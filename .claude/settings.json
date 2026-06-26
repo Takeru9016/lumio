@@ -1,0 +1,351 @@
+{
+  "_comment": "Lumio Claude Code project settings. Commit this file. Personal overrides go in settings.local.json (gitignored).",
+  "_docs": "https://code.claude.com/docs/en/settings",
+
+  // ============================================================
+  // MODEL & EFFORT
+  // Controls which model runs by default and how hard it thinks.
+  // Per-task model guidance is in CLAUDE.md and the PHASES.md
+  // Sonnet/Opus designations. Override per session with /model.
+  // ============================================================
+
+  "model": "claude-sonnet-4-6",
+
+  "effortLevel": "medium",
+  // Options: fast | balanced | thorough (alias: low | medium | high | max)
+  // "balanced" is the right default for this project — saves tokens on
+  // mechanical tasks while staying capable for architecture decisions.
+  // Switch to "thorough" for Phase 4 AI/RAG tasks; back to "balanced" otherwise.
+
+  "alwaysThinkingEnabled": false,
+  // Extended thinking burns tokens invisibly. Disabled by default.
+  // Enable per session only when debugging complex architectural issues.
+
+  // ============================================================
+  // TOKEN EFFICIENCY
+  // These settings directly reduce token burn per session.
+  // Source: March 2026 usage limit changes + community research.
+  // ============================================================
+
+  "env": {
+    "MAX_THINKING_TOKENS": "8000",
+    // Default extended thinking cap. 8k is sufficient for most tasks.
+    // Raise to 20000 only for Phase 4 RAG/embedding architecture sessions.
+    // Leave uncapped and a single complex response consumes 40k+ tokens.
+
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-haiku-4-5",
+    // Subagents spawned for parallel tasks (file sorting, formatting,
+    // simple transforms) default to Haiku — not the parent model.
+    // This prevents a batch operation that spawns 5 subagents from
+    // consuming 5x Opus/Sonnet cost. The Phase prompts for complex
+    // reasoning explicitly request Opus — those override this for that call.
+
+    "NODE_ENV": "development",
+    "NEXT_TELEMETRY_DISABLED": "1"
+    // Disable Next.js telemetry — stops background network calls
+    // during dev that could confuse Claude's error diagnosis.
+  },
+
+  "contextCompactionThreshold": 80,
+  // Trigger context compaction when 80% of context window is full.
+  // Lower (50–60) = more aggressive compaction, risks losing context.
+  // Higher (90+) = lets window fill before acting; sudden drops.
+  // 80 is the tested sweet spot for a codebase this size.
+
+  "autoMemoryEnabled": true,
+  // Allow Claude Code to extract and persist project memory across sessions.
+  // Reduces the cost of re-explaining project context at session start.
+
+  "autoMemoryDirectory": ".claude/memory",
+  // Store auto-memory in the project directory so it's portable.
+
+  "cleanupPeriodDays": 30,
+  // Retain transcripts for 30 days. Longer = more context available
+  // for /resume but larger transcript files and slower session start.
+
+  "fileCheckpointingEnabled": true,
+  // Snapshot files before edits. Essential safety net — lets you
+  // recover from a bad batch edit without needing git stash.
+
+  "showTurnDuration": true,
+  // Shows how long each turn took. Useful for spotting token-heavy
+  // turns and correlating them with what triggered extended thinking.
+
+  // ============================================================
+  // PERMISSIONS
+  // Priority order: deny → ask → allow. Deny is absolute.
+  // Generous allow + tight deny is safer than a narrow allow.
+  // Source: https://code.claude.com/docs/en/settings#permissions
+  // ============================================================
+
+  "permissions": {
+    "allow": [
+      // Read operations — always safe to auto-approve
+      "Read(**)",
+      "Glob(**)",
+      "Grep(**)",
+
+      // pnpm commands — the only package manager for this project
+      "Bash(pnpm install*)",
+      "Bash(pnpm add*)",
+      "Bash(pnpm run*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm dev*)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm dlx*)",
+
+      // TypeScript checks — run constantly, never need prompt
+      "Bash(npx tsc*)",
+      "Bash(npx tsc --noEmit*)",
+
+      // Prisma CLI — safe to auto-run
+      "Bash(prisma generate*)",
+      "Bash(prisma migrate dev*)",
+      "Bash(prisma studio*)",
+      "Bash(prisma format*)",
+      "Bash(prisma validate*)",
+
+      // Git read operations — status, diff, log
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(git stash list*)",
+
+      // Git write operations — allow, but hooks add safety checks
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git checkout*)",
+      "Bash(git switch*)",
+
+      // Shell utilities
+      "Bash(ls*)",
+      "Bash(cat*)",
+      "Bash(echo*)",
+      "Bash(mkdir*)",
+      "Bash(cp*)",
+      "Bash(mv*)",
+      "Bash(find*)",
+      "Bash(grep*)",
+      "Bash(wc*)",
+      "Bash(pwd*)",
+      "Bash(which*)",
+      "Bash(node -v*)",
+      "Bash(node --version*)",
+
+      // File editing — auto-allowed, hooks enforce safety
+      "Edit(**)",
+      "Write(**)",
+      "MultiEdit(**)"
+    ],
+
+    "ask": [
+      // Pushes and remote operations — require explicit confirmation
+      "Bash(git push*)",
+      "Bash(git pull*)",
+      "Bash(git fetch*)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(git reset*)",
+
+      // Deployment — never auto-deploy
+      "Bash(vercel*)",
+      "Bash(npx vercel*)",
+
+      // npm/yarn — ask in case of accidental wrong package manager
+      "Bash(npm*)",
+      "Bash(yarn*)",
+      "Bash(bun*)"
+    ],
+
+    "deny": [
+      // Secrets — absolute block, no exceptions
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(.env.local)",
+      "Read(.env.production)",
+      "Edit(.env)",
+      "Edit(.env.*)",
+      "Write(.env)",
+      "Write(.env.*)",
+
+      // Production database destructive operations
+      "Bash(*prisma migrate reset*)",
+      "Bash(*prisma db push --force*)",
+      "Bash(*DROP DATABASE*)",
+      "Bash(*DROP TABLE*)",
+
+      // Destructive git operations — never auto-run
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -fd*)",
+
+      // Pipe installs — security risk
+      "Bash(*curl * | bash*)",
+      "Bash(*wget * | sh*)",
+      "Bash(*curl * | sh*)",
+
+      // Recursive deletes — never auto-run
+      "Bash(rm -rf /)*",
+      "Bash(rm -rf ~)*",
+      "Bash(rm -rf /*)"
+    ],
+
+    "defaultMode": "auto"
+    // "auto" = Claude decides when to ask vs proceed.
+    // Switch to "plan" for complex multi-file tasks to review before execution.
+  },
+
+  // ============================================================
+  // HOOKS
+  // Deterministic scripts at lifecycle events.
+  // Run /hooks in a session to see what's active.
+  // Source: https://code.claude.com/docs/en/hooks
+  // ============================================================
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '📋 Lumio session started. Node:' $(node -v) 'pnpm:' $(pnpm -v) && echo 'Stack: Next.js 16 | Prisma 7 | Clerk v7 | Razorpay | motion v12' && git log --oneline -3 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    // Prints stack reminder and last 3 commits at session start.
+    // Keeps Claude oriented without having to re-read CLAUDE.md every time.
+
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"${CLAUDE_FILE_PATH:-}\"; if [ -n \"$FILE\" ]; then EXT=\"${FILE##*.}\"; if [ \"$EXT\" = \"ts\" ] || [ \"$EXT\" = \"tsx\" ]; then npx prettier --write \"$FILE\" --log-level silent 2>/dev/null || true; fi; fi",
+            "timeout": 15,
+            "async": true
+          }
+        ]
+      },
+      // Auto-format .ts/.tsx files on every edit using Prettier.
+      // async: true means it runs in background without blocking Claude.
+      // Falls back silently if Prettier isn't installed yet (Phase 1A).
+
+      {
+        "matcher": "Bash(git commit*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✅ Committed. Run: npx tsc --noEmit to verify types.' && git log --oneline -1",
+            "timeout": 5
+          }
+        ]
+      }
+      // After every commit: reminds to verify TypeScript, shows commit hash.
+    ],
+
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"${CLAUDE_FILE_PATH:-}\"; BLOCKED=\".env .env.local .env.production .env.development prisma/migrations\"; for B in $BLOCKED; do if echo \"$FILE\" | grep -q \"$B\"; then echo \"❌ BLOCKED: Cannot edit $FILE (protected path)\"; exit 2; fi; done; exit 0",
+            "timeout": 5
+          }
+        ]
+      },
+      // Hard-blocks edits to .env files and migration files.
+      // Exit code 2 = deterministic block, Claude is told the reason.
+      // This is belt-and-suspenders with the deny permission rules above.
+
+      {
+        "matcher": "Bash(git add*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "STAGED=$(git diff --cached --name-only 2>/dev/null); for F in $STAGED; do if echo \"$F\" | grep -qE '^\\.env'; then echo \"🚨 BLOCKED: .env file detected in staged changes: $F\"; exit 2; fi; done; exit 0",
+            "timeout": 10
+          }
+        ]
+      },
+      // Blocks git add if any .env file is staged.
+      // Prevents accidental secret commits even if Claude generated a git add -A.
+
+      {
+        "matcher": "Bash(rm*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '⚠️  Delete detected. Pausing 3s — Ctrl+C to abort.' && sleep 3",
+            "timeout": 10
+          }
+        ]
+      }
+      // All rm commands get a 3-second pause with abort option.
+      // Not a block — just a safety window before deletion executes.
+    ],
+
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🏁 Turn complete.' $(date '+%H:%M:%S')",
+            "timeout": 3,
+            "async": true
+          }
+        ]
+      }
+    ]
+    // Timestamps when each turn completes. Useful for tracking
+    // which sessions are burning time and correlating with token use.
+  },
+
+  // ============================================================
+  // DISPLAY & UI
+  // ============================================================
+
+  "showThinkingSummaries": true,
+  // Show summaries of extended thinking when it runs.
+  // Helps identify when a task triggered more thinking than expected.
+
+  "includeCoAuthoredBy": false,
+  // Do not add "Co-authored-by: Claude" to git commits.
+  // Keeps commit history clean for a client-facing project.
+
+  "includeGitInstructions": true,
+  // Include git context in Claude's system prompt.
+  // Helps Claude orient to branch state and recent changes.
+
+  "respectGitignore": true,
+  // Files in .gitignore are excluded from Claude's file awareness.
+  // This combines with .claudeignore for maximum context hygiene.
+
+  // ============================================================
+  // FILE HANDLING
+  // ============================================================
+
+  "plansDirectory": ".claude/plans",
+  // Where /plan outputs are saved. Committed to source control
+  // so plan history is available across sessions.
+
+  // ============================================================
+  // MCP SERVERS
+  // Only add MCP servers here when you actively use them.
+  // Unused servers add tool definitions to every message = wasted tokens.
+  // ============================================================
+
+  "mcpServers": {}
+  // Empty by default. Add entries here when you connect a tool:
+  // "mcpServers": {
+  //   "github": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"] }
+  // }
+}
