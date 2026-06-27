@@ -87,14 +87,21 @@ export default async function CourseDetailPage({
   );
 
   let completedCount = 0;
+  let resumeLessonId: string | null = null;
   if (isEnrolled && publishedLessons.length > 0) {
-    completedCount = await db.lessonProgress.count({
+    const completedProgress = await db.lessonProgress.findMany({
       where: {
         userId: dbUser.id,
         lessonId: { in: publishedLessons.map((l) => l.id) },
         isCompleted: true,
       },
+      select: { lessonId: true },
     });
+    completedCount = completedProgress.length;
+    const completedSet = new Set(completedProgress.map((p) => p.lessonId));
+    const firstUncompleted = publishedLessons.find((l) => !completedSet.has(l.id));
+    resumeLessonId =
+      firstUncompleted?.id ?? publishedLessons[publishedLessons.length - 1]?.id ?? null;
   }
 
   const totalLessons = publishedLessons.length;
@@ -191,7 +198,11 @@ export default async function CourseDetailPage({
                     />
                   </div>
                   <Link
-                    href={`/courses/${courseId}/lessons`}
+                    href={
+                      resumeLessonId
+                        ? `/courses/${courseId}/lessons/${resumeLessonId}`
+                        : `/courses/${courseId}`
+                    }
                     className="flex items-center justify-center w-full py-3 px-6 rounded-xl font-semibold text-sm bg-(--color-brand) text-white hover:bg-(--color-brand-dark) transition-colors"
                   >
                     {progress === 0 ? "Start Learning" : "Continue Learning"}
