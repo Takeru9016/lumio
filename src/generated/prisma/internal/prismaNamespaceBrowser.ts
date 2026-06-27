@@ -107,6 +107,7 @@ export const UserScalarFieldEnum = {
   cancelAtPeriodEnd: 'cancelAtPeriodEnd',
   currentPeriodEnd: 'currentPeriodEnd',
   tenantId: 'tenantId',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
