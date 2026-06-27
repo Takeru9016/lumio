@@ -1,0 +1,184 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { LessonList, type SectionItem, type LessonItem } from "@/components/course/LessonList";
+import { LessonEditor } from "@/components/course/LessonEditor";
+
+interface CourseEditorProps {
+  courseId: string;
+  initialSections: SectionItem[];
+  courseTitle: string;
+  courseStatus: string;
+}
+
+export function CourseEditor({
+  courseId,
+  initialSections,
+  courseTitle,
+  courseStatus,
+}: CourseEditorProps) {
+  const router = useRouter();
+  const [sections, setSections] = useState<SectionItem[]>(initialSections);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [aiNote, setAiNote] = useState<string | null>(null);
+
+  const selectedLesson = sections
+    .flatMap((s) => s.lessons)
+    .find((l) => l.id === selectedLessonId) as
+    | (LessonItem & { textContent?: string | null; muxPlaybackId?: string | null })
+    | undefined;
+
+  async function addSection() {
+    const title = prompt("Section title:");
+    if (!title?.trim()) return;
+    const res = await fetch(`/api/courses/${courseId}/sections`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: title.trim(), order: sections.length }),
+    });
+    if (res.ok) {
+      const section = await res.json();
+      setSections((prev) => [...prev, { ...section, lessons: [] }]);
+    }
+  }
+
+  async function addLesson(sectionId: string) {
+    const title = prompt("Lesson title:");
+    if (!title?.trim()) return;
+    const section = sections.find((s) => s.id === sectionId);
+    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: title.trim(),
+        type: "VIDEO",
+        order: section?.lessons.length ?? 0,
+      }),
+    });
+    if (res.ok) {
+      const lesson = await res.json();
+      setSections((prev) =>
+        prev.map((s) =>
+          s.id === sectionId ? { ...s, lessons: [...s.lessons, lesson] } : s
+        )
+      );
+      setSelectedLessonId(lesson.id);
+    }
+  }
+
+  function handleLessonUpdate(
+    lessonId: string,
+    patch: Partial<LessonItem & { textContent?: string }>
+  ) {
+    setSections((prev) =>
+      prev.map((s) => ({
+        ...s,
+        lessons: s.lessons.map((l) => (l.id === lessonId ? { ...l, ...patch } : l)),
+      }))
+    );
+  }
+
+  function handleAiOutline() {
+    setAiNote("AI outline coming in Phase 4");
+    setTimeout(() => setAiNote(null), 3000);
+  }
+
+  return (
+    <div className="flex h-full">
+      {/* Left sidebar — course structure */}
+      <aside className="w-64 shrink-0 border-r border-(--color-border) flex flex-col overflow-hidden">
+        {/* Sidebar header */}
+        <div className="px-4 py-3 border-b border-(--color-border) flex items-center justify-between">
+          <div className="min-w-0">
+            <p className="text-xs text-(--color-text-muted) font-medium uppercase tracking-wide">Course</p>
+            <p className="text-sm font-semibold text-(--color-text-primary) truncate">{courseTitle}</p>
+          </div>
+          <span
+            className={`shrink-0 text-[10px] px-2 py-0.5 rounded-full font-medium ${
+              courseStatus === "PUBLISHED"
+                ? "bg-(--color-success-bg) text-(--color-success)"
+                : "bg-(--color-surface-3) text-(--color-text-muted)"
+            }`}
+          >
+            {courseStatus === "PUBLISHED" ? "Live" : "Draft"}
+          </span>
+        </div>
+
+        <LessonList
+          courseId={courseId}
+          sections={sections}
+          selectedLessonId={selectedLessonId}
+          onSelectLesson={(lessonId) => {
+            setSelectedLessonId(lessonId);
+          }}
+          onAddSection={addSection}
+          onAddLesson={addLesson}
+          onReorder={setSections}
+        />
+      </aside>
+
+      {/* Right panel — editor */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Toolbar */}
+        <div className="h-12 px-6 border-b border-(--color-border) flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.push(`/courses/${courseId}/analytics`)}
+              className="text-sm text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors"
+            >
+              Analytics →
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {aiNote && (
+              <span className="text-xs text-(--color-ai) bg-(--color-ai-bg) px-3 py-1 rounded-full">
+                ✦ {aiNote}
+              </span>
+            )}
+            {/* AI Outline button — wire to /api/ai/quiz in Phase 4 */}
+            <button
+              type="button"
+              onClick={handleAiOutline}
+              data-ai-action="outline"
+              data-course-id={courseId}
+              className="flex items-center gap-1.5 bg-(--color-ai) text-white rounded-md px-3 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              ✦ AI Outline
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                await fetch(`/api/courses/${courseId}/publish`, { method: "POST" });
+                router.refresh();
+              }}
+              className="bg-(--color-brand) text-white rounded-md px-3 py-1.5 text-sm font-medium hover:bg-(--color-brand-dark) transition-colors"
+            >
+              Publish
+            </button>
+          </div>
+        </div>
+
+        {/* Editor area */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {selectedLesson ? (
+            <LessonEditor lesson={selectedLesson} onUpdate={handleLessonUpdate} />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center py-16">
+              <div className="text-3xl mb-3">📝</div>
+              <h3 className="text-base font-semibold text-(--color-text-primary) mb-1">
+                Select a lesson to edit
+              </h3>
+              <p className="text-sm text-(--color-text-muted)">
+                Choose a lesson from the sidebar or add a new one.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
