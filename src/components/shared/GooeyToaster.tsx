@@ -6,7 +6,7 @@ import "gooey-toast/styles.css";
 
 export function GooeyToaster() {
   useEffect(() => {
-    mountToaster({ position: "bottom-right" });
+    mountToaster({ position: "top-center" });
   }, []);
 
   return null;
