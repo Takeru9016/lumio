@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UploadDropzone } from "@/lib/uploadthing";
+import { toast } from "gooey-toast";
 
 const courseSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -33,7 +34,6 @@ export default function NewCoursePage() {
   const [step, setStep] = useState(1);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -53,7 +53,6 @@ export default function NewCoursePage() {
 
   async function onSubmit(data: CourseFormData) {
     setIsSubmitting(true);
-    setError(null);
     try {
       const res = await fetch("/api/courses", {
         method: "POST",
@@ -64,7 +63,7 @@ export default function NewCoursePage() {
       const course = await res.json();
       router.push(`/courses/${course.id}/edit`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to create course");
+      toast.error({ title: "Failed to create course", description: e instanceof Error ? e.message : undefined });
       setIsSubmitting(false);
     }
   }
@@ -221,7 +220,7 @@ export default function NewCoursePage() {
               onClientUploadComplete={(res) => {
                 if (res[0]) setThumbnailUrl(res[0].ufsUrl);
               }}
-              onUploadError={(e) => setError(e.message)}
+              onUploadError={(e) => { toast.error({ title: "Upload failed", description: e.message }); }}
             />
           )}
           <p className="text-xs text-(--color-text-muted)">
@@ -278,12 +277,6 @@ export default function NewCoursePage() {
               </span>
             </div>
           </div>
-
-          {error && (
-            <p className="text-sm text-(--color-danger) bg-(--color-danger-bg) rounded-md px-3 py-2">
-              {error}
-            </p>
-          )}
 
           <div className="flex justify-between pt-2">
             <button

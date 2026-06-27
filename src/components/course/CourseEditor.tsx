@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "gooey-toast";
 import { LessonList, type SectionItem, type LessonItem } from "@/components/course/LessonList";
 import { LessonEditor } from "@/components/course/LessonEditor";
 
@@ -21,7 +22,6 @@ export function CourseEditor({
   const router = useRouter();
   const [sections, setSections] = useState<SectionItem[]>(initialSections);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
-  const [aiNote, setAiNote] = useState<string | null>(null);
 
   const selectedLesson = sections
     .flatMap((s) => s.lessons)
@@ -80,8 +80,7 @@ export function CourseEditor({
   }
 
   function handleAiOutline() {
-    setAiNote("AI outline coming in Phase 4");
-    setTimeout(() => setAiNote(null), 3000);
+    toast.info({ title: "Coming in Phase 4", description: "AI outline will be available soon." });
   }
 
   return (
@@ -133,11 +132,6 @@ export function CourseEditor({
           </div>
 
           <div className="flex items-center gap-2">
-            {aiNote && (
-              <span className="text-xs text-(--color-ai) bg-(--color-ai-bg) px-3 py-1 rounded-full">
-                ✦ {aiNote}
-              </span>
-            )}
             {/* AI Outline button — wire to /api/ai/quiz in Phase 4 */}
             <button
               type="button"

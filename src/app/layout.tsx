@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Geist, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { GooeyToaster } from "@/components/shared/GooeyToaster";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -39,7 +40,10 @@ export default function RootLayout({
         lang="en"
         className={`${spaceGrotesk.variable} ${geist.variable} ${ibmPlexMono.variable} h-full antialiased`}
       >
-        <body className="min-h-full flex flex-col">{children}</body>
+        <body className="min-h-full flex flex-col">
+          {children}
+          <GooeyToaster />
+        </body>
       </html>
     </ClerkProvider>
   );
