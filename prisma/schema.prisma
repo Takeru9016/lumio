@@ -108,6 +108,8 @@ model User {
   aiChats        AIChat[]
   teamMembers    TeamMember[]
 
+  deletedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

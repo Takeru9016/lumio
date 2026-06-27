@@ -1,0 +1,258 @@
+"use client";
+
+import { useSignUp } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+export default function SignUpPage() {
+  const { signUp, errors, fetchStatus } = useSignUp();
+  const router = useRouter();
+
+  const handleSignUp = async (formData: FormData) => {
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const emailAddress = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    const { error } = await signUp.password({
+      emailAddress,
+      password,
+      firstName,
+      lastName,
+    });
+
+    if (!error) {
+      await signUp.verifications.sendEmailCode();
+    }
+  };
+
+  const handleVerify = async (formData: FormData) => {
+    const code = formData.get("code") as string;
+
+    await signUp.verifications.verifyEmailCode({ code });
+
+    if (signUp.status === "complete") {
+      await signUp.finalize({
+        navigate: ({ session, decorateUrl }) => {
+          if (session?.currentTask) return;
+          const url = decorateUrl("/onboarding");
+          if (url.startsWith("http")) {
+            window.location.href = url;
+          } else {
+            router.push(url);
+          }
+        },
+      });
+    }
+  };
+
+  const isLoading = fetchStatus === "fetching";
+  const needsVerification =
+    signUp.status === "missing_requirements" &&
+    signUp.unverifiedFields.includes("email_address") &&
+    signUp.missingFields.length === 0;
+
+  if (needsVerification) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface-2)] px-4">
+        <div className="w-full max-w-sm bg-[var(--color-surface-1)] rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-8">
+          <h1 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-2">
+            Check your email
+          </h1>
+          <p className="text-sm text-[var(--color-text-muted)] mb-6">
+            We sent a 6-digit code to your email. Enter it below to verify your
+            account.
+          </p>
+
+          <form action={handleVerify} className="space-y-4">
+            <div>
+              <label
+                htmlFor="code"
+                className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
+              >
+                Verification code
+              </label>
+              <input
+                id="code"
+                name="code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                required
+                className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-1)] text-[var(--color-text-primary)] text-sm placeholder:text-[var(--color-text-disabled)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
+                placeholder="123456"
+              />
+              {errors?.fields?.code && (
+                <p className="mt-1.5 text-xs text-[var(--color-danger)]">
+                  {errors.fields.code.message}
+                </p>
+              )}
+            </div>
+
+            {errors?.global && errors.global.length > 0 && (
+              <p className="text-xs text-[var(--color-danger)]">
+                {errors.global[0].message}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2.5 px-4 rounded-[var(--radius-md)] bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white text-sm font-medium transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Verifying…" : "Verify email"}
+            </button>
+          </form>
+
+          <button
+            type="button"
+            onClick={() => signUp.verifications.sendEmailCode()}
+            className="mt-4 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition"
+          >
+            Resend code
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface-2)] px-4">
+      <div className="w-full max-w-sm bg-[var(--color-surface-1)] rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-8">
+        <div className="mb-8">
+          <span className="text-2xl font-bold text-[var(--color-brand)] tracking-tight">
+            Lumio
+          </span>
+          <h1 className="mt-4 text-2xl font-semibold text-[var(--color-text-primary)]">
+            Create your account
+          </h1>
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+            Start learning with intelligence.
+          </p>
+        </div>
+
+        <form action={handleSignUp} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
+              >
+                First name
+              </label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                autoComplete="given-name"
+                required
+                className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-1)] text-[var(--color-text-primary)] text-sm placeholder:text-[var(--color-text-disabled)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
+                placeholder="Jane"
+              />
+              {errors?.fields?.firstName && (
+                <p className="mt-1.5 text-xs text-[var(--color-danger)]">
+                  {errors.fields.firstName.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
+              >
+                Last name
+              </label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                autoComplete="family-name"
+                required
+                className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-1)] text-[var(--color-text-primary)] text-sm placeholder:text-[var(--color-text-disabled)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
+                placeholder="Doe"
+              />
+              {errors?.fields?.lastName && (
+                <p className="mt-1.5 text-xs text-[var(--color-danger)]">
+                  {errors.fields.lastName.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-1)] text-[var(--color-text-primary)] text-sm placeholder:text-[var(--color-text-disabled)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
+              placeholder="you@example.com"
+            />
+            {errors?.fields?.emailAddress && (
+              <p className="mt-1.5 text-xs text-[var(--color-danger)]">
+                {errors.fields.emailAddress.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-1)] text-[var(--color-text-primary)] text-sm placeholder:text-[var(--color-text-disabled)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
+              placeholder="Min. 8 characters"
+            />
+            {errors?.fields?.password && (
+              <p className="mt-1.5 text-xs text-[var(--color-danger)]">
+                {errors.fields.password.message}
+              </p>
+            )}
+          </div>
+
+          {errors?.global && errors.global.length > 0 && (
+            <p className="text-xs text-[var(--color-danger)]">
+              {errors.global[0].message}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-2.5 px-4 rounded-[var(--radius-md)] bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white text-sm font-medium transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Creating account…" : "Create account"}
+          </button>
+        </form>
+
+        {/* Required for Clerk's bot protection */}
+        <div id="clerk-captcha" />
+
+        <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+          Already have an account?{" "}
+          <Link
+            href="/sign-in"
+            className="text-[var(--color-brand)] hover:text-[var(--color-brand-dark)] font-medium transition"
+          >
+            Sign in
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
