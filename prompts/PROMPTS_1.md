@@ -36,7 +36,7 @@ Scaffold the Lumio Next.js 16 project with the following:
 8. Create AGENTS.md at project root (copy from lumio-cc/AGENTS.md).
 
 9. Create package.json scripts:
-   "dev": "next dev",
+   "dev": "next dev --experimental-https",
    "build": "next build",
    "start": "next start",
    "lint": "next lint",
