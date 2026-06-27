@@ -64,7 +64,9 @@ export default async function LessonPage({
     }),
   ]);
 
-  if (!course || course.status !== "PUBLISHED") notFound();
+  if (!course || course.status === "DRAFT") notFound();
+  // Archived courses: only enrolled students may continue their lessons
+  if (course.status === "ARCHIVED" && !enrollment) notFound();
   if (!lesson || !lesson.isPublished) notFound();
   if (!enrollment) redirect(`/courses/${courseId}`);
 

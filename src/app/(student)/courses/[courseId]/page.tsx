@@ -70,7 +70,7 @@ export default async function CourseDetailPage({
   ]);
 
   if (!dbUser) redirect("/sign-in");
-  if (!course || course.status !== "PUBLISHED") notFound();
+  if (!course || course.status === "DRAFT") notFound();
 
   const enrollment = await db.enrollment.findUnique({
     where: { userId_courseId: { userId: dbUser.id, courseId } },
@@ -81,6 +81,9 @@ export default async function CourseDetailPage({
   });
 
   const isEnrolled = !!enrollment;
+
+  // Archived courses are invisible to students who aren't enrolled
+  if (course.status === "ARCHIVED" && !isEnrolled) notFound();
 
   const publishedLessons = course.sections.flatMap((s) =>
     s.lessons.filter((l) => l.isPublished),
