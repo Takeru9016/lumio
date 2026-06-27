@@ -1,8 +1,14 @@
 import type { Role } from "@/generated/prisma/enums";
 
-export function getRoleDashboard(_role: Role): string {
-  // All roles currently redirect to /dashboard.
-  // When pages are added across route groups this will need per-role paths
-  // e.g. /student/dashboard, /instructor/dashboard to avoid URL conflicts.
-  return "/dashboard";
+export function getRoleDashboard(role: Role): string {
+  switch (role) {
+    case "STUDENT":
+      return "/student/dashboard";
+    case "INSTRUCTOR":
+      return "/instructor/dashboard";
+    case "ORG_ADMIN":
+      return "/org/dashboard";
+    case "SUPER_ADMIN":
+      return "/admin/dashboard";
+  }
 }
