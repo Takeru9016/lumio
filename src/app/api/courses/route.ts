@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
+import { z } from "zod";
 import { db } from "@/lib/db";
 import type { CourseStatus } from "@/generated/prisma/client";
 
@@ -107,4 +108,54 @@ export async function GET(req: NextRequest) {
     limit,
     totalPages: Math.ceil(total / limit),
   });
+}
+
+const createCourseSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().optional(),
+  thumbnailUrl: z.string().optional(),
+  category: z.string().optional(),
+  level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]).optional(),
+  price: z.number().min(0).optional(),
+  currency: z.string().optional(),
+});
+
+export async function POST(req: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({
+    where: { clerkId: userId },
+    select: { id: true, role: true },
+  });
+
+  if (!user || user.role !== "INSTRUCTOR") {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const body = await req.json();
+  const parsed = createCourseSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { title, description, thumbnailUrl, category, level, price, currency } =
+    parsed.data;
+
+  const course = await db.course.create({
+    data: {
+      title,
+      description,
+      thumbnailUrl,
+      category,
+      level,
+      price: price ?? 0,
+      currency: currency ?? "INR",
+      instructorId: user.id,
+    },
+  });
+
+  return Response.json(course, { status: 201 });
 }

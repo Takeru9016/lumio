@@ -11,6 +11,7 @@ import { toast } from "gooey-toast";
 const courseSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().optional(),
+  thumbnailUrl: z.string().optional(),
   category: z.string().optional(),
   level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]).optional(),
   price: z.number().min(0),
@@ -32,13 +33,14 @@ const CATEGORIES = [
 export default function NewCoursePage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
     getValues,
+    setValue,
     formState: { errors },
     trigger,
   } = useForm<CourseFormData>({
@@ -57,7 +59,7 @@ export default function NewCoursePage() {
       const res = await fetch("/api/courses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, thumbnailUrl }),
+        body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error(await res.text());
       const course = await res.json();
@@ -198,17 +200,20 @@ export default function NewCoursePage() {
       {/* Step 2 */}
       {step === 2 && (
         <div className="space-y-5">
-          {thumbnailUrl ? (
+          {previewUrl ? (
             <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={thumbnailUrl}
-                alt="Thumbnail"
+                src={previewUrl}
+                alt="thumbnail preview"
                 className="w-full aspect-video object-cover rounded-lg border border-(--color-border)"
               />
               <button
                 type="button"
-                onClick={() => setThumbnailUrl(null)}
+                onClick={() => {
+                  setPreviewUrl(null);
+                  setValue("thumbnailUrl", "");
+                }}
                 className="absolute top-2 right-2 bg-white border border-(--color-border) rounded-md px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-surface-2)"
               >
                 Remove
@@ -218,7 +223,11 @@ export default function NewCoursePage() {
             <UploadDropzone
               endpoint="thumbnailUploader"
               onClientUploadComplete={(res) => {
-                if (res[0]) setThumbnailUrl(res[0].ufsUrl);
+                if (res[0]) {
+                  const url = res[0].url;
+                  setValue("thumbnailUrl", url);
+                  setPreviewUrl(url);
+                }
               }}
               onUploadError={(e) => { toast.error({ title: "Upload failed", description: e.message }); }}
             />
@@ -249,11 +258,11 @@ export default function NewCoursePage() {
       {step === 3 && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="bg-white border border-(--color-border) rounded-lg divide-y divide-(--color-border)">
-            {thumbnailUrl && (
+            {previewUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={thumbnailUrl}
-                alt="Thumbnail"
+                src={previewUrl}
+                alt="thumbnail preview"
                 className="w-full aspect-video object-cover rounded-t-lg"
               />
             )}
