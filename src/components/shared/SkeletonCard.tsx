@@ -4,12 +4,12 @@ interface SkeletonCardProps {
 
 function CourseCardSkeleton() {
   return (
-    <div className="bg-white border border-(--color-border) rounded-lg overflow-hidden animate-pulse">
-      <div className="h-40 bg-(--color-surface-3)" />
+    <div className="bg-white border border-border rounded-lg overflow-hidden animate-pulse">
+      <div className="h-40 bg-surface-3" />
       <div className="p-4 space-y-2">
-        <div className="h-4 bg-(--color-surface-3) rounded w-3/4" />
-        <div className="h-3 bg-(--color-surface-3) rounded w-1/2" />
-        <div className="h-1.5 bg-(--color-surface-3) rounded-full w-full mt-3" />
+        <div className="h-4 bg-surface-3 rounded w-3/4" />
+        <div className="h-3 bg-surface-3 rounded w-1/2" />
+        <div className="h-1.5 bg-surface-3 rounded-full w-full mt-3" />
       </div>
     </div>
   );

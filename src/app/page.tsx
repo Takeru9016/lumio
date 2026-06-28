@@ -7,7 +7,7 @@ export default function HomePage() {
         <span className="text-4xl font-bold tracking-tight text-[#0F0F10]">
           Lumio
         </span>
-        <p className="text-base text-[#737380]">Learn with intelligence.</p>
+        <p className="text-base text-text-muted">Learn with intelligence.</p>
       </div>
 
       <div className="flex gap-3">

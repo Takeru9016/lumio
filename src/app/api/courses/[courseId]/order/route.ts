@@ -1,7 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
-import { db } from "@/lib/db";
-import { razorpay } from "@/lib/razorpay";
+import { auth } from "@clerk/nextjs/server";
+
+import { db, razorpay } from "@/lib";
 
 export async function POST(
   _req: NextRequest,
@@ -20,12 +20,21 @@ export async function POST(
   });
 
   if (!user || user.role !== "STUDENT") {
-    return Response.json({ error: "Only students can purchase courses" }, { status: 403 });
+    return Response.json(
+      { error: "Only students can purchase courses" },
+      { status: 403 },
+    );
   }
 
   const course = await db.course.findUnique({
     where: { id: courseId },
-    select: { id: true, title: true, price: true, currency: true, status: true },
+    select: {
+      id: true,
+      title: true,
+      price: true,
+      currency: true,
+      status: true,
+    },
   });
 
   if (!course || course.status !== "PUBLISHED") {
@@ -33,7 +42,10 @@ export async function POST(
   }
 
   if (course.price === 0) {
-    return Response.json({ error: "Course is free — no order needed" }, { status: 400 });
+    return Response.json(
+      { error: "Course is free — no order needed" },
+      { status: 400 },
+    );
   }
 
   const existing = await db.enrollment.findUnique({

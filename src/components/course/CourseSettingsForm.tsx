@@ -5,11 +5,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "gooey-toast";
-import { UploadButton } from "@/lib/uploadthing";
 import { Loader2 } from "lucide-react";
 
+import { UploadButton } from "@/lib/uploadthing";
+
 const schema = z.object({
-  title: z.string().min(3, "At least 3 characters").max(100, "Max 100 characters"),
+  title: z
+    .string()
+    .min(3, "At least 3 characters")
+    .max(100, "Max 100 characters"),
   description: z
     .string()
     .refine((v) => !v || v.length >= 100, "At least 100 characters if provided")
@@ -52,7 +56,10 @@ interface CourseSettingsFormProps {
   };
 }
 
-export function CourseSettingsForm({ courseId, initialData }: CourseSettingsFormProps) {
+export function CourseSettingsForm({
+  courseId,
+  initialData,
+}: CourseSettingsFormProps) {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     initialData.thumbnailUrl ?? null,
   );
@@ -71,7 +78,12 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
     },
   });
 
-  const { register, handleSubmit, watch, formState: { errors } } = form;
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = form;
 
   const descriptionValue = watch("description") ?? "";
 
@@ -105,7 +117,8 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
 
   const inputClass =
     "w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm text-(--color-text-primary) placeholder:text-(--color-text-disabled) focus:outline-none focus:ring-2 focus:ring-(--color-brand) focus:border-transparent transition-all";
-  const labelClass = "block text-sm font-medium text-(--color-text-primary) mb-1.5";
+  const labelClass =
+    "block text-sm font-medium text-(--color-text-primary) mb-1.5";
   const errorClass = "mt-1 text-xs text-(--color-danger)";
 
   return (
@@ -113,11 +126,11 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
       {/* Title */}
       <div>
         <label className={labelClass}>
-          Course title <span className="text-(--color-danger)">*</span>
+          Course title <span className="text-danger">*</span>
         </label>
         <input
           {...register("title")}
-          className={`${inputClass} ${errors.title ? "border-(--color-danger)" : ""}`}
+          className={`${inputClass} ${errors.title ? "border-danger" : ""}`}
           placeholder="e.g. Complete Next.js Developer Course"
         />
         {errors.title && <p className={errorClass}>{errors.title.message}</p>}
@@ -129,7 +142,7 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
         <textarea
           {...register("description")}
           rows={6}
-          className={`${inputClass} resize-none ${errors.description ? "border-(--color-danger)" : ""}`}
+          className={`${inputClass} resize-none ${errors.description ? "border-danger" : ""}`}
           placeholder="Describe what students will learn. Min 100 characters."
         />
         <div className="mt-1 flex items-center justify-between">
@@ -139,8 +152,8 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
             <p
               className={`text-xs ${
                 descriptionValue.length > 0 && descriptionValue.length < 100
-                  ? "text-(--color-danger)"
-                  : "text-(--color-text-muted)"
+                  ? "text-danger"
+                  : "text-text-muted"
               }`}
             >
               {descriptionValue.length > 0 && descriptionValue.length < 100
@@ -148,7 +161,7 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
                 : ""}
             </p>
           )}
-          <p className="text-xs text-(--color-text-muted) ml-auto">
+          <p className="text-xs text-text-muted ml-auto">
             {descriptionValue.length} / 5000
           </p>
         </div>
@@ -158,7 +171,7 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
       <div>
         <label className={labelClass}>Thumbnail</label>
         {thumbnailPreview ? (
-          <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-[var(--color-border)]">
+          <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={thumbnailPreview}
@@ -177,7 +190,7 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
             </button>
           </div>
         ) : (
-          <div className="border-2 border-dashed border-[var(--color-border)] rounded-lg p-6 text-center">
+          <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
             <UploadButton
               endpoint="thumbnailUploader"
               onClientUploadComplete={(res) => {
@@ -191,11 +204,12 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
                 toast.error({ title: "Upload failed", description: e.message });
               }}
               appearance={{
-                button: "bg-[var(--color-brand)] text-white rounded-md px-4 py-2 text-sm font-medium",
+                button:
+                  "bg-[var(--color-brand)] text-white rounded-md px-4 py-2 text-sm font-medium",
                 allowedContent: "text-[var(--color-text-muted)] text-xs mt-1",
               }}
             />
-            <p className="text-xs text-[var(--color-text-muted)] mt-2">
+            <p className="text-xs text-text-muted mt-2">
               Recommended: 1280×720px, max 4MB
             </p>
           </div>
@@ -239,7 +253,7 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
             type="number"
             min={0}
             step={1}
-            className={`${inputClass} ${errors.price ? "border-(--color-danger)" : ""}`}
+            className={`${inputClass} ${errors.price ? "border-danger" : ""}`}
             placeholder="0"
           />
           {errors.price && <p className={errorClass}>{errors.price.message}</p>}
@@ -259,7 +273,7 @@ export function CourseSettingsForm({ courseId, initialData }: CourseSettingsForm
         <button
           type="submit"
           disabled={isSaving}
-          className="flex items-center gap-2 bg-(--color-brand) text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-(--color-brand-dark) transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 bg-brand text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSaving && <Loader2 size={14} className="animate-spin" />}
           {isSaving ? "Saving…" : "Save settings"}

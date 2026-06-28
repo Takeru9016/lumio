@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { Webhook } from "svix";
-import { db } from "@/lib/db";
+
+import { db } from "@/lib";
+
 import type { Role } from "@/generated/prisma/client";
 
 type ClerkWebhookEvent = {
@@ -64,7 +66,8 @@ export async function POST(req: Request) {
     const primaryEmail = data.email_addresses.find(
       (e) => e.id === data.primary_email_address_id,
     );
-    const email = primaryEmail?.email_address ?? data.email_addresses[0]?.email_address;
+    const email =
+      primaryEmail?.email_address ?? data.email_addresses[0]?.email_address;
     if (!email) {
       return Response.json({ error: "No email found" }, { status: 400 });
     }

@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { z } from "zod";
-import { mux } from "@/lib/mux";
-import { db } from "@/lib/db";
+
+import { db, mux } from "@/lib";
 
 const f = createUploadthing();
 
@@ -14,7 +14,8 @@ async function getInstructor() {
     select: { id: true, role: true },
   });
   if (!user) throw new Error("User not found");
-  if (user.role !== "INSTRUCTOR" && user.role !== "SUPER_ADMIN") throw new Error("Forbidden");
+  if (user.role !== "INSTRUCTOR" && user.role !== "SUPER_ADMIN")
+    throw new Error("Forbidden");
   return userId;
 }
 

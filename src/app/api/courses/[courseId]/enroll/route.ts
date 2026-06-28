@@ -1,8 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
-import { db } from "@/lib/db";
-import { razorpay } from "@/lib/razorpay";
-import { resend } from "@/lib/resend";
+import { auth } from "@clerk/nextjs/server";
+
+import { db, razorpay, resend } from "@/lib";
 
 export async function POST(
   req: NextRequest,
@@ -21,12 +20,21 @@ export async function POST(
   });
 
   if (!user || user.role !== "STUDENT") {
-    return Response.json({ error: "Only students can enroll" }, { status: 403 });
+    return Response.json(
+      { error: "Only students can enroll" },
+      { status: 403 },
+    );
   }
 
   const course = await db.course.findUnique({
     where: { id: courseId },
-    select: { id: true, title: true, price: true, currency: true, status: true },
+    select: {
+      id: true,
+      title: true,
+      price: true,
+      currency: true,
+      status: true,
+    },
   });
 
   if (!course || course.status !== "PUBLISHED") {
@@ -56,7 +64,11 @@ export async function POST(
       );
     }
 
-    type PaymentResult = { status: string; amount: number | string; currency: string };
+    type PaymentResult = {
+      status: string;
+      amount: number | string;
+      currency: string;
+    };
     let payment: PaymentResult;
     try {
       payment = (await razorpay.payments.fetch(
@@ -74,7 +86,10 @@ export async function POST(
       Number(payment.amount) !== Math.round(course.price * 100) ||
       payment.currency !== course.currency
     ) {
-      return Response.json({ error: "Payment amount mismatch" }, { status: 402 });
+      return Response.json(
+        { error: "Payment amount mismatch" },
+        { status: 402 },
+      );
     }
   }
 

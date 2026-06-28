@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
-import { mux } from "@/lib/mux";
-import { db } from "@/lib/db";
+
+import { db, mux } from "@/lib";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -8,7 +8,11 @@ export async function POST(req: Request) {
 
   let event: Awaited<ReturnType<typeof mux.webhooks.unwrap>>;
   try {
-    event = await mux.webhooks.unwrap(body, headersList, process.env.MUX_WEBHOOK_SECRET!);
+    event = await mux.webhooks.unwrap(
+      body,
+      headersList,
+      process.env.MUX_WEBHOOK_SECRET!,
+    );
   } catch {
     return new Response("Invalid Mux signature", { status: 401 });
   }

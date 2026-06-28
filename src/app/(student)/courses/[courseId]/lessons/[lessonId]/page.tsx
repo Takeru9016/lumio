@@ -1,6 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
-import { db } from "@/lib/db";
+import { auth } from "@clerk/nextjs/server";
+
+import { db } from "@/lib";
+
 import { CoursePlayerClient } from "./_components/CoursePlayerClient";
 import type { SidebarSection } from "./_components/LessonSidebar";
 

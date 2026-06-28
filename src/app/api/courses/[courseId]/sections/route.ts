@@ -1,12 +1,16 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import { db } from "@/lib/db";
+
+import { db } from "@/lib";
 
 async function getCourseAndUser(courseId: string, clerkId: string) {
   const [dbUser, course] = await Promise.all([
     db.user.findUnique({ where: { clerkId }, select: { id: true } }),
-    db.course.findUnique({ where: { id: courseId }, select: { id: true, instructorId: true } }),
+    db.course.findUnique({
+      where: { id: courseId },
+      select: { id: true, instructorId: true },
+    }),
   ]);
   return { dbUser, course };
 }
@@ -16,7 +20,8 @@ export async function GET(
   { params }: { params: Promise<{ courseId: string }> },
 ) {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId } = await params;
 
@@ -32,7 +37,8 @@ export async function GET(
     },
   });
 
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!course)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   return NextResponse.json(course.sections);
 }
@@ -46,18 +52,26 @@ export async function POST(
   { params }: { params: Promise<{ courseId: string }> },
 ) {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId } = await params;
   const { dbUser, course } = await getCourseAndUser(courseId, userId);
 
-  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (course.instructorId !== dbUser.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!dbUser)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!course)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (course.instructorId !== dbUser.id)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await req.json();
   const parsed = createSectionSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  if (!parsed.success)
+    return NextResponse.json(
+      { error: parsed.error.flatten() },
+      { status: 400 },
+    );
 
   const count = await db.section.count({ where: { courseId } });
 

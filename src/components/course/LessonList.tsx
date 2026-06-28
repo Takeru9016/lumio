@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -29,9 +30,10 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
-import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
+
 import { InlineInput } from "@/components/course/InlineInput";
+
+import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
 
 export interface LessonItem {
   id: string;
@@ -87,8 +89,14 @@ function SortableLesson({
   onSelect: () => void;
   onEdit: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: `lesson-${lesson.id}` });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `lesson-${lesson.id}` });
 
   return (
     <div
@@ -98,14 +106,14 @@ function SortableLesson({
         isDragging ? "opacity-50" : ""
       } ${
         isSelected
-          ? "bg-(--color-brand-light) text-(--color-brand)"
-          : "hover:bg-(--color-surface-3) text-(--color-text-secondary)"
+          ? "bg-brand-light text-brand"
+          : "hover:bg-surface-3 text-text-secondary"
       }`}
       onClick={onSelect}
     >
       <button
         type="button"
-        className="cursor-grab touch-none text-(--color-text-disabled) hover:text-(--color-text-muted) shrink-0"
+        className="cursor-grab touch-none text-text-disabled hover:text-text-muted shrink-0"
         {...attributes}
         {...listeners}
         onClick={(e) => e.stopPropagation()}
@@ -113,33 +121,40 @@ function SortableLesson({
         <GripVertical size={13} />
       </button>
 
-      <span className={`shrink-0 ${isSelected ? "text-(--color-brand)" : "text-(--color-text-muted)"}`}>
+      <span
+        className={`shrink-0 ${isSelected ? "text-brand" : "text-text-muted"}`}
+      >
         {typeIcons[lesson.type]}
       </span>
 
-      <span className="text-xs flex-1 truncate font-medium">{lesson.title}</span>
+      <span className="text-xs flex-1 truncate font-medium">
+        {lesson.title}
+      </span>
 
       {lesson.videoDuration && lesson.type === "VIDEO" && (
-        <span className="text-[10px] text-(--color-text-muted) flex items-center gap-0.5 shrink-0">
+        <span className="text-[10px] text-text-muted flex items-center gap-0.5 shrink-0">
           <Clock size={10} />
           {formatDuration(lesson.videoDuration)}
         </span>
       )}
 
       {lesson.isPublished ? (
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-(--color-success-bg) text-(--color-success) shrink-0">
+        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-success-bg text-success shrink-0">
           Live
         </span>
       ) : (
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-(--color-surface-3) text-(--color-text-muted) shrink-0">
+        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-3 text-text-muted shrink-0">
           Draft
         </span>
       )}
 
       <button
         type="button"
-        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-(--color-border) transition-opacity shrink-0"
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit();
+        }}
+        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-border transition-opacity shrink-0"
       >
         <Pencil size={11} />
       </button>
@@ -169,21 +184,33 @@ function SortableSection({
   onLessonInputCancel: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: `section-${section.id}` });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `section-${section.id}` });
 
   const lessonIds = section.lessons.map((l) => `lesson-${l.id}`);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   function handleLessonDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIdx = section.lessons.findIndex((l) => `lesson-${l.id}` === active.id);
-    const newIdx = section.lessons.findIndex((l) => `lesson-${l.id}` === over.id);
+    const oldIdx = section.lessons.findIndex(
+      (l) => `lesson-${l.id}` === active.id,
+    );
+    const newIdx = section.lessons.findIndex(
+      (l) => `lesson-${l.id}` === over.id,
+    );
     if (oldIdx === -1 || newIdx === -1) return;
     onLessonReorder(arrayMove(section.lessons, oldIdx, newIdx));
   }
@@ -198,7 +225,7 @@ function SortableSection({
       <div className="flex items-center gap-1.5 px-2 py-1.5 group">
         <button
           type="button"
-          className="cursor-grab touch-none text-(--color-text-disabled) hover:text-(--color-text-muted)"
+          className="cursor-grab touch-none text-text-disabled hover:text-text-muted"
           {...attributes}
           {...listeners}
         >
@@ -210,14 +237,17 @@ function SortableSection({
           className="flex items-center gap-1 flex-1 min-w-0"
         >
           {collapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
-          <span className="text-xs font-semibold text-(--color-text-primary) truncate">
+          <span className="text-xs font-semibold text-text-primary truncate">
             {section.title}
           </span>
         </button>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onAddLesson(); }}
-          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-(--color-surface-3) text-(--color-text-muted) transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddLesson();
+          }}
+          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-surface-3 text-text-muted transition-opacity"
           title="Add lesson"
         >
           <Plus size={12} />
@@ -226,13 +256,16 @@ function SortableSection({
 
       {/* Lessons */}
       {!collapsed && (
-        <div className="ml-3 pl-2 border-l border-(--color-border) space-y-0.5">
+        <div className="ml-3 pl-2 border-l border-border space-y-0.5">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleLessonDragEnd}
           >
-            <SortableContext items={lessonIds} strategy={verticalListSortingStrategy}>
+            <SortableContext
+              items={lessonIds}
+              strategy={verticalListSortingStrategy}
+            >
               {section.lessons.map((lesson) => (
                 <SortableLesson
                   key={lesson.id}
@@ -246,7 +279,9 @@ function SortableSection({
           </DndContext>
 
           {section.lessons.length === 0 && !showLessonInput && (
-            <p className="text-[11px] text-(--color-text-disabled) px-3 py-2">No lessons yet</p>
+            <p className="text-[11px] text-text-disabled px-3 py-2">
+              No lessons yet
+            </p>
           )}
 
           {showLessonInput ? (
@@ -259,7 +294,7 @@ function SortableSection({
             <button
               type="button"
               onClick={onAddLesson}
-              className="w-full flex items-center gap-1 px-3 py-1.5 text-[11px] text-(--color-text-muted) hover:text-(--color-brand) hover:bg-(--color-brand-light) rounded-md transition-colors"
+              className="w-full flex items-center gap-1 px-3 py-1.5 text-[11px] text-text-muted hover:text-brand hover:bg-brand-light rounded-md transition-colors"
             >
               <Plus size={11} /> Add lesson
             </button>
@@ -285,7 +320,9 @@ export function LessonList({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const sectionIds = sections.map((s) => `section-${s.id}`);
@@ -303,7 +340,7 @@ export function LessonList({
 
   function handleLessonReorder(sectionId: string, newLessons: LessonItem[]) {
     const reordered = sections.map((s) =>
-      s.id === sectionId ? { ...s, lessons: newLessons } : s
+      s.id === sectionId ? { ...s, lessons: newLessons } : s,
     );
     onReorder(reordered);
     persistReorder(courseId, reordered);
@@ -317,7 +354,10 @@ export function LessonList({
           collisionDetection={closestCenter}
           onDragEnd={handleSectionDragEnd}
         >
-          <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={sectionIds}
+            strategy={verticalListSortingStrategy}
+          >
             {sections.map((section) => (
               <SortableSection
                 key={section.id}
@@ -325,7 +365,9 @@ export function LessonList({
                 selectedLessonId={selectedLessonId}
                 onSelectLesson={onSelectLesson}
                 onAddLesson={() => setInlineFor(section.id)}
-                onLessonReorder={(newLessons) => handleLessonReorder(section.id, newLessons)}
+                onLessonReorder={(newLessons) =>
+                  handleLessonReorder(section.id, newLessons)
+                }
                 showLessonInput={inlineFor === section.id}
                 onLessonInputConfirm={(title) => {
                   onAddLesson(section.id, title);
@@ -339,18 +381,21 @@ export function LessonList({
 
         {sections.length === 0 && (
           <div className="px-4 py-8 text-center">
-            <p className="text-xs text-(--color-text-muted) mb-3">No sections yet</p>
+            <p className="text-xs text-text-muted mb-3">No sections yet</p>
             {inlineFor === "section" ? (
               <InlineInput
                 placeholder="Section title"
-                onConfirm={(title) => { onAddSection(title); setInlineFor(null); }}
+                onConfirm={(title) => {
+                  onAddSection(title);
+                  setInlineFor(null);
+                }}
                 onCancel={() => setInlineFor(null)}
               />
             ) : (
               <button
                 type="button"
                 onClick={() => setInlineFor("section")}
-                className="text-xs bg-(--color-brand) text-white rounded-md px-3 py-1.5 font-medium hover:bg-(--color-brand-dark) transition-colors"
+                className="text-xs bg-brand text-white rounded-md px-3 py-1.5 font-medium hover:bg-brand-dark transition-colors"
               >
                 Add first section
               </button>
@@ -360,18 +405,21 @@ export function LessonList({
       </div>
 
       {sections.length > 0 && (
-        <div className="border-t border-(--color-border) p-3">
+        <div className="border-t border-border p-3">
           {inlineFor === "section" ? (
             <InlineInput
               placeholder="Section title"
-              onConfirm={(title) => { onAddSection(title); setInlineFor(null); }}
+              onConfirm={(title) => {
+                onAddSection(title);
+                setInlineFor(null);
+              }}
               onCancel={() => setInlineFor(null)}
             />
           ) : (
             <button
               type="button"
               onClick={() => setInlineFor("section")}
-              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-(--color-text-muted) border border-dashed border-(--color-border) rounded-md hover:border-(--color-brand) hover:text-(--color-brand) transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-text-muted border border-dashed border-border rounded-md hover:border-brand hover:text-brand transition-colors"
             >
               <Plus size={13} /> Add section
             </button>

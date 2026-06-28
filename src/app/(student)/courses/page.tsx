@@ -1,9 +1,10 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { db } from "@/lib/db";
-import { CourseCard } from "@/components/course/CourseCard";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+
+import { CourseCard, EmptyState } from "@/components";
+
+import { db } from "@/lib";
 
 type Tab = "all" | "in-progress" | "completed";
 
@@ -154,21 +155,21 @@ export default async function CoursesPage({
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-(--color-text-primary)">Courses</h1>
-        <p className="text-sm text-(--color-text-muted) mt-1">
+        <h1 className="text-2xl font-bold text-text-primary">Courses</h1>
+        <p className="text-sm text-text-muted mt-1">
           Browse your enrolled courses and discover new ones.
         </p>
       </div>
 
-      <div className="flex gap-1 border-b border-(--color-border)">
+      <div className="flex gap-1 border-b border-border">
         {tabs.map(({ id, label }) => (
           <Link
             key={id}
             href={`/courses?tab=${id}`}
             className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
               tab === id
-                ? "border-(--color-brand) text-(--color-brand)"
-                : "border-transparent text-(--color-text-muted) hover:text-(--color-text-secondary)"
+                ? "border-brand text-brand"
+                : "border-transparent text-text-muted hover:text-text-secondary"
             }`}
           >
             {label}
@@ -189,7 +190,7 @@ export default async function CoursesPage({
           {enrolledCards.length > 0 && (
             <section>
               {tab === "all" && (
-                <h2 className="text-base font-semibold text-(--color-text-primary) mb-4">
+                <h2 className="text-base font-semibold text-text-primary mb-4">
                   My Learning
                 </h2>
               )}
@@ -207,7 +208,7 @@ export default async function CoursesPage({
 
           {tab === "all" && availableCards.length > 0 && (
             <section>
-              <h2 className="text-base font-semibold text-(--color-text-primary) mb-4">
+              <h2 className="text-base font-semibold text-text-primary mb-4">
                 Available Courses
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

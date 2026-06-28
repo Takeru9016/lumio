@@ -1,7 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import { db } from "@/lib/db";
+
+import { db } from "@/lib";
+
 import type { CourseStatus } from "@/generated/prisma/client";
 
 const VALID_STATUSES: CourseStatus[] = ["DRAFT", "PUBLISHED", "ARCHIVED"];
@@ -18,7 +20,10 @@ export async function GET(req: NextRequest) {
   const tenantId = searchParams.get("tenantId") ?? undefined;
   const category = searchParams.get("category") ?? undefined;
   const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
-  const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") ?? "12")));
+  const limit = Math.min(
+    50,
+    Math.max(1, Number(searchParams.get("limit") ?? "12")),
+  );
 
   const status =
     statusParam && VALID_STATUSES.includes(statusParam as CourseStatus)

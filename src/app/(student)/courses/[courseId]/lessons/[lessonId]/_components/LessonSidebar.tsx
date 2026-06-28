@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2, Circle, PlayCircle, FileText, HelpCircle, ClipboardList } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  PlayCircle,
+  FileText,
+  HelpCircle,
+  ClipboardList,
+} from "lucide-react";
+
 import type { LessonType } from "@/generated/prisma/enums";
 
 export interface SidebarLesson {
@@ -42,7 +50,7 @@ export function LessonSidebar({
       {sections.map((section) => (
         <div key={section.id} className="mb-2">
           <div className="px-4 pt-3 pb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-(--color-text-muted)">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
               {section.title}
             </span>
           </div>
@@ -57,35 +65,35 @@ export function LessonSidebar({
                 href={`/courses/${courseId}/lessons/${lesson.id}`}
                 className={`flex items-start gap-2.5 px-4 py-2.5 text-xs leading-snug transition-colors ${
                   isCurrent
-                    ? "bg-(--color-brand-light) text-(--color-brand) font-medium"
-                    : "text-(--color-text-secondary) hover:bg-(--color-surface-2)"
+                    ? "bg-brand-light text-brand font-medium"
+                    : "text-text-secondary hover:bg-surface-2"
                 }`}
               >
                 {isCompleted ? (
                   <CheckCircle2
                     size={14}
-                    className="shrink-0 mt-0.5 text-(--color-success)"
+                    className="shrink-0 mt-0.5 text-success"
                   />
                 ) : isCurrent ? (
                   <Circle
                     size={14}
                     strokeWidth={2.5}
-                    className="shrink-0 mt-0.5 text-(--color-brand)"
+                    className="shrink-0 mt-0.5 text-brand"
                   />
                 ) : (
                   <Circle
                     size={14}
-                    className="shrink-0 mt-0.5 text-(--color-border-strong)"
+                    className="shrink-0 mt-0.5 text-border-strong"
                   />
                 )}
 
                 <span
                   className={`shrink-0 mt-0.5 ${
                     lesson.isAiQuiz
-                      ? "text-(--color-ai)"
+                      ? "text-ai"
                       : isCurrent
-                        ? "text-(--color-brand)"
-                        : "text-(--color-text-muted)"
+                        ? "text-brand"
+                        : "text-text-muted"
                   }`}
                 >
                   {lesson.isAiQuiz ? (
@@ -98,7 +106,7 @@ export function LessonSidebar({
                 <span className="flex-1 truncate">
                   {lesson.title}
                   {lesson.isAiQuiz && (
-                    <span className="ml-1 text-[10px] text-(--color-ai) font-medium">
+                    <span className="ml-1 text-[10px] text-ai font-medium">
                       (AI)
                     </span>
                   )}

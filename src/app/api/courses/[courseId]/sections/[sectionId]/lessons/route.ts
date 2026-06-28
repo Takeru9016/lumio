@@ -1,14 +1,26 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import { db } from "@/lib/db";
+
+import { db } from "@/lib";
+
 import type { LessonType } from "@/generated/prisma/client";
 
-async function resolveSectionOwnership(courseId: string, sectionId: string, clerkId: string) {
+async function resolveSectionOwnership(
+  courseId: string,
+  sectionId: string,
+  clerkId: string,
+) {
   const [dbUser, course, section] = await Promise.all([
     db.user.findUnique({ where: { clerkId }, select: { id: true } }),
-    db.course.findUnique({ where: { id: courseId }, select: { id: true, instructorId: true } }),
-    db.section.findUnique({ where: { id: sectionId }, select: { id: true, courseId: true } }),
+    db.course.findUnique({
+      where: { id: courseId },
+      select: { id: true, instructorId: true },
+    }),
+    db.section.findUnique({
+      where: { id: sectionId },
+      select: { id: true, courseId: true },
+    }),
   ]);
   return { dbUser, course, section };
 }
@@ -18,7 +30,8 @@ export async function GET(
   { params }: { params: Promise<{ courseId: string; sectionId: string }> },
 ) {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, sectionId } = await params;
 
@@ -27,7 +40,8 @@ export async function GET(
     include: { lessons: { orderBy: { order: "asc" } } },
   });
 
-  if (!section) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!section)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   return NextResponse.json(section.lessons);
 }
@@ -42,19 +56,32 @@ export async function POST(
   { params }: { params: Promise<{ courseId: string; sectionId: string }> },
 ) {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, sectionId } = await params;
-  const { dbUser, course, section } = await resolveSectionOwnership(courseId, sectionId, userId);
+  const { dbUser, course, section } = await resolveSectionOwnership(
+    courseId,
+    sectionId,
+    userId,
+  );
 
-  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (course.instructorId !== dbUser.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!section || section.courseId !== courseId) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!dbUser)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!course)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (course.instructorId !== dbUser.id)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!section || section.courseId !== courseId)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const body = await req.json();
   const parsed = createLessonSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  if (!parsed.success)
+    return NextResponse.json(
+      { error: parsed.error.flatten() },
+      { status: 400 },
+    );
 
   const count = await db.lesson.count({ where: { sectionId } });
 
@@ -69,4 +96,3 @@ export async function POST(
 
   return NextResponse.json(lesson, { status: 201 });
 }
-

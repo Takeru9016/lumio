@@ -1,9 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { getRoleDashboard } from "@/lib/role-redirect";
-import { TopNav } from "@/components/layout/TopNav";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { auth } from "@clerk/nextjs/server";
+
+import { Sidebar, TopNav } from "@/components";
+
+import { db, getRoleDashboard } from "@/lib";
 
 export default async function InstructorLayout({
   children,

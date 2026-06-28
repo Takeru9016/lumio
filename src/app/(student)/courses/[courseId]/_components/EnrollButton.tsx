@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useRazorpay } from "@/hooks/useRazorpay";
 import { toast } from "gooey-toast";
+
 import type { RazorpayOptions } from "@/types";
+
+import { useRazorpay } from "@/hooks";
 
 interface EnrollButtonProps {
   courseId: string;
@@ -78,7 +80,9 @@ export function EnrollButton({
       const { orderId, amount, razorpayKeyId } = await orderRes.json();
 
       if (!window.Razorpay) {
-        toast.error({ title: "Razorpay failed to load. Please refresh and try again." });
+        toast.error({
+          title: "Razorpay failed to load. Please refresh and try again.",
+        });
         setLoading(false);
         return;
       }
@@ -102,7 +106,9 @@ export function EnrollButton({
           });
           if (!enrollRes.ok) {
             const data = await enrollRes.json();
-            toast.error({ title: data.error ?? "Enrollment failed after payment" });
+            toast.error({
+              title: data.error ?? "Enrollment failed after payment",
+            });
             return;
           }
           toast.success({ title: "Payment successful! You're enrolled." });
@@ -136,7 +142,7 @@ export function EnrollButton({
         onClick={hasLessons ? handleStartLearning : undefined}
         disabled={!hasLessons}
         title={!hasLessons ? "No lessons available yet" : undefined}
-        className="w-full py-3 px-6 rounded-xl font-semibold text-sm bg-(--color-brand) text-white hover:bg-(--color-brand-dark) transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full py-3 px-6 rounded-xl font-semibold text-sm bg-brand text-white hover:bg-brand-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {label}
       </button>
@@ -147,7 +153,7 @@ export function EnrollButton({
     <button
       onClick={price === 0 ? handleFreeEnroll : handlePaidEnroll}
       disabled={busy}
-      className="w-full py-3 px-6 rounded-xl font-semibold text-sm bg-(--color-brand) text-white hover:bg-(--color-brand-dark) transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      className="w-full py-3 px-6 rounded-xl font-semibold text-sm bg-brand text-white hover:bg-brand-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {busy
         ? "Please wait…"

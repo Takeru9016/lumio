@@ -1,6 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { auth } from "@clerk/nextjs/server";
+
+import { db } from "@/lib";
 
 const XP_PER_LESSON = 10;
 
@@ -9,7 +10,8 @@ export async function POST(
   { params }: { params: Promise<{ courseId: string; lessonId: string }> },
 ) {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, lessonId } = await params;
 
@@ -17,7 +19,8 @@ export async function POST(
     where: { clerkId: userId },
     select: { id: true },
   });
-  if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!dbUser)
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const [enrollment, lesson] = await Promise.all([
     db.enrollment.findUnique({
@@ -30,8 +33,10 @@ export async function POST(
     }),
   ]);
 
-  if (!enrollment) return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
-  if (!lesson) return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+  if (!enrollment)
+    return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
+  if (!lesson)
+    return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
 
   const existing = await db.lessonProgress.findUnique({
     where: { userId_lessonId: { userId: dbUser.id, lessonId } },
@@ -46,7 +51,11 @@ export async function POST(
         lesson: { section: { courseId } },
       },
     });
-    return NextResponse.json({ xpEarned: 0, isFirstCompletion: false, totalCompleted });
+    return NextResponse.json({
+      xpEarned: 0,
+      isFirstCompletion: false,
+      totalCompleted,
+    });
   }
 
   await Promise.all([
@@ -75,5 +84,9 @@ export async function POST(
     },
   });
 
-  return NextResponse.json({ xpEarned: XP_PER_LESSON, isFirstCompletion: true, totalCompleted });
+  return NextResponse.json({
+    xpEarned: XP_PER_LESSON,
+    isFirstCompletion: true,
+    totalCompleted,
+  });
 }

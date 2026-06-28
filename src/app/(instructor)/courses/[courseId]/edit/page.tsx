@@ -1,8 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
-import { db } from "@/lib/db";
-import { CourseEditor } from "@/components/course/CourseEditor";
-import type { SectionItem } from "@/components/course/LessonList";
+import { auth } from "@clerk/nextjs/server";
+
+import { CourseEditor, type SectionItem } from "@/components";
+
+import { db } from "@/lib";
 
 interface EditCoursePageProps {
   params: Promise<{ courseId: string }>;

@@ -4,7 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "gooey-toast";
 import { AlertCircle, X } from "lucide-react";
-import { LessonList, type SectionItem, type LessonItem } from "@/components/course/LessonList";
+
+import {
+  LessonList,
+  type SectionItem,
+  type LessonItem,
+} from "@/components/course/LessonList";
 import { LessonEditor } from "@/components/course/LessonEditor";
 
 type CourseStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
@@ -16,20 +21,21 @@ interface CourseEditorProps {
   courseStatus: CourseStatus;
 }
 
-const STATUS_BADGE: Record<CourseStatus, { label: string; className: string }> = {
-  DRAFT: {
-    label: "Draft",
-    className: "bg-(--color-surface-3) text-(--color-text-muted)",
-  },
-  PUBLISHED: {
-    label: "Live",
-    className: "bg-(--color-success-bg) text-(--color-success)",
-  },
-  ARCHIVED: {
-    label: "Archived",
-    className: "bg-amber-50 text-amber-600",
-  },
-};
+const STATUS_BADGE: Record<CourseStatus, { label: string; className: string }> =
+  {
+    DRAFT: {
+      label: "Draft",
+      className: "bg-(--color-surface-3) text-(--color-text-muted)",
+    },
+    PUBLISHED: {
+      label: "Live",
+      className: "bg-(--color-success-bg) text-(--color-success)",
+    },
+    ARCHIVED: {
+      label: "Archived",
+      className: "bg-amber-50 text-amber-600",
+    },
+  };
 
 export function CourseEditor({
   courseId,
@@ -50,7 +56,12 @@ export function CourseEditor({
   );
   const selectedLesson = selectedSection?.lessons.find(
     (l) => l.id === selectedLessonId,
-  ) as (LessonItem & { textContent?: string | null; muxPlaybackId?: string | null }) | undefined;
+  ) as
+    | (LessonItem & {
+        textContent?: string | null;
+        muxPlaybackId?: string | null;
+      })
+    | undefined;
 
   async function addSection(title: string) {
     const res = await fetch(`/api/courses/${courseId}/sections`, {
@@ -66,15 +77,18 @@ export function CourseEditor({
 
   async function addLesson(sectionId: string, title: string) {
     const section = sections.find((s) => s.id === sectionId);
-    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        type: "VIDEO",
-        order: section?.lessons.length ?? 0,
-      }),
-    });
+    const res = await fetch(
+      `/api/courses/${courseId}/sections/${sectionId}/lessons`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          type: "VIDEO",
+          order: section?.lessons.length ?? 0,
+        }),
+      },
+    );
     if (res.ok) {
       const lesson = (await res.json()) as LessonItem;
       setSections((prev) =>
@@ -93,30 +107,46 @@ export function CourseEditor({
     setSections((prev) =>
       prev.map((s) => ({
         ...s,
-        lessons: s.lessons.map((l) => (l.id === lessonId ? { ...l, ...patch } : l)),
+        lessons: s.lessons.map((l) =>
+          l.id === lessonId ? { ...l, ...patch } : l,
+        ),
       })),
     );
   }
 
   function handleAiOutline() {
-    toast.info({ title: "Coming in Phase 4", description: "AI outline will be available soon." });
+    toast.info({
+      title: "Coming in Phase 4",
+      description: "AI outline will be available soon.",
+    });
   }
 
   async function handlePublish() {
     setIsPublishing(true);
     setPublishErrors([]);
     try {
-      const res = await fetch(`/api/courses/${courseId}/publish`, { method: "POST" });
-      const data = (await res.json()) as { errors?: string[]; status?: CourseStatus };
+      const res = await fetch(`/api/courses/${courseId}/publish`, {
+        method: "POST",
+      });
+      const data = (await res.json()) as {
+        errors?: string[];
+        status?: CourseStatus;
+      };
       if (!res.ok) {
         setPublishErrors(data.errors ?? ["Failed to publish course."]);
         return;
       }
       setStatus("PUBLISHED");
-      toast.success({ title: "Course is live!", description: "Students can now enroll." });
+      toast.success({
+        title: "Course is live!",
+        description: "Students can now enroll.",
+      });
       router.refresh();
     } catch {
-      toast.error({ title: "Network error", description: "Failed to publish course." });
+      toast.error({
+        title: "Network error",
+        description: "Failed to publish course.",
+      });
     } finally {
       setIsPublishing(false);
     }
@@ -125,9 +155,14 @@ export function CourseEditor({
   async function handleArchive() {
     setIsArchiving(true);
     try {
-      const res = await fetch(`/api/courses/${courseId}/archive`, { method: "POST" });
+      const res = await fetch(`/api/courses/${courseId}/archive`, {
+        method: "POST",
+      });
       if (!res.ok) {
-        toast.error({ title: "Archive failed", description: "Could not archive this course." });
+        toast.error({
+          title: "Archive failed",
+          description: "Could not archive this course.",
+        });
         return;
       }
       setStatus("ARCHIVED");
@@ -138,7 +173,10 @@ export function CourseEditor({
       });
       router.refresh();
     } catch {
-      toast.error({ title: "Network error", description: "Failed to archive course." });
+      toast.error({
+        title: "Network error",
+        description: "Failed to archive course.",
+      });
     } finally {
       setIsArchiving(false);
     }
@@ -151,13 +189,13 @@ export function CourseEditor({
   return (
     <div className="flex h-full">
       {/* Left sidebar — course structure */}
-      <aside className="w-64 shrink-0 border-r border-(--color-border) flex flex-col overflow-hidden">
-        <div className="px-4 py-3 border-b border-(--color-border) flex items-center justify-between">
+      <aside className="w-64 shrink-0 border-r border-border flex flex-col overflow-hidden">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-xs text-(--color-text-muted) font-medium uppercase tracking-wide">
+            <p className="text-xs text-text-muted font-medium uppercase tracking-wide">
               Course
             </p>
-            <p className="text-sm font-semibold text-(--color-text-primary) truncate">
+            <p className="text-sm font-semibold text-text-primary truncate">
               {courseTitle}
             </p>
           </div>
@@ -182,19 +220,19 @@ export function CourseEditor({
       {/* Right panel — editor */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Toolbar */}
-        <div className="h-12 px-6 border-b border-(--color-border) flex items-center justify-between shrink-0">
+        <div className="h-12 px-6 border-b border-border flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => router.push(`/courses/${courseId}/settings`)}
-              className="text-sm text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors"
+              className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >
               Settings
             </button>
             <button
               type="button"
               onClick={() => router.push(`/courses/${courseId}/analytics`)}
-              className="text-sm text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors"
+              className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >
               Analytics →
             </button>
@@ -204,7 +242,7 @@ export function CourseEditor({
             <button
               type="button"
               onClick={handleAiOutline}
-              className="flex items-center gap-1.5 bg-(--color-ai) text-white rounded-md px-3 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 bg-ai text-white rounded-md px-3 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
             >
               ✦ AI Outline
             </button>
@@ -214,7 +252,7 @@ export function CourseEditor({
                 type="button"
                 onClick={() => void handleArchive()}
                 disabled={isArchiving}
-                className="text-sm font-medium text-(--color-text-muted) hover:text-amber-600 transition-colors disabled:opacity-50"
+                className="text-sm font-medium text-text-muted hover:text-amber-600 transition-colors disabled:opacity-50"
               >
                 {isArchiving ? "Archiving…" : "Archive"}
               </button>
@@ -224,7 +262,7 @@ export function CourseEditor({
               type="button"
               onClick={() => void handlePublish()}
               disabled={!canPublish || isPublishing}
-              className="bg-(--color-brand) text-white rounded-md px-3 py-1.5 text-sm font-medium hover:bg-(--color-brand-dark) transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-brand text-white rounded-md px-3 py-1.5 text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPublishing
                 ? "Publishing…"
@@ -274,10 +312,10 @@ export function CourseEditor({
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
               <div className="text-3xl mb-3">📝</div>
-              <h3 className="text-base font-semibold text-(--color-text-primary) mb-1">
+              <h3 className="text-base font-semibold text-text-primary mb-1">
                 Select a lesson to edit
               </h3>
-              <p className="text-sm text-(--color-text-muted)">
+              <p className="text-sm text-text-muted">
                 Choose a lesson from the sidebar or add a new one.
               </p>
             </div>

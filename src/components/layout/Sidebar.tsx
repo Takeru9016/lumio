@@ -22,7 +22,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+
 import type { NavItem } from "@/types";
+
 import type { Role } from "@/generated/prisma/enums";
 
 const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
@@ -36,7 +38,11 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Settings", href: "/student/settings", icon: Settings },
   ],
   INSTRUCTOR: [
-    { label: "Dashboard", href: "/instructor/dashboard", icon: LayoutDashboard },
+    {
+      label: "Dashboard",
+      href: "/instructor/dashboard",
+      icon: LayoutDashboard,
+    },
     { label: "My Courses", href: "/instructor/courses", icon: BookOpen },
     { label: "Students", href: "/instructor/students", icon: Users },
     { label: "Earnings", href: "/instructor/earnings", icon: DollarSign },
@@ -81,7 +87,7 @@ export function Sidebar({ role }: SidebarProps) {
       animate={{ width: isCollapsed ? 64 : 240 }}
       initial={{ width: 240 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="hidden md:flex flex-col h-full border-r border-(--color-border) bg-white flex-shrink-0 overflow-hidden"
+      className="hidden md:flex flex-col h-full border-r border-border bg-white shrink-0 overflow-hidden"
     >
       <div className="flex-1 flex flex-col py-3 px-2 gap-0.5">
         {items.map((item) => {
@@ -98,24 +104,24 @@ export function Sidebar({ role }: SidebarProps) {
                 isCollapsed ? "justify-center px-3" : "gap-3 px-3"
               } ${
                 isActive
-                  ? `bg-(--color-brand-light) text-(--color-brand) font-medium${
-                      isCollapsed ? "" : " border-l-2 border-(--color-brand)"
+                  ? `bg-brand-light text-brand font-medium${
+                      isCollapsed ? "" : " border-l-2 border-brand"
                     }`
-                  : "text-(--color-text-secondary) hover:bg-(--color-surface-2)"
+                  : "text-text-secondary hover:bg-surface-2"
               }`}
             >
-              <Icon size={16} className="flex-shrink-0" />
+              <Icon size={16} className="shrink-0" />
               {!isCollapsed && <span>{item.label}</span>}
             </Link>
           );
         })}
       </div>
 
-      <div className="p-2 border-t border-(--color-border)">
+      <div className="p-2 border-t border-border">
         <button
           onClick={toggle}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="w-full flex items-center justify-center p-2 text-(--color-text-muted) hover:bg-(--color-surface-2) rounded-md transition-colors"
+          className="w-full flex items-center justify-center p-2 text-text-muted hover:bg-surface-2 rounded-md transition-colors"
         >
           {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>

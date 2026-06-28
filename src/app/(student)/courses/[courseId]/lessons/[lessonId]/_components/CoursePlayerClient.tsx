@@ -6,10 +6,12 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { toast } from "gooey-toast";
-import { VideoPlayer } from "@/components/course/VideoPlayer";
-import { AiBadge } from "@/components/shared/AiBadge";
+
+import { AiBadge, VideoPlayer } from "@/components";
+
 import { LessonSidebar, type SidebarSection } from "./LessonSidebar";
 import { NotesTab } from "./NotesTab";
+
 import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
 
 interface LessonData {
@@ -50,14 +52,14 @@ function ReadonlyTextContent({ content }: { content: string }) {
 
   if (!editor) {
     return (
-      <div className="min-h-[200px] rounded-lg border border-(--color-border) bg-(--color-surface-2) animate-pulse" />
+      <div className="min-h-[200px] rounded-lg border border-border bg-surface-2 animate-pulse" />
     );
   }
 
   return (
     <EditorContent
       editor={editor}
-      className="prose prose-sm max-w-none text-(--color-text-primary) [&_.tiptap]:outline-none"
+      className="prose prose-sm max-w-none text-text-primary [&_.tiptap]:outline-none"
     />
   );
 }
@@ -117,35 +119,35 @@ export function CoursePlayerClient({
   const isCurrentComplete = completedIds.has(lesson.id);
 
   return (
-    <div className="min-h-full bg-(--color-surface-2) flex flex-col">
+    <div className="min-h-full bg-surface-2 flex flex-col">
       {/* Inner top bar */}
-      <div className="sticky top-0 z-10 bg-(--color-surface-1) border-b border-(--color-border) px-4 flex items-center gap-3 h-[52px] shrink-0">
+      <div className="sticky top-0 z-10 bg-surface-1 border-b border-border px-4 flex items-center gap-3 h-[52px] shrink-0">
         <Link
           href={`/courses/${courseId}`}
-          className="flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors shrink-0"
+          className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors shrink-0"
         >
           <ArrowLeft size={15} />
           <span className="hidden sm:inline">Back</span>
         </Link>
 
-        <div className="w-px h-4 bg-(--color-border) shrink-0" />
+        <div className="w-px h-4 bg-border shrink-0" />
 
-        <span className="text-sm font-semibold text-(--color-text-primary) truncate flex-1 min-w-0">
+        <span className="text-sm font-semibold text-text-primary truncate flex-1 min-w-0">
           {courseTitle}
         </span>
 
-        <span className="text-xs text-(--color-text-muted) shrink-0">
+        <span className="text-xs text-text-muted shrink-0">
           Lesson {lessonIndex} of {totalLessons}
         </span>
 
         <div className="w-24 shrink-0">
-          <div className="h-1.5 rounded-full bg-(--color-surface-3)">
+          <div className="h-1.5 rounded-full bg-surface-3">
             <div
-              className="h-full rounded-full bg-(--color-brand) transition-all duration-500"
+              className="h-full rounded-full bg-brand transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-[10px] text-(--color-text-disabled) text-right mt-0.5">
+          <p className="text-[10px] text-text-disabled text-right mt-0.5">
             {progress}%
           </p>
         </div>
@@ -157,7 +159,7 @@ export function CoursePlayerClient({
         <div className="flex-1 min-w-0 overflow-y-auto">
           <div className="p-4 md:p-6 space-y-4 max-w-4xl">
             {/* Lesson title */}
-            <h1 className="text-xl font-bold text-(--color-text-primary)">
+            <h1 className="text-xl font-bold text-text-primary">
               {lesson.title}
             </h1>
 
@@ -169,13 +171,11 @@ export function CoursePlayerClient({
                 onComplete={markComplete}
               />
             ) : (
-              <div className="bg-(--color-surface-1) border border-(--color-border) rounded-lg p-5">
+              <div className="bg-surface-1 border border-border rounded-lg p-5">
                 {lesson.textContent ? (
                   <ReadonlyTextContent content={lesson.textContent} />
                 ) : (
-                  <p className="text-sm text-(--color-text-muted)">
-                    No content yet.
-                  </p>
+                  <p className="text-sm text-text-muted">No content yet.</p>
                 )}
               </div>
             )}
@@ -184,7 +184,7 @@ export function CoursePlayerClient({
             {lesson.type !== "VIDEO" && (
               <div className="flex justify-end">
                 {isCurrentComplete ? (
-                  <div className="flex items-center gap-2 text-sm font-medium text-(--color-success)">
+                  <div className="flex items-center gap-2 text-sm font-medium text-success">
                     <CheckCircle2 size={16} />
                     Completed
                   </div>
@@ -192,7 +192,7 @@ export function CoursePlayerClient({
                   <button
                     type="button"
                     onClick={() => void markComplete()}
-                    className="flex items-center gap-2 bg-(--color-brand) text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-(--color-brand-dark) transition-colors"
+                    className="flex items-center gap-2 bg-brand text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-brand-dark transition-colors"
                   >
                     <CheckCircle2 size={15} />
                     Mark as complete
@@ -202,8 +202,8 @@ export function CoursePlayerClient({
             )}
 
             {/* Tabs */}
-            <div className="bg-(--color-surface-1) border border-(--color-border) rounded-lg overflow-hidden">
-              <div className="flex border-b border-(--color-border)">
+            <div className="bg-surface-1 border border-border rounded-lg overflow-hidden">
+              <div className="flex border-b border-border">
                 {TABS.map((tab) => (
                   <button
                     key={tab.id}
@@ -211,8 +211,8 @@ export function CoursePlayerClient({
                     onClick={() => setActiveTab(tab.id)}
                     className={`px-4 py-3 text-sm font-medium transition-colors relative ${
                       activeTab === tab.id
-                        ? "text-(--color-brand)"
-                        : "text-(--color-text-muted) hover:text-(--color-text-primary)"
+                        ? "text-brand"
+                        : "text-text-muted hover:text-text-primary"
                     }`}
                   >
                     {tab.id === "ai-tutor" ? (
@@ -223,7 +223,7 @@ export function CoursePlayerClient({
                       tab.label
                     )}
                     {activeTab === tab.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-(--color-brand)" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
                     )}
                   </button>
                 ))}
@@ -234,26 +234,26 @@ export function CoursePlayerClient({
 
                 {activeTab === "discussion" && (
                   <div className="py-8 text-center">
-                    <p className="text-sm font-medium text-(--color-text-primary) mb-1">
+                    <p className="text-sm font-medium text-text-primary mb-1">
                       Discussion coming soon
                     </p>
-                    <p className="text-xs text-(--color-text-muted)">
+                    <p className="text-xs text-text-muted">
                       Ask questions and connect with other learners.
                     </p>
                   </div>
                 )}
 
                 {activeTab === "ai-tutor" && (
-                  <div className="bg-(--color-ai-bg) border border-(--color-ai-border) rounded-lg p-5 flex items-start gap-3">
-                    <span className="text-xl text-(--color-ai) shrink-0">✦</span>
+                  <div className="bg-ai-bg border border-ai-border rounded-lg p-5 flex items-start gap-3">
+                    <span className="text-xl text-ai shrink-0">✦</span>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-semibold text-(--color-ai)">
+                        <p className="text-sm font-semibold text-ai">
                           AI Tutor
                         </p>
                         <AiBadge label="Phase 4" />
                       </div>
-                      <p className="text-sm text-(--color-text-muted)">
+                      <p className="text-sm text-text-muted">
                         Ask questions about this lesson, get explanations, and
                         explore concepts deeper. Coming in Phase 4.
                       </p>
@@ -263,10 +263,10 @@ export function CoursePlayerClient({
 
                 {activeTab === "resources" && (
                   <div className="py-8 text-center">
-                    <p className="text-sm font-medium text-(--color-text-primary) mb-1">
+                    <p className="text-sm font-medium text-text-primary mb-1">
                       No resources for this lesson
                     </p>
-                    <p className="text-xs text-(--color-text-muted)">
+                    <p className="text-xs text-text-muted">
                       The instructor hasn&apos;t added any attachments yet.
                     </p>
                   </div>
@@ -277,9 +277,9 @@ export function CoursePlayerClient({
         </div>
 
         {/* Right sidebar — lesson list */}
-        <div className="hidden lg:block w-60 shrink-0 border-l border-(--color-border) bg-(--color-surface-1) sticky top-[52px] h-[calc(100vh-104px)] overflow-y-auto">
-          <div className="px-4 py-3 border-b border-(--color-border)">
-            <p className="text-xs font-semibold text-(--color-text-primary)">
+        <div className="hidden lg:block w-60 shrink-0 border-l border-border bg-surface-1 sticky top-[52px] h-[calc(100vh-104px)] overflow-y-auto">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-xs font-semibold text-text-primary">
               Course content
             </p>
           </div>

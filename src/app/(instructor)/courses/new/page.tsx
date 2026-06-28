@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UploadDropzone } from "@/lib/uploadthing";
 import { toast } from "gooey-toast";
+
+import { UploadDropzone } from "@/lib";
 
 const courseSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -67,7 +68,10 @@ export default function NewCoursePage() {
       const course = await res.json();
       router.push(`/courses/${course.id}/edit`);
     } catch (e) {
-      toast.error({ title: "Failed to create course", description: e instanceof Error ? e.message : undefined });
+      toast.error({
+        title: "Failed to create course",
+        description: e instanceof Error ? e.message : undefined,
+      });
       setIsSubmitting(false);
     }
   }
@@ -75,7 +79,8 @@ export default function NewCoursePage() {
   const inputClass =
     "w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm text-(--color-text-primary) placeholder:text-(--color-text-disabled) focus:outline-none focus:ring-2 focus:ring-(--color-brand) focus:border-transparent transition-all";
 
-  const labelClass = "block text-sm font-medium text-(--color-text-primary) mb-1.5";
+  const labelClass =
+    "block text-sm font-medium text-(--color-text-primary) mb-1.5";
 
   return (
     <div className="max-w-xl mx-auto px-6 py-10">
@@ -86,8 +91,8 @@ export default function NewCoursePage() {
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 step >= s
-                  ? "bg-(--color-brand) text-white"
-                  : "bg-(--color-surface-3) text-(--color-text-muted)"
+                  ? "bg-brand text-white"
+                  : "bg-surface-3 text-text-muted"
               }`}
             >
               {s}
@@ -95,13 +100,13 @@ export default function NewCoursePage() {
             {s < 3 && (
               <div
                 className={`h-px w-10 transition-colors ${
-                  step > s ? "bg-(--color-brand)" : "bg-(--color-border)"
+                  step > s ? "bg-brand" : "bg-border"
                 }`}
               />
             )}
           </div>
         ))}
-        <span className="ml-3 text-sm text-(--color-text-muted)">
+        <span className="ml-3 text-sm text-text-muted">
           {step === 1 && "Basic info"}
           {step === 2 && "Thumbnail"}
           {step === 3 && "Confirm"}
@@ -119,15 +124,15 @@ export default function NewCoursePage() {
         <div className="space-y-5">
           <div>
             <label className={labelClass}>
-              Course title <span className="text-(--color-danger)">*</span>
+              Course title <span className="text-danger">*</span>
             </label>
             <input
               {...register("title")}
-              className={`${inputClass} ${errors.title ? "border-(--color-danger) focus:ring-(--color-danger)" : ""}`}
+              className={`${inputClass} ${errors.title ? "border-danger focus:ring-danger" : ""}`}
               placeholder="e.g. Complete Next.js Developer Course"
             />
             {errors.title && (
-              <p className="mt-1 text-xs text-(--color-danger)">{errors.title.message}</p>
+              <p className="mt-1 text-xs text-danger">{errors.title.message}</p>
             )}
           </div>
 
@@ -191,7 +196,7 @@ export default function NewCoursePage() {
             <button
               type="button"
               onClick={goToStep2}
-              className="bg-(--color-brand) text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-(--color-brand-dark) transition-colors"
+              className="bg-brand text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-brand-dark transition-colors"
             >
               Continue →
             </button>
@@ -203,7 +208,7 @@ export default function NewCoursePage() {
       {step === 2 && (
         <div className="space-y-5">
           {thumbnailPreview ? (
-            <div className="relative aspect-video rounded-lg overflow-hidden border border-[var(--color-border)]">
+            <div className="relative aspect-video rounded-lg overflow-hidden border border-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={thumbnailPreview}
@@ -239,41 +244,44 @@ export default function NewCoursePage() {
                   setThumbProgress(0);
                 }}
                 onUploadError={(e) => {
-                  toast.error({ title: "Upload failed", description: e.message });
+                  toast.error({
+                    title: "Upload failed",
+                    description: e.message,
+                  });
                   setThumbUploading(false);
                   setThumbProgress(0);
                 }}
               />
               {thumbUploading && (
                 <div className="space-y-1">
-                  <div className="w-full h-1 bg-(--color-surface-3) rounded-full overflow-hidden">
+                  <div className="w-full h-1 bg-surface-3 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-(--color-brand) rounded-full transition-all duration-300"
+                      className="h-full bg-brand rounded-full transition-all duration-300"
                       style={{ width: `${thumbProgress}%` }}
                     />
                   </div>
-                  <p className="text-xs text-(--color-text-muted)">
+                  <p className="text-xs text-text-muted">
                     Uploading… {thumbProgress}%
                   </p>
                 </div>
               )}
             </div>
           )}
-          <p className="text-xs text-(--color-text-muted)">
+          <p className="text-xs text-text-muted">
             Recommended: 1280×720px, max 4MB. You can change this later.
           </p>
           <div className="flex justify-between pt-2">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="text-(--color-text-muted) rounded-md px-4 py-2 text-sm font-medium hover:bg-(--color-surface-2) transition-colors"
+              className="text-text-muted rounded-md px-4 py-2 text-sm font-medium hover:bg-surface-2 transition-colors"
             >
               ← Back
             </button>
             <button
               type="button"
               onClick={() => setStep(3)}
-              className="bg-(--color-brand) text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-(--color-brand-dark) transition-colors"
+              className="bg-brand text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-brand-dark transition-colors"
             >
               Continue →
             </button>
@@ -284,7 +292,7 @@ export default function NewCoursePage() {
       {/* Step 3 */}
       {step === 3 && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div className="bg-white border border-(--color-border) rounded-lg divide-y divide-(--color-border)">
+          <div className="bg-white border border-border rounded-lg divide-y divide-border">
             {thumbnailPreview && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -294,18 +302,20 @@ export default function NewCoursePage() {
               />
             )}
             <div className="p-4 space-y-2">
-              <p className="text-sm font-semibold text-(--color-text-primary)">
+              <p className="text-sm font-semibold text-text-primary">
                 {getValues("title")}
               </p>
               {getValues("description") && (
-                <p className="text-sm text-(--color-text-muted) line-clamp-2">
+                <p className="text-sm text-text-muted line-clamp-2">
                   {getValues("description")}
                 </p>
               )}
             </div>
-            <div className="px-4 py-3 grid grid-cols-3 gap-2 text-xs text-(--color-text-muted)">
+            <div className="px-4 py-3 grid grid-cols-3 gap-2 text-xs text-text-muted">
               <span>{getValues("category") || "No category"}</span>
-              <span className="text-center">{getValues("level") || "Any level"}</span>
+              <span className="text-center">
+                {getValues("level") || "Any level"}
+              </span>
               <span className="text-right">
                 {getValues("price") > 0
                   ? `${getValues("currency")} ${getValues("price")}`
@@ -318,14 +328,14 @@ export default function NewCoursePage() {
             <button
               type="button"
               onClick={() => setStep(2)}
-              className="text-(--color-text-muted) rounded-md px-4 py-2 text-sm font-medium hover:bg-(--color-surface-2) transition-colors"
+              className="text-text-muted rounded-md px-4 py-2 text-sm font-medium hover:bg-surface-2 transition-colors"
             >
               ← Back
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-(--color-brand) text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-(--color-brand-dark) transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-brand text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Creating…" : "Create course"}
             </button>

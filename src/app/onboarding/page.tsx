@@ -40,10 +40,10 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#FAFAFA]">
       {timedOut ? (
         <>
-          <p className="text-sm text-[#737380]">
+          <p className="text-sm text-text-muted">
             Account setup is taking longer than expected.
           </p>
-          <p className="text-xs text-[#737380]">
+          <p className="text-xs text-text-muted">
             Please refresh the page or{" "}
             <a href="/sign-in" className="underline">
               sign in again
@@ -54,7 +54,7 @@ export default function OnboardingPage() {
       ) : (
         <>
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#E5E5E7] border-t-[#4F6EF7]" />
-          <p className="text-sm text-[#737380]">Setting up your account…</p>
+          <p className="text-sm text-text-muted">Setting up your account…</p>
         </>
       )}
     </div>

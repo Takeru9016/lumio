@@ -439,3 +439,18 @@ git commit -m "phase/N-task/X: short description"
 12. **No Stripe** — Razorpay only. If you see Stripe anywhere, flag it immediately.
 13. **No framer-motion** — Motion only. Import from `"motion/react"`.
 14. **No tailwind.config.ts** — Tailwind config lives in `globals.css` @theme block only.
+15. Going forward for all remaining phases: use shadcn/ui primitives for complex interactive components. Do not hand-roll:
+- Dialog / AlertDialog → use shadcn
+- DropdownMenu → use shadcn  
+- Select → use shadcn
+- Sheet → use shadcn
+- Tabs → use shadcn
+- Tooltip → use shadcn
+- Popover → use shadcn
+- Command → use shadcn
+
+Install components as needed per phase with:
+pnpm dlx shadcn@latest add [component]
+
+Simple components (buttons, cards, badges, inputs already built)
+stay as hand-rolled — do not replace them.

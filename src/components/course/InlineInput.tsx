@@ -50,13 +50,13 @@ export function InlineInput({
         animate={shake ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
         transition={{ duration: 0.3 }}
         onAnimationComplete={() => setShake(false)}
-        className="w-full rounded-md border border-(--color-border) bg-white px-3 py-1.5 text-xs text-(--color-text-primary) placeholder:text-(--color-text-disabled) focus:outline-none focus:ring-2 focus:ring-(--color-brand) focus:border-transparent"
+        className="w-full rounded-md border border-border bg-white px-3 py-1.5 text-xs text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
       />
       <div className="flex items-center gap-1">
         <button
           type="button"
           onClick={handleConfirm}
-          className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium bg-(--color-brand) text-white rounded-md hover:bg-(--color-brand-dark) transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium bg-brand text-white rounded-md hover:bg-brand-dark transition-colors"
         >
           <Check size={10} />
           Add
@@ -64,7 +64,7 @@ export function InlineInput({
         <button
           type="button"
           onClick={onCancel}
-          className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-(--color-text-muted) hover:text-(--color-text-primary) hover:bg-(--color-surface-3) rounded-md transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-text-muted hover:text-text-primary hover:bg-surface-3 rounded-md transition-colors"
         >
           <X size={10} />
           Cancel

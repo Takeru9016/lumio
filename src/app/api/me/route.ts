@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
-import { db } from "@/lib/db";
+
+import { db } from "@/lib";
 
 export async function GET() {
   const { userId } = await auth();

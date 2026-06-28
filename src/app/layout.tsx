@@ -3,8 +3,11 @@ import { Space_Grotesk, Geist, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
+
 import { ourFileRouter } from "@/app/api/uploadthing/core";
-import { GooeyToaster } from "@/components/shared/GooeyToaster";
+
+import { GooeyToaster } from "@/components";
+
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({

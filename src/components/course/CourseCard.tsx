@@ -1,8 +1,9 @@
 "use client";
 
-import { motion } from "motion/react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "motion/react";
+
 import { AiBadge } from "@/components/shared/AiBadge";
 
 interface CourseCardCourse {
@@ -31,7 +32,9 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
   const isEnrolled = !!enrollment;
   const progress =
     enrollment && enrollment.totalLessons > 0
-      ? Math.round((enrollment.completedLessons / enrollment.totalLessons) * 100)
+      ? Math.round(
+          (enrollment.completedLessons / enrollment.totalLessons) * 100,
+        )
       : 0;
   const isCompleted = enrollment?.status === "COMPLETED";
 
@@ -44,9 +47,12 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
     <motion.div
       whileHover={{ y: -4, boxShadow: "0 12px 28px -6px rgb(0 0 0 / 0.10)" }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className="bg-(--color-surface-1) border border-(--color-border) rounded-xl overflow-hidden flex flex-col"
+      className="bg-surface-1 border border-border rounded-xl overflow-hidden flex flex-col"
     >
-      <Link href={`/courses/${course.id}`} className="block relative aspect-video bg-(--color-surface-3)">
+      <Link
+        href={`/courses/${course.id}`}
+        className="block relative aspect-video bg-surface-3"
+      >
         {course.thumbnailUrl ? (
           <Image
             src={course.thumbnailUrl}
@@ -69,17 +75,17 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
 
       <div className="p-4 flex flex-col gap-2 flex-1">
         <Link href={`/courses/${course.id}`}>
-          <h3 className="font-semibold text-sm leading-snug line-clamp-2 text-(--color-text-primary) hover:text-(--color-brand) transition-colors">
+          <h3 className="font-semibold text-sm leading-snug line-clamp-2 text-text-primary hover:text-brand transition-colors">
             {course.title}
           </h3>
         </Link>
 
-        <p className="text-xs text-(--color-text-muted)">
+        <p className="text-xs text-text-muted">
           {course.instructor.name ?? "Instructor"}
         </p>
 
         {course.category && (
-          <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-(--color-brand-light) text-(--color-brand)">
+          <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-light text-brand">
             {course.category}
           </span>
         )}
@@ -87,11 +93,11 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
         <div className="mt-auto pt-3">
           {isEnrolled ? (
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] text-(--color-text-muted)">
+              <div className="flex items-center justify-between text-[11px] text-text-muted">
                 <span>{isCompleted ? "Completed" : "In Progress"}</span>
                 <span>{progress}%</span>
               </div>
-              <div className="h-1.5 bg-(--color-surface-3) rounded-full overflow-hidden">
+              <div className="h-1.5 bg-surface-3 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
@@ -104,19 +110,19 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
               </div>
               <Link
                 href={`/courses/${course.id}`}
-                className="mt-2 flex items-center justify-center w-full py-1.5 text-xs font-semibold rounded-lg bg-(--color-brand) text-white hover:bg-(--color-brand-dark) transition-colors"
+                className="mt-2 flex items-center justify-center w-full py-1.5 text-xs font-semibold rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors"
               >
                 {isCompleted ? "Review" : "Continue"}
               </Link>
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-(--color-text-primary)">
+              <span className="text-sm font-semibold text-text-primary">
                 {priceLabel}
               </span>
               <Link
                 href={`/courses/${course.id}`}
-                className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-(--color-border) text-(--color-text-secondary) hover:border-(--color-brand) hover:text-(--color-brand) transition-colors"
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border text-text-secondary hover:border-brand hover:text-brand transition-colors"
               >
                 View
               </Link>

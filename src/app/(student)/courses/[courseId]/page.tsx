@@ -1,11 +1,20 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Lock, PlayCircle, FileText, ClipboardList, BookOpen } from "lucide-react";
-import { db } from "@/lib/db";
-import { AiBadge } from "@/components/shared/AiBadge";
+import { redirect, notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import {
+  Lock,
+  PlayCircle,
+  FileText,
+  ClipboardList,
+  BookOpen,
+} from "lucide-react";
+
+import { AiBadge } from "@/components";
+
 import { EnrollButton } from "./_components/EnrollButton";
+
+import { db } from "@/lib";
 
 const LESSON_ICONS = {
   VIDEO: PlayCircle,
@@ -102,9 +111,13 @@ export default async function CourseDetailPage({
     });
     completedCount = completedProgress.length;
     const completedSet = new Set(completedProgress.map((p) => p.lessonId));
-    const firstUncompleted = publishedLessons.find((l) => !completedSet.has(l.id));
+    const firstUncompleted = publishedLessons.find(
+      (l) => !completedSet.has(l.id),
+    );
     resumeLessonId =
-      firstUncompleted?.id ?? publishedLessons[publishedLessons.length - 1]?.id ?? null;
+      firstUncompleted?.id ??
+      publishedLessons[publishedLessons.length - 1]?.id ??
+      null;
   }
 
   const totalLessons = publishedLessons.length;
@@ -114,7 +127,9 @@ export default async function CourseDetailPage({
       : 0;
 
   const hasAiContent = course.sections.some((s) =>
-    s.lessons.some((l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true),
+    s.lessons.some(
+      (l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true,
+    ),
   );
 
   function formatDuration(secs: number | null) {
@@ -125,12 +140,12 @@ export default async function CourseDetailPage({
   }
 
   return (
-    <div className="min-h-full bg-(--color-surface-2)">
+    <div className="min-h-full bg-surface-2">
       {/* Header */}
-      <div className="bg-(--color-surface-1) border-b border-(--color-border)">
+      <div className="bg-surface-1 border-b border-border">
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8">
           {/* Thumbnail */}
-          <div className="relative w-full md:w-80 shrink-0 aspect-video rounded-xl overflow-hidden bg-(--color-surface-3)">
+          <div className="relative w-full md:w-80 shrink-0 aspect-video rounded-xl overflow-hidden bg-surface-3">
             {course.thumbnailUrl ? (
               <Image
                 src={course.thumbnailUrl}
@@ -150,36 +165,36 @@ export default async function CourseDetailPage({
           <div className="flex-1 flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {course.category && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-(--color-brand-light) text-(--color-brand)">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-light text-brand">
                   {course.category}
                 </span>
               )}
               {course.level && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-(--color-surface-3) text-(--color-text-muted)">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-3 text-text-muted">
                   {course.level}
                 </span>
               )}
               {hasAiContent && <AiBadge label="AI-Enhanced" size="md" />}
             </div>
 
-            <h1 className="text-2xl font-bold text-(--color-text-primary) leading-tight">
+            <h1 className="text-2xl font-bold text-text-primary leading-tight">
               {course.title}
             </h1>
 
             {course.description && (
-              <p className="text-sm text-(--color-text-secondary) leading-relaxed line-clamp-3">
+              <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">
                 {course.description}
               </p>
             )}
 
-            <p className="text-sm text-(--color-text-muted)">
+            <p className="text-sm text-text-muted">
               By{" "}
-              <span className="font-medium text-(--color-text-secondary)">
+              <span className="font-medium text-text-secondary">
                 {course.instructor.name ?? "Instructor"}
               </span>
             </p>
 
-            <div className="flex items-center gap-4 text-xs text-(--color-text-muted)">
+            <div className="flex items-center gap-4 text-xs text-text-muted">
               <span>{totalLessons} lessons</span>
               <span>{course.sections.length} sections</span>
               <span>{course._count.enrollments} students</span>
@@ -189,14 +204,14 @@ export default async function CourseDetailPage({
               {isEnrolled && (
                 <>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-(--color-text-muted)">Your progress</span>
-                    <span className="font-semibold text-(--color-text-primary)">
+                    <span className="text-text-muted">Your progress</span>
+                    <span className="font-semibold text-text-primary">
                       {progress}%
                     </span>
                   </div>
-                  <div className="h-2 bg-(--color-surface-3) rounded-full overflow-hidden">
+                  <div className="h-2 bg-surface-3 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-(--color-brand) transition-all"
+                      className="h-full rounded-full bg-brand transition-all"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -220,7 +235,7 @@ export default async function CourseDetailPage({
 
       {/* Curriculum */}
       <div className="max-w-5xl mx-auto px-6 py-8">
-        <h2 className="text-lg font-bold text-(--color-text-primary) mb-4">
+        <h2 className="text-lg font-bold text-text-primary mb-4">
           Course Curriculum
         </h2>
 
@@ -230,18 +245,18 @@ export default async function CourseDetailPage({
             return (
               <div
                 key={section.id}
-                className="bg-(--color-surface-1) border border-(--color-border) rounded-xl overflow-hidden"
+                className="bg-surface-1 border border-border rounded-xl overflow-hidden"
               >
-                <div className="flex items-center justify-between px-4 py-3 bg-(--color-surface-2) border-b border-(--color-border)">
-                  <span className="font-semibold text-sm text-(--color-text-primary)">
+                <div className="flex items-center justify-between px-4 py-3 bg-surface-2 border-b border-border">
+                  <span className="font-semibold text-sm text-text-primary">
                     {section.title}
                   </span>
-                  <span className="text-xs text-(--color-text-muted)">
+                  <span className="text-xs text-text-muted">
                     {published.length} lesson{published.length !== 1 ? "s" : ""}
                   </span>
                 </div>
 
-                <ul className="divide-y divide-(--color-border)">
+                <ul className="divide-y divide-border">
                   {published.map((lesson) => {
                     const Icon = LESSON_ICONS[lesson.type] ?? PlayCircle;
                     const isAccessible = isEnrolled || lesson.isFree;
@@ -254,24 +269,24 @@ export default async function CourseDetailPage({
                         {isAccessible ? (
                           <Link
                             href={`/courses/${courseId}/lessons/${lesson.id}`}
-                            className="flex items-center gap-3 px-4 py-3 hover:bg-(--color-surface-2) transition-colors"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2 transition-colors"
                           >
                             <Icon
                               size={16}
-                              className="shrink-0 text-(--color-text-muted)"
+                              className="shrink-0 text-text-muted"
                             />
-                            <span className="flex-1 text-sm text-(--color-text-secondary)">
+                            <span className="flex-1 text-sm text-text-secondary">
                               {lesson.title}
                             </span>
                             <div className="flex items-center gap-2 shrink-0">
                               {hasAi && <AiBadge size="sm" />}
                               {lesson.isFree && !isEnrolled && (
-                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-(--color-success-bg) text-(--color-success)">
+                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-success-bg text-success">
                                   Preview
                                 </span>
                               )}
                               {lesson.videoDuration && (
-                                <span className="text-xs text-(--color-text-disabled)">
+                                <span className="text-xs text-text-disabled">
                                   {formatDuration(lesson.videoDuration)}
                                 </span>
                               )}
@@ -279,12 +294,15 @@ export default async function CourseDetailPage({
                           </Link>
                         ) : (
                           <div className="flex items-center gap-3 px-4 py-3 opacity-60">
-                            <Lock size={16} className="shrink-0 text-(--color-text-muted)" />
-                            <span className="flex-1 text-sm text-(--color-text-muted)">
+                            <Lock
+                              size={16}
+                              className="shrink-0 text-text-muted"
+                            />
+                            <span className="flex-1 text-sm text-text-muted">
                               {lesson.title}
                             </span>
                             {lesson.videoDuration && (
-                              <span className="text-xs text-(--color-text-disabled) shrink-0">
+                              <span className="text-xs text-text-disabled shrink-0">
                                 {formatDuration(lesson.videoDuration)}
                               </span>
                             )}
