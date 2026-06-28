@@ -20,6 +20,7 @@ const updateLessonSchema = z.object({
   description: z.string().optional(),
   textContent: z.string().optional(),
   isPublished: z.boolean().optional(),
+  type: z.enum(["VIDEO", "TEXT", "QUIZ", "ASSIGNMENT"]).optional(),
 });
 
 export async function PUT(

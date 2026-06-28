@@ -52,13 +52,11 @@ export function CourseEditor({
     (l) => l.id === selectedLessonId,
   ) as (LessonItem & { textContent?: string | null; muxPlaybackId?: string | null }) | undefined;
 
-  async function addSection() {
-    const title = prompt("Section title:");
-    if (!title?.trim()) return;
+  async function addSection(title: string) {
     const res = await fetch(`/api/courses/${courseId}/sections`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: title.trim(), order: sections.length }),
+      body: JSON.stringify({ title, order: sections.length }),
     });
     if (res.ok) {
       const section = (await res.json()) as SectionItem;
@@ -66,15 +64,13 @@ export function CourseEditor({
     }
   }
 
-  async function addLesson(sectionId: string) {
-    const title = prompt("Lesson title:");
-    if (!title?.trim()) return;
+  async function addLesson(sectionId: string, title: string) {
     const section = sections.find((s) => s.id === sectionId);
     const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        title: title.trim(),
+        title,
         type: "VIDEO",
         order: section?.lessons.length ?? 0,
       }),
@@ -262,6 +258,7 @@ export function CourseEditor({
         <div className="flex-1 overflow-y-auto p-6">
           {selectedLesson && selectedSection ? (
             <LessonEditor
+              key={selectedLesson.id}
               lesson={selectedLesson}
               courseId={courseId}
               sectionId={selectedSection.id}

@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
+import { InlineInput } from "@/components/course/InlineInput";
 
 export interface LessonItem {
   id: string;
@@ -54,8 +55,8 @@ interface LessonListProps {
   sections: SectionItem[];
   selectedLessonId: string | null;
   onSelectLesson: (lessonId: string, sectionId: string) => void;
-  onAddSection: () => void;
-  onAddLesson: (sectionId: string) => void;
+  onAddSection: (title: string) => void;
+  onAddLesson: (sectionId: string, title: string) => void;
   onReorder: (sections: SectionItem[]) => void;
 }
 
@@ -153,18 +154,29 @@ function SortableSection({
   onSelectLesson,
   onAddLesson,
   onLessonReorder,
+  showLessonInput,
+  onLessonInputConfirm,
+  onLessonInputCancel,
 }: {
   section: SectionItem;
   selectedLessonId: string | null;
   onSelectLesson: (lessonId: string, sectionId: string) => void;
   onAddLesson: () => void;
   onLessonReorder: (newLessons: LessonItem[]) => void;
+  showLessonInput: boolean;
+  onLessonInputConfirm: (title: string) => void;
+  onLessonInputCancel: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: `section-${section.id}` });
 
   const lessonIds = section.lessons.map((l) => `lesson-${l.id}`);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   function handleLessonDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -215,10 +227,7 @@ function SortableSection({
       {!collapsed && (
         <div className="ml-3 pl-2 border-l border-(--color-border) space-y-0.5">
           <DndContext
-            sensors={useSensors(
-              useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-              useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-            )}
+            sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleLessonDragEnd}
           >
@@ -235,17 +244,25 @@ function SortableSection({
             </SortableContext>
           </DndContext>
 
-          {section.lessons.length === 0 && (
+          {section.lessons.length === 0 && !showLessonInput && (
             <p className="text-[11px] text-(--color-text-disabled) px-3 py-2">No lessons yet</p>
           )}
 
-          <button
-            type="button"
-            onClick={onAddLesson}
-            className="w-full flex items-center gap-1 px-3 py-1.5 text-[11px] text-(--color-text-muted) hover:text-(--color-brand) hover:bg-(--color-brand-light) rounded-md transition-colors"
-          >
-            <Plus size={11} /> Add lesson
-          </button>
+          {showLessonInput ? (
+            <InlineInput
+              placeholder="Lesson title"
+              onConfirm={onLessonInputConfirm}
+              onCancel={onLessonInputCancel}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={onAddLesson}
+              className="w-full flex items-center gap-1 px-3 py-1.5 text-[11px] text-(--color-text-muted) hover:text-(--color-brand) hover:bg-(--color-brand-light) rounded-md transition-colors"
+            >
+              <Plus size={11} /> Add lesson
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -263,6 +280,8 @@ export function LessonList({
   onAddLesson,
   onReorder,
 }: LessonListProps) {
+  const [inlineFor, setInlineFor] = useState<null | "section" | string>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -304,8 +323,14 @@ export function LessonList({
                 section={section}
                 selectedLessonId={selectedLessonId}
                 onSelectLesson={onSelectLesson}
-                onAddLesson={() => onAddLesson(section.id)}
+                onAddLesson={() => setInlineFor(section.id)}
                 onLessonReorder={(newLessons) => handleLessonReorder(section.id, newLessons)}
+                showLessonInput={inlineFor === section.id}
+                onLessonInputConfirm={(title) => {
+                  onAddLesson(section.id, title);
+                  setInlineFor(null);
+                }}
+                onLessonInputCancel={() => setInlineFor(null)}
               />
             ))}
           </SortableContext>
@@ -314,26 +339,42 @@ export function LessonList({
         {sections.length === 0 && (
           <div className="px-4 py-8 text-center">
             <p className="text-xs text-(--color-text-muted) mb-3">No sections yet</p>
-            <button
-              type="button"
-              onClick={onAddSection}
-              className="text-xs bg-(--color-brand) text-white rounded-md px-3 py-1.5 font-medium hover:bg-(--color-brand-dark) transition-colors"
-            >
-              Add first section
-            </button>
+            {inlineFor === "section" ? (
+              <InlineInput
+                placeholder="Section title"
+                onConfirm={(title) => { onAddSection(title); setInlineFor(null); }}
+                onCancel={() => setInlineFor(null)}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setInlineFor("section")}
+                className="text-xs bg-(--color-brand) text-white rounded-md px-3 py-1.5 font-medium hover:bg-(--color-brand-dark) transition-colors"
+              >
+                Add first section
+              </button>
+            )}
           </div>
         )}
       </div>
 
       {sections.length > 0 && (
         <div className="border-t border-(--color-border) p-3">
-          <button
-            type="button"
-            onClick={onAddSection}
-            className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-(--color-text-muted) border border-dashed border-(--color-border) rounded-md hover:border-(--color-brand) hover:text-(--color-brand) transition-colors"
-          >
-            <Plus size={13} /> Add section
-          </button>
+          {inlineFor === "section" ? (
+            <InlineInput
+              placeholder="Section title"
+              onConfirm={(title) => { onAddSection(title); setInlineFor(null); }}
+              onCancel={() => setInlineFor(null)}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setInlineFor("section")}
+              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-(--color-text-muted) border border-dashed border-(--color-border) rounded-md hover:border-(--color-brand) hover:text-(--color-brand) transition-colors"
+            >
+              <Plus size={13} /> Add section
+            </button>
+          )}
         </div>
       )}
     </div>

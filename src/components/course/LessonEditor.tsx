@@ -1,12 +1,22 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Loader2, AlertCircle, CheckCircle, UploadCloud } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  UploadCloud,
+  Video,
+  FileText,
+  HelpCircle,
+  ClipboardList,
+} from "lucide-react";
 import { TextEditor } from "@/components/course/TextEditor";
 import { VideoPlayer } from "@/components/course/VideoPlayer";
 import { useUploadThing } from "@/lib/uploadthing";
 import { toast } from "gooey-toast";
 import type { LessonItem } from "@/components/course/LessonList";
+import type { LessonType } from "@/generated/prisma/enums";
 
 interface LessonEditorProps {
   lesson: LessonItem & {
@@ -20,8 +30,16 @@ interface LessonEditorProps {
 
 type UploadState = "idle" | "uploading" | "processing" | "ready";
 
+const LESSON_TYPES: { value: LessonType; label: string; icon: React.ReactNode }[] = [
+  { value: "VIDEO", label: "Video", icon: <Video size={13} /> },
+  { value: "TEXT", label: "Text", icon: <FileText size={13} /> },
+  { value: "QUIZ", label: "Quiz", icon: <HelpCircle size={13} /> },
+  { value: "ASSIGNMENT", label: "Assignment", icon: <ClipboardList size={13} /> },
+];
+
 export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [localType, setLocalType] = useState<LessonType>(lesson.type);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadState, setUploadState] = useState<UploadState>(() => {
     if (lesson.videoStatus === "READY" && lesson.muxPlaybackId) return "ready";
@@ -88,6 +106,29 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
     return () => clearInterval(interval);
   }, [uploadState, courseId, sectionId, lesson.id]);
 
+  async function handleTypeChange(type: LessonType) {
+    if (type === localType) return;
+    const prev = localType;
+    setLocalType(type);
+    onUpdate(lesson.id, { type });
+
+    try {
+      const res = await fetch(
+        `/api/courses/${courseId}/sections/${sectionId}/lessons/${lesson.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type }),
+        },
+      );
+      if (!res.ok) throw new Error();
+    } catch {
+      setLocalType(prev);
+      onUpdate(lesson.id, { type: prev });
+      toast.error({ title: "Failed to update lesson type" });
+    }
+  }
+
   async function saveText(html: string) {
     setIsSaving(true);
     try {
@@ -127,10 +168,28 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
         )}
       </div>
 
+      {/* Type selector */}
+      <div className="flex items-center gap-1 p-1 bg-(--color-surface-3) rounded-lg">
+        {LESSON_TYPES.map(({ value, label, icon }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => void handleTypeChange(value)}
+            className={`flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              localType === value
+                ? "bg-(--color-brand) text-white"
+                : "bg-white text-(--color-text-muted) border border-(--color-border) hover:text-(--color-text-primary)"
+            }`}
+          >
+            {icon}
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* VIDEO */}
-      {lesson.type === "VIDEO" && (
+      {localType === "VIDEO" && (
         <div className="space-y-4">
-          {/* Uploading state — progress bar */}
           {(uploadState === "uploading" || isUploading) && (
             <div className="space-y-2">
               <div className="w-full h-1.5 bg-(--color-surface-3) rounded-full overflow-hidden">
@@ -145,7 +204,6 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
             </div>
           )}
 
-          {/* Processing state — pulsing placeholder */}
           {uploadState === "processing" && (
             <div className="space-y-2">
               <div className="w-full aspect-video rounded-lg bg-(--color-surface-3) animate-pulse flex items-center justify-center">
@@ -159,7 +217,6 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
             </div>
           )}
 
-          {/* Ready state — player + replace button */}
           {uploadState === "ready" && previewPlaybackId && (
             <div className="space-y-2">
               <VideoPlayer playbackId={previewPlaybackId} videoStatus="READY" />
@@ -183,7 +240,6 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
             </div>
           )}
 
-          {/* Idle state — upload dropzone */}
           {uploadState === "idle" && (
             <div className="space-y-3">
               {lesson.videoStatus === "ERROR" && (
@@ -228,7 +284,7 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
       )}
 
       {/* TEXT */}
-      {lesson.type === "TEXT" && (
+      {localType === "TEXT" && (
         <TextEditor
           content={lesson.textContent ?? ""}
           onChange={(html) => {
@@ -239,7 +295,7 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
       )}
 
       {/* QUIZ */}
-      {lesson.type === "QUIZ" && (
+      {localType === "QUIZ" && (
         <div className="rounded-lg border border-(--color-border) bg-(--color-surface-2) px-6 py-10 text-center">
           <p className="text-sm font-medium text-(--color-text-primary) mb-1">
             Quiz builder coming in Phase 3
@@ -247,18 +303,46 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
           <p className="text-xs text-(--color-text-muted)">
             Add questions and auto-grade student responses.
           </p>
+          <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-(--color-ai) font-medium">
+            ✦ AI quiz generation available after adding content
+          </p>
         </div>
       )}
 
       {/* ASSIGNMENT */}
-      {lesson.type === "ASSIGNMENT" && (
-        <div className="rounded-lg border border-(--color-border) bg-(--color-surface-2) px-6 py-10 text-center">
-          <p className="text-sm font-medium text-(--color-text-primary) mb-1">
-            Assignment builder coming in Phase 3
-          </p>
-          <p className="text-xs text-(--color-text-muted)">
-            Set instructions, deadlines, and rubrics.
-          </p>
+      {localType === "ASSIGNMENT" && (
+        <div className="rounded-lg border border-(--color-border) bg-(--color-surface-2) px-6 py-8 space-y-6">
+          <div className="text-center">
+            <p className="text-sm font-medium text-(--color-text-primary) mb-1">
+              Assignment builder coming in Phase 3
+            </p>
+            <p className="text-xs text-(--color-text-muted)">
+              Set instructions, deadlines, and rubrics.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div title="Coming soon">
+              <label className="block text-xs font-medium text-(--color-text-muted) mb-1">
+                Due date
+              </label>
+              <input
+                type="date"
+                disabled
+                className="w-full rounded-md border border-(--color-border) bg-(--color-surface-3) px-3 py-2 text-sm opacity-50 cursor-not-allowed"
+              />
+            </div>
+            <div title="Coming soon">
+              <label className="block text-xs font-medium text-(--color-text-muted) mb-1">
+                Max score
+              </label>
+              <input
+                type="number"
+                disabled
+                defaultValue={100}
+                className="w-full rounded-md border border-(--color-border) bg-(--color-surface-3) px-3 py-2 text-sm opacity-50 cursor-not-allowed"
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
