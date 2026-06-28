@@ -185,9 +185,9 @@ export default async function CourseDetailPage({
               <span>{course._count.enrollments} students</span>
             </div>
 
-            <div className="mt-auto pt-2">
-              {isEnrolled ? (
-                <div className="space-y-3">
+            <div className="mt-auto pt-2 space-y-3">
+              {isEnrolled && (
+                <>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-(--color-text-muted)">Your progress</span>
                     <span className="font-semibold text-(--color-text-primary)">
@@ -200,27 +200,19 @@ export default async function CourseDetailPage({
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <Link
-                    href={
-                      resumeLessonId
-                        ? `/courses/${courseId}/lessons/${resumeLessonId}`
-                        : `/courses/${courseId}`
-                    }
-                    className="flex items-center justify-center w-full py-3 px-6 rounded-xl font-semibold text-sm bg-(--color-brand) text-white hover:bg-(--color-brand-dark) transition-colors"
-                  >
-                    {progress === 0 ? "Start Learning" : "Continue Learning"}
-                  </Link>
-                </div>
-              ) : (
-                <EnrollButton
-                  courseId={courseId}
-                  price={course.price}
-                  currency={course.currency}
-                  courseTitle={course.title}
-                  userEmail={dbUser.email}
-                  userName={dbUser.name}
-                />
+                </>
               )}
+              <EnrollButton
+                courseId={courseId}
+                price={course.price}
+                currency={course.currency}
+                courseTitle={course.title}
+                userEmail={dbUser.email}
+                userName={dbUser.name}
+                isEnrolled={isEnrolled}
+                firstLessonId={resumeLessonId}
+                progress={progress}
+              />
             </div>
           </div>
         </div>

@@ -13,6 +13,9 @@ interface EnrollButtonProps {
   courseTitle: string;
   userEmail: string;
   userName: string | null;
+  isEnrolled: boolean;
+  firstLessonId: string | null;
+  progress?: number;
 }
 
 export function EnrollButton({
@@ -22,10 +25,19 @@ export function EnrollButton({
   courseTitle,
   userEmail,
   userName,
+  isEnrolled,
+  firstLessonId,
+  progress = 0,
 }: EnrollButtonProps) {
   const router = useRouter();
   const { loadRazorpay, isLoading: scriptLoading } = useRazorpay();
   const [loading, setLoading] = useState(false);
+
+  function handleStartLearning() {
+    if (firstLessonId) {
+      router.push(`/courses/${courseId}/lessons/${firstLessonId}`);
+    }
+  }
 
   async function handleFreeEnroll() {
     setLoading(true);
@@ -110,6 +122,26 @@ export function EnrollButton({
   }
 
   const busy = loading || scriptLoading;
+
+  if (isEnrolled) {
+    const hasLessons = !!firstLessonId;
+    const label = !hasLessons
+      ? "No lessons available yet"
+      : progress > 0
+        ? "Continue Learning"
+        : "Start Learning";
+
+    return (
+      <button
+        onClick={hasLessons ? handleStartLearning : undefined}
+        disabled={!hasLessons}
+        title={!hasLessons ? "No lessons available yet" : undefined}
+        className="w-full py-3 px-6 rounded-xl font-semibold text-sm bg-(--color-brand) text-white hover:bg-(--color-brand-dark) transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {label}
+      </button>
+    );
+  }
 
   return (
     <button
