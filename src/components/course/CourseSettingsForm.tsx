@@ -41,7 +41,7 @@ const LEVELS = [
 
 interface CourseSettingsFormProps {
   courseId: string;
-  course: {
+  initialData: {
     title: string;
     description: string | null;
     thumbnailUrl: string | null;
@@ -52,22 +52,22 @@ interface CourseSettingsFormProps {
   };
 }
 
-export function CourseSettingsForm({ courseId, course }: CourseSettingsFormProps) {
+export function CourseSettingsForm({ courseId, initialData }: CourseSettingsFormProps) {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
-    course.thumbnailUrl ?? null,
+    initialData.thumbnailUrl ?? null,
   );
   const [isSaving, setIsSaving] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      title: course.title,
-      description: course.description ?? "",
-      thumbnailUrl: course.thumbnailUrl ?? "",
-      category: course.category ?? "",
-      level: course.level ?? "",
-      price: course.price,
-      currency: course.currency,
+      title: initialData.title,
+      description: initialData.description ?? "",
+      thumbnailUrl: initialData.thumbnailUrl ?? "",
+      category: initialData.category ?? "",
+      level: initialData.level ?? "",
+      price: initialData.price,
+      currency: initialData.currency,
     },
   });
 
@@ -177,23 +177,29 @@ export function CourseSettingsForm({ courseId, course }: CourseSettingsFormProps
             </button>
           </div>
         ) : (
-          <UploadButton
-            endpoint="thumbnailUploader"
-            onClientUploadComplete={(res) => {
-              if (res[0]) {
-                const url = res[0].url;
-                form.setValue("thumbnailUrl", url);
-                setThumbnailPreview(url);
-              }
-            }}
-            onUploadError={(e) => {
-              toast.error({ title: "Upload failed", description: e.message });
-            }}
-          />
+          <div className="border-2 border-dashed border-[var(--color-border)] rounded-lg p-6 text-center">
+            <UploadButton
+              endpoint="thumbnailUploader"
+              onClientUploadComplete={(res) => {
+                if (res[0]) {
+                  const url = res[0].url;
+                  form.setValue("thumbnailUrl", url);
+                  setThumbnailPreview(url);
+                }
+              }}
+              onUploadError={(e) => {
+                toast.error({ title: "Upload failed", description: e.message });
+              }}
+              appearance={{
+                button: "bg-[var(--color-brand)] text-white rounded-md px-4 py-2 text-sm font-medium",
+                allowedContent: "text-[var(--color-text-muted)] text-xs mt-1",
+              }}
+            />
+            <p className="text-xs text-[var(--color-text-muted)] mt-2">
+              Recommended: 1280×720px, max 4MB
+            </p>
+          </div>
         )}
-        <p className="mt-1.5 text-xs text-(--color-text-muted)">
-          Recommended: 1280×720px, max 4MB
-        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

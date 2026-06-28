@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Geist, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { GooeyToaster } from "@/components/shared/GooeyToaster";
 import "./globals.css";
 
@@ -41,6 +44,7 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${geist.variable} ${ibmPlexMono.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">
+          <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
           {children}
           <GooeyToaster />
         </body>

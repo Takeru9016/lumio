@@ -53,7 +53,7 @@ export default async function CourseSettingsPage({ params }: CourseSettingsPageP
       </div>
 
       <div className="bg-white rounded-xl border border-(--color-border) p-6">
-        <CourseSettingsForm courseId={course.id} course={course} />
+        <CourseSettingsForm courseId={course.id} initialData={course} />
       </div>
     </div>
   );
