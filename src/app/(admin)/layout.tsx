@@ -19,7 +19,7 @@ export default async function AdminLayout({
   });
 
   if (!user || user.role !== "SUPER_ADMIN") {
-    redirect(user ? getRoleDashboard(user.role) : "/sign-in");
+    redirect(user ? getRoleDashboard(user.role) : "/onboarding");
   }
 
   return (

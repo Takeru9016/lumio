@@ -19,7 +19,7 @@ export default async function StudentLayout({
   });
 
   if (!user || user.role !== "STUDENT") {
-    redirect(user ? getRoleDashboard(user.role) : "/sign-in");
+    redirect(user ? getRoleDashboard(user.role) : "/onboarding");
   }
 
   return (

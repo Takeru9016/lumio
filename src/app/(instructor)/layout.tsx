@@ -19,7 +19,7 @@ export default async function InstructorLayout({
   });
 
   if (!user || user.role !== "INSTRUCTOR") {
-    redirect(user ? getRoleDashboard(user.role) : "/sign-in");
+    redirect(user ? getRoleDashboard(user.role) : "/onboarding");
   }
 
   return (

@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     select: { role: true },
   });
 
-  if (!user) redirect("/sign-in");
+  if (!user) redirect("/onboarding");
 
   redirect(getRoleDashboard(user.role));
 }

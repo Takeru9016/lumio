@@ -19,7 +19,7 @@ export default async function OrgLayout({
   });
 
   if (!user || user.role !== "ORG_ADMIN") {
-    redirect(user ? getRoleDashboard(user.role) : "/sign-in");
+    redirect(user ? getRoleDashboard(user.role) : "/onboarding");
   }
 
   return (
