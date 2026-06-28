@@ -4,6 +4,7 @@ export { CourseSettingsForm } from "./course/CourseSettingsForm";
 export { InlineInput } from "./course/InlineInput";
 export { LessonEditor } from "./course/LessonEditor";
 export { LessonList, type SectionItem } from "./course/LessonList";
+export { QuizBuilder } from "./course/QuizBuilder";
 export { TextEditor } from "./course/TextEditor";
 export { VideoPlayer } from "./course/VideoPlayer";
 

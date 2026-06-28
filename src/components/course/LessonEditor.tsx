@@ -15,6 +15,7 @@ import { toast } from "gooey-toast";
 
 import { TextEditor } from "@/components/course/TextEditor";
 import { VideoPlayer } from "@/components/course/VideoPlayer";
+import { QuizBuilder } from "@/components/course/QuizBuilder";
 import type { LessonItem } from "@/components/course/LessonList";
 
 import { useUploadThing } from "@/lib/uploadthing";
@@ -361,17 +362,7 @@ export function LessonEditor({
 
       {/* QUIZ */}
       {localType === "QUIZ" && (
-        <div className="rounded-lg border border-border bg-surface-2 px-6 py-10 text-center">
-          <p className="text-sm font-medium text-text-primary mb-1">
-            Quiz builder coming in Phase 3
-          </p>
-          <p className="text-xs text-text-muted">
-            Add questions and auto-grade student responses.
-          </p>
-          <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-ai font-medium">
-            ✦ AI quiz generation available after adding content
-          </p>
-        </div>
+        <QuizBuilder courseId={courseId} lessonId={lesson.id} />
       )}
 
       {/* ASSIGNMENT */}

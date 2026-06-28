@@ -5,6 +5,7 @@ import { db } from "@/lib";
 
 import { CoursePlayerClient } from "./_components/CoursePlayerClient";
 import type { SidebarSection } from "./_components/LessonSidebar";
+import type { AttemptSummary } from "./_components/StudentQuiz";
 
 export default async function LessonPage({
   params,
@@ -62,6 +63,23 @@ export default async function LessonPage({
         videoStatus: true,
         textContent: true,
         isPublished: true,
+        quiz: {
+          select: {
+            id: true,
+            title: true,
+            passingScore: true,
+            questions: {
+              orderBy: { order: "asc" },
+              select: {
+                id: true,
+                question: true,
+                type: true,
+                options: true,
+                order: true,
+              },
+            },
+          },
+        },
       },
     }),
   ]);
@@ -74,6 +92,21 @@ export default async function LessonPage({
 
   const allPublishedLessons = course.sections.flatMap((s) => s.lessons);
   const lessonIndex = allPublishedLessons.findIndex((l) => l.id === lessonId);
+
+  let initialAttempts: AttemptSummary[] = [];
+  if (lesson.type === "QUIZ" && lesson.quiz) {
+    const attempts = await db.quizAttempt.findMany({
+      where: { userId: dbUser.id, quizId: lesson.quiz.id },
+      orderBy: { completedAt: "desc" },
+      select: { id: true, score: true, isPassed: true, completedAt: true },
+    });
+    initialAttempts = attempts.map((a) => ({
+      id: a.id,
+      score: a.score,
+      isPassed: a.isPassed,
+      completedAt: a.completedAt.toISOString(),
+    }));
+  }
 
   const completedRecords = await db.lessonProgress.findMany({
     where: {
@@ -98,15 +131,39 @@ export default async function LessonPage({
     }))
     .filter((s) => s.lessons.length > 0);
 
+  const quizData = lesson.quiz
+    ? {
+        id: lesson.quiz.id,
+        title: lesson.quiz.title,
+        passingScore: lesson.quiz.passingScore,
+        questions: lesson.quiz.questions.map((q) => ({
+          id: q.id,
+          question: q.question,
+          type: q.type,
+          options: q.options as { id: string; text: string }[] | null,
+          order: q.order,
+        })),
+      }
+    : null;
+
   return (
     <CoursePlayerClient
       courseId={courseId}
       courseTitle={course.title}
-      lesson={lesson}
+      lesson={{
+        id: lesson.id,
+        title: lesson.title,
+        type: lesson.type,
+        muxPlaybackId: lesson.muxPlaybackId,
+        videoStatus: lesson.videoStatus,
+        textContent: lesson.textContent,
+        quiz: quizData,
+      }}
       lessonIndex={lessonIndex + 1}
       totalLessons={allPublishedLessons.length}
       sections={sections}
       initialCompletedIds={completedIds}
+      initialAttempts={initialAttempts}
     />
   );
 }

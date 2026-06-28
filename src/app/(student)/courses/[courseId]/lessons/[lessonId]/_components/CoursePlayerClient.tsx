@@ -11,6 +11,11 @@ import { AiBadge, VideoPlayer } from "@/components";
 
 import { LessonSidebar, type SidebarSection } from "./LessonSidebar";
 import { NotesTab } from "./NotesTab";
+import {
+  StudentQuiz,
+  type QuizData,
+  type AttemptSummary,
+} from "./StudentQuiz";
 
 import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
 
@@ -21,6 +26,7 @@ interface LessonData {
   muxPlaybackId: string | null;
   videoStatus: VideoStatus;
   textContent: string | null;
+  quiz: QuizData | null;
 }
 
 interface CoursePlayerClientProps {
@@ -31,6 +37,7 @@ interface CoursePlayerClientProps {
   totalLessons: number;
   sections: SidebarSection[];
   initialCompletedIds: string[];
+  initialAttempts: AttemptSummary[];
 }
 
 type Tab = "notes" | "discussion" | "ai-tutor" | "resources";
@@ -72,6 +79,7 @@ export function CoursePlayerClient({
   totalLessons,
   sections,
   initialCompletedIds,
+  initialAttempts,
 }: CoursePlayerClientProps) {
   const [completedIds, setCompletedIds] = useState<Set<string>>(
     () => new Set(initialCompletedIds),
@@ -163,12 +171,17 @@ export function CoursePlayerClient({
               {lesson.title}
             </h1>
 
-            {/* Video or text content */}
+            {/* Video or text or quiz content */}
             {lesson.type === "VIDEO" ? (
               <VideoPlayer
                 playbackId={lesson.muxPlaybackId ?? ""}
                 videoStatus={lesson.videoStatus}
                 onComplete={markComplete}
+              />
+            ) : lesson.type === "QUIZ" ? (
+              <StudentQuiz
+                quiz={lesson.quiz}
+                initialAttempts={initialAttempts}
               />
             ) : (
               <div className="bg-surface-1 border border-border rounded-lg p-5">
