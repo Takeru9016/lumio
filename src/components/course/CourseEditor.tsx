@@ -186,6 +186,13 @@ export function CourseEditor({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => router.push(`/courses/${courseId}/settings`)}
+              className="text-sm text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors"
+            >
+              Settings
+            </button>
+            <button
+              type="button"
               onClick={() => router.push(`/courses/${courseId}/analytics`)}
               className="text-sm text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors"
             >
