@@ -7,16 +7,25 @@ import { db } from "@/lib/db";
 const f = createUploadthing();
 
 async function getInstructor() {
-  const { userId, sessionClaims } = await auth();
+  const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
-  const role = (sessionClaims?.publicMetadata as { role?: string })?.role;
-  if (role !== "INSTRUCTOR" && role !== "SUPER_ADMIN") throw new Error("Forbidden");
+  const user = await db.user.findUnique({
+    where: { clerkId: userId },
+    select: { id: true, role: true },
+  });
+  if (!user) throw new Error("User not found");
+  if (user.role !== "INSTRUCTOR" && user.role !== "SUPER_ADMIN") throw new Error("Forbidden");
   return userId;
 }
 
 async function getStudent() {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
+  const user = await db.user.findUnique({
+    where: { clerkId: userId },
+    select: { id: true },
+  });
+  if (!user) throw new Error("User not found");
   return userId;
 }
 
