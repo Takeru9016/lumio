@@ -11,10 +11,10 @@ export default function SignInPage() {
   const router = useRouter();
 
   const handleSignIn = async (formData: FormData) => {
-    const identifier = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
-    await signIn.password({ identifier, password });
+    await signIn.password({
+      identifier: formData.get("email") as string,
+      password: formData.get("password") as string,
+    });
 
     if (signIn.status === "needs_second_factor") {
       await signIn.mfa.sendEmailCode();
@@ -38,8 +38,7 @@ export default function SignInPage() {
   };
 
   const handleMFA = async (formData: FormData) => {
-    const code = formData.get("code") as string;
-    await signIn.mfa.verifyEmailCode({ code });
+    await signIn.mfa.verifyEmailCode({ code: formData.get("code") as string });
 
     if (signIn.status === "complete") {
       await signIn.finalize({

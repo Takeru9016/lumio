@@ -9,16 +9,11 @@ export default function SignUpPage() {
   const router = useRouter();
 
   const handleSignUp = async (formData: FormData) => {
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const emailAddress = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
     const { error } = await signUp.password({
-      emailAddress,
-      password,
-      firstName,
-      lastName,
+      emailAddress: formData.get("email") as string,
+      password: formData.get("password") as string,
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
     });
 
     if (!error) {
@@ -27,15 +22,15 @@ export default function SignUpPage() {
   };
 
   const handleVerify = async (formData: FormData) => {
-    const code = formData.get("code") as string;
-
-    await signUp.verifications.verifyEmailCode({ code });
+    await signUp.verifications.verifyEmailCode({
+      code: formData.get("code") as string,
+    });
 
     if (signUp.status === "complete") {
       await signUp.finalize({
         navigate: ({ session, decorateUrl }) => {
           if (session?.currentTask) return;
-          const url = decorateUrl("/onboarding");
+          const url = decorateUrl("/dashboard");
           if (url.startsWith("http")) {
             window.location.href = url;
           } else {
