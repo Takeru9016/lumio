@@ -23,6 +23,41 @@ const updateLessonSchema = z.object({
   type: z.enum(["VIDEO", "TEXT", "QUIZ", "ASSIGNMENT"]).optional(),
 });
 
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ courseId: string; sectionId: string; lessonId: string }> },
+) {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { courseId, sectionId, lessonId } = await params;
+  const { dbUser, course, lesson } = await resolveLessonOwnership(courseId, lessonId, userId);
+
+  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (course.instructorId !== dbUser.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== courseId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const data = await db.lesson.findUnique({
+    where: { id: lessonId },
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      order: true,
+      isPublished: true,
+      videoStatus: true,
+      videoDuration: true,
+      muxPlaybackId: true,
+      textContent: true,
+    },
+  });
+
+  return NextResponse.json(data);
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ courseId: string; sectionId: string; lessonId: string }> },

@@ -58,6 +58,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       isPublished: l.isPublished,
       videoStatus: l.videoStatus,
       videoDuration: l.videoDuration,
+      muxPlaybackId: l.muxPlaybackId,
     })),
   }));
 

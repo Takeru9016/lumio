@@ -58,24 +58,20 @@ export function CourseSettingsForm({ courseId, course }: CourseSettingsFormProps
   );
   const [isSaving, setIsSaving] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: course.title,
       description: course.description ?? "",
-      thumbnailUrl: course.thumbnailUrl ?? undefined,
+      thumbnailUrl: course.thumbnailUrl ?? "",
       category: course.category ?? "",
       level: course.level ?? "",
       price: course.price,
       currency: course.currency,
     },
   });
+
+  const { register, handleSubmit, watch, formState: { errors } } = form;
 
   const descriptionValue = watch("description") ?? "";
 
@@ -162,22 +158,22 @@ export function CourseSettingsForm({ courseId, course }: CourseSettingsFormProps
       <div>
         <label className={labelClass}>Thumbnail</label>
         {thumbnailPreview ? (
-          <div className="relative aspect-video max-w-sm rounded-lg overflow-hidden border border-(--color-border)">
+          <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-[var(--color-border)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={thumbnailPreview}
-              alt="Course thumbnail"
+              alt="Thumbnail"
               className="w-full h-full object-cover"
             />
             <button
               type="button"
               onClick={() => {
                 setThumbnailPreview(null);
-                setValue("thumbnailUrl", undefined);
+                form.setValue("thumbnailUrl", "");
               }}
-              className="absolute top-2 right-2 bg-black/60 text-white rounded-md px-2 py-1 text-xs"
+              className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md"
             >
-              Change
+              Remove
             </button>
           </div>
         ) : (
@@ -186,7 +182,7 @@ export function CourseSettingsForm({ courseId, course }: CourseSettingsFormProps
             onClientUploadComplete={(res) => {
               if (res[0]) {
                 const url = res[0].url;
-                setValue("thumbnailUrl", url);
+                form.setValue("thumbnailUrl", url);
                 setThumbnailPreview(url);
               }
             }}

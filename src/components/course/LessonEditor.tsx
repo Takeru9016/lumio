@@ -41,17 +41,44 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
   const [isSaving, setIsSaving] = useState(false);
   const [localType, setLocalType] = useState<LessonType>(lesson.type);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadState, setUploadState] = useState<UploadState>(() => {
-    if (lesson.videoStatus === "READY" && lesson.muxPlaybackId) return "ready";
-    if (lesson.videoStatus === "PROCESSING") return "processing";
-    return "idle";
-  });
+  const [uploadState, setUploadState] = useState<UploadState>(
+    lesson.videoStatus === "READY" ? "ready" :
+    lesson.videoStatus === "PROCESSING" ? "processing" : "idle"
+  );
   const [previewPlaybackId, setPreviewPlaybackId] = useState<string | null>(
     lesson.muxPlaybackId ?? null,
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const onUpdateRef = useRef(onUpdate);
   useEffect(() => { onUpdateRef.current = onUpdate; }, [onUpdate]);
+
+  // On mount, fetch fresh lesson state from DB in case props are stale
+  // (component remounts on lesson switch via key={lesson.id} in CourseEditor)
+  useEffect(() => {
+    if (lesson.type !== "VIDEO") return;
+    async function refresh() {
+      try {
+        const res = await fetch(
+          `/api/courses/${courseId}/sections/${sectionId}/lessons/${lesson.id}`,
+        );
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          videoStatus: string;
+          muxPlaybackId: string | null;
+        };
+        if (data.videoStatus === "READY" && data.muxPlaybackId) {
+          setUploadState("ready");
+          setPreviewPlaybackId(data.muxPlaybackId);
+        } else if (data.videoStatus === "PROCESSING") {
+          setUploadState((s) => (s === "idle" ? "processing" : s));
+        }
+      } catch {
+        // ignore — use prop-initialised state
+      }
+    }
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // empty — runs once per mount; key={lesson.id} handles lesson changes
 
   const { startUpload, isUploading } = useUploadThing("videoUploader", {
     onUploadProgress: (p) => setUploadProgress(p),
