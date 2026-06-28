@@ -45,11 +45,12 @@ export function CourseEditor({
   const [isPublishing, setIsPublishing] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
 
-  const selectedLesson = sections
-    .flatMap((s) => s.lessons)
-    .find((l) => l.id === selectedLessonId) as
-    | (LessonItem & { textContent?: string | null; muxPlaybackId?: string | null })
-    | undefined;
+  const selectedSection = sections.find((s) =>
+    s.lessons.some((l) => l.id === selectedLessonId),
+  );
+  const selectedLesson = selectedSection?.lessons.find(
+    (l) => l.id === selectedLessonId,
+  ) as (LessonItem & { textContent?: string | null; muxPlaybackId?: string | null }) | undefined;
 
   async function addSection() {
     const title = prompt("Section title:");
@@ -259,8 +260,13 @@ export function CourseEditor({
 
         {/* Editor area */}
         <div className="flex-1 overflow-y-auto p-6">
-          {selectedLesson ? (
-            <LessonEditor lesson={selectedLesson} onUpdate={handleLessonUpdate} />
+          {selectedLesson && selectedSection ? (
+            <LessonEditor
+              lesson={selectedLesson}
+              courseId={courseId}
+              sectionId={selectedSection.id}
+              onUpdate={handleLessonUpdate}
+            />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
               <div className="text-3xl mb-3">📝</div>

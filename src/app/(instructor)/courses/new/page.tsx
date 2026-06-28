@@ -33,7 +33,9 @@ const CATEGORIES = [
 export default function NewCoursePage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbProgress, setThumbProgress] = useState(0);
+  const [thumbUploading, setThumbUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -200,37 +202,62 @@ export default function NewCoursePage() {
       {/* Step 2 */}
       {step === 2 && (
         <div className="space-y-5">
-          {previewUrl ? (
-            <div className="relative">
+          {thumbnailPreview ? (
+            <div className="relative aspect-video rounded-lg overflow-hidden border border-[var(--color-border)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={previewUrl}
-                alt="thumbnail preview"
-                className="w-full aspect-video object-cover rounded-lg border border-(--color-border)"
+                src={thumbnailPreview}
+                alt="Course thumbnail"
+                className="w-full h-full object-cover"
               />
               <button
                 type="button"
                 onClick={() => {
-                  setPreviewUrl(null);
+                  setThumbnailPreview(null);
                   setValue("thumbnailUrl", "");
                 }}
-                className="absolute top-2 right-2 bg-white border border-(--color-border) rounded-md px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-surface-2)"
+                className="absolute top-2 right-2 bg-black/60 text-white rounded-md px-2 py-1 text-xs"
               >
-                Remove
+                Change
               </button>
             </div>
           ) : (
-            <UploadDropzone
-              endpoint="thumbnailUploader"
-              onClientUploadComplete={(res) => {
-                if (res[0]) {
-                  const url = res[0].url;
-                  setValue("thumbnailUrl", url);
-                  setPreviewUrl(url);
-                }
-              }}
-              onUploadError={(e) => { toast.error({ title: "Upload failed", description: e.message }); }}
-            />
+            <div className="space-y-2">
+              <UploadDropzone
+                endpoint="thumbnailUploader"
+                onUploadProgress={(p) => {
+                  setThumbUploading(true);
+                  setThumbProgress(p);
+                }}
+                onClientUploadComplete={(res) => {
+                  if (res[0]) {
+                    const url = res[0].url;
+                    setValue("thumbnailUrl", url);
+                    setThumbnailPreview(url);
+                  }
+                  setThumbUploading(false);
+                  setThumbProgress(0);
+                }}
+                onUploadError={(e) => {
+                  toast.error({ title: "Upload failed", description: e.message });
+                  setThumbUploading(false);
+                  setThumbProgress(0);
+                }}
+              />
+              {thumbUploading && (
+                <div className="space-y-1">
+                  <div className="w-full h-1 bg-(--color-surface-3) rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-(--color-brand) rounded-full transition-all duration-300"
+                      style={{ width: `${thumbProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-(--color-text-muted)">
+                    Uploading… {thumbProgress}%
+                  </p>
+                </div>
+              )}
+            </div>
           )}
           <p className="text-xs text-(--color-text-muted)">
             Recommended: 1280×720px, max 4MB. You can change this later.
@@ -258,10 +285,10 @@ export default function NewCoursePage() {
       {step === 3 && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="bg-white border border-(--color-border) rounded-lg divide-y divide-(--color-border)">
-            {previewUrl && (
+            {thumbnailPreview && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={previewUrl}
+                src={thumbnailPreview}
                 alt="thumbnail preview"
                 className="w-full aspect-video object-cover rounded-t-lg"
               />
