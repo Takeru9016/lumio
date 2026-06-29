@@ -15,7 +15,7 @@ export default async function InstructorLayout({
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { role: true },
+    select: { role: true, currentStreak: true },
   });
 
   if (!user || user.role !== "INSTRUCTOR") {
@@ -26,7 +26,7 @@ export default async function InstructorLayout({
     <div className="flex h-screen overflow-hidden">
       <Sidebar role="INSTRUCTOR" />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <TopNav />
+        <TopNav currentStreak={user.currentStreak} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>

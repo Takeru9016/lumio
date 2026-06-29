@@ -107,6 +107,7 @@ model User {
   certificates   Certificate[]
   aiChats        AIChat[]
   teamMembers    TeamMember[]
+  xpTransactions XPTransaction[]
 
   deletedAt DateTime?
 
@@ -417,6 +418,19 @@ model AssignmentSubmission {
 // ============================================================
 // GAMIFICATION
 // ============================================================
+
+model XPTransaction {
+  id     String @id @default(cuid())
+  event  String
+  amount Int
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
 
 model Certificate {
   id             String @id @default(cuid())

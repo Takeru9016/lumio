@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
-import { db } from "@/lib";
-
-const XP_PASS = 25;
-const XP_PERFECT = 50;
+import { db, awardXP, XP_EVENTS } from "@/lib";
 
 const bodySchema = z.object({
   answers: z.array(
@@ -97,7 +94,6 @@ export async function POST(
     scoreable === 0 ? 0 : Math.round((correct / scoreable) * 100);
   const isPassed = score >= quiz.passingScore;
   const isPerfect = scoreable > 0 && correct === scoreable;
-  const xpAwarded = isPassed ? (isPerfect ? XP_PERFECT : XP_PASS) : 0;
 
   const attempt = await db.quizAttempt.create({
     data: {
@@ -109,11 +105,11 @@ export async function POST(
     },
   });
 
-  if (xpAwarded > 0) {
-    await db.user.update({
-      where: { id: dbUser.id },
-      data: { xpTotal: { increment: xpAwarded } },
-    });
+  let xpAwarded = 0;
+  if (isPassed) {
+    const event = isPerfect ? "QUIZ_PERFECT" : "QUIZ_PASS";
+    xpAwarded = XP_EVENTS[event];
+    await awardXP(dbUser.id, event, xpAwarded);
   }
 
   return NextResponse.json({

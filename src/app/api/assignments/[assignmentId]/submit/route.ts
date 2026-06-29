@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
-import { db } from "@/lib";
-
-const XP_PER_SUBMISSION = 15;
+import { db, awardXP, XP_EVENTS } from "@/lib";
 
 const bodySchema = z.object({
   textContent: z.string().optional().nullable(),
@@ -83,36 +81,30 @@ export async function POST(
   const status = isLate ? ("LATE" as const) : ("SUBMITTED" as const);
   const isFirstSubmission = !existing;
 
-  const [submission] = await Promise.all([
-    db.assignmentSubmission.upsert({
-      where: { userId_assignmentId: { userId: dbUser.id, assignmentId } },
-      create: {
-        userId: dbUser.id,
-        assignmentId,
-        textContent: textContent ?? null,
-        fileUrl: fileUrl ?? null,
-        status,
-        submittedAt: now,
-      },
-      update: {
-        textContent: textContent ?? null,
-        fileUrl: fileUrl ?? null,
-        status,
-        submittedAt: now,
-      },
-    }),
-    ...(isFirstSubmission
-      ? [
-          db.user.update({
-            where: { id: dbUser.id },
-            data: { xpTotal: { increment: XP_PER_SUBMISSION } },
-          }),
-        ]
-      : []),
-  ]);
+  const submission = await db.assignmentSubmission.upsert({
+    where: { userId_assignmentId: { userId: dbUser.id, assignmentId } },
+    create: {
+      userId: dbUser.id,
+      assignmentId,
+      textContent: textContent ?? null,
+      fileUrl: fileUrl ?? null,
+      status,
+      submittedAt: now,
+    },
+    update: {
+      textContent: textContent ?? null,
+      fileUrl: fileUrl ?? null,
+      status,
+      submittedAt: now,
+    },
+  });
+
+  if (isFirstSubmission) {
+    await awardXP(dbUser.id, "ASSIGNMENT_SUBMIT", XP_EVENTS.ASSIGNMENT_SUBMIT);
+  }
 
   return NextResponse.json({
     submission,
-    xpAwarded: isFirstSubmission ? XP_PER_SUBMISSION : 0,
+    xpAwarded: isFirstSubmission ? XP_EVENTS.ASSIGNMENT_SUBMIT : 0,
   });
 }

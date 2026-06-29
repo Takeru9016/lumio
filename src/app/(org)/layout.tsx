@@ -15,7 +15,7 @@ export default async function OrgLayout({
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { role: true },
+    select: { role: true, currentStreak: true },
   });
 
   if (!user || user.role !== "ORG_ADMIN") {
@@ -26,7 +26,7 @@ export default async function OrgLayout({
     <div className="flex h-screen overflow-hidden">
       <Sidebar role="ORG_ADMIN" />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <TopNav />
+        <TopNav currentStreak={user.currentStreak} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>

@@ -15,7 +15,7 @@ export default async function StudentLayout({
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { role: true },
+    select: { role: true, currentStreak: true },
   });
 
   if (!user || user.role !== "STUDENT") {
@@ -26,7 +26,7 @@ export default async function StudentLayout({
     <div className="flex h-screen overflow-hidden">
       <Sidebar role="STUDENT" />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <TopNav showAiBadge />
+        <TopNav showAiBadge currentStreak={user.currentStreak} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>

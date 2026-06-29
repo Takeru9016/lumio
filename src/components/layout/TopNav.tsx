@@ -8,9 +8,10 @@ import { AiBadge } from "@/components/shared/AiBadge";
 
 interface TopNavProps {
   showAiBadge?: boolean;
+  currentStreak?: number;
 }
 
-export function TopNav({ showAiBadge = false }: TopNavProps) {
+export function TopNav({ showAiBadge = false, currentStreak = 0 }: TopNavProps) {
   return (
     <header
       className="h-[52px] flex items-center justify-between px-4 bg-white shrink-0"
@@ -29,6 +30,12 @@ export function TopNav({ showAiBadge = false }: TopNavProps) {
           <Link href="/ai-tutor">
             <AiBadge label="AI Tutor" size="md" />
           </Link>
+        )}
+
+        {currentStreak >= 2 && (
+          <span className="text-sm font-medium text-text-muted">
+            🔥 {currentStreak}-day
+          </span>
         )}
 
         <button

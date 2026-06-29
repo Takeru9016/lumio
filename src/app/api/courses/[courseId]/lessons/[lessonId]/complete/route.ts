@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
-import { db } from "@/lib";
-
-const XP_PER_LESSON = 10;
+import { db, awardXP, updateStreak, XP_EVENTS } from "@/lib";
 
 export async function POST(
   _req: Request,
@@ -58,34 +56,34 @@ export async function POST(
     });
   }
 
-  await Promise.all([
-    db.lessonProgress.upsert({
-      where: { userId_lessonId: { userId: dbUser.id, lessonId } },
-      create: {
+  await db.lessonProgress.upsert({
+    where: { userId_lessonId: { userId: dbUser.id, lessonId } },
+    create: {
+      userId: dbUser.id,
+      lessonId,
+      isCompleted: true,
+      completedAt: new Date(),
+      watchedSecs: 0,
+    },
+    update: { isCompleted: true, completedAt: new Date() },
+  });
+
+  const [, totalCompleted] = await Promise.all([
+    Promise.all([
+      awardXP(dbUser.id, "LESSON_COMPLETE", XP_EVENTS.LESSON_COMPLETE),
+      updateStreak(dbUser.id),
+    ]),
+    db.lessonProgress.count({
+      where: {
         userId: dbUser.id,
-        lessonId,
         isCompleted: true,
-        completedAt: new Date(),
-        watchedSecs: 0,
+        lesson: { section: { courseId } },
       },
-      update: { isCompleted: true, completedAt: new Date() },
-    }),
-    db.user.update({
-      where: { id: dbUser.id },
-      data: { xpTotal: { increment: XP_PER_LESSON } },
     }),
   ]);
 
-  const totalCompleted = await db.lessonProgress.count({
-    where: {
-      userId: dbUser.id,
-      isCompleted: true,
-      lesson: { section: { courseId } },
-    },
-  });
-
   return NextResponse.json({
-    xpEarned: XP_PER_LESSON,
+    xpEarned: XP_EVENTS.LESSON_COMPLETE,
     isFirstCompletion: true,
     totalCompleted,
   });
