@@ -373,6 +373,7 @@ export type UserWhereInput = {
   certificates?: Prisma.CertificateListRelationFilter
   aiChats?: Prisma.AIChatListRelationFilter
   teamMembers?: Prisma.TeamMemberListRelationFilter
+  xpTransactions?: Prisma.XPTransactionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -407,6 +408,7 @@ export type UserOrderByWithRelationInput = {
   certificates?: Prisma.CertificateOrderByRelationAggregateInput
   aiChats?: Prisma.AIChatOrderByRelationAggregateInput
   teamMembers?: Prisma.TeamMemberOrderByRelationAggregateInput
+  xpTransactions?: Prisma.XPTransactionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -444,6 +446,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   certificates?: Prisma.CertificateListRelationFilter
   aiChats?: Prisma.AIChatListRelationFilter
   teamMembers?: Prisma.TeamMemberListRelationFilter
+  xpTransactions?: Prisma.XPTransactionListRelationFilter
 }, "id" | "clerkId" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -535,6 +538,7 @@ export type UserCreateInput = {
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -568,6 +572,7 @@ export type UserUncheckedCreateInput = {
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -601,6 +606,7 @@ export type UserUpdateInput = {
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -634,6 +640,7 @@ export type UserUncheckedUpdateInput = {
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -980,6 +987,20 @@ export type UserUpdateOneRequiredWithoutSubmissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.UserUpdateWithoutSubmissionsInput>, Prisma.UserUncheckedUpdateWithoutSubmissionsInput>
 }
 
+export type UserCreateNestedOneWithoutXpTransactionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutXpTransactionsInput, Prisma.UserUncheckedCreateWithoutXpTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutXpTransactionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutXpTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutXpTransactionsInput, Prisma.UserUncheckedCreateWithoutXpTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutXpTransactionsInput
+  upsert?: Prisma.UserUpsertWithoutXpTransactionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutXpTransactionsInput, Prisma.UserUpdateWithoutXpTransactionsInput>, Prisma.UserUncheckedUpdateWithoutXpTransactionsInput>
+}
+
 export type UserCreateNestedOneWithoutCertificatesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCertificatesInput, Prisma.UserUncheckedCreateWithoutCertificatesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCertificatesInput
@@ -1038,6 +1059,7 @@ export type UserCreateWithoutTenantInput = {
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTenantInput = {
@@ -1070,6 +1092,7 @@ export type UserUncheckedCreateWithoutTenantInput = {
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTenantInput = {
@@ -1156,6 +1179,7 @@ export type UserCreateWithoutTeamMembersInput = {
   submissions?: Prisma.AssignmentSubmissionCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembersInput = {
@@ -1188,6 +1212,7 @@ export type UserUncheckedCreateWithoutTeamMembersInput = {
   submissions?: Prisma.AssignmentSubmissionUncheckedCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembersInput = {
@@ -1236,6 +1261,7 @@ export type UserUpdateWithoutTeamMembersInput = {
   submissions?: Prisma.AssignmentSubmissionUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembersInput = {
@@ -1268,6 +1294,7 @@ export type UserUncheckedUpdateWithoutTeamMembersInput = {
   submissions?: Prisma.AssignmentSubmissionUncheckedUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCoursesInput = {
@@ -1300,6 +1327,7 @@ export type UserCreateWithoutCoursesInput = {
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCoursesInput = {
@@ -1332,6 +1360,7 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCoursesInput = {
@@ -1380,6 +1409,7 @@ export type UserUpdateWithoutCoursesInput = {
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCoursesInput = {
@@ -1412,6 +1442,7 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEnrollmentsInput = {
@@ -1444,6 +1475,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEnrollmentsInput = {
@@ -1476,6 +1508,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEnrollmentsInput = {
@@ -1524,6 +1557,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEnrollmentsInput = {
@@ -1556,6 +1590,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLessonProgressInput = {
@@ -1588,6 +1623,7 @@ export type UserCreateWithoutLessonProgressInput = {
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLessonProgressInput = {
@@ -1620,6 +1656,7 @@ export type UserUncheckedCreateWithoutLessonProgressInput = {
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLessonProgressInput = {
@@ -1668,6 +1705,7 @@ export type UserUpdateWithoutLessonProgressInput = {
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLessonProgressInput = {
@@ -1700,6 +1738,7 @@ export type UserUncheckedUpdateWithoutLessonProgressInput = {
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutQuizAttemptsInput = {
@@ -1732,6 +1771,7 @@ export type UserCreateWithoutQuizAttemptsInput = {
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutQuizAttemptsInput = {
@@ -1764,6 +1804,7 @@ export type UserUncheckedCreateWithoutQuizAttemptsInput = {
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutQuizAttemptsInput = {
@@ -1812,6 +1853,7 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
@@ -1844,6 +1886,7 @@ export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSubmissionsInput = {
@@ -1876,6 +1919,7 @@ export type UserCreateWithoutSubmissionsInput = {
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubmissionsInput = {
@@ -1908,6 +1952,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubmissionsInput = {
@@ -1956,6 +2001,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmissionsInput = {
@@ -1985,6 +2031,155 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   courses?: Prisma.CourseUncheckedUpdateManyWithoutInstructorNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutUserNestedInput
   quizAttempts?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
+  aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutXpTransactionsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  name?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.Role
+  plan?: $Enums.Plan
+  aiCallsUsed?: number
+  aiQuotaResetAt?: Date | string
+  xpTotal?: number
+  currentStreak?: number
+  longestStreak?: number
+  lastActiveDate?: Date | string | null
+  razorpayCustomerId?: string | null
+  razorpaySubId?: string | null
+  subscriptionStatus?: $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.TenantCreateNestedOneWithoutUsersInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseCreateNestedManyWithoutInstructorInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  submissions?: Prisma.AssignmentSubmissionCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
+  aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutXpTransactionsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  name?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.Role
+  plan?: $Enums.Plan
+  aiCallsUsed?: number
+  aiQuotaResetAt?: Date | string
+  xpTotal?: number
+  currentStreak?: number
+  longestStreak?: number
+  lastActiveDate?: Date | string | null
+  razorpayCustomerId?: string | null
+  razorpaySubId?: string | null
+  subscriptionStatus?: $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: Date | string | null
+  tenantId?: string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutInstructorInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  submissions?: Prisma.AssignmentSubmissionUncheckedCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
+  aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutXpTransactionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutXpTransactionsInput, Prisma.UserUncheckedCreateWithoutXpTransactionsInput>
+}
+
+export type UserUpsertWithoutXpTransactionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutXpTransactionsInput, Prisma.UserUncheckedUpdateWithoutXpTransactionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutXpTransactionsInput, Prisma.UserUncheckedCreateWithoutXpTransactionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutXpTransactionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutXpTransactionsInput, Prisma.UserUncheckedUpdateWithoutXpTransactionsInput>
+}
+
+export type UserUpdateWithoutXpTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  aiCallsUsed?: Prisma.IntFieldUpdateOperationsInput | number
+  aiQuotaResetAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  xpTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  currentStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  longestStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  razorpayCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneWithoutUsersNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutInstructorNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.AssignmentSubmissionUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
+  aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutXpTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  aiCallsUsed?: Prisma.IntFieldUpdateOperationsInput | number
+  aiQuotaResetAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  xpTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  currentStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  longestStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  razorpayCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutInstructorNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.AssignmentSubmissionUncheckedUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -2020,6 +2215,7 @@ export type UserCreateWithoutCertificatesInput = {
   submissions?: Prisma.AssignmentSubmissionCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCertificatesInput = {
@@ -2052,6 +2248,7 @@ export type UserUncheckedCreateWithoutCertificatesInput = {
   submissions?: Prisma.AssignmentSubmissionUncheckedCreateNestedManyWithoutUserInput
   aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCertificatesInput = {
@@ -2100,6 +2297,7 @@ export type UserUpdateWithoutCertificatesInput = {
   submissions?: Prisma.AssignmentSubmissionUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCertificatesInput = {
@@ -2132,6 +2330,7 @@ export type UserUncheckedUpdateWithoutCertificatesInput = {
   submissions?: Prisma.AssignmentSubmissionUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiChatsInput = {
@@ -2164,6 +2363,7 @@ export type UserCreateWithoutAiChatsInput = {
   submissions?: Prisma.AssignmentSubmissionCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiChatsInput = {
@@ -2196,6 +2396,7 @@ export type UserUncheckedCreateWithoutAiChatsInput = {
   submissions?: Prisma.AssignmentSubmissionUncheckedCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
   teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiChatsInput = {
@@ -2244,6 +2445,7 @@ export type UserUpdateWithoutAiChatsInput = {
   submissions?: Prisma.AssignmentSubmissionUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiChatsInput = {
@@ -2276,6 +2478,7 @@ export type UserUncheckedUpdateWithoutAiChatsInput = {
   submissions?: Prisma.AssignmentSubmissionUncheckedUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyTenantInput = {
@@ -2332,6 +2535,7 @@ export type UserUpdateWithoutTenantInput = {
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTenantInput = {
@@ -2364,6 +2568,7 @@ export type UserUncheckedUpdateWithoutTenantInput = {
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
   teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutTenantInput = {
@@ -2404,6 +2609,7 @@ export type UserCountOutputType = {
   certificates: number
   aiChats: number
   teamMembers: number
+  xpTransactions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2415,6 +2621,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   certificates?: boolean | UserCountOutputTypeCountCertificatesArgs
   aiChats?: boolean | UserCountOutputTypeCountAiChatsArgs
   teamMembers?: boolean | UserCountOutputTypeCountTeamMembersArgs
+  xpTransactions?: boolean | UserCountOutputTypeCountXpTransactionsArgs
 }
 
 /**
@@ -2483,6 +2690,13 @@ export type UserCountOutputTypeCountTeamMembersArgs<ExtArgs extends runtime.Type
   where?: Prisma.TeamMemberWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountXpTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.XPTransactionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2516,6 +2730,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   certificates?: boolean | Prisma.User$certificatesArgs<ExtArgs>
   aiChats?: boolean | Prisma.User$aiChatsArgs<ExtArgs>
   teamMembers?: boolean | Prisma.User$teamMembersArgs<ExtArgs>
+  xpTransactions?: boolean | Prisma.User$xpTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2607,6 +2822,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   certificates?: boolean | Prisma.User$certificatesArgs<ExtArgs>
   aiChats?: boolean | Prisma.User$aiChatsArgs<ExtArgs>
   teamMembers?: boolean | Prisma.User$teamMembersArgs<ExtArgs>
+  xpTransactions?: boolean | Prisma.User$xpTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2628,6 +2844,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     certificates: Prisma.$CertificatePayload<ExtArgs>[]
     aiChats: Prisma.$AIChatPayload<ExtArgs>[]
     teamMembers: Prisma.$TeamMemberPayload<ExtArgs>[]
+    xpTransactions: Prisma.$XPTransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3055,6 +3272,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   certificates<T extends Prisma.User$certificatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$certificatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertificatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiChats<T extends Prisma.User$aiChatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiChatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teamMembers<T extends Prisma.User$teamMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teamMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  xpTransactions<T extends Prisma.User$xpTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$xpTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$XPTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3715,6 +3933,30 @@ export type User$teamMembersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.TeamMemberScalarFieldEnum | Prisma.TeamMemberScalarFieldEnum[]
+}
+
+/**
+ * User.xpTransactions
+ */
+export type User$xpTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the XPTransaction
+   */
+  select?: Prisma.XPTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the XPTransaction
+   */
+  omit?: Prisma.XPTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.XPTransactionInclude<ExtArgs> | null
+  where?: Prisma.XPTransactionWhereInput
+  orderBy?: Prisma.XPTransactionOrderByWithRelationInput | Prisma.XPTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.XPTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.XPTransactionScalarFieldEnum | Prisma.XPTransactionScalarFieldEnum[]
 }
 
 /**

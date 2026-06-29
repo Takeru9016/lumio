@@ -93,6 +93,11 @@ export type Assignment = Prisma.AssignmentModel
  */
 export type AssignmentSubmission = Prisma.AssignmentSubmissionModel
 /**
+ * Model XPTransaction
+ * 
+ */
+export type XPTransaction = Prisma.XPTransactionModel
+/**
  * Model Certificate
  * 
  */

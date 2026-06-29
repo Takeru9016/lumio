@@ -66,6 +66,7 @@ export const ModelName = {
   QuizAnswer: 'QuizAnswer',
   Assignment: 'Assignment',
   AssignmentSubmission: 'AssignmentSubmission',
+  XPTransaction: 'XPTransaction',
   Certificate: 'Certificate',
   AIChat: 'AIChat',
   MandatoryTraining: 'MandatoryTraining'
@@ -316,6 +317,17 @@ export const AssignmentSubmissionScalarFieldEnum = {
 } as const
 
 export type AssignmentSubmissionScalarFieldEnum = (typeof AssignmentSubmissionScalarFieldEnum)[keyof typeof AssignmentSubmissionScalarFieldEnum]
+
+
+export const XPTransactionScalarFieldEnum = {
+  id: 'id',
+  event: 'event',
+  amount: 'amount',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type XPTransactionScalarFieldEnum = (typeof XPTransactionScalarFieldEnum)[keyof typeof XPTransactionScalarFieldEnum]
 
 
 export const CertificateScalarFieldEnum = {

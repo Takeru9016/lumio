@@ -399,6 +399,7 @@ export const ModelName = {
   QuizAnswer: 'QuizAnswer',
   Assignment: 'Assignment',
   AssignmentSubmission: 'AssignmentSubmission',
+  XPTransaction: 'XPTransaction',
   Certificate: 'Certificate',
   AIChat: 'AIChat',
   MandatoryTraining: 'MandatoryTraining'
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tenant" | "team" | "teamMember" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "certificate" | "aIChat" | "mandatoryTraining"
+    modelProps: "user" | "tenant" | "team" | "teamMember" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1531,6 +1532,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    XPTransaction: {
+      payload: Prisma.$XPTransactionPayload<ExtArgs>
+      fields: Prisma.XPTransactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.XPTransactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.XPTransactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>
+        }
+        findFirst: {
+          args: Prisma.XPTransactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.XPTransactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>
+        }
+        findMany: {
+          args: Prisma.XPTransactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>[]
+        }
+        create: {
+          args: Prisma.XPTransactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>
+        }
+        createMany: {
+          args: Prisma.XPTransactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.XPTransactionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>[]
+        }
+        delete: {
+          args: Prisma.XPTransactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>
+        }
+        update: {
+          args: Prisma.XPTransactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.XPTransactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.XPTransactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.XPTransactionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>[]
+        }
+        upsert: {
+          args: Prisma.XPTransactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$XPTransactionPayload>
+        }
+        aggregate: {
+          args: Prisma.XPTransactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateXPTransaction>
+        }
+        groupBy: {
+          args: Prisma.XPTransactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.XPTransactionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.XPTransactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.XPTransactionCountAggregateOutputType> | number
+        }
+      }
+    }
     Certificate: {
       payload: Prisma.$CertificatePayload<ExtArgs>
       fields: Prisma.CertificateFieldRefs
@@ -2023,6 +2098,17 @@ export const AssignmentSubmissionScalarFieldEnum = {
 export type AssignmentSubmissionScalarFieldEnum = (typeof AssignmentSubmissionScalarFieldEnum)[keyof typeof AssignmentSubmissionScalarFieldEnum]
 
 
+export const XPTransactionScalarFieldEnum = {
+  id: 'id',
+  event: 'event',
+  amount: 'amount',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type XPTransactionScalarFieldEnum = (typeof XPTransactionScalarFieldEnum)[keyof typeof XPTransactionScalarFieldEnum]
+
+
 export const CertificateScalarFieldEnum = {
   id: 'id',
   certificateUrl: 'certificateUrl',
@@ -2427,6 +2513,7 @@ export type GlobalOmitConfig = {
   quizAnswer?: Prisma.QuizAnswerOmit
   assignment?: Prisma.AssignmentOmit
   assignmentSubmission?: Prisma.AssignmentSubmissionOmit
+  xPTransaction?: Prisma.XPTransactionOmit
   certificate?: Prisma.CertificateOmit
   aIChat?: Prisma.AIChatOmit
   mandatoryTraining?: Prisma.MandatoryTrainingOmit
