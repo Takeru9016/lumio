@@ -35,7 +35,7 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "AI Tutor", href: "/student/ai-tutor", icon: Sparkles },
     { label: "Assignments", href: "/student/assignments", icon: ClipboardList },
     { label: "Leaderboard", href: "/student/leaderboard", icon: Trophy },
-    { label: "Settings", href: "/student/settings", icon: Settings },
+    { label: "Settings", href: "/settings", icon: Settings },
   ],
   INSTRUCTOR: [
     {

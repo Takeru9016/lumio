@@ -65,6 +65,13 @@ export async function PUT(
       { status: 400 },
     );
 
+  const existingSubmission = await db.assignmentSubmission.findFirst({
+    where: { id: submissionId, assignmentId },
+    select: { id: true },
+  });
+  if (!existingSubmission)
+    return NextResponse.json({ error: "Submission not found" }, { status: 404 });
+
   const submission = await db.assignmentSubmission.update({
     where: { id: submissionId },
     data: {
