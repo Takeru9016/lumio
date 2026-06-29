@@ -16,6 +16,10 @@ import {
   type QuizData,
   type AttemptSummary,
 } from "./StudentQuiz";
+import {
+  StudentAssignment,
+  type StudentAssignmentData,
+} from "./StudentAssignment";
 
 import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
 
@@ -27,6 +31,7 @@ interface LessonData {
   videoStatus: VideoStatus;
   textContent: string | null;
   quiz: QuizData | null;
+  assignment: StudentAssignmentData | null;
 }
 
 interface CoursePlayerClientProps {
@@ -171,7 +176,7 @@ export function CoursePlayerClient({
               {lesson.title}
             </h1>
 
-            {/* Video or text or quiz content */}
+            {/* Video or text or quiz or assignment content */}
             {lesson.type === "VIDEO" ? (
               <VideoPlayer
                 playbackId={lesson.muxPlaybackId ?? ""}
@@ -183,6 +188,22 @@ export function CoursePlayerClient({
                 quiz={lesson.quiz}
                 initialAttempts={initialAttempts}
               />
+            ) : lesson.type === "ASSIGNMENT" ? (
+              lesson.assignment ? (
+                <StudentAssignment
+                  assignment={lesson.assignment}
+                  onComplete={markComplete}
+                />
+              ) : (
+                <div className="bg-surface-1 border border-border rounded-lg p-6 text-center">
+                  <p className="text-sm font-medium text-text-primary mb-1">
+                    Assignment not set up yet
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    The instructor hasn&apos;t published this assignment yet.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="bg-surface-1 border border-border rounded-lg p-5">
                 {lesson.textContent ? (
@@ -193,8 +214,8 @@ export function CoursePlayerClient({
               </div>
             )}
 
-            {/* Mark complete for non-video lessons */}
-            {lesson.type !== "VIDEO" && (
+            {/* Mark complete for non-video, non-assignment lessons */}
+            {lesson.type !== "VIDEO" && lesson.type !== "ASSIGNMENT" && (
               <div className="flex justify-end">
                 {isCurrentComplete ? (
                   <div className="flex items-center gap-2 text-sm font-medium text-success">

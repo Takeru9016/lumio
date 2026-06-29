@@ -1,3 +1,4 @@
+export { AssignmentBuilder } from "./course/AssignmentBuilder";
 export { CourseCard } from "./course/CourseCard";
 export { CourseEditor } from "./course/CourseEditor";
 export { CourseSettingsForm } from "./course/CourseSettingsForm";

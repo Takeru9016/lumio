@@ -16,6 +16,7 @@ import { toast } from "gooey-toast";
 import { TextEditor } from "@/components/course/TextEditor";
 import { VideoPlayer } from "@/components/course/VideoPlayer";
 import { QuizBuilder } from "@/components/course/QuizBuilder";
+import { AssignmentBuilder } from "@/components/course/AssignmentBuilder";
 import type { LessonItem } from "@/components/course/LessonList";
 
 import { useUploadThing } from "@/lib/uploadthing";
@@ -367,39 +368,7 @@ export function LessonEditor({
 
       {/* ASSIGNMENT */}
       {localType === "ASSIGNMENT" && (
-        <div className="rounded-lg border border-border bg-surface-2 px-6 py-8 space-y-6">
-          <div className="text-center">
-            <p className="text-sm font-medium text-text-primary mb-1">
-              Assignment builder coming in Phase 3
-            </p>
-            <p className="text-xs text-text-muted">
-              Set instructions, deadlines, and rubrics.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div title="Coming soon">
-              <label className="block text-xs font-medium text-text-muted mb-1">
-                Due date
-              </label>
-              <input
-                type="date"
-                disabled
-                className="w-full rounded-md border border-border bg-surface-3 px-3 py-2 text-sm opacity-50 cursor-not-allowed"
-              />
-            </div>
-            <div title="Coming soon">
-              <label className="block text-xs font-medium text-text-muted mb-1">
-                Max score
-              </label>
-              <input
-                type="number"
-                disabled
-                defaultValue={100}
-                className="w-full rounded-md border border-border bg-surface-3 px-3 py-2 text-sm opacity-50 cursor-not-allowed"
-              />
-            </div>
-          </div>
-        </div>
+        <AssignmentBuilder courseId={courseId} lessonId={lesson.id} />
       )}
     </div>
   );

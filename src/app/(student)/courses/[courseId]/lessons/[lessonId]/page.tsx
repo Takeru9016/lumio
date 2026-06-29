@@ -6,6 +6,7 @@ import { db } from "@/lib";
 import { CoursePlayerClient } from "./_components/CoursePlayerClient";
 import type { SidebarSection } from "./_components/LessonSidebar";
 import type { AttemptSummary } from "./_components/StudentQuiz";
+import type { StudentAssignmentData } from "./_components/StudentAssignment";
 
 export default async function LessonPage({
   params,
@@ -80,6 +81,29 @@ export default async function LessonPage({
             },
           },
         },
+        assignment: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            dueDate: true,
+            maxScore: true,
+            submissions: {
+              where: { userId: dbUser.id },
+              select: {
+                id: true,
+                status: true,
+                textContent: true,
+                fileUrl: true,
+                score: true,
+                feedback: true,
+                submittedAt: true,
+                gradedAt: true,
+              },
+              take: 1,
+            },
+          },
+        },
       },
     }),
   ]);
@@ -146,6 +170,31 @@ export default async function LessonPage({
       }
     : null;
 
+  const assignmentData: StudentAssignmentData | null = lesson.assignment
+    ? {
+        id: lesson.assignment.id,
+        title: lesson.assignment.title,
+        description: lesson.assignment.description,
+        dueDate: lesson.assignment.dueDate?.toISOString() ?? null,
+        maxScore: lesson.assignment.maxScore,
+        submission: lesson.assignment.submissions[0]
+          ? {
+              id: lesson.assignment.submissions[0].id,
+              status: lesson.assignment.submissions[0].status,
+              textContent: lesson.assignment.submissions[0].textContent,
+              fileUrl: lesson.assignment.submissions[0].fileUrl,
+              score: lesson.assignment.submissions[0].score,
+              feedback: lesson.assignment.submissions[0].feedback,
+              submittedAt:
+                lesson.assignment.submissions[0].submittedAt.toISOString(),
+              gradedAt:
+                lesson.assignment.submissions[0].gradedAt?.toISOString() ??
+                null,
+            }
+          : null,
+      }
+    : null;
+
   return (
     <CoursePlayerClient
       courseId={courseId}
@@ -158,6 +207,7 @@ export default async function LessonPage({
         videoStatus: lesson.videoStatus,
         textContent: lesson.textContent,
         quiz: quizData,
+        assignment: assignmentData,
       }}
       lessonIndex={lessonIndex + 1}
       totalLessons={allPublishedLessons.length}
