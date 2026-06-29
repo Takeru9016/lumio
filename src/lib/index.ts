@@ -7,3 +7,4 @@ export { UploadButton, UploadDropzone, useUploadThing } from "./uploadthing";
 export { awardXP, XP_EVENTS } from "./xp";
 export type { XPEvent } from "./xp";
 export { updateStreak } from "./streak";
+export { generateCertificate } from "./certificate";

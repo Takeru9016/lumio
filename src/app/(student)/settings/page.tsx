@@ -1,7 +1,14 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { format } from "date-fns";
-import { CheckCircle2, Clock, Star, ClipboardList } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Star,
+  ClipboardList,
+  Award,
+  ExternalLink,
+} from "lucide-react";
 import Link from "next/link";
 
 import { db } from "@/lib";
@@ -17,25 +24,27 @@ export default async function StudentSettingsPage() {
   });
   if (!dbUser) redirect("/sign-in");
 
-  const gradedSubmissions = await db.assignmentSubmission.findMany({
-    where: { userId: dbUser.id, status: "GRADED" },
-    select: {
-      id: true,
-      score: true,
-      feedback: true,
-      gradedAt: true,
-      submittedAt: true,
-      assignment: {
-        select: {
-          title: true,
-          maxScore: true,
-          lesson: {
-            select: {
-              title: true,
-              section: {
-                select: {
-                  course: {
-                    select: { id: true, title: true },
+  const [gradedSubmissions, certificates] = await Promise.all([
+    db.assignmentSubmission.findMany({
+      where: { userId: dbUser.id, status: "GRADED" },
+      select: {
+        id: true,
+        score: true,
+        feedback: true,
+        gradedAt: true,
+        submittedAt: true,
+        assignment: {
+          select: {
+            title: true,
+            maxScore: true,
+            lesson: {
+              select: {
+                title: true,
+                section: {
+                  select: {
+                    course: {
+                      select: { id: true, title: true },
+                    },
                   },
                 },
               },
@@ -43,9 +52,21 @@ export default async function StudentSettingsPage() {
           },
         },
       },
-    },
-    orderBy: { gradedAt: "desc" },
-  });
+      orderBy: { gradedAt: "desc" },
+    }),
+    db.certificate.findMany({
+      where: { userId: dbUser.id },
+      select: {
+        id: true,
+        certificateUrl: true,
+        issuedAt: true,
+        course: {
+          select: { id: true, title: true, thumbnailUrl: true },
+        },
+      },
+      orderBy: { issuedAt: "desc" },
+    }),
+  ]);
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
@@ -64,6 +85,14 @@ export default async function StudentSettingsPage() {
             {gradedSubmissions.length > 0 && (
               <span className="ml-1.5 text-[10px] font-semibold bg-success text-white rounded-full px-1.5 py-0.5">
                 {gradedSubmissions.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="certificates">
+            Certificates
+            {certificates.length > 0 && (
+              <span className="ml-1.5 text-[10px] font-semibold bg-[var(--color-brand)] text-white rounded-full px-1.5 py-0.5">
+                {certificates.length}
               </span>
             )}
           </TabsTrigger>
@@ -181,6 +210,79 @@ export default async function StudentSettingsPage() {
                   </div>
                 );
               })
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Certificates tab */}
+        <TabsContent value="certificates">
+          <div className="mt-4">
+            {certificates.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border bg-surface-2 py-12 text-center">
+                <Award size={28} className="text-text-disabled mx-auto mb-2" />
+                <p className="text-sm font-medium text-text-primary mb-1">
+                  No certificates yet
+                </p>
+                <p className="text-xs text-text-muted mb-4">
+                  Complete all lessons and quizzes in a course to earn your
+                  certificate.
+                </p>
+                <Link
+                  href="/courses"
+                  className="inline-flex items-center gap-1.5 bg-[var(--color-brand)] text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-[var(--color-brand-dark)] transition-colors"
+                >
+                  Browse courses →
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {certificates.map((cert) => (
+                  <div
+                    key={cert.id}
+                    className="bg-surface-1 border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    {/* Thumbnail */}
+                    {cert.course.thumbnailUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={cert.course.thumbnailUrl}
+                        alt={cert.course.title}
+                        className="w-full h-32 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-32 bg-[var(--color-brand-light)] flex items-center justify-center">
+                        <Award size={32} className="text-[var(--color-brand)]" />
+                      </div>
+                    )}
+
+                    {/* Info */}
+                    <div className="p-4 space-y-3">
+                      <div>
+                        <p className="text-sm font-semibold text-text-primary leading-snug">
+                          {cert.course.title}
+                        </p>
+                        <p className="text-xs text-text-muted mt-0.5">
+                          Issued{" "}
+                          {format(new Date(cert.issuedAt), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-text-disabled truncate">
+                          {cert.id}
+                        </span>
+                        <a
+                          href={cert.certificateUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-brand)] hover:underline shrink-0 ml-2"
+                        >
+                          View <ExternalLink size={10} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </TabsContent>

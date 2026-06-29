@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
-import { db, awardXP, updateStreak, XP_EVENTS } from "@/lib";
+import { db, awardXP, updateStreak, XP_EVENTS, generateCertificate } from "@/lib";
 
 export async function POST(
   _req: Request,
@@ -53,6 +53,7 @@ export async function POST(
       xpEarned: 0,
       isFirstCompletion: false,
       totalCompleted,
+      certificateEarned: false,
     });
   }
 
@@ -82,9 +83,41 @@ export async function POST(
     }),
   ]);
 
+  // Check if the full course is now complete
+  let certificateEarned = false;
+
+  const allPublishedLessons = await db.lesson.findMany({
+    where: { section: { courseId }, isPublished: true },
+    select: { quiz: { select: { id: true } } },
+  });
+
+  const totalLessons = allPublishedLessons.length;
+
+  if (totalLessons > 0 && totalCompleted >= totalLessons) {
+    const quizIds = allPublishedLessons
+      .map((l) => l.quiz?.id)
+      .filter((id): id is string => !!id);
+
+    let allQuizzesPassed = true;
+    if (quizIds.length > 0) {
+      const passedDistinct = await db.quizAttempt.findMany({
+        where: { userId: dbUser.id, quizId: { in: quizIds }, isPassed: true },
+        distinct: ["quizId"],
+        select: { quizId: true },
+      });
+      allQuizzesPassed = passedDistinct.length >= quizIds.length;
+    }
+
+    if (allQuizzesPassed) {
+      await generateCertificate(dbUser.id, courseId);
+      certificateEarned = true;
+    }
+  }
+
   return NextResponse.json({
     xpEarned: XP_EVENTS.LESSON_COMPLETE,
     isFirstCompletion: true,
     totalCompleted,
+    certificateEarned,
   });
 }
