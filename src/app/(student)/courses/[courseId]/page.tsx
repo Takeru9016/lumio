@@ -59,6 +59,7 @@ export default async function CourseDetailPage({
             title: true,
             order: true,
             lessons: {
+              where: { isArchived: false },
               orderBy: { order: "asc" },
               select: {
                 id: true,

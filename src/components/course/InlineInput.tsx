@@ -9,6 +9,8 @@ interface InlineInputProps {
   onConfirm: (value: string) => void;
   onCancel: () => void;
   autoFocus?: boolean;
+  defaultValue?: string;
+  confirmLabel?: string;
 }
 
 export function InlineInput({
@@ -16,8 +18,10 @@ export function InlineInput({
   onConfirm,
   onCancel,
   autoFocus = true,
+  defaultValue = "",
+  confirmLabel = "Add",
 }: InlineInputProps) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(defaultValue);
   const [shake, setShake] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +63,7 @@ export function InlineInput({
           className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium bg-brand text-white rounded-md hover:bg-brand-dark transition-colors"
         >
           <Check size={10} />
-          Add
+          {confirmLabel}
         </button>
         <button
           type="button"

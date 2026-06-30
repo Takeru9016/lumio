@@ -25,6 +25,9 @@ import {
   ClipboardList,
   GripVertical,
   Pencil,
+  Trash2,
+  Archive,
+  ArchiveRestore,
   Clock,
   Plus,
   ChevronDown,
@@ -32,6 +35,11 @@ import {
 } from "lucide-react";
 
 import { InlineInput } from "@/components/course/InlineInput";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
 
@@ -41,10 +49,13 @@ export interface LessonItem {
   type: LessonType;
   order: number;
   isPublished: boolean;
+  isArchived: boolean;
   videoStatus: VideoStatus;
   videoDuration: number | null;
   muxPlaybackId?: string | null;
   textContent?: string | null;
+  hasQuiz?: boolean;
+  hasAssignment?: boolean;
 }
 
 export interface SectionItem {
@@ -62,6 +73,12 @@ interface LessonListProps {
   onAddSection: (title: string) => void;
   onAddLesson: (sectionId: string, title: string) => void;
   onReorder: (sections: SectionItem[]) => void;
+  onRenameSection: (sectionId: string, title: string) => void;
+  onRenameLesson: (lessonId: string, title: string) => void;
+  onDeleteSection: (sectionId: string) => void;
+  onDeleteLesson: (lessonId: string, sectionId: string) => void;
+  onArchiveLesson: (lessonId: string) => void;
+  onUnarchiveLesson: (lessonId: string) => void;
 }
 
 const typeIcons: Record<LessonType, React.ReactNode> = {
@@ -83,13 +100,22 @@ function SortableLesson({
   lesson,
   isSelected,
   onSelect,
-  onEdit,
+  onRename,
+  onDelete,
+  onArchive,
+  onUnarchive,
 }: {
   lesson: LessonItem;
   isSelected: boolean;
   onSelect: () => void;
-  onEdit: () => void;
+  onRename: (title: string) => void;
+  onDelete: () => void;
+  onArchive: () => void;
+  onUnarchive: () => void;
 }) {
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -99,67 +125,172 @@ function SortableLesson({
     isDragging,
   } = useSortable({ id: `lesson-${lesson.id}` });
 
+  if (isRenaming) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={{ transform: CSS.Transform.toString(transform), transition }}
+      >
+        <InlineInput
+          placeholder="Lesson title"
+          defaultValue={lesson.title}
+          confirmLabel="Save"
+          onConfirm={(title) => {
+            onRename(title);
+            setIsRenaming(false);
+          }}
+          onCancel={() => setIsRenaming(false)}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div
-      ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors group ${
-        isDragging ? "opacity-50" : ""
-      } ${
-        isSelected
-          ? "bg-brand-light text-brand"
-          : "hover:bg-surface-3 text-text-secondary"
-      }`}
-      onClick={onSelect}
-    >
-      <button
-        type="button"
-        className="cursor-grab touch-none text-text-disabled hover:text-text-muted shrink-0"
-        {...attributes}
-        {...listeners}
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <div
+        ref={setNodeRef}
+        style={{ transform: CSS.Transform.toString(transform), transition }}
+        className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors group ${
+          isDragging ? "opacity-50" : ""
+        } ${
+          lesson.isArchived
+            ? "opacity-50 hover:bg-surface-3 text-text-secondary"
+            : isSelected
+              ? "bg-brand-light text-brand"
+              : "hover:bg-surface-3 text-text-secondary"
+        }`}
+        onClick={onSelect}
       >
-        <GripVertical size={13} />
-      </button>
+        <button
+          type="button"
+          className="cursor-grab touch-none text-text-disabled hover:text-text-muted shrink-0"
+          {...attributes}
+          {...listeners}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical size={13} />
+        </button>
 
-      <span
-        className={`shrink-0 ${isSelected ? "text-brand" : "text-text-muted"}`}
-      >
-        {typeIcons[lesson.type]}
-      </span>
-
-      <span className="text-xs flex-1 truncate font-medium">
-        {lesson.title}
-      </span>
-
-      {lesson.videoDuration && lesson.type === "VIDEO" && (
-        <span className="text-[10px] text-text-muted flex items-center gap-0.5 shrink-0">
-          <Clock size={10} />
-          {formatDuration(lesson.videoDuration)}
+        <span
+          className={`shrink-0 ${
+            lesson.isArchived
+              ? "text-text-disabled"
+              : isSelected
+                ? "text-brand"
+                : "text-text-muted"
+          }`}
+        >
+          {typeIcons[lesson.type]}
         </span>
-      )}
 
-      {lesson.isPublished ? (
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-success-bg text-success shrink-0">
-          Live
+        <span className="text-xs flex-1 truncate font-medium">
+          {lesson.title}
         </span>
-      ) : (
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-3 text-text-muted shrink-0">
-          Draft
-        </span>
-      )}
 
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onEdit();
-        }}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-border transition-opacity shrink-0"
-      >
-        <Pencil size={11} />
-      </button>
-    </div>
+        {lesson.isArchived ? (
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 shrink-0">
+            Archived
+          </span>
+        ) : (
+          <>
+            {lesson.videoDuration && lesson.type === "VIDEO" && (
+              <span className="text-[10px] text-text-muted flex items-center gap-0.5 shrink-0">
+                <Clock size={10} />
+                {formatDuration(lesson.videoDuration)}
+              </span>
+            )}
+            {lesson.isPublished ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-success-bg text-success shrink-0">
+                Live
+              </span>
+            ) : (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-3 text-text-muted shrink-0">
+                Draft
+              </span>
+            )}
+          </>
+        )}
+
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 shrink-0 transition-opacity">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsRenaming(true);
+            }}
+            className="p-1 rounded hover:bg-border transition-colors"
+            title="Rename"
+          >
+            <Pencil size={11} />
+          </button>
+          {lesson.isArchived ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onUnarchive();
+              }}
+              className="p-1 rounded hover:bg-border transition-colors text-amber-600"
+              title="Unarchive"
+            >
+              <ArchiveRestore size={11} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onArchive();
+              }}
+              className="p-1 rounded hover:bg-border transition-colors text-text-muted"
+              title="Archive"
+            >
+              <Archive size={11} />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDeleteConfirm(true);
+            }}
+            className="p-1 rounded hover:bg-border transition-colors text-danger"
+            title="Delete"
+          >
+            <Trash2 size={11} />
+          </button>
+        </div>
+      </div>
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-sm">
+          <DialogTitle>Delete &ldquo;{lesson.title}&rdquo;?</DialogTitle>
+          <p className="text-sm text-text-muted -mt-2">
+            This cannot be undone. Any video, quiz, or assignment content will
+            be permanently removed.
+          </p>
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(false)}
+              className="px-3 py-1.5 text-sm text-text-muted hover:text-text-primary hover:bg-surface-3 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onDelete();
+                setShowDeleteConfirm(false);
+              }}
+              className="px-3 py-1.5 text-sm font-medium text-white bg-danger rounded-md hover:opacity-90 transition-opacity"
+            >
+              Delete
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -174,6 +305,12 @@ function SortableSection({
   showLessonInput,
   onLessonInputConfirm,
   onLessonInputCancel,
+  onRename,
+  onDelete,
+  onRenameLesson,
+  onDeleteLesson,
+  onArchiveLesson,
+  onUnarchiveLesson,
 }: {
   section: SectionItem;
   selectedLessonId: string | null;
@@ -183,8 +320,17 @@ function SortableSection({
   showLessonInput: boolean;
   onLessonInputConfirm: (title: string) => void;
   onLessonInputCancel: () => void;
+  onRename: (title: string) => void;
+  onDelete: () => void;
+  onRenameLesson: (lessonId: string, title: string) => void;
+  onDeleteLesson: (lessonId: string, sectionId: string) => void;
+  onArchiveLesson: (lessonId: string) => void;
+  onUnarchiveLesson: (lessonId: string) => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -217,92 +363,176 @@ function SortableSection({
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={isDragging ? "opacity-50" : ""}
-    >
-      {/* Section header */}
-      <div className="flex items-center gap-1.5 px-2 py-1.5 group">
-        <button
-          type="button"
-          className="cursor-grab touch-none text-text-disabled hover:text-text-muted"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical size={14} />
-        </button>
-        <button
-          type="button"
-          onClick={() => setCollapsed((c) => !c)}
-          className="flex items-center gap-1 flex-1 min-w-0"
-        >
-          {collapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
-          <span className="text-xs font-semibold text-text-primary truncate">
-            {section.title}
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddLesson();
-          }}
-          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-surface-3 text-text-muted transition-opacity"
-          title="Add lesson"
-        >
-          <Plus size={12} />
-        </button>
-      </div>
-
-      {/* Lessons */}
-      {!collapsed && (
-        <div className="ml-3 pl-2 border-l border-border space-y-0.5">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleLessonDragEnd}
+    <>
+      <div
+        ref={setNodeRef}
+        style={{ transform: CSS.Transform.toString(transform), transition }}
+        className={isDragging ? "opacity-50" : ""}
+      >
+        {/* Section header */}
+        <div className="flex items-center gap-1.5 px-2 py-1.5 group">
+          <button
+            type="button"
+            className="cursor-grab touch-none text-text-disabled hover:text-text-muted"
+            {...attributes}
+            {...listeners}
           >
-            <SortableContext
-              items={lessonIds}
-              strategy={verticalListSortingStrategy}
-            >
-              {section.lessons.map((lesson) => (
-                <SortableLesson
-                  key={lesson.id}
-                  lesson={lesson}
-                  isSelected={selectedLessonId === lesson.id}
-                  onSelect={() => onSelectLesson(lesson.id, section.id)}
-                  onEdit={() => onSelectLesson(lesson.id, section.id)}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
+            <GripVertical size={14} />
+          </button>
 
-          {section.lessons.length === 0 && !showLessonInput && (
-            <p className="text-[11px] text-text-disabled px-3 py-2">
-              No lessons yet
-            </p>
-          )}
-
-          {showLessonInput ? (
-            <InlineInput
-              placeholder="Lesson title"
-              onConfirm={onLessonInputConfirm}
-              onCancel={onLessonInputCancel}
-            />
+          {isRenaming ? (
+            <div className="flex-1 min-w-0">
+              <InlineInput
+                placeholder="Section title"
+                defaultValue={section.title}
+                confirmLabel="Save"
+                onConfirm={(title) => {
+                  onRename(title);
+                  setIsRenaming(false);
+                }}
+                onCancel={() => setIsRenaming(false)}
+              />
+            </div>
           ) : (
             <button
               type="button"
-              onClick={onAddLesson}
-              className="w-full flex items-center gap-1 px-3 py-1.5 text-[11px] text-text-muted hover:text-brand hover:bg-brand-light rounded-md transition-colors"
+              onClick={() => setCollapsed((c) => !c)}
+              className="flex items-center gap-1 flex-1 min-w-0"
             >
-              <Plus size={11} /> Add lesson
+              {collapsed ? (
+                <ChevronRight size={13} />
+              ) : (
+                <ChevronDown size={13} />
+              )}
+              <span className="text-xs font-semibold text-text-primary truncate">
+                {section.title}
+              </span>
             </button>
           )}
+
+          {!isRenaming && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsRenaming(true);
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-surface-3 text-text-muted transition-opacity"
+                title="Rename section"
+              >
+                <Pencil size={11} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteConfirm(true);
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-surface-3 text-danger transition-opacity"
+                title="Delete section"
+              >
+                <Trash2 size={11} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddLesson();
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-surface-3 text-text-muted transition-opacity"
+                title="Add lesson"
+              >
+                <Plus size={12} />
+              </button>
+            </>
+          )}
         </div>
-      )}
-    </div>
+
+        {/* Lessons */}
+        {!collapsed && (
+          <div className="ml-3 pl-2 border-l border-border space-y-0.5">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleLessonDragEnd}
+            >
+              <SortableContext
+                items={lessonIds}
+                strategy={verticalListSortingStrategy}
+              >
+                {section.lessons.map((lesson) => (
+                  <SortableLesson
+                    key={lesson.id}
+                    lesson={lesson}
+                    isSelected={selectedLessonId === lesson.id}
+                    onSelect={() => onSelectLesson(lesson.id, section.id)}
+                    onRename={(title) => onRenameLesson(lesson.id, title)}
+                    onDelete={() => onDeleteLesson(lesson.id, section.id)}
+                    onArchive={() => onArchiveLesson(lesson.id)}
+                    onUnarchive={() => onUnarchiveLesson(lesson.id)}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+
+            {section.lessons.length === 0 && !showLessonInput && (
+              <p className="text-[11px] text-text-disabled px-3 py-2">
+                No lessons yet
+              </p>
+            )}
+
+            {showLessonInput ? (
+              <InlineInput
+                placeholder="Lesson title"
+                onConfirm={onLessonInputConfirm}
+                onCancel={onLessonInputCancel}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={onAddLesson}
+                className="w-full flex items-center gap-1 px-3 py-1.5 text-[11px] text-text-muted hover:text-brand hover:bg-brand-light rounded-md transition-colors"
+              >
+                <Plus size={11} /> Add lesson
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-sm">
+          <DialogTitle>Delete &ldquo;{section.title}&rdquo;?</DialogTitle>
+          <p className="text-sm text-text-muted -mt-2">
+            This will permanently delete this section and all{" "}
+            <strong>{section.lessons.length}</strong> lesson
+            {section.lessons.length !== 1 ? "s" : ""} inside it. This cannot
+            be undone.
+          </p>
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(false)}
+              className="px-3 py-1.5 text-sm text-text-muted hover:text-text-primary hover:bg-surface-3 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onDelete();
+                setShowDeleteConfirm(false);
+              }}
+              className="px-3 py-1.5 text-sm font-medium text-white bg-danger rounded-md hover:opacity-90 transition-opacity"
+            >
+              Delete section and {section.lessons.length} lesson
+              {section.lessons.length !== 1 ? "s" : ""}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -316,6 +546,12 @@ export function LessonList({
   onAddSection,
   onAddLesson,
   onReorder,
+  onRenameSection,
+  onRenameLesson,
+  onDeleteSection,
+  onDeleteLesson,
+  onArchiveLesson,
+  onUnarchiveLesson,
 }: LessonListProps) {
   const [inlineFor, setInlineFor] = useState<null | "section" | string>(null);
 
@@ -375,6 +611,12 @@ export function LessonList({
                   setInlineFor(null);
                 }}
                 onLessonInputCancel={() => setInlineFor(null)}
+                onRename={(title) => onRenameSection(section.id, title)}
+                onDelete={() => onDeleteSection(section.id)}
+                onRenameLesson={onRenameLesson}
+                onDeleteLesson={onDeleteLesson}
+                onArchiveLesson={onArchiveLesson}
+                onUnarchiveLesson={onUnarchiveLesson}
               />
             ))}
           </SortableContext>

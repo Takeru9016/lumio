@@ -49,6 +49,7 @@ export type LessonMinAggregateOutputType = {
   videoStatus: $Enums.VideoStatus | null
   videoDuration: number | null
   textContent: string | null
+  isArchived: boolean | null
   sectionId: string | null
   aiSummary: string | null
   createdAt: Date | null
@@ -68,6 +69,7 @@ export type LessonMaxAggregateOutputType = {
   videoStatus: $Enums.VideoStatus | null
   videoDuration: number | null
   textContent: string | null
+  isArchived: boolean | null
   sectionId: string | null
   aiSummary: string | null
   createdAt: Date | null
@@ -87,6 +89,7 @@ export type LessonCountAggregateOutputType = {
   videoStatus: number
   videoDuration: number
   textContent: number
+  isArchived: number
   sectionId: number
   aiSummary: number
   createdAt: number
@@ -118,6 +121,7 @@ export type LessonMinAggregateInputType = {
   videoStatus?: true
   videoDuration?: true
   textContent?: true
+  isArchived?: true
   sectionId?: true
   aiSummary?: true
   createdAt?: true
@@ -137,6 +141,7 @@ export type LessonMaxAggregateInputType = {
   videoStatus?: true
   videoDuration?: true
   textContent?: true
+  isArchived?: true
   sectionId?: true
   aiSummary?: true
   createdAt?: true
@@ -156,6 +161,7 @@ export type LessonCountAggregateInputType = {
   videoStatus?: true
   videoDuration?: true
   textContent?: true
+  isArchived?: true
   sectionId?: true
   aiSummary?: true
   createdAt?: true
@@ -262,6 +268,7 @@ export type LessonGroupByOutputType = {
   videoStatus: $Enums.VideoStatus
   videoDuration: number | null
   textContent: string | null
+  isArchived: boolean
   sectionId: string
   aiSummary: string | null
   createdAt: Date
@@ -304,6 +311,7 @@ export type LessonWhereInput = {
   videoStatus?: Prisma.EnumVideoStatusFilter<"Lesson"> | $Enums.VideoStatus
   videoDuration?: Prisma.IntNullableFilter<"Lesson"> | number | null
   textContent?: Prisma.StringNullableFilter<"Lesson"> | string | null
+  isArchived?: Prisma.BoolFilter<"Lesson"> | boolean
   sectionId?: Prisma.StringFilter<"Lesson"> | string
   aiSummary?: Prisma.StringNullableFilter<"Lesson"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
@@ -328,6 +336,7 @@ export type LessonOrderByWithRelationInput = {
   videoStatus?: Prisma.SortOrder
   videoDuration?: Prisma.SortOrderInput | Prisma.SortOrder
   textContent?: Prisma.SortOrderInput | Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -355,6 +364,7 @@ export type LessonWhereUniqueInput = Prisma.AtLeast<{
   videoStatus?: Prisma.EnumVideoStatusFilter<"Lesson"> | $Enums.VideoStatus
   videoDuration?: Prisma.IntNullableFilter<"Lesson"> | number | null
   textContent?: Prisma.StringNullableFilter<"Lesson"> | string | null
+  isArchived?: Prisma.BoolFilter<"Lesson"> | boolean
   sectionId?: Prisma.StringFilter<"Lesson"> | string
   aiSummary?: Prisma.StringNullableFilter<"Lesson"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
@@ -379,6 +389,7 @@ export type LessonOrderByWithAggregationInput = {
   videoStatus?: Prisma.SortOrder
   videoDuration?: Prisma.SortOrderInput | Prisma.SortOrder
   textContent?: Prisma.SortOrderInput | Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -406,6 +417,7 @@ export type LessonScalarWhereWithAggregatesInput = {
   videoStatus?: Prisma.EnumVideoStatusWithAggregatesFilter<"Lesson"> | $Enums.VideoStatus
   videoDuration?: Prisma.IntNullableWithAggregatesFilter<"Lesson"> | number | null
   textContent?: Prisma.StringNullableWithAggregatesFilter<"Lesson"> | string | null
+  isArchived?: Prisma.BoolWithAggregatesFilter<"Lesson"> | boolean
   sectionId?: Prisma.StringWithAggregatesFilter<"Lesson"> | string
   aiSummary?: Prisma.StringNullableWithAggregatesFilter<"Lesson"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Lesson"> | Date | string
@@ -425,6 +437,7 @@ export type LessonCreateInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   aiSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -448,6 +461,7 @@ export type LessonUncheckedCreateInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
   createdAt?: Date | string
@@ -471,6 +485,7 @@ export type LessonUpdateInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -494,6 +509,7 @@ export type LessonUncheckedUpdateInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -517,6 +533,7 @@ export type LessonCreateManyInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
   createdAt?: Date | string
@@ -536,6 +553,7 @@ export type LessonUpdateManyMutationInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -554,6 +572,7 @@ export type LessonUncheckedUpdateManyInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -583,6 +602,7 @@ export type LessonCountOrderByAggregateInput = {
   videoStatus?: Prisma.SortOrder
   videoDuration?: Prisma.SortOrder
   textContent?: Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -607,6 +627,7 @@ export type LessonMaxOrderByAggregateInput = {
   videoStatus?: Prisma.SortOrder
   videoDuration?: Prisma.SortOrder
   textContent?: Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -626,6 +647,7 @@ export type LessonMinOrderByAggregateInput = {
   videoStatus?: Prisma.SortOrder
   videoDuration?: Prisma.SortOrder
   textContent?: Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -776,6 +798,7 @@ export type LessonCreateWithoutSectionInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   aiSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -798,6 +821,7 @@ export type LessonUncheckedCreateWithoutSectionInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   aiSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -849,6 +873,7 @@ export type LessonScalarWhereInput = {
   videoStatus?: Prisma.EnumVideoStatusFilter<"Lesson"> | $Enums.VideoStatus
   videoDuration?: Prisma.IntNullableFilter<"Lesson"> | number | null
   textContent?: Prisma.StringNullableFilter<"Lesson"> | string | null
+  isArchived?: Prisma.BoolFilter<"Lesson"> | boolean
   sectionId?: Prisma.StringFilter<"Lesson"> | string
   aiSummary?: Prisma.StringNullableFilter<"Lesson"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
@@ -868,6 +893,7 @@ export type LessonCreateWithoutProgressInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   aiSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -890,6 +916,7 @@ export type LessonUncheckedCreateWithoutProgressInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
   createdAt?: Date | string
@@ -928,6 +955,7 @@ export type LessonUpdateWithoutProgressInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -950,6 +978,7 @@ export type LessonUncheckedUpdateWithoutProgressInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -972,6 +1001,7 @@ export type LessonCreateWithoutQuizInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   aiSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -994,6 +1024,7 @@ export type LessonUncheckedCreateWithoutQuizInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
   createdAt?: Date | string
@@ -1032,6 +1063,7 @@ export type LessonUpdateWithoutQuizInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1054,6 +1086,7 @@ export type LessonUncheckedUpdateWithoutQuizInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1076,6 +1109,7 @@ export type LessonCreateWithoutAssignmentInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   aiSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1098,6 +1132,7 @@ export type LessonUncheckedCreateWithoutAssignmentInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
   createdAt?: Date | string
@@ -1136,6 +1171,7 @@ export type LessonUpdateWithoutAssignmentInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1158,6 +1194,7 @@ export type LessonUncheckedUpdateWithoutAssignmentInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1180,6 +1217,7 @@ export type LessonCreateWithoutAiChatsInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   aiSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1202,6 +1240,7 @@ export type LessonUncheckedCreateWithoutAiChatsInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
   createdAt?: Date | string
@@ -1240,6 +1279,7 @@ export type LessonUpdateWithoutAiChatsInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1262,6 +1302,7 @@ export type LessonUncheckedUpdateWithoutAiChatsInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1284,6 +1325,7 @@ export type LessonCreateManySectionInput = {
   videoStatus?: $Enums.VideoStatus
   videoDuration?: number | null
   textContent?: string | null
+  isArchived?: boolean
   aiSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1302,6 +1344,7 @@ export type LessonUpdateWithoutSectionInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1324,6 +1367,7 @@ export type LessonUncheckedUpdateWithoutSectionInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1346,6 +1390,7 @@ export type LessonUncheckedUpdateManyWithoutSectionInput = {
   videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1404,6 +1449,7 @@ export type LessonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   videoStatus?: boolean
   videoDuration?: boolean
   textContent?: boolean
+  isArchived?: boolean
   sectionId?: boolean
   aiSummary?: boolean
   createdAt?: boolean
@@ -1429,6 +1475,7 @@ export type LessonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   videoStatus?: boolean
   videoDuration?: boolean
   textContent?: boolean
+  isArchived?: boolean
   sectionId?: boolean
   aiSummary?: boolean
   createdAt?: boolean
@@ -1449,6 +1496,7 @@ export type LessonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   videoStatus?: boolean
   videoDuration?: boolean
   textContent?: boolean
+  isArchived?: boolean
   sectionId?: boolean
   aiSummary?: boolean
   createdAt?: boolean
@@ -1469,13 +1517,14 @@ export type LessonSelectScalar = {
   videoStatus?: boolean
   videoDuration?: boolean
   textContent?: boolean
+  isArchived?: boolean
   sectionId?: boolean
   aiSummary?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "type" | "order" | "isPublished" | "isFree" | "muxAssetId" | "muxPlaybackId" | "videoStatus" | "videoDuration" | "textContent" | "sectionId" | "aiSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>
+export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "type" | "order" | "isPublished" | "isFree" | "muxAssetId" | "muxPlaybackId" | "videoStatus" | "videoDuration" | "textContent" | "isArchived" | "sectionId" | "aiSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>
 export type LessonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   section?: boolean | Prisma.SectionDefaultArgs<ExtArgs>
   progress?: boolean | Prisma.Lesson$progressArgs<ExtArgs>
@@ -1513,6 +1562,7 @@ export type $LessonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     videoStatus: $Enums.VideoStatus
     videoDuration: number | null
     textContent: string | null
+    isArchived: boolean
     sectionId: string
     aiSummary: string | null
     createdAt: Date
@@ -1957,6 +2007,7 @@ export interface LessonFieldRefs {
   readonly videoStatus: Prisma.FieldRef<"Lesson", 'VideoStatus'>
   readonly videoDuration: Prisma.FieldRef<"Lesson", 'Int'>
   readonly textContent: Prisma.FieldRef<"Lesson", 'String'>
+  readonly isArchived: Prisma.FieldRef<"Lesson", 'Boolean'>
   readonly sectionId: Prisma.FieldRef<"Lesson", 'String'>
   readonly aiSummary: Prisma.FieldRef<"Lesson", 'String'>
   readonly createdAt: Prisma.FieldRef<"Lesson", 'DateTime'>

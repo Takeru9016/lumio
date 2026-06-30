@@ -18,7 +18,13 @@ import { TextEditor } from "@/components/course/TextEditor";
 import { VideoPlayer } from "@/components/course/VideoPlayer";
 import { QuizBuilder } from "@/components/course/QuizBuilder";
 import { AssignmentBuilder } from "@/components/course/AssignmentBuilder";
+import { InlineInput } from "@/components/course/InlineInput";
 import type { LessonItem } from "@/components/course/LessonList";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import { useUploadThing } from "@/lib/uploadthing";
 
@@ -49,6 +55,13 @@ const LESSON_TYPES: {
   },
 ];
 
+const TYPE_LABELS: Record<LessonType, string> = {
+  VIDEO: "Video",
+  TEXT: "Text",
+  QUIZ: "Quiz",
+  ASSIGNMENT: "Assignment",
+};
+
 export function LessonEditor({
   lesson,
   courseId,
@@ -69,6 +82,9 @@ export function LessonEditor({
   const [previewPlaybackId, setPreviewPlaybackId] = useState<string | null>(
     lesson.muxPlaybackId ?? null,
   );
+  const [pendingType, setPendingType] = useState<LessonType | null>(null);
+  const [isRenamingTitle, setIsRenamingTitle] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -170,11 +186,55 @@ export function LessonEditor({
     return () => clearInterval(interval);
   }, [uploadState, courseId, sectionId, lesson.id]);
 
-  async function handleTypeChange(type: LessonType) {
+  // Content detection for each type
+  const hasVideoContent =
+    previewPlaybackId !== null ||
+    (lesson.muxPlaybackId !== null && lesson.muxPlaybackId !== undefined);
+  const hasTextContent =
+    !!lesson.textContent && lesson.textContent.trim() !== "";
+  const hasQuizContent = lesson.hasQuiz === true;
+  const hasAssignmentContent = lesson.hasAssignment === true;
+
+  function contentExistsForType(type: LessonType): boolean {
+    switch (type) {
+      case "VIDEO":
+        return hasVideoContent;
+      case "TEXT":
+        return hasTextContent;
+      case "QUIZ":
+        return hasQuizContent;
+      case "ASSIGNMENT":
+        return hasAssignmentContent;
+    }
+  }
+
+  function typeHasIndicator(type: LessonType): boolean {
+    switch (type) {
+      case "VIDEO":
+        return hasVideoContent;
+      case "TEXT":
+        return hasTextContent;
+      case "QUIZ":
+        return hasQuizContent;
+      case "ASSIGNMENT":
+        return hasAssignmentContent;
+    }
+  }
+
+  function requestTypeChange(type: LessonType) {
     if (type === localType) return;
+    if (contentExistsForType(localType)) {
+      setPendingType(type);
+    } else {
+      void commitTypeChange(type);
+    }
+  }
+
+  async function commitTypeChange(type: LessonType) {
     const prev = localType;
     setLocalType(type);
     onUpdate(lesson.id, { type });
+    setPendingType(null);
 
     try {
       const res = await fetch(
@@ -217,6 +277,23 @@ export function LessonEditor({
     }
   }
 
+  async function saveTitle(title: string) {
+    try {
+      const res = await fetch(
+        `/api/courses/${courseId}/sections/${sectionId}/lessons/${lesson.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title }),
+        },
+      );
+      if (!res.ok) throw new Error();
+      onUpdateRef.current(lesson.id, { title });
+    } catch {
+      toast.error({ title: "Failed to rename lesson" });
+    }
+  }
+
   async function togglePublish() {
     const next = !localIsPublished;
     setLocalIsPublished(next);
@@ -250,9 +327,28 @@ export function LessonEditor({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-text-primary truncate">
-          {lesson.title}
-        </h2>
+        {isRenamingTitle ? (
+          <div className="flex-1 min-w-0">
+            <InlineInput
+              placeholder="Lesson title"
+              defaultValue={lesson.title}
+              confirmLabel="Save"
+              onConfirm={(title) => {
+                setIsRenamingTitle(false);
+                void saveTitle(title);
+              }}
+              onCancel={() => setIsRenamingTitle(false)}
+            />
+          </div>
+        ) : (
+          <h2
+            className="text-base font-semibold text-text-primary truncate cursor-pointer hover:text-brand transition-colors"
+            onClick={() => setIsRenamingTitle(true)}
+            title="Click to rename"
+          >
+            {lesson.title}
+          </h2>
+        )}
         <div className="flex items-center gap-3 shrink-0">
           {saveStatus === "saving" && (
             <span className="flex items-center gap-1 text-xs text-text-muted">
@@ -287,7 +383,7 @@ export function LessonEditor({
           <button
             key={value}
             type="button"
-            onClick={() => void handleTypeChange(value)}
+            onClick={() => requestTypeChange(value)}
             className={`flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
               localType === value
                 ? "bg-brand text-white"
@@ -296,6 +392,15 @@ export function LessonEditor({
           >
             {icon}
             {label}
+            {typeHasIndicator(value) && (
+              <span
+                className={`text-[9px] font-bold leading-none ${
+                  localType === value ? "text-white/80" : "text-success"
+                }`}
+              >
+                ✓
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -423,6 +528,40 @@ export function LessonEditor({
       {localType === "ASSIGNMENT" && (
         <AssignmentBuilder courseId={courseId} lessonId={lesson.id} />
       )}
+
+      {/* Type switch confirmation */}
+      <Dialog
+        open={pendingType !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingType(null);
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogTitle>Switch to {pendingType ? TYPE_LABELS[pendingType] : ""}?</DialogTitle>
+          <p className="text-sm text-text-muted -mt-2">
+            This lesson currently has{" "}
+            <strong>{TYPE_LABELS[localType]}</strong> content. Switching to{" "}
+            <strong>{pendingType ? TYPE_LABELS[pendingType] : ""}</strong> will
+            hide it from students, but it stays saved if you switch back.
+          </p>
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => setPendingType(null)}
+              className="px-3 py-1.5 text-sm text-text-muted hover:text-text-primary hover:bg-surface-3 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => pendingType && void commitTypeChange(pendingType)}
+              className="px-3 py-1.5 text-sm font-medium bg-brand text-white rounded-md hover:bg-brand-dark transition-colors"
+            >
+              Switch anyway
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

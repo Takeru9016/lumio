@@ -32,6 +32,7 @@ export async function POST(
           id: true,
           title: true,
           lessons: {
+            where: { isArchived: false },
             select: { id: true, type: true, videoStatus: true },
           },
         },

@@ -202,6 +202,7 @@ export const LessonScalarFieldEnum = {
   videoStatus: 'videoStatus',
   videoDuration: 'videoDuration',
   textContent: 'textContent',
+  isArchived: 'isArchived',
   sectionId: 'sectionId',
   aiSummary: 'aiSummary',
   createdAt: 'createdAt',

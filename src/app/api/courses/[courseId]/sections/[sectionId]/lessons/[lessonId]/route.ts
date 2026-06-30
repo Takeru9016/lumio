@@ -32,6 +32,7 @@ const updateLessonSchema = z.object({
   description: z.string().optional(),
   textContent: z.string().optional(),
   isPublished: z.boolean().optional(),
+  isArchived: z.boolean().optional(),
   type: z.enum(["VIDEO", "TEXT", "QUIZ", "ASSIGNMENT"]).optional(),
 });
 

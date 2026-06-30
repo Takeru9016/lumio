@@ -87,7 +87,7 @@ export async function POST(
   let certificateEarned = false;
 
   const allPublishedLessons = await db.lesson.findMany({
-    where: { section: { courseId }, isPublished: true },
+    where: { section: { courseId }, isPublished: true, isArchived: false },
     select: { quiz: { select: { id: true } } },
   });
 

@@ -249,6 +249,9 @@ model Lesson {
   // Text content
   textContent   String?
 
+  // Archive flag — hides from students without deleting content
+  isArchived    Boolean @default(false)
+
   // AI embeddings for RAG (pgvector)
   embedding     Unsupported("vector(1536)")?
 
@@ -298,7 +301,7 @@ model LessonProgress {
   userId   String
   lessonId String
   user     User   @relation(fields: [userId], references: [id])
-  lesson   Lesson @relation(fields: [lessonId], references: [id])
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   completedAt DateTime?
   createdAt   DateTime  @default(now())
@@ -352,7 +355,7 @@ model QuizAttempt {
   userId   String
   quizId   String
   user     User   @relation(fields: [userId], references: [id])
-  quiz     Quiz   @relation(fields: [quizId], references: [id])
+  quiz     Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   answers  QuizAnswer[]
 
@@ -370,7 +373,7 @@ model QuizAnswer {
   attemptId  String
   questionId String
   attempt    QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question   QuizQuestion @relation(fields: [questionId], references: [id])
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@index([attemptId])
 }
@@ -406,7 +409,7 @@ model AssignmentSubmission {
   userId       String
   assignmentId String
   user         User             @relation(fields: [userId], references: [id])
-  assignment   Assignment       @relation(fields: [assignmentId], references: [id])
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   submittedAt  DateTime @default(now())
   gradedAt     DateTime?

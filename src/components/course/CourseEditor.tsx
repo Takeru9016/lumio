@@ -58,6 +58,10 @@ export function CourseEditor({
     (l) => l.id === selectedLessonId,
   );
 
+  function findSectionForLesson(lessonId: string): string | undefined {
+    return sections.find((s) => s.lessons.some((l) => l.id === lessonId))?.id;
+  }
+
   async function addSection(title: string) {
     const res = await fetch(`/api/courses/${courseId}/sections`, {
       method: "POST",
@@ -104,6 +108,129 @@ export function CourseEditor({
         ),
       })),
     );
+  }
+
+  async function renameSection(sectionId: string, title: string) {
+    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
+    if (!res.ok) {
+      toast.error({ title: "Failed to rename section" });
+      return;
+    }
+    setSections((prev) =>
+      prev.map((s) => (s.id === sectionId ? { ...s, title } : s)),
+    );
+  }
+
+  async function renameLesson(lessonId: string, title: string) {
+    const sectionId = findSectionForLesson(lessonId);
+    if (!sectionId) return;
+    const res = await fetch(
+      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      },
+    );
+    if (!res.ok) {
+      toast.error({ title: "Failed to rename lesson" });
+      return;
+    }
+    handleLessonUpdate(lessonId, { title });
+  }
+
+  async function deleteSection(sectionId: string) {
+    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      toast.error({ title: "Failed to delete section" });
+      return;
+    }
+
+    const deletedSection = sections.find((s) => s.id === sectionId);
+    if (deletedSection?.lessons.some((l) => l.id === selectedLessonId)) {
+      const otherLessons = sections
+        .filter((s) => s.id !== sectionId)
+        .flatMap((s) => s.lessons);
+      setSelectedLessonId(otherLessons[0]?.id ?? null);
+    }
+
+    setSections((prev) => prev.filter((s) => s.id !== sectionId));
+    toast.success({ title: "Section deleted" });
+  }
+
+  async function deleteLesson(lessonId: string, sectionId: string) {
+    const res = await fetch(
+      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+      { method: "DELETE" },
+    );
+    if (!res.ok) {
+      toast.error({ title: "Failed to delete lesson" });
+      return;
+    }
+
+    if (selectedLessonId === lessonId) {
+      const currentSection = sections.find((s) => s.id === sectionId);
+      const remainingInSection =
+        currentSection?.lessons.filter((l) => l.id !== lessonId) ?? [];
+      const otherLessons = sections
+        .filter((s) => s.id !== sectionId)
+        .flatMap((s) => s.lessons);
+      const nextLesson = remainingInSection[0] ?? otherLessons[0] ?? null;
+      setSelectedLessonId(nextLesson?.id ?? null);
+    }
+
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? { ...s, lessons: s.lessons.filter((l) => l.id !== lessonId) }
+          : s,
+      ),
+    );
+    toast.success({ title: "Lesson deleted" });
+  }
+
+  async function archiveLesson(lessonId: string) {
+    const sectionId = findSectionForLesson(lessonId);
+    if (!sectionId) return;
+    const res = await fetch(
+      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isArchived: true }),
+      },
+    );
+    if (!res.ok) {
+      toast.error({ title: "Failed to archive lesson" });
+      return;
+    }
+    handleLessonUpdate(lessonId, { isArchived: true });
+    toast.success({ title: "Lesson archived — hidden from students" });
+  }
+
+  async function unarchiveLesson(lessonId: string) {
+    const sectionId = findSectionForLesson(lessonId);
+    if (!sectionId) return;
+    const res = await fetch(
+      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isArchived: false }),
+      },
+    );
+    if (!res.ok) {
+      toast.error({ title: "Failed to unarchive lesson" });
+      return;
+    }
+    handleLessonUpdate(lessonId, { isArchived: false });
+    toast.success({ title: "Lesson unarchived" });
   }
 
   function handleAiOutline() {
@@ -203,9 +330,21 @@ export function CourseEditor({
           sections={sections}
           selectedLessonId={selectedLessonId}
           onSelectLesson={(lessonId) => setSelectedLessonId(lessonId)}
-          onAddSection={addSection}
-          onAddLesson={addLesson}
+          onAddSection={(title) => void addSection(title)}
+          onAddLesson={(sectionId, title) => void addLesson(sectionId, title)}
           onReorder={setSections}
+          onRenameSection={(sectionId, title) =>
+            void renameSection(sectionId, title)
+          }
+          onRenameLesson={(lessonId, title) =>
+            void renameLesson(lessonId, title)
+          }
+          onDeleteSection={(sectionId) => void deleteSection(sectionId)}
+          onDeleteLesson={(lessonId, sectionId) =>
+            void deleteLesson(lessonId, sectionId)
+          }
+          onArchiveLesson={(lessonId) => void archiveLesson(lessonId)}
+          onUnarchiveLesson={(lessonId) => void unarchiveLesson(lessonId)}
         />
       </aside>
 

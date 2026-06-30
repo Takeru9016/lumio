@@ -41,7 +41,7 @@ export default async function LessonPage({
             id: true,
             title: true,
             lessons: {
-              where: { isPublished: true },
+              where: { isPublished: true, isArchived: false },
               orderBy: { order: "asc" },
               select: {
                 id: true,
@@ -64,6 +64,7 @@ export default async function LessonPage({
         videoStatus: true,
         textContent: true,
         isPublished: true,
+        isArchived: true,
         quiz: {
           select: {
             id: true,
@@ -111,7 +112,7 @@ export default async function LessonPage({
   if (!course || course.status === "DRAFT") notFound();
   // Archived courses: only enrolled students may continue their lessons
   if (course.status === "ARCHIVED" && !enrollment) notFound();
-  if (!lesson || !lesson.isPublished) notFound();
+  if (!lesson || !lesson.isPublished || lesson.isArchived) notFound();
   if (!enrollment) redirect(`/courses/${courseId}`);
 
   const allPublishedLessons = course.sections.flatMap((s) => s.lessons);
