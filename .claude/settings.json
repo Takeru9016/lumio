@@ -2,7 +2,7 @@
   "_comment": "Lumio Claude Code project settings. Commit this file. Personal overrides go in settings.local.json (gitignored).",
   "_docs": "https://code.claude.com/docs/en/settings",
 
-  "model": "claude-sonnet-4-6",
+  "model": "claude-sonnet-5",
 
   "effortLevel": "high",
 
