@@ -44,6 +44,7 @@ type QuizPhase = "idle" | "taking" | "results";
 interface StudentQuizProps {
   quiz: QuizData | null;
   initialAttempts: AttemptSummary[];
+  onComplete?: () => void;
 }
 
 function displayAnswer(
@@ -59,7 +60,7 @@ function displayAnswer(
   return answer;
 }
 
-export function StudentQuiz({ quiz, initialAttempts }: StudentQuizProps) {
+export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizProps) {
   const [phase, setPhase] = useState<QuizPhase>("idle");
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -130,6 +131,7 @@ export function StudentQuiz({ quiz, initialAttempts }: StudentQuizProps) {
         ...prev,
       ]);
       setPhase("results");
+      if (data.isPassed) onComplete?.();
     } catch {
       toast.error({ title: "Failed to submit quiz. Please try again." });
     } finally {

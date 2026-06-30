@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
@@ -86,6 +87,7 @@ export function CoursePlayerClient({
   initialCompletedIds,
   initialAttempts,
 }: CoursePlayerClientProps) {
+  const router = useRouter();
   const [completedIds, setCompletedIds] = useState<Set<string>>(
     () => new Set(initialCompletedIds),
   );
@@ -111,6 +113,9 @@ export function CoursePlayerClient({
         xpEarned: number;
         isFirstCompletion: boolean;
         totalCompleted: number;
+        certificateEarned: boolean;
+        courseCompleted: boolean;
+        courseXpEarned: number;
       };
 
       if (data.isFirstCompletion && data.xpEarned > 0) {
@@ -119,6 +124,13 @@ export function CoursePlayerClient({
           description: "Lesson complete. Keep going!",
         });
       }
+      if (data.courseCompleted && data.courseXpEarned > 0) {
+        toast.success({
+          title: "Course complete! 🎉",
+          description: `+${data.courseXpEarned} XP bonus earned`,
+        });
+      }
+      router.refresh();
     } catch {
       hasPostedRef.current = false;
       setCompletedIds((prev) => {
@@ -170,7 +182,7 @@ export function CoursePlayerClient({
       <div className="flex flex-1 min-h-0">
         {/* Main content */}
         <div className="flex-1 min-w-0 overflow-y-auto">
-          <div className="p-4 md:p-6 space-y-4 max-w-4xl">
+          <div className="p-4 md:p-6 space-y-4">
             {/* Lesson title */}
             <h1 className="text-xl font-bold text-text-primary">
               {lesson.title}
@@ -187,6 +199,7 @@ export function CoursePlayerClient({
               <StudentQuiz
                 quiz={lesson.quiz}
                 initialAttempts={initialAttempts}
+                onComplete={() => void markComplete()}
               />
             ) : lesson.type === "ASSIGNMENT" ? (
               lesson.assignment ? (

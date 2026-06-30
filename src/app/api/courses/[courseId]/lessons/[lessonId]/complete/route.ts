@@ -23,7 +23,7 @@ export async function POST(
   const [enrollment, lesson] = await Promise.all([
     db.enrollment.findUnique({
       where: { userId_courseId: { userId: dbUser.id, courseId } },
-      select: { id: true },
+      select: { id: true, status: true },
     }),
     db.lesson.findFirst({
       where: { id: lessonId, section: { courseId } },
@@ -41,50 +41,40 @@ export async function POST(
     select: { isCompleted: true },
   });
 
-  if (existing?.isCompleted) {
-    const totalCompleted = await db.lessonProgress.count({
-      where: {
+  const isFirstCompletion = !existing?.isCompleted;
+
+  if (isFirstCompletion) {
+    await db.lessonProgress.upsert({
+      where: { userId_lessonId: { userId: dbUser.id, lessonId } },
+      create: {
         userId: dbUser.id,
+        lessonId,
         isCompleted: true,
-        lesson: { section: { courseId } },
+        completedAt: new Date(),
+        watchedSecs: 0,
       },
+      update: { isCompleted: true, completedAt: new Date() },
     });
-    return NextResponse.json({
-      xpEarned: 0,
-      isFirstCompletion: false,
-      totalCompleted,
-      certificateEarned: false,
-    });
-  }
 
-  await db.lessonProgress.upsert({
-    where: { userId_lessonId: { userId: dbUser.id, lessonId } },
-    create: {
-      userId: dbUser.id,
-      lessonId,
-      isCompleted: true,
-      completedAt: new Date(),
-      watchedSecs: 0,
-    },
-    update: { isCompleted: true, completedAt: new Date() },
-  });
-
-  const [, totalCompleted] = await Promise.all([
-    Promise.all([
+    await Promise.all([
       awardXP(dbUser.id, "LESSON_COMPLETE", XP_EVENTS.LESSON_COMPLETE),
       updateStreak(dbUser.id),
-    ]),
-    db.lessonProgress.count({
-      where: {
-        userId: dbUser.id,
-        isCompleted: true,
-        lesson: { section: { courseId } },
-      },
-    }),
-  ]);
+    ]);
+  }
 
-  // Check if the full course is now complete
+  const totalCompleted = await db.lessonProgress.count({
+    where: {
+      userId: dbUser.id,
+      isCompleted: true,
+      lesson: { section: { courseId } },
+    },
+  });
+
+  // Always check course completion — a quiz pass can trigger it even when the
+  // lesson was already marked complete manually before the quiz was attempted.
   let certificateEarned = false;
+  let courseCompleted = false;
+  let courseXpEarned = 0;
 
   const allPublishedLessons = await db.lesson.findMany({
     where: { section: { courseId }, isPublished: true, isArchived: false },
@@ -109,15 +99,30 @@ export async function POST(
     }
 
     if (allQuizzesPassed) {
-      await generateCertificate(dbUser.id, courseId);
       certificateEarned = true;
+      courseCompleted = true;
+      if (enrollment.status !== "COMPLETED") {
+        await Promise.all([
+          db.enrollment.update({
+            where: { id: enrollment.id },
+            data: { status: "COMPLETED", completedAt: new Date() },
+          }),
+          awardXP(dbUser.id, "COURSE_COMPLETE", XP_EVENTS.COURSE_COMPLETE),
+          generateCertificate(dbUser.id, courseId),
+        ]);
+        courseXpEarned = XP_EVENTS.COURSE_COMPLETE;
+      } else {
+        await generateCertificate(dbUser.id, courseId);
+      }
     }
   }
 
   return NextResponse.json({
-    xpEarned: XP_EVENTS.LESSON_COMPLETE,
-    isFirstCompletion: true,
+    xpEarned: isFirstCompletion ? XP_EVENTS.LESSON_COMPLETE : 0,
+    isFirstCompletion,
     totalCompleted,
     certificateEarned,
+    courseCompleted,
+    courseXpEarned,
   });
 }
