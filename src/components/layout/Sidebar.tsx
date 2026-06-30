@@ -30,11 +30,11 @@ import type { Role } from "@/generated/prisma/enums";
 const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
   STUDENT: [
     { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-    { label: "My Courses", href: "/student/courses", icon: BookOpen },
+    { label: "My Courses", href: "/courses", icon: BookOpen },
     { label: "Learning Path", href: "/student/learning-path", icon: Map },
     { label: "AI Tutor", href: "/student/ai-tutor", icon: Sparkles },
     { label: "Assignments", href: "/student/assignments", icon: ClipboardList },
-    { label: "Leaderboard", href: "/student/leaderboard", icon: Trophy },
+    { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { label: "Settings", href: "/settings", icon: Settings },
   ],
   INSTRUCTOR: [

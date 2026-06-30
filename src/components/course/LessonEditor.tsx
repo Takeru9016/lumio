@@ -5,6 +5,7 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
+  CheckCircle2,
   UploadCloud,
   Video,
   FileText,
@@ -24,19 +25,14 @@ import { useUploadThing } from "@/lib/uploadthing";
 import type { LessonType } from "@/generated/prisma/enums";
 
 interface LessonEditorProps {
-  lesson: LessonItem & {
-    textContent?: string | null;
-    muxPlaybackId?: string | null;
-  };
+  lesson: LessonItem;
   courseId: string;
   sectionId: string;
-  onUpdate: (
-    lessonId: string,
-    patch: Partial<LessonItem & { textContent?: string }>,
-  ) => void;
+  onUpdate: (lessonId: string, patch: Partial<LessonItem>) => void;
 }
 
 type UploadState = "idle" | "uploading" | "processing" | "ready";
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 const LESSON_TYPES: {
   value: LessonType;
@@ -59,7 +55,8 @@ export function LessonEditor({
   sectionId,
   onUpdate,
 }: LessonEditorProps) {
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [localIsPublished, setLocalIsPublished] = useState(lesson.isPublished);
   const [localType, setLocalType] = useState<LessonType>(lesson.type);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadState, setUploadState] = useState<UploadState>(
@@ -73,10 +70,19 @@ export function LessonEditor({
     lesson.muxPlaybackId ?? null,
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onUpdateRef = useRef(onUpdate);
   useEffect(() => {
     onUpdateRef.current = onUpdate;
   }, [onUpdate]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
 
   // On mount, fetch fresh lesson state from DB in case props are stale
   // (component remounts on lesson switch via key={lesson.id} in CourseEditor)
@@ -188,9 +194,9 @@ export function LessonEditor({
   }
 
   async function saveText(html: string) {
-    setIsSaving(true);
+    setSaveStatus("saving");
     try {
-      await fetch(
+      const res = await fetch(
         `/api/courses/${courseId}/sections/${sectionId}/lessons/${lesson.id}`,
         {
           method: "PUT",
@@ -198,11 +204,37 @@ export function LessonEditor({
           body: JSON.stringify({ textContent: html }),
         },
       );
-      onUpdateRef.current(lesson.id, { textContent: html } as Partial<
-        LessonItem & { textContent?: string }
-      >);
-    } finally {
-      setIsSaving(false);
+      if (!res.ok) throw new Error("Save failed");
+      onUpdateRef.current(lesson.id, { textContent: html });
+      setSaveStatus("saved");
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), 2000);
+    } catch {
+      setSaveStatus("error");
+      toast.error({ title: "Failed to save lesson content" });
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), 3000);
+    }
+  }
+
+  async function togglePublish() {
+    const next = !localIsPublished;
+    setLocalIsPublished(next);
+    onUpdateRef.current(lesson.id, { isPublished: next });
+    try {
+      const res = await fetch(
+        `/api/courses/${courseId}/sections/${sectionId}/lessons/${lesson.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isPublished: next }),
+        },
+      );
+      if (!res.ok) throw new Error();
+    } catch {
+      setLocalIsPublished(!next);
+      onUpdateRef.current(lesson.id, { isPublished: !next });
+      toast.error({ title: "Failed to update lesson status" });
     }
   }
 
@@ -217,15 +249,36 @@ export function LessonEditor({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-text-primary truncate">
           {lesson.title}
         </h2>
-        {isSaving && (
-          <span className="flex items-center gap-1 text-xs text-text-muted">
-            <Loader2 size={12} className="animate-spin" /> Saving…
-          </span>
-        )}
+        <div className="flex items-center gap-3 shrink-0">
+          {saveStatus === "saving" && (
+            <span className="flex items-center gap-1 text-xs text-text-muted">
+              <Loader2 size={12} className="animate-spin" /> Saving…
+            </span>
+          )}
+          {saveStatus === "saved" && (
+            <span className="flex items-center gap-1 text-xs text-success">
+              <CheckCircle2 size={12} /> Saved
+            </span>
+          )}
+          {saveStatus === "error" && (
+            <span className="text-xs text-danger">Save failed</span>
+          )}
+          <button
+            type="button"
+            onClick={() => void togglePublish()}
+            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+              localIsPublished
+                ? "bg-success-bg text-success hover:opacity-80"
+                : "bg-surface-3 text-text-muted hover:bg-brand-light hover:text-brand"
+            }`}
+          >
+            {localIsPublished ? "Live" : "Draft"}
+          </button>
+        </div>
       </div>
 
       {/* Type selector */}
@@ -355,8 +408,8 @@ export function LessonEditor({
         <TextEditor
           content={lesson.textContent ?? ""}
           onChange={(html) => {
-            const debounced = setTimeout(() => saveText(html), 1000);
-            return () => clearTimeout(debounced);
+            if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+            saveTimerRef.current = setTimeout(() => void saveText(html), 1000);
           }}
         />
       )}

@@ -56,12 +56,7 @@ export function CourseEditor({
   );
   const selectedLesson = selectedSection?.lessons.find(
     (l) => l.id === selectedLessonId,
-  ) as
-    | (LessonItem & {
-        textContent?: string | null;
-        muxPlaybackId?: string | null;
-      })
-    | undefined;
+  );
 
   async function addSection(title: string) {
     const res = await fetch(`/api/courses/${courseId}/sections`, {
@@ -100,10 +95,7 @@ export function CourseEditor({
     }
   }
 
-  function handleLessonUpdate(
-    lessonId: string,
-    patch: Partial<LessonItem & { textContent?: string }>,
-  ) {
+  function handleLessonUpdate(lessonId: string, patch: Partial<LessonItem>) {
     setSections((prev) =>
       prev.map((s) => ({
         ...s,

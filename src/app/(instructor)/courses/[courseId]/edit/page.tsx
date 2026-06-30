@@ -60,6 +60,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       videoStatus: l.videoStatus,
       videoDuration: l.videoDuration,
       muxPlaybackId: l.muxPlaybackId,
+      textContent: l.textContent,
     })),
   }));
 

@@ -44,6 +44,7 @@ export interface LessonItem {
   videoStatus: VideoStatus;
   videoDuration: number | null;
   muxPlaybackId?: string | null;
+  textContent?: string | null;
 }
 
 export interface SectionItem {
