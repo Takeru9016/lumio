@@ -53,8 +53,9 @@ Node 18 is dropped. Verify with `node -v` before starting any session.
 | Animation          | Motion                     | ^12.41.0      | Package: `motion`; import from `"motion/react"`             |
 | Payments           | Razorpay                   | ^2.9.x        | India SaaS — NOT Stripe                                     |
 | Video              | Mux                        | ^14.1.1       | `@mux/mux-node`                                             |
-| AI SDK             | Vercel AI SDK              | ^6.x          | `ai` package; `UIMessage`/`ModelMessage` are separate types |
-| AI Provider        | OpenAI                     | —             | `@ai-sdk/openai`                                            |
+| AI SDK             | Vercel AI SDK              | ^7.0.2        | `ai` package; `UIMessage`/`ModelMessage` are separate types |
+| AI SDK (React)     | `@ai-sdk/react`            | ^4.0.9        | `useChat` imports from here — NOT `ai/react`                |
+| AI Provider        | OpenAI                     | ^4.x          | `@ai-sdk/openai`                                            |
 | Email              | Resend                     | ^4.x          | `resend` package                                            |
 | File Upload        | Uploadthing                | ^7.x          | Route handler in `src/app/api/uploadthing/`                 |
 | Redis / Rate limit | Upstash Redis + Ratelimit  | ^1.x / ^2.x   | AI routes must be rate-limited                              |
@@ -117,12 +118,17 @@ Node 18 is dropped. Verify with `node -v` before starting any session.
 ✅ Signature verification required on EVERY webhook
 ```
 
-### 6. Vercel AI SDK v6
+### 6. AI SDK v7
 
 ```
-✅ Core package: ai
+✅ Core package: ai (^7.0.2)
 ✅ UIMessage[] for client/chat state; ModelMessage[] for LLM calls
 ✅ Use streamText() for AI tutor streaming responses
+✅ useChat imports from "@ai-sdk/react" — NOT "ai/react"
+✅ convertToModelMessages() is async — must be awaited
+✅ toUIMessageStreamResponse is deprecated — use toUIMessageStream + createUIMessageStreamResponse
+✅ onFinish renamed to onEnd in streaming helpers
+⚠️ generateObject is soft-deprecated — prefer generateText + output (deferred to Phase 6F cleanup)
 ✅ Every AI route MUST have Upstash rate limiting before calling LLM
 ✅ Every AI route MUST check user's quota (plan limit) before calling LLM
 ```

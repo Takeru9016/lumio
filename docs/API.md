@@ -139,9 +139,9 @@
 - Quota: `User.aiCallsUsed < PLAN_LIMITS[plan].aiCallsPerMonth`
 - Body: `{ messages: UIMessage[], lessonId?: string, chatId?: string }`
 - RAG: if `lessonId`, retrieve top-3 similar lesson chunks via pgvector
-- Uses: `streamText` with `gpt-4o-mini`; streams response
+- Uses: `streamText` with `gpt-5.4-mini`; streams response
 - After success: increment `User.aiCallsUsed`; save updated messages to `AIChat`
-- Returns: streaming text response (AI SDK v6 stream)
+- Returns: streaming text response (AI SDK v7 stream)
 
 ### POST /api/ai/quiz
 
@@ -149,7 +149,7 @@
 - Rate limit: 5 req/min per user
 - Quota: same check
 - Body: `{ lessonId }`
-- Uses: `generateObject` with `gpt-4o` + Zod schema for 5 MCQ questions
+- Uses: `generateObject` with `gpt-5.4` + Zod schema for 5 MCQ questions
 - Saves to `Quiz` + `QuizQuestion[]` with `isAiGenerated: true`
 - Returns: `{ quiz, questions }`
 
@@ -159,7 +159,7 @@
 - Rate limit: 10 req/min per user
 - Body: `{ lessonId }`
 - Checks `Lesson.aiSummary` — return cached if exists (don't call LLM twice)
-- Uses: `generateText` with `gpt-4o-mini`
+- Uses: `generateText` with `gpt-5.4-mini`
 - Saves result to `Lesson.aiSummary`
 - Returns: `{ summary }` (3 bullet points)
 
@@ -169,7 +169,7 @@
 - Rate limit: 2 req/min per user
 - Body: `{ courseId? }` (optional — scoped or platform-wide)
 - Gathers: student's `LessonProgress`, `QuizAttempt` scores, `Enrollment` data
-- Uses: `generateObject` with `gpt-4o` + Zod schema
+- Uses: `generateObject` with `gpt-5.4` + Zod schema
 - Returns: `{ recommendations: [{ lessonId, reason, priority }] }`
 
 ---

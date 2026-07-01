@@ -48,6 +48,7 @@ pnpm add \
   @mux/mux-uploader-react \
   ai \
   @ai-sdk/openai \
+  @ai-sdk/react \
   resend \
   @uploadthing/react \
   uploadthing \
@@ -118,13 +119,38 @@ pnpm dlx shadcn@latest add toast sonner skeleton separator
 | `razorpay`              | `^2.9.x`   | Server only. Client uses CDN `checkout.js`.              |
 | `@mux/mux-node`         | `^14.1.1`  | New client init: `new Mux({ tokenId, tokenSecret })`.    |
 | `@mux/mux-player-react` | `^3.x`     | React player component.                                  |
-| `ai`                    | `^6.x`     | `UIMessage` and `ModelMessage` are separate types in v6. |
-| `@ai-sdk/openai`        | `^1.x`     | Provider for OpenAI via Vercel AI SDK.                   |
+| `ai`                    | `^7.0.2`   | AI SDK v7. `UIMessage`/`ModelMessage` are separate types. |
+| `@ai-sdk/openai`        | `^4.x`     | Provider for OpenAI via Vercel AI SDK.                   |
+| `@ai-sdk/react`         | `^4.0.9`   | `useChat` imports from here — NOT `ai/react`.            |
 | `resend`                | `^4.x`     | Stable. API unchanged.                                   |
 | `uploadthing`           | `^7.x`     | Route handler pattern changed in v7. See API.md.         |
 | `@upstash/redis`        | `^1.x`     | Stable.                                                  |
 | `@upstash/ratelimit`    | `^2.x`     | Stable.                                                  |
 | `zod`                   | `^3.x`     | Import from `"zod"` (v3 stable).                         |
+| `@ai-sdk/react`         | `^4.0.9`   | `useChat` imports from here — NOT `ai/react`.            |
+
+---
+
+## AI SDK v7 Breaking Changes
+
+```
+✅ useChat imports from "@ai-sdk/react" — NOT "ai/react"
+✅ convertToModelMessages() is async — must be awaited
+✅ toUIMessageStreamResponse is deprecated — use toUIMessageStream + createUIMessageStreamResponse
+✅ onFinish renamed to onEnd in streaming helpers
+⚠️ generateObject is soft-deprecated — prefer generateText + output (deferred to Phase 6F cleanup)
+```
+
+---
+
+## Linting & Formatting (Biome)
+
+```
+✅ Biome replaces ESLint + Prettier — no ESLint config in the project
+✅ Lint:   pnpm biome check .
+✅ Format: pnpm biome format --write .
+ℹ️ The Prettier hook in settings.json is already updated to Biome — no further change needed.
+```
 
 ---
 
@@ -243,8 +269,8 @@ export const openai = createOpenAI({
 });
 
 // Models in use:
-// openai("gpt-4o")        — quiz generation, learning path (complex reasoning)
-// openai("gpt-4o-mini")   — tutor chat, lesson summary (cost-efficient streaming)
+// openai("gpt-5.4")        — quiz generation, learning path (complex reasoning)
+// openai("gpt-5.4-mini")   — tutor chat, lesson summary (cost-efficient streaming)
 // openai("text-embedding-3-small") — embeddings for pgvector
 ```
 

@@ -116,7 +116,7 @@ export async function POST(req: Request) {
   let questions: z.infer<typeof quizSchema>["questions"];
   try {
     const { object } = await generateObject({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5.4"),
       schema: quizSchema,
       system: QUIZ_SYSTEM_PROMPT(content),
       prompt: "Generate the 5 quiz questions for this lesson now.",
