@@ -1,6 +1,6 @@
 import type { Ratelimit } from "@upstash/ratelimit";
 import { db } from "@/lib/db";
-import { checkAndIncrementQuota } from "@/lib/ai/quota";
+import { checkAiQuota } from "@/lib/ai/quota";
 
 type User = NonNullable<Awaited<ReturnType<typeof db.user.findUnique>>>;
 
@@ -12,8 +12,9 @@ type GuardResult =
  * Guards every /api/ai/* route in order:
  * 1. auth (userId present)
  * 2. rate limit (Upstash sliding window)
- * 3. plan quota (DB) — atomically increments usage when allowed
+ * 3. plan quota ceiling (DB) — does NOT increment usage
  *
+ * On success, the route must call incrementAiUsage(user.id) AFTER the LLM call succeeds.
  * Returns { ok: true, user } to proceed, or { ok: false, response } to short-circuit.
  */
 export async function withAiGuards(
@@ -46,7 +47,7 @@ export async function withAiGuards(
     };
   }
 
-  const { allowed } = await checkAndIncrementQuota(userId, user.plan);
+  const { allowed } = await checkAiQuota(userId, user.plan);
   if (!allowed) {
     return {
       ok: false,

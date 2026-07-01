@@ -3,10 +3,11 @@ import { PLAN_LIMITS } from "@/constants/plans";
 import type { Plan } from "@/generated/prisma/enums";
 
 /**
- * Checks a user's monthly AI quota and atomically increments usage when allowed.
- * Enterprise (Infinity limit) always passes without incrementing a bounded counter.
+ * Checks a user's monthly AI quota ceiling WITHOUT incrementing usage.
+ * Enterprise (Infinity limit) always passes.
+ * @param userId Clerk user id
  */
-export async function checkAndIncrementQuota(
+export async function checkAiQuota(
   userId: string,
   plan: Plan,
 ): Promise<{ allowed: boolean; remaining: number }> {
@@ -25,11 +26,17 @@ export async function checkAndIncrementQuota(
     return { allowed: false, remaining: 0 };
   }
 
-  const updated = await db.user.update({
-    where: { clerkId: userId },
-    data: { aiCallsUsed: { increment: 1 } },
-    select: { aiCallsUsed: true },
-  });
+  return { allowed: true, remaining: limit - user.aiCallsUsed };
+}
 
-  return { allowed: true, remaining: limit - updated.aiCallsUsed };
+/**
+ * Atomically increments a user's AI usage counter.
+ * Call this only AFTER a successful LLM call.
+ * @param userId DB User.id (primary key), not the Clerk id
+ */
+export async function incrementAiUsage(userId: string): Promise<void> {
+  await db.user.update({
+    where: { id: userId },
+    data: { aiCallsUsed: { increment: 1 } },
+  });
 }
