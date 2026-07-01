@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
 import { db } from "@/lib";
+import { embedLessonById } from "@/lib/ai/embeddings";
 
 async function resolveLessonOwnership(
   courseId: string,
@@ -20,6 +21,7 @@ async function resolveLessonOwnership(
       select: {
         id: true,
         sectionId: true,
+        textContent: true,
         section: { select: { courseId: true } },
       },
     }),
@@ -132,6 +134,21 @@ export async function PUT(
     where: { id: lessonId },
     data: parsed.data,
   });
+
+  // Re-embed when text content actually changed. Runs after the response via
+  // after() so it survives on serverless; failures are logged, never fail the save.
+  if (
+    parsed.data.textContent !== undefined &&
+    parsed.data.textContent !== lesson.textContent
+  ) {
+    after(async () => {
+      try {
+        await embedLessonById(lessonId);
+      } catch (err) {
+        console.error(`Failed to embed lesson ${lessonId}:`, err);
+      }
+    });
+  }
 
   return NextResponse.json(updated);
 }
