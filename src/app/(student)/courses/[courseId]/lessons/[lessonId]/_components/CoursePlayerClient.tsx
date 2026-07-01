@@ -8,7 +8,9 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { toast } from "gooey-toast";
 
-import { AiBadge, VideoPlayer } from "@/components";
+import { AiTutorChat, VideoPlayer } from "@/components";
+
+import type { UIMessage } from "ai";
 
 import { LessonSidebar, type SidebarSection } from "./LessonSidebar";
 import { NotesTab } from "./NotesTab";
@@ -44,6 +46,8 @@ interface CoursePlayerClientProps {
   sections: SidebarSection[];
   initialCompletedIds: string[];
   initialAttempts: AttemptSummary[];
+  tutorChatId?: string;
+  tutorInitialMessages: UIMessage[];
 }
 
 type Tab = "notes" | "discussion" | "ai-tutor" | "resources";
@@ -86,6 +90,8 @@ export function CoursePlayerClient({
   sections,
   initialCompletedIds,
   initialAttempts,
+  tutorChatId,
+  tutorInitialMessages,
 }: CoursePlayerClientProps) {
   const router = useRouter();
   const [completedIds, setCompletedIds] = useState<Set<string>>(
@@ -291,21 +297,13 @@ export function CoursePlayerClient({
                 )}
 
                 {activeTab === "ai-tutor" && (
-                  <div className="bg-ai-bg border border-ai-border rounded-lg p-5 flex items-start gap-3">
-                    <span className="text-xl text-ai shrink-0">✦</span>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-semibold text-ai">
-                          AI Tutor
-                        </p>
-                        <AiBadge label="Phase 4" />
-                      </div>
-                      <p className="text-sm text-text-muted">
-                        Ask questions about this lesson, get explanations, and
-                        explore concepts deeper. Coming in Phase 4.
-                      </p>
-                    </div>
-                  </div>
+                  <AiTutorChat
+                    className="h-[520px]"
+                    lessonId={lesson.id}
+                    courseId={courseId}
+                    chatId={tutorChatId}
+                    initialMessages={tutorInitialMessages}
+                  />
                 )}
 
                 {activeTab === "resources" && (

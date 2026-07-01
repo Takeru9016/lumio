@@ -11,9 +11,10 @@ export type SimilarLesson = {
 
 /**
  * Finds the lessons most semantically similar to `query` via pgvector cosine
- * distance (`<=>`). Optionally scopes to a single course. Only lessons that are
- * embeddable (READY video or non-null textContent) and already embedded are
- * considered.
+ * distance (`<=>`). Optionally scopes to a single course. Only published,
+ * non-archived, already-embedded lessons with embeddable content (READY video
+ * or non-null textContent) are considered — students never receive draft or
+ * archived content as RAG context.
  *
  * @param query   natural-language search text
  * @param courseId optional — restrict results to lessons in this course
@@ -39,6 +40,8 @@ export async function searchSimilarLessons(
       1 - (embedding <=> ${vector}::vector) AS similarity
     FROM "Lesson"
     WHERE embedding IS NOT NULL
+      AND "isPublished" = true
+      AND "isArchived" = false
       AND ("videoStatus" = 'READY' OR "textContent" IS NOT NULL)
       ${courseFilter}
     ORDER BY embedding <=> ${vector}::vector

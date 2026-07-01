@@ -9,6 +9,8 @@ export { QuizBuilder } from "./course/QuizBuilder";
 export { TextEditor } from "./course/TextEditor";
 export { VideoPlayer } from "./course/VideoPlayer";
 
+export { AiTutorChat } from "./ai/AiTutorChat";
+
 export { AiBadge } from "./shared/AiBadge";
 export { EmptyState } from "./shared/EmptyState";
 export { GooeyToaster } from "./shared/GooeyToaster";

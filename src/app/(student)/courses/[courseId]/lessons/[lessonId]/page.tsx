@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import type { UIMessage } from "ai";
 
 import { db } from "@/lib";
 
@@ -143,6 +144,14 @@ export default async function LessonPage({
   });
   const completedIds = completedRecords.map((r) => r.lessonId);
 
+  // Existing AI tutor conversation for this lesson (hydrates the chat on load).
+  const aiChat = await db.aIChat.findFirst({
+    where: { userId: dbUser.id, lessonId },
+    select: { id: true, messages: true },
+    orderBy: { updatedAt: "desc" },
+  });
+  const tutorInitialMessages = (aiChat?.messages as UIMessage[] | null) ?? [];
+
   const sections: SidebarSection[] = course.sections
     .map((s) => ({
       id: s.id,
@@ -215,6 +224,8 @@ export default async function LessonPage({
       sections={sections}
       initialCompletedIds={completedIds}
       initialAttempts={initialAttempts}
+      tutorChatId={aiChat?.id}
+      tutorInitialMessages={tutorInitialMessages}
     />
   );
 }
