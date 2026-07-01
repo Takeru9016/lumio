@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import type { UIMessage } from "ai";
+import { redirect } from "next/navigation";
 
 import { AiTutorChat } from "@/components";
 import { db } from "@/lib";

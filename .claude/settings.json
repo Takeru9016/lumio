@@ -149,7 +149,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=\"${CLAUDE_FILE_PATH:-}\"; if [ -n \"$FILE\" ]; then EXT=\"${FILE##*.}\"; if [ \"$EXT\" = \"ts\" ] || [ \"$EXT\" = \"tsx\" ]; then npx prettier --write \"$FILE\" --log-level silent 2>/dev/null || true; fi; fi",
+            "command": "FILE=\"${CLAUDE_FILE_PATH:-}\"; if [ -n \"$FILE\" ]; then EXT=\"${FILE##*.}\"; if [ \"$EXT\" = \"ts\" ] || [ \"$EXT\" = \"tsx\" ]; then pnpm biome format --write \"$FILE\" 2>/dev/null || true; fi; fi",
             "timeout": 15,
             "async": true
           }

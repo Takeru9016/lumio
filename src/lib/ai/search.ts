@@ -1,6 +1,6 @@
-import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
 import { generateEmbedding, toVectorLiteral } from "@/lib/ai/embeddings";
+import { db } from "@/lib/db";
 
 export type SimilarLesson = {
   id: string;

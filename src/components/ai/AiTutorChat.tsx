@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { SendHorizonal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { AiBadge } from "@/components";
 
@@ -47,6 +47,7 @@ export function AiTutorChat({
   const awaitingReply =
     isBusy && messages[messages.length - 1]?.role === "user";
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages and awaitingReply are intentional scroll triggers — the effect body reads a ref, not these values.
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,

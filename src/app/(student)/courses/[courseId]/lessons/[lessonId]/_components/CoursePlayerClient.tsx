@@ -1,30 +1,22 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { toast } from "gooey-toast";
-
-import { AiTutorChat, VideoPlayer } from "@/components";
-
 import type { UIMessage } from "ai";
-
+import { toast } from "gooey-toast";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import { AiTutorChat, VideoPlayer } from "@/components";
+import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
 import { LessonSidebar, type SidebarSection } from "./LessonSidebar";
 import { NotesTab } from "./NotesTab";
-import {
-  StudentQuiz,
-  type QuizData,
-  type AttemptSummary,
-} from "./StudentQuiz";
 import {
   StudentAssignment,
   type StudentAssignmentData,
 } from "./StudentAssignment";
-
-import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
+import { type AttemptSummary, type QuizData, StudentQuiz } from "./StudentQuiz";
 
 interface LessonData {
   id: string;

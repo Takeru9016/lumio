@@ -1,20 +1,19 @@
 import { auth } from "@clerk/nextjs/server";
 import {
-  streamText,
   convertToModelMessages,
-  toUIMessageStream,
   createUIMessageStreamResponse,
+  streamText,
+  toUIMessageStream,
   type UIMessage,
 } from "ai";
-
-import { db } from "@/lib/db";
-import { openai } from "@/lib/ai/openai";
+import type { Prisma } from "@/generated/prisma/client";
 import { withAiGuards } from "@/lib/ai/middleware";
+import { openai } from "@/lib/ai/openai";
+import { TUTOR_SYSTEM_PROMPT } from "@/lib/ai/prompts";
 import { incrementAiUsage } from "@/lib/ai/quota";
 import { searchSimilarLessons } from "@/lib/ai/search";
-import { TUTOR_SYSTEM_PROMPT } from "@/lib/ai/prompts";
+import { db } from "@/lib/db";
 import { tutorRatelimit } from "@/lib/ratelimit";
-import { Prisma } from "@/generated/prisma/client";
 
 // Only the most recent turns are sent to the model; full history is persisted.
 const MODEL_CONTEXT_WINDOW = 10;
@@ -100,6 +99,24 @@ export async function POST(req: Request) {
   const { messages, lessonId, courseId, chatId } = body;
   if (!Array.isArray(messages) || messages.length === 0) {
     return Response.json({ error: "messages is required" }, { status: 400 });
+  }
+
+  // Enrollment guard: a lesson-scoped chat may only pull RAG context from a
+  // course the user is actually enrolled in. Standalone chats (no lessonId) skip
+  // this entirely.
+  if (lessonId) {
+    const enrollment = await db.enrollment.findFirst({
+      where: {
+        userId: user.id,
+        course: {
+          sections: { some: { lessons: { some: { id: lessonId } } } },
+        },
+        status: { in: ["ACTIVE", "COMPLETED"] },
+      },
+    });
+    if (!enrollment) {
+      return new Response("Not enrolled in this course", { status: 403 });
+    }
   }
 
   // RAG: only for lesson-scoped chats. The standalone tutor skips retrieval and

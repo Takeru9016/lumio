@@ -1,13 +1,13 @@
-import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import type { UIMessage } from "ai";
+import { notFound, redirect } from "next/navigation";
 
 import { db } from "@/lib";
 
 import { CoursePlayerClient } from "./_components/CoursePlayerClient";
 import type { SidebarSection } from "./_components/LessonSidebar";
-import type { AttemptSummary } from "./_components/StudentQuiz";
 import type { StudentAssignmentData } from "./_components/StudentAssignment";
+import type { AttemptSummary } from "./_components/StudentQuiz";
 
 export default async function LessonPage({
   params,

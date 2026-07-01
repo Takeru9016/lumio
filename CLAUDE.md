@@ -22,11 +22,14 @@
 pnpm install                  # install deps
 pnpm dev                      # dev server (Turbopack is default in Next.js 16)
 pnpm build                    # production build
-pnpm lint                     # eslint
+pnpm biome check .            # lint
+pnpm biome format --write .   # format
 npx tsc --noEmit              # type check — run before EVERY commit, no exceptions
 prisma migrate dev            # run migrations (reads prisma.config.ts)
 prisma generate               # regenerate client after schema changes
 ```
+
+> **ESLint is not used — Biome handles lint + format.**
 
 ---
 
