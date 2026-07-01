@@ -1,8 +1,8 @@
-import Link from "next/link";
-import Image from "next/image";
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Plus, Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { EmptyState } from "@/components";
 
@@ -10,21 +10,20 @@ import type { CourseStatus } from "@/generated/prisma/enums";
 
 import { db } from "@/lib";
 
-const STATUS_BADGE: Record<CourseStatus, { label: string; className: string }> =
-  {
-    DRAFT: {
-      label: "Draft",
-      className: "bg-(--color-surface-3) text-(--color-text-muted)",
-    },
-    PUBLISHED: {
-      label: "Published",
-      className: "bg-(--color-success-bg) text-(--color-success)",
-    },
-    ARCHIVED: {
-      label: "Archived",
-      className: "bg-amber-50 text-amber-600",
-    },
-  };
+const STATUS_BADGE: Record<CourseStatus, { label: string; className: string }> = {
+  DRAFT: {
+    label: "Draft",
+    className: "bg-(--color-surface-3) text-(--color-text-muted)",
+  },
+  PUBLISHED: {
+    label: "Published",
+    className: "bg-(--color-success-bg) text-(--color-success)",
+  },
+  ARCHIVED: {
+    label: "Archived",
+    className: "bg-amber-50 text-amber-600",
+  },
+};
 
 export default async function InstructorCoursesPage() {
   const { userId } = await auth();
@@ -59,9 +58,7 @@ export default async function InstructorCoursesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">My Courses</h1>
-          <p className="text-sm text-text-muted mt-1">
-            Manage and publish your courses.
-          </p>
+          <p className="text-sm text-text-muted mt-1">Manage and publish your courses.</p>
         </div>
         <Link
           href="/courses/new"
@@ -84,10 +81,7 @@ export default async function InstructorCoursesPage() {
         <div className="space-y-3">
           {courses.map((course) => {
             const badge = STATUS_BADGE[course.status];
-            const lessonCount = course.sections.reduce(
-              (acc, s) => acc + s._count.lessons,
-              0,
-            );
+            const lessonCount = course.sections.reduce((acc, s) => acc + s._count.lessons, 0);
             return (
               <div
                 key={course.id}
@@ -122,10 +116,8 @@ export default async function InstructorCoursesPage() {
                   </div>
                   <p className="text-xs text-text-muted">
                     {course.sections.length} section
-                    {course.sections.length !== 1 ? "s" : ""} · {lessonCount}{" "}
-                    lesson
-                    {lessonCount !== 1 ? "s" : ""} · {course._count.enrollments}{" "}
-                    enrolled
+                    {course.sections.length !== 1 ? "s" : ""} · {lessonCount} lesson
+                    {lessonCount !== 1 ? "s" : ""} · {course._count.enrollments} enrolled
                   </p>
                 </div>
 

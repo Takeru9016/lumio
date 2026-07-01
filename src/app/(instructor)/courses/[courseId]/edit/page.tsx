@@ -1,5 +1,5 @@
-import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { notFound, redirect } from "next/navigation";
 
 import { CourseEditor, type SectionItem } from "@/components";
 

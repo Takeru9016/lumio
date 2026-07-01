@@ -6,7 +6,7 @@ export type NavItem = {
   icon: LucideIcon;
 };
 
-export type { Role, Plan } from "@/generated/prisma/enums";
+export type { Plan, Role } from "@/generated/prisma/enums";
 
 // --- Razorpay client types ---
 
@@ -47,6 +47,8 @@ export type RazorpayInstance = {
 declare global {
   interface Window {
     // Optional — populated only after checkout.js CDN script loads
-    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
+    Razorpay?: new (
+      options: RazorpayOptions
+    ) => RazorpayInstance;
   }
 }

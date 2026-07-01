@@ -1,37 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import { motion } from "motion/react";
 import {
-  LayoutDashboard,
-  BookOpen,
-  Map,
-  Sparkles,
-  ClipboardList,
-  Trophy,
-  Settings,
-  Users,
-  DollarSign,
   BarChart2,
-  Globe,
+  BookOpen,
   Building2,
-  CreditCard,
-  Users2,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
+  CreditCard,
+  DollarSign,
+  Globe,
+  LayoutDashboard,
+  Map as MapIcon,
+  Settings,
+  Sparkles,
+  Trophy,
+  Users,
+  Users2,
 } from "lucide-react";
-
-import type { NavItem } from "@/types";
-
+import { motion } from "motion/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { Role } from "@/generated/prisma/enums";
+import type { NavItem } from "@/types";
 
 const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
   STUDENT: [
     { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
     { label: "My Courses", href: "/courses", icon: BookOpen },
-    { label: "Learning Path", href: "/student/learning-path", icon: Map },
+    { label: "Learning Path", href: "/student/learning-path", icon: MapIcon },
     { label: "AI Tutor", href: "/student/ai-tutor", icon: Sparkles },
     { label: "Assignments", href: "/student/assignments", icon: ClipboardList },
     { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
@@ -91,8 +89,7 @@ export function Sidebar({ role }: SidebarProps) {
     >
       <div className="flex-1 flex flex-col py-3 px-2 gap-0.5">
         {items.map((item) => {
-          const isActive =
-            pathname === item.href || pathname.startsWith(item.href + "/");
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
 
           return (
@@ -119,6 +116,7 @@ export function Sidebar({ role }: SidebarProps) {
 
       <div className="p-2 border-t border-border">
         <button
+          type="button"
           onClick={toggle}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="w-full flex items-center justify-center p-2 text-text-muted hover:bg-surface-2 rounded-md transition-colors"

@@ -185,10 +185,7 @@ function buildEmailHtml(params: {
 </html>`;
 }
 
-export async function generateCertificate(
-  userId: string,
-  courseId: string
-): Promise<void> {
+export async function generateCertificate(userId: string, courseId: string): Promise<void> {
   const existing = await db.certificate.findUnique({
     where: { userId_courseId: { userId, courseId } },
     select: { id: true },

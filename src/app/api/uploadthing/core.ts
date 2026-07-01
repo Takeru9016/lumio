@@ -14,8 +14,7 @@ async function getInstructor() {
     select: { id: true, role: true },
   });
   if (!user) throw new Error("User not found");
-  if (user.role !== "INSTRUCTOR" && user.role !== "SUPER_ADMIN")
-    throw new Error("Forbidden");
+  if (user.role !== "INSTRUCTOR" && user.role !== "SUPER_ADMIN") throw new Error("Forbidden");
   return userId;
 }
 

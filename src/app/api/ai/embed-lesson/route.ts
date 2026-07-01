@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-
-import { db } from "@/lib/db";
 import { embedLessonById } from "@/lib/ai/embeddings";
+import { db } from "@/lib/db";
 
 const bodySchema = z.object({
   lessonId: z.string().min(1),
@@ -33,7 +32,7 @@ export async function POST(req: NextRequest) {
   if (!embedded) {
     return NextResponse.json(
       { error: "Lesson not found or has no embeddable content" },
-      { status: 404 },
+      { status: 404 }
     );
   }
 

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib";
@@ -15,11 +15,10 @@ export async function PUT(
     params,
   }: {
     params: Promise<{ assignmentId: string; submissionId: string }>;
-  },
+  }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { assignmentId, submissionId } = await params;
 
@@ -27,8 +26,7 @@ export async function PUT(
     where: { clerkId: userId },
     select: { id: true, role: true },
   });
-  if (!dbUser)
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
   if (dbUser.role !== "INSTRUCTOR" && dbUser.role !== "SUPER_ADMIN")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -45,8 +43,7 @@ export async function PUT(
       },
     },
   });
-  if (!assignment)
-    return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
+  if (!assignment) return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
   if (assignment.lesson.section.course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -55,14 +52,14 @@ export async function PUT(
   if (!parsed.success)
     return NextResponse.json(
       { error: "Invalid body", issues: parsed.error.issues },
-      { status: 400 },
+      { status: 400 }
     );
 
   const { score, feedback } = parsed.data;
   if (score > assignment.maxScore)
     return NextResponse.json(
       { error: `Score cannot exceed maxScore (${assignment.maxScore})` },
-      { status: 400 },
+      { status: 400 }
     );
 
   const existingSubmission = await db.assignmentSubmission.findFirst({

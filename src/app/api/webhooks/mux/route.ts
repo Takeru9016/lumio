@@ -8,11 +8,7 @@ export async function POST(req: Request) {
 
   let event: Awaited<ReturnType<typeof mux.webhooks.unwrap>>;
   try {
-    event = await mux.webhooks.unwrap(
-      body,
-      headersList,
-      process.env.MUX_WEBHOOK_SECRET!,
-    );
+    event = await mux.webhooks.unwrap(body, headersList, process.env.MUX_WEBHOOK_SECRET!);
   } catch {
     return new Response("Invalid Mux signature", { status: 401 });
   }
@@ -21,8 +17,7 @@ export async function POST(req: Request) {
   if (!assetId) return new Response("Missing asset ID", { status: 400 });
 
   if (event.type === "video.asset.ready") {
-    const playbackId = (event.data as { playback_ids?: { id: string }[] })
-      ?.playback_ids?.[0]?.id;
+    const playbackId = (event.data as { playback_ids?: { id: string }[] })?.playback_ids?.[0]?.id;
 
     await db.lesson.updateMany({
       where: { muxAssetId: assetId },

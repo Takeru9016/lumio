@@ -197,11 +197,8 @@ export default async function LessonPage({
               fileUrl: lesson.assignment.submissions[0].fileUrl,
               score: lesson.assignment.submissions[0].score,
               feedback: lesson.assignment.submissions[0].feedback,
-              submittedAt:
-                lesson.assignment.submissions[0].submittedAt.toISOString(),
-              gradedAt:
-                lesson.assignment.submissions[0].gradedAt?.toISOString() ??
-                null,
+              submittedAt: lesson.assignment.submissions[0].submittedAt.toISOString(),
+              gradedAt: lesson.assignment.submissions[0].gradedAt?.toISOString() ?? null,
             }
           : null,
       }

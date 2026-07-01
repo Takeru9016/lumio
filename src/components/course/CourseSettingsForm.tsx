@@ -1,19 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "gooey-toast";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { UploadButton } from "@/lib/uploadthing";
 
 const schema = z.object({
-  title: z
-    .string()
-    .min(3, "At least 3 characters")
-    .max(100, "Max 100 characters"),
+  title: z.string().min(3, "At least 3 characters").max(100, "Max 100 characters"),
   description: z
     .string()
     .refine((v) => !v || v.length >= 100, "At least 100 characters if provided")
@@ -56,12 +53,9 @@ interface CourseSettingsFormProps {
   };
 }
 
-export function CourseSettingsForm({
-  courseId,
-  initialData,
-}: CourseSettingsFormProps) {
+export function CourseSettingsForm({ courseId, initialData }: CourseSettingsFormProps) {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
-    initialData.thumbnailUrl ?? null,
+    initialData.thumbnailUrl ?? null
   );
   const [isSaving, setIsSaving] = useState(false);
 
@@ -117,8 +111,7 @@ export function CourseSettingsForm({
 
   const inputClass =
     "w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm text-(--color-text-primary) placeholder:text-(--color-text-disabled) focus:outline-none focus:ring-2 focus:ring-(--color-brand) focus:border-transparent transition-all";
-  const labelClass =
-    "block text-sm font-medium text-(--color-text-primary) mb-1.5";
+  const labelClass = "block text-sm font-medium text-(--color-text-primary) mb-1.5";
   const errorClass = "mt-1 text-xs text-(--color-danger)";
 
   return (
@@ -161,9 +154,7 @@ export function CourseSettingsForm({
                 : ""}
             </p>
           )}
-          <p className="text-xs text-text-muted ml-auto">
-            {descriptionValue.length} / 5000
-          </p>
+          <p className="text-xs text-text-muted ml-auto">{descriptionValue.length} / 5000</p>
         </div>
       </div>
 
@@ -173,11 +164,7 @@ export function CourseSettingsForm({
         {thumbnailPreview ? (
           <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={thumbnailPreview}
-              alt="Thumbnail"
-              className="w-full h-full object-cover"
-            />
+            <img src={thumbnailPreview} alt="Thumbnail" className="w-full h-full object-cover" />
             <button
               type="button"
               onClick={() => {
@@ -209,9 +196,7 @@ export function CourseSettingsForm({
                 allowedContent: "text-[var(--color-text-muted)] text-xs mt-1",
               }}
             />
-            <p className="text-xs text-text-muted mt-2">
-              Recommended: 1280×720px, max 4MB
-            </p>
+            <p className="text-xs text-text-muted mt-2">Recommended: 1280×720px, max 4MB</p>
           </div>
         )}
       </div>

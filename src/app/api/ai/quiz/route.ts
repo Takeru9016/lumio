@@ -21,12 +21,10 @@ const quizSchema = z.object({
       z.object({
         question: z.string(),
         type: z.enum(["MCQ", "TRUE_FALSE"]),
-        options: z
-          .array(z.object({ id: z.string(), text: z.string() }))
-          .optional(),
+        options: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
         correctAnswer: z.string(),
         explanation: z.string(),
-      }),
+      })
     )
     .length(5),
 });
@@ -85,19 +83,12 @@ export async function POST(req: Request) {
     return Response.json({ error: "Lesson not found" }, { status: 404 });
   }
   if (lesson.section.course.instructorId !== user.id) {
-    return Response.json(
-      { error: "You do not own this course" },
-      { status: 403 },
-    );
+    return Response.json({ error: "You do not own this course" }, { status: 403 });
   }
 
   // Build the grounding content. A Mux transcript would go here too, but no
   // transcript field is stored on Lesson yet, so we ground on the written body.
-  const content = [
-    lesson.title,
-    lesson.description,
-    htmlToText(lesson.textContent),
-  ]
+  const content = [lesson.title, lesson.description, htmlToText(lesson.textContent)]
     .filter(Boolean)
     .join("\n\n")
     .trim()
@@ -106,10 +97,9 @@ export async function POST(req: Request) {
   if (content.length < MIN_CONTENT_CHARS) {
     return Response.json(
       {
-        error:
-          "Not enough lesson content to generate a quiz. Add lesson text first.",
+        error: "Not enough lesson content to generate a quiz. Add lesson text first.",
       },
-      { status: 422 },
+      { status: 422 }
     );
   }
 
@@ -125,7 +115,7 @@ export async function POST(req: Request) {
   } catch {
     return Response.json(
       { error: "AI failed to generate a quiz. Please try again." },
-      { status: 502 },
+      { status: 502 }
     );
   }
 

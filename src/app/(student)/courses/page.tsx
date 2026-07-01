@@ -1,6 +1,6 @@
+import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 
 import { CourseCard, EmptyState } from "@/components";
 
@@ -17,8 +17,7 @@ export default async function CoursesPage({
   if (!userId) redirect("/sign-in");
 
   const { tab: rawTab = "all" } = await searchParams;
-  const tab: Tab =
-    rawTab === "in-progress" || rawTab === "completed" ? rawTab : "all";
+  const tab: Tab = rawTab === "in-progress" || rawTab === "completed" ? rawTab : "all";
 
   const dbUser = await db.user.findUnique({
     where: { clerkId: userId },
@@ -102,11 +101,9 @@ export default async function CoursesPage({
     .map((e) => {
       const allLessons = e.course.sections.flatMap((s) => s.lessons);
       const totalLessons = allLessons.length;
-      const completedLessons = allLessons.filter(
-        (l) => l.progress[0]?.isCompleted,
-      ).length;
+      const completedLessons = allLessons.filter((l) => l.progress[0]?.isCompleted).length;
       const hasAiContent = allLessons.some(
-        (l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true,
+        (l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true
       );
       return {
         course: {
@@ -130,7 +127,7 @@ export default async function CoursesPage({
   const availableCards = availableCourses.map((c) => {
     const allLessons = c.sections.flatMap((s) => s.lessons);
     const hasAiContent = allLessons.some(
-      (l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true,
+      (l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true
     );
     return {
       course: {
@@ -190,17 +187,11 @@ export default async function CoursesPage({
           {enrolledCards.length > 0 && (
             <section>
               {tab === "all" && (
-                <h2 className="text-base font-semibold text-text-primary mb-4">
-                  My Learning
-                </h2>
+                <h2 className="text-base font-semibold text-text-primary mb-4">My Learning</h2>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {enrolledCards.map(({ course, enrollment }) => (
-                  <CourseCard
-                    key={course.id}
-                    course={course}
-                    enrollment={enrollment}
-                  />
+                  <CourseCard key={course.id} course={course} enrollment={enrollment} />
                 ))}
               </div>
             </section>
@@ -208,9 +199,7 @@ export default async function CoursesPage({
 
           {tab === "all" && availableCards.length > 0 && (
             <section>
-              <h2 className="text-base font-semibold text-text-primary mb-4">
-                Available Courses
-              </h2>
+              <h2 className="text-base font-semibold text-text-primary mb-4">Available Courses</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {availableCards.map(({ course }) => (
                   <CourseCard key={course.id} course={course} />

@@ -1,22 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { format } from "date-fns";
-import {
-  ExternalLink,
-  Loader2,
-  CheckCircle2,
-  ClipboardList,
-} from "lucide-react";
-import { toast } from "gooey-toast";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { format } from "date-fns";
+import { toast } from "gooey-toast";
+import { CheckCircle2, ClipboardList, ExternalLink, Loader2 } from "lucide-react";
+import { useState } from "react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface SubmissionItem {
   id: string;
@@ -91,7 +82,7 @@ function GradingForm({ submission, onGraded, onClose }: GradingFormProps) {
             score: Number(score),
             feedback: feedback.trim() || null,
           }),
-        },
+        }
       );
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
@@ -123,8 +114,7 @@ function GradingForm({ submission, onGraded, onClose }: GradingFormProps) {
           {submission.lessonTitle} — {submission.assignmentTitle}
         </p>
         <p className="text-xs">
-          Submitted {format(new Date(submission.submittedAt), "MMM d, yyyy 'at' h:mm a")}
-          {" "}
+          Submitted {format(new Date(submission.submittedAt), "MMM d, yyyy 'at' h:mm a")}{" "}
           <span
             className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${STATUS_CONFIG[submission.status].className}`}
           >
@@ -136,9 +126,7 @@ function GradingForm({ submission, onGraded, onClose }: GradingFormProps) {
       {/* Written submission */}
       {submission.textContent && (
         <div>
-          <p className="text-xs font-medium text-text-secondary mb-1.5">
-            Written response
-          </p>
+          <p className="text-xs font-medium text-text-secondary mb-1.5">Written response</p>
           <div className="rounded-lg border border-border bg-surface-2 p-4 max-h-64 overflow-y-auto">
             <ReadonlySubmission html={submission.textContent} />
           </div>
@@ -148,9 +136,7 @@ function GradingForm({ submission, onGraded, onClose }: GradingFormProps) {
       {/* File */}
       {submission.fileUrl && (
         <div>
-          <p className="text-xs font-medium text-text-secondary mb-1.5">
-            Attachment
-          </p>
+          <p className="text-xs font-medium text-text-secondary mb-1.5">Attachment</p>
           <a
             href={submission.fileUrl}
             target="_blank"
@@ -167,18 +153,14 @@ function GradingForm({ submission, onGraded, onClose }: GradingFormProps) {
         <div>
           <label className="block text-xs font-medium text-text-secondary mb-1">
             Score{" "}
-            <span className="text-text-disabled font-normal">
-              (out of {submission.maxScore})
-            </span>
+            <span className="text-text-disabled font-normal">(out of {submission.maxScore})</span>
           </label>
           <input
             type="number"
             value={score}
             min={0}
             max={submission.maxScore}
-            onChange={(e) =>
-              setScore(e.target.value === "" ? "" : Number(e.target.value))
-            }
+            onChange={(e) => setScore(e.target.value === "" ? "" : Number(e.target.value))}
             placeholder={`0 – ${submission.maxScore}`}
             className="w-full border border-border rounded-md px-3 py-2 text-sm text-text-primary bg-surface-1 focus:outline-none focus:border-brand"
           />
@@ -186,8 +168,7 @@ function GradingForm({ submission, onGraded, onClose }: GradingFormProps) {
 
         <div>
           <label className="block text-xs font-medium text-text-secondary mb-1">
-            Feedback{" "}
-            <span className="text-text-disabled font-normal">(optional)</span>
+            Feedback <span className="text-text-disabled font-normal">(optional)</span>
           </label>
           <textarea
             value={feedback}
@@ -229,13 +210,9 @@ interface SubmissionsGraderProps {
   initialSubmissions: SubmissionItem[];
 }
 
-export function SubmissionsGrader({
-  initialSubmissions,
-}: SubmissionsGraderProps) {
-  const [submissions, setSubmissions] =
-    useState<SubmissionItem[]>(initialSubmissions);
-  const [activeSubmission, setActiveSubmission] =
-    useState<SubmissionItem | null>(null);
+export function SubmissionsGrader({ initialSubmissions }: SubmissionsGraderProps) {
+  const [submissions, setSubmissions] = useState<SubmissionItem[]>(initialSubmissions);
+  const [activeSubmission, setActiveSubmission] = useState<SubmissionItem | null>(null);
 
   function removeGraded(submissionId: string) {
     setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
@@ -245,12 +222,8 @@ export function SubmissionsGrader({
     return (
       <div className="rounded-lg border border-dashed border-border bg-surface-2 py-12 text-center">
         <ClipboardList size={28} className="text-text-disabled mx-auto mb-2" />
-        <p className="text-sm font-medium text-text-primary mb-1">
-          All caught up!
-        </p>
-        <p className="text-xs text-text-muted">
-          No submissions waiting for a grade.
-        </p>
+        <p className="text-sm font-medium text-text-primary mb-1">All caught up!</p>
+        <p className="text-xs text-text-muted">No submissions waiting for a grade.</p>
       </div>
     );
   }

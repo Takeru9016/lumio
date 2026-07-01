@@ -12,10 +12,7 @@ import { AiTutorChat, VideoPlayer } from "@/components";
 import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
 import { LessonSidebar, type SidebarSection } from "./LessonSidebar";
 import { NotesTab } from "./NotesTab";
-import {
-  StudentAssignment,
-  type StudentAssignmentData,
-} from "./StudentAssignment";
+import { StudentAssignment, type StudentAssignmentData } from "./StudentAssignment";
 import { type AttemptSummary, type QuizData, StudentQuiz } from "./StudentQuiz";
 
 interface LessonData {
@@ -86,15 +83,12 @@ export function CoursePlayerClient({
   tutorInitialMessages,
 }: CoursePlayerClientProps) {
   const router = useRouter();
-  const [completedIds, setCompletedIds] = useState<Set<string>>(
-    () => new Set(initialCompletedIds),
-  );
+  const [completedIds, setCompletedIds] = useState<Set<string>>(() => new Set(initialCompletedIds));
   const [activeTab, setActiveTab] = useState<Tab>("notes");
   const hasPostedRef = useRef(false);
 
   const completedCount = completedIds.size;
-  const progress =
-    totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+  const progress = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   async function markComplete() {
     if (hasPostedRef.current) return;
@@ -103,10 +97,9 @@ export function CoursePlayerClient({
     setCompletedIds((prev) => new Set([...prev, lesson.id]));
 
     try {
-      const res = await fetch(
-        `/api/courses/${courseId}/lessons/${lesson.id}/complete`,
-        { method: "POST" },
-      );
+      const res = await fetch(`/api/courses/${courseId}/lessons/${lesson.id}/complete`, {
+        method: "POST",
+      });
       const data = (await res.json()) as {
         xpEarned: number;
         isFirstCompletion: boolean;
@@ -170,9 +163,7 @@ export function CoursePlayerClient({
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-[10px] text-text-disabled text-right mt-0.5">
-            {progress}%
-          </p>
+          <p className="text-[10px] text-text-disabled text-right mt-0.5">{progress}%</p>
         </div>
       </div>
 
@@ -182,9 +173,7 @@ export function CoursePlayerClient({
         <div className="flex-1 min-w-0 overflow-y-auto">
           <div className="p-4 md:p-6 space-y-4">
             {/* Lesson title */}
-            <h1 className="text-xl font-bold text-text-primary">
-              {lesson.title}
-            </h1>
+            <h1 className="text-xl font-bold text-text-primary">{lesson.title}</h1>
 
             {/* Video or text or quiz or assignment content */}
             {lesson.type === "VIDEO" ? (
@@ -201,10 +190,7 @@ export function CoursePlayerClient({
               />
             ) : lesson.type === "ASSIGNMENT" ? (
               lesson.assignment ? (
-                <StudentAssignment
-                  assignment={lesson.assignment}
-                  onComplete={markComplete}
-                />
+                <StudentAssignment assignment={lesson.assignment} onComplete={markComplete} />
               ) : (
                 <div className="bg-surface-1 border border-border rounded-lg p-6 text-center">
                   <p className="text-sm font-medium text-text-primary mb-1">
@@ -261,9 +247,7 @@ export function CoursePlayerClient({
                     }`}
                   >
                     {tab.id === "ai-tutor" ? (
-                      <span className="flex items-center gap-1">
-                        ✦ AI Tutor
-                      </span>
+                      <span className="flex items-center gap-1">✦ AI Tutor</span>
                     ) : (
                       tab.label
                     )}
@@ -316,9 +300,7 @@ export function CoursePlayerClient({
         {/* Right sidebar — lesson list */}
         <div className="hidden lg:block w-60 shrink-0 border-l border-border bg-surface-1 sticky top-[52px] h-[calc(100vh-104px)] overflow-y-auto">
           <div className="px-4 py-3 border-b border-border">
-            <p className="text-xs font-semibold text-text-primary">
-              Course content
-            </p>
+            <p className="text-xs font-semibold text-text-primary">Course content</p>
           </div>
           <LessonSidebar
             courseId={courseId}

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 
 interface TextEditorProps {
   content?: string;
@@ -59,9 +59,7 @@ export function TextEditor({
               action();
             }}
             className={`w-7 h-7 rounded text-sm font-medium transition-colors ${
-              active
-                ? "bg-brand text-white"
-                : "text-text-muted hover:bg-surface-3"
+              active ? "bg-brand text-white" : "text-text-muted hover:bg-surface-3"
             }`}
           >
             {label}
@@ -71,14 +69,12 @@ export function TextEditor({
         {[
           {
             label: "H2",
-            action: () =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run(),
+            action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
             active: editor.isActive("heading", { level: 2 }),
           },
           {
             label: "H3",
-            action: () =>
-              editor.chain().focus().toggleHeading({ level: 3 }).run(),
+            action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
             active: editor.isActive("heading", { level: 3 }),
           },
         ].map(({ label, action, active }) => (
@@ -90,9 +86,7 @@ export function TextEditor({
               action();
             }}
             className={`px-2 h-7 rounded text-xs font-medium transition-colors ${
-              active
-                ? "bg-brand text-white"
-                : "text-text-muted hover:bg-surface-3"
+              active ? "bg-brand text-white" : "text-text-muted hover:bg-surface-3"
             }`}
           >
             {label}

@@ -1,34 +1,27 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { toast } from "gooey-toast";
 import {
-  Loader2,
   AlertCircle,
   CheckCircle,
   CheckCircle2,
-  UploadCloud,
-  Video,
+  ClipboardList,
   FileText,
   HelpCircle,
-  ClipboardList,
+  Loader2,
+  UploadCloud,
+  Video,
 } from "lucide-react";
-import { toast } from "gooey-toast";
-
-import { TextEditor } from "@/components/course/TextEditor";
-import { VideoPlayer } from "@/components/course/VideoPlayer";
-import { QuizBuilder } from "@/components/course/QuizBuilder";
+import { useEffect, useRef, useState } from "react";
 import { AssignmentBuilder } from "@/components/course/AssignmentBuilder";
 import { InlineInput } from "@/components/course/InlineInput";
 import type { LessonItem } from "@/components/course/LessonList";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-import { useUploadThing } from "@/lib/uploadthing";
-
+import { QuizBuilder } from "@/components/course/QuizBuilder";
+import { TextEditor } from "@/components/course/TextEditor";
+import { VideoPlayer } from "@/components/course/VideoPlayer";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { LessonType } from "@/generated/prisma/enums";
+import { useUploadThing } from "@/lib/uploadthing";
 
 interface LessonEditorProps {
   lesson: LessonItem;
@@ -62,12 +55,7 @@ const TYPE_LABELS: Record<LessonType, string> = {
   ASSIGNMENT: "Assignment",
 };
 
-export function LessonEditor({
-  lesson,
-  courseId,
-  sectionId,
-  onUpdate,
-}: LessonEditorProps) {
+export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEditorProps) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [localIsPublished, setLocalIsPublished] = useState(lesson.isPublished);
   const [localType, setLocalType] = useState<LessonType>(lesson.type);
@@ -77,10 +65,10 @@ export function LessonEditor({
       ? "ready"
       : lesson.videoStatus === "PROCESSING"
         ? "processing"
-        : "idle",
+        : "idle"
   );
   const [previewPlaybackId, setPreviewPlaybackId] = useState<string | null>(
-    lesson.muxPlaybackId ?? null,
+    lesson.muxPlaybackId ?? null
   );
   const [pendingType, setPendingType] = useState<LessonType | null>(null);
   const [isRenamingTitle, setIsRenamingTitle] = useState(false);
@@ -107,7 +95,7 @@ export function LessonEditor({
     async function refresh() {
       try {
         const res = await fetch(
-          `/api/courses/${courseId}/sections/${sectionId}/lessons/${lesson.id}`,
+          `/api/courses/${courseId}/sections/${sectionId}/lessons/${lesson.id}`
         );
         if (!res.ok) return;
         const data = (await res.json()) as {
@@ -147,9 +135,7 @@ export function LessonEditor({
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(
-          `/api/courses/${courseId}/sections/${sectionId}/lessons`,
-        );
+        const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons`);
         if (!res.ok) return;
         const lessons = (await res.json()) as Array<{
           id: string;
@@ -165,9 +151,7 @@ export function LessonEditor({
           setPreviewPlaybackId(current.muxPlaybackId);
           onUpdateRef.current(lesson.id, {
             videoStatus: "READY",
-            ...(current.muxPlaybackId
-              ? { muxPlaybackId: current.muxPlaybackId }
-              : {}),
+            ...(current.muxPlaybackId ? { muxPlaybackId: current.muxPlaybackId } : {}),
           } as Partial<LessonItem>);
         } else if (current.videoStatus === "ERROR") {
           clearInterval(interval);
@@ -190,8 +174,7 @@ export function LessonEditor({
   const hasVideoContent =
     previewPlaybackId !== null ||
     (lesson.muxPlaybackId !== null && lesson.muxPlaybackId !== undefined);
-  const hasTextContent =
-    !!lesson.textContent && lesson.textContent.trim() !== "";
+  const hasTextContent = !!lesson.textContent && lesson.textContent.trim() !== "";
   const hasQuizContent = lesson.hasQuiz === true;
   const hasAssignmentContent = lesson.hasAssignment === true;
 
@@ -243,7 +226,7 @@ export function LessonEditor({
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ type }),
-        },
+        }
       );
       if (!res.ok) throw new Error();
     } catch {
@@ -262,7 +245,7 @@ export function LessonEditor({
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ textContent: html }),
-        },
+        }
       );
       if (!res.ok) throw new Error("Save failed");
       onUpdateRef.current(lesson.id, { textContent: html });
@@ -285,7 +268,7 @@ export function LessonEditor({
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title }),
-        },
+        }
       );
       if (!res.ok) throw new Error();
       onUpdateRef.current(lesson.id, { title });
@@ -305,7 +288,7 @@ export function LessonEditor({
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ isPublished: next }),
-        },
+        }
       );
       if (!res.ok) throw new Error();
     } catch {
@@ -360,9 +343,7 @@ export function LessonEditor({
               <CheckCircle2 size={12} /> Saved
             </span>
           )}
-          {saveStatus === "error" && (
-            <span className="text-xs text-danger">Save failed</span>
-          )}
+          {saveStatus === "error" && <span className="text-xs text-danger">Save failed</span>}
           <button
             type="button"
             onClick={() => void togglePublish()}
@@ -416,9 +397,7 @@ export function LessonEditor({
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
-              <p className="text-xs text-text-muted">
-                Uploading… {uploadProgress}%
-              </p>
+              <p className="text-xs text-text-muted">Uploading… {uploadProgress}%</p>
             </div>
           )}
 
@@ -426,10 +405,7 @@ export function LessonEditor({
             <div className="space-y-2">
               <div className="w-full aspect-video rounded-lg bg-surface-3 animate-pulse flex items-center justify-center">
                 <div className="text-center">
-                  <Loader2
-                    size={20}
-                    className="animate-spin text-text-muted mx-auto mb-2"
-                  />
+                  <Loader2 size={20} className="animate-spin text-text-muted mx-auto mb-2" />
                   <p className="text-sm text-text-muted">
                     ⚙ Processing video… this may take a minute
                   </p>
@@ -467,12 +443,8 @@ export function LessonEditor({
                 <div className="flex items-center gap-3 rounded-lg border border-danger bg-danger-bg px-4 py-3">
                   <AlertCircle size={16} className="text-danger shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-danger">
-                      Video processing failed
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      Please re-upload the video below
-                    </p>
+                    <p className="text-sm font-medium text-danger">Video processing failed</p>
+                    <p className="text-xs text-text-muted">Please re-upload the video below</p>
                   </div>
                 </div>
               )}
@@ -487,12 +459,8 @@ export function LessonEditor({
                   className="text-text-muted group-hover:text-brand transition-colors"
                 />
                 <div className="text-center">
-                  <p className="text-sm font-medium text-text-primary">
-                    Click to upload video
-                  </p>
-                  <p className="text-xs text-text-muted mt-0.5">
-                    MP4, MOV, WebM — up to 2GB
-                  </p>
+                  <p className="text-sm font-medium text-text-primary">Click to upload video</p>
+                  <p className="text-xs text-text-muted mt-0.5">MP4, MOV, WebM — up to 2GB</p>
                 </div>
               </button>
 
@@ -520,14 +488,10 @@ export function LessonEditor({
       )}
 
       {/* QUIZ */}
-      {localType === "QUIZ" && (
-        <QuizBuilder courseId={courseId} lessonId={lesson.id} />
-      )}
+      {localType === "QUIZ" && <QuizBuilder courseId={courseId} lessonId={lesson.id} />}
 
       {/* ASSIGNMENT */}
-      {localType === "ASSIGNMENT" && (
-        <AssignmentBuilder courseId={courseId} lessonId={lesson.id} />
-      )}
+      {localType === "ASSIGNMENT" && <AssignmentBuilder courseId={courseId} lessonId={lesson.id} />}
 
       {/* Type switch confirmation */}
       <Dialog
@@ -539,10 +503,9 @@ export function LessonEditor({
         <DialogContent className="max-w-sm">
           <DialogTitle>Switch to {pendingType ? TYPE_LABELS[pendingType] : ""}?</DialogTitle>
           <p className="text-sm text-text-muted -mt-2">
-            This lesson currently has{" "}
-            <strong>{TYPE_LABELS[localType]}</strong> content. Switching to{" "}
-            <strong>{pendingType ? TYPE_LABELS[pendingType] : ""}</strong> will
-            hide it from students, but it stays saved if you switch back.
+            This lesson currently has <strong>{TYPE_LABELS[localType]}</strong> content. Switching
+            to <strong>{pendingType ? TYPE_LABELS[pendingType] : ""}</strong> will hide it from
+            students, but it stays saved if you switch back.
           </p>
           <div className="flex items-center justify-end gap-2 mt-4">
             <button

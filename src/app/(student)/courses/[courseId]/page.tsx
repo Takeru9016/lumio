@@ -1,20 +1,12 @@
-import Link from "next/link";
-import Image from "next/image";
-import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import {
-  Lock,
-  PlayCircle,
-  FileText,
-  ClipboardList,
-  BookOpen,
-} from "lucide-react";
+import { BookOpen, ClipboardList, FileText, Lock, PlayCircle } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 
 import { AiBadge } from "@/components";
-
-import { EnrollButton } from "./_components/EnrollButton";
-
 import { db } from "@/lib";
+import { EnrollButton } from "./_components/EnrollButton";
 
 const LESSON_ICONS = {
   VIDEO: PlayCircle,
@@ -95,9 +87,7 @@ export default async function CourseDetailPage({
   // Archived courses are invisible to students who aren't enrolled
   if (course.status === "ARCHIVED" && !isEnrolled) notFound();
 
-  const publishedLessons = course.sections.flatMap((s) =>
-    s.lessons.filter((l) => l.isPublished),
-  );
+  const publishedLessons = course.sections.flatMap((s) => s.lessons.filter((l) => l.isPublished));
 
   let completedCount = 0;
   let resumeLessonId: string | null = null;
@@ -112,25 +102,17 @@ export default async function CourseDetailPage({
     });
     completedCount = completedProgress.length;
     const completedSet = new Set(completedProgress.map((p) => p.lessonId));
-    const firstUncompleted = publishedLessons.find(
-      (l) => !completedSet.has(l.id),
-    );
+    const firstUncompleted = publishedLessons.find((l) => !completedSet.has(l.id));
     resumeLessonId =
-      firstUncompleted?.id ??
-      publishedLessons[publishedLessons.length - 1]?.id ??
-      null;
+      firstUncompleted?.id ?? publishedLessons[publishedLessons.length - 1]?.id ?? null;
   }
 
   const totalLessons = publishedLessons.length;
   const progress =
-    isEnrolled && totalLessons > 0
-      ? Math.round((completedCount / totalLessons) * 100)
-      : 0;
+    isEnrolled && totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   const hasAiContent = course.sections.some((s) =>
-    s.lessons.some(
-      (l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true,
-    ),
+    s.lessons.some((l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true)
   );
 
   function formatDuration(secs: number | null) {
@@ -156,9 +138,7 @@ export default async function CourseDetailPage({
                 sizes="320px"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-5xl">
-                📚
-              </div>
+              <div className="absolute inset-0 flex items-center justify-center text-5xl">📚</div>
             )}
           </div>
 
@@ -178,9 +158,7 @@ export default async function CourseDetailPage({
               {hasAiContent && <AiBadge label="AI-Enhanced" size="md" />}
             </div>
 
-            <h1 className="text-2xl font-bold text-text-primary leading-tight">
-              {course.title}
-            </h1>
+            <h1 className="text-2xl font-bold text-text-primary leading-tight">{course.title}</h1>
 
             {course.description && (
               <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">
@@ -206,9 +184,7 @@ export default async function CourseDetailPage({
                 <>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-text-muted">Your progress</span>
-                    <span className="font-semibold text-text-primary">
-                      {progress}%
-                    </span>
+                    <span className="font-semibold text-text-primary">{progress}%</span>
                   </div>
                   <div className="h-2 bg-surface-3 rounded-full overflow-hidden">
                     <div
@@ -236,9 +212,7 @@ export default async function CourseDetailPage({
 
       {/* Curriculum */}
       <div className="max-w-5xl mx-auto px-6 py-8">
-        <h2 className="text-lg font-bold text-text-primary mb-4">
-          Course Curriculum
-        </h2>
+        <h2 className="text-lg font-bold text-text-primary mb-4">Course Curriculum</h2>
 
         <div className="space-y-3">
           {course.sections.map((section) => {
@@ -249,9 +223,7 @@ export default async function CourseDetailPage({
                 className="bg-surface-1 border border-border rounded-xl overflow-hidden"
               >
                 <div className="flex items-center justify-between px-4 py-3 bg-surface-2 border-b border-border">
-                  <span className="font-semibold text-sm text-text-primary">
-                    {section.title}
-                  </span>
+                  <span className="font-semibold text-sm text-text-primary">{section.title}</span>
                   <span className="text-xs text-text-muted">
                     {published.length} lesson{published.length !== 1 ? "s" : ""}
                   </span>
@@ -261,9 +233,7 @@ export default async function CourseDetailPage({
                   {published.map((lesson) => {
                     const Icon = LESSON_ICONS[lesson.type] ?? PlayCircle;
                     const isAccessible = isEnrolled || lesson.isFree;
-                    const hasAi =
-                      lesson.aiSummary !== null ||
-                      lesson.quiz?.isAiGenerated === true;
+                    const hasAi = lesson.aiSummary !== null || lesson.quiz?.isAiGenerated === true;
 
                     return (
                       <li key={lesson.id}>
@@ -272,10 +242,7 @@ export default async function CourseDetailPage({
                             href={`/courses/${courseId}/lessons/${lesson.id}`}
                             className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2 transition-colors"
                           >
-                            <Icon
-                              size={16}
-                              className="shrink-0 text-text-muted"
-                            />
+                            <Icon size={16} className="shrink-0 text-text-muted" />
                             <span className="flex-1 text-sm text-text-secondary">
                               {lesson.title}
                             </span>
@@ -295,13 +262,8 @@ export default async function CourseDetailPage({
                           </Link>
                         ) : (
                           <div className="flex items-center gap-3 px-4 py-3 opacity-60">
-                            <Lock
-                              size={16}
-                              className="shrink-0 text-text-muted"
-                            />
-                            <span className="flex-1 text-sm text-text-muted">
-                              {lesson.title}
-                            </span>
+                            <Lock size={16} className="shrink-0 text-text-muted" />
+                            <span className="flex-1 text-sm text-text-muted">{lesson.title}</span>
                             {lesson.videoDuration && (
                               <span className="text-xs text-text-disabled shrink-0">
                                 {formatDuration(lesson.videoDuration)}

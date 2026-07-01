@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 const MAX_ATTEMPTS = 10;
 const POLL_INTERVAL_MS = 2000;
@@ -40,9 +40,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#FAFAFA]">
       {timedOut ? (
         <>
-          <p className="text-sm text-text-muted">
-            Account setup is taking longer than expected.
-          </p>
+          <p className="text-sm text-text-muted">Account setup is taking longer than expected.</p>
           <p className="text-xs text-text-muted">
             Please refresh the page or{" "}
             <a href="/sign-in" className="underline">

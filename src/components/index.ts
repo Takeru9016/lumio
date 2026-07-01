@@ -1,3 +1,4 @@
+export { AiTutorChat } from "./ai/AiTutorChat";
 export { AssignmentBuilder } from "./course/AssignmentBuilder";
 export { CourseCard } from "./course/CourseCard";
 export { CourseEditor } from "./course/CourseEditor";
@@ -8,13 +9,9 @@ export { LessonList, type SectionItem } from "./course/LessonList";
 export { QuizBuilder } from "./course/QuizBuilder";
 export { TextEditor } from "./course/TextEditor";
 export { VideoPlayer } from "./course/VideoPlayer";
-
-export { AiTutorChat } from "./ai/AiTutorChat";
-
+export { Sidebar } from "./layout/Sidebar";
+export { TopNav } from "./layout/TopNav";
 export { AiBadge } from "./shared/AiBadge";
 export { EmptyState } from "./shared/EmptyState";
 export { GooeyToaster } from "./shared/GooeyToaster";
 export { SkeletonCard } from "./shared/SkeletonCard";
-
-export { Sidebar } from "./layout/Sidebar";
-export { TopNav } from "./layout/TopNav";

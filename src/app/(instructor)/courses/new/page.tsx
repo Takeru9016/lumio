@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "gooey-toast";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { UploadDropzone } from "@/lib";
 
@@ -79,8 +79,7 @@ export default function NewCoursePage() {
   const inputClass =
     "w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm text-(--color-text-primary) placeholder:text-(--color-text-disabled) focus:outline-none focus:ring-2 focus:ring-(--color-brand) focus:border-transparent transition-all";
 
-  const labelClass =
-    "block text-sm font-medium text-(--color-text-primary) mb-1.5";
+  const labelClass = "block text-sm font-medium text-(--color-text-primary) mb-1.5";
 
   return (
     <div className="max-w-xl mx-auto px-6 py-10">
@@ -90,18 +89,14 @@ export default function NewCoursePage() {
           <div key={s} className="flex items-center gap-2">
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
-                step >= s
-                  ? "bg-brand text-white"
-                  : "bg-surface-3 text-text-muted"
+                step >= s ? "bg-brand text-white" : "bg-surface-3 text-text-muted"
               }`}
             >
               {s}
             </div>
             {s < 3 && (
               <div
-                className={`h-px w-10 transition-colors ${
-                  step > s ? "bg-brand" : "bg-border"
-                }`}
+                className={`h-px w-10 transition-colors ${step > s ? "bg-brand" : "bg-border"}`}
               />
             )}
           </div>
@@ -131,9 +126,7 @@ export default function NewCoursePage() {
               className={`${inputClass} ${errors.title ? "border-danger focus:ring-danger" : ""}`}
               placeholder="e.g. Complete Next.js Developer Course"
             />
-            {errors.title && (
-              <p className="mt-1 text-xs text-danger">{errors.title.message}</p>
-            )}
+            {errors.title && <p className="mt-1 text-xs text-danger">{errors.title.message}</p>}
           </div>
 
           <div>
@@ -260,9 +253,7 @@ export default function NewCoursePage() {
                       style={{ width: `${thumbProgress}%` }}
                     />
                   </div>
-                  <p className="text-xs text-text-muted">
-                    Uploading… {thumbProgress}%
-                  </p>
+                  <p className="text-xs text-text-muted">Uploading… {thumbProgress}%</p>
                 </div>
               )}
             </div>
@@ -302,24 +293,16 @@ export default function NewCoursePage() {
               />
             )}
             <div className="p-4 space-y-2">
-              <p className="text-sm font-semibold text-text-primary">
-                {getValues("title")}
-              </p>
+              <p className="text-sm font-semibold text-text-primary">{getValues("title")}</p>
               {getValues("description") && (
-                <p className="text-sm text-text-muted line-clamp-2">
-                  {getValues("description")}
-                </p>
+                <p className="text-sm text-text-muted line-clamp-2">{getValues("description")}</p>
               )}
             </div>
             <div className="px-4 py-3 grid grid-cols-3 gap-2 text-xs text-text-muted">
               <span>{getValues("category") || "No category"}</span>
-              <span className="text-center">
-                {getValues("level") || "Any level"}
-              </span>
+              <span className="text-center">{getValues("level") || "Any level"}</span>
               <span className="text-right">
-                {getValues("price") > 0
-                  ? `${getValues("currency")} ${getValues("price")}`
-                  : "Free"}
+                {getValues("price") > 0 ? `${getValues("currency")} ${getValues("price")}` : "Free"}
               </span>
             </div>
           </div>

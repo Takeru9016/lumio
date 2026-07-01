@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { format } from "date-fns";
 import { Award, ExternalLink } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { db } from "@/lib";
 
@@ -48,9 +48,7 @@ export default async function OrgReportsPage() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Award size={16} className="text-[var(--color-brand)]" />
-            <h2 className="text-base font-semibold text-text-primary">
-              Certificates Issued
-            </h2>
+            <h2 className="text-base font-semibold text-text-primary">Certificates Issued</h2>
             {certificates.length > 0 && (
               <span className="text-xs font-medium text-text-muted bg-surface-3 rounded-full px-2 py-0.5">
                 {certificates.length}
@@ -62,9 +60,7 @@ export default async function OrgReportsPage() {
         {certificates.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-surface-2 py-12 text-center">
             <Award size={28} className="text-text-disabled mx-auto mb-2" />
-            <p className="text-sm font-medium text-text-primary mb-1">
-              No certificates issued yet
-            </p>
+            <p className="text-sm font-medium text-text-primary mb-1">No certificates issued yet</p>
             <p className="text-xs text-text-muted">
               Certificates appear here when members complete courses.
             </p>
@@ -100,16 +96,12 @@ export default async function OrgReportsPage() {
                     {cert.user.name ?? cert.user.email}
                   </p>
                   {cert.user.name && (
-                    <p className="text-xs text-text-muted truncate">
-                      {cert.user.email}
-                    </p>
+                    <p className="text-xs text-text-muted truncate">{cert.user.email}</p>
                   )}
                 </div>
 
                 {/* Course */}
-                <p className="text-sm text-text-secondary truncate pr-4">
-                  {cert.course.title}
-                </p>
+                <p className="text-sm text-text-secondary truncate pr-4">{cert.course.title}</p>
 
                 {/* Date */}
                 <p className="text-sm text-text-muted">

@@ -23,7 +23,7 @@ export type SimilarLesson = {
 export async function searchSimilarLessons(
   query: string,
   courseId?: string,
-  limit = 3,
+  limit = 3
 ): Promise<SimilarLesson[]> {
   const embedding = await generateEmbedding(query);
   const vector = toVectorLiteral(embedding);

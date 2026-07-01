@@ -1,45 +1,41 @@
 "use client";
 
-import { useState } from "react";
 import {
-  DndContext,
   closestCenter,
-  PointerSensor,
+  DndContext,
+  type DragEndEvent,
   KeyboardSensor,
+  PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
+  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  Video,
-  FileText,
-  HelpCircle,
-  ClipboardList,
-  GripVertical,
-  Pencil,
-  Trash2,
   Archive,
   ArchiveRestore,
-  Clock,
-  Plus,
   ChevronDown,
   ChevronRight,
+  ClipboardList,
+  Clock,
+  FileText,
+  GripVertical,
+  HelpCircle,
+  Pencil,
+  Plus,
+  Trash2,
+  Video,
 } from "lucide-react";
+import { useState } from "react";
 
 import { InlineInput } from "@/components/course/InlineInput";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
 
@@ -116,21 +112,13 @@ function SortableLesson({
   const [isRenaming, setIsRenaming] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: `lesson-${lesson.id}` });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `lesson-${lesson.id}`,
+  });
 
   if (isRenaming) {
     return (
-      <div
-        ref={setNodeRef}
-        style={{ transform: CSS.Transform.toString(transform), transition }}
-      >
+      <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}>
         <InlineInput
           placeholder="Lesson title"
           defaultValue={lesson.title}
@@ -173,19 +161,13 @@ function SortableLesson({
 
         <span
           className={`shrink-0 ${
-            lesson.isArchived
-              ? "text-text-disabled"
-              : isSelected
-                ? "text-brand"
-                : "text-text-muted"
+            lesson.isArchived ? "text-text-disabled" : isSelected ? "text-brand" : "text-text-muted"
           }`}
         >
           {typeIcons[lesson.type]}
         </span>
 
-        <span className="text-xs flex-1 truncate font-medium">
-          {lesson.title}
-        </span>
+        <span className="text-xs flex-1 truncate font-medium">{lesson.title}</span>
 
         {lesson.isArchived ? (
           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 shrink-0">
@@ -266,8 +248,8 @@ function SortableLesson({
         <DialogContent className="max-w-sm">
           <DialogTitle>Delete &ldquo;{lesson.title}&rdquo;?</DialogTitle>
           <p className="text-sm text-text-muted -mt-2">
-            This cannot be undone. Any video, quiz, or assignment content will
-            be permanently removed.
+            This cannot be undone. Any video, quiz, or assignment content will be permanently
+            removed.
           </p>
           <div className="flex items-center justify-end gap-2 mt-4">
             <button
@@ -331,14 +313,9 @@ function SortableSection({
   const [isRenaming, setIsRenaming] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: `section-${section.id}` });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `section-${section.id}`,
+  });
 
   const lessonIds = section.lessons.map((l) => `lesson-${l.id}`);
 
@@ -346,18 +323,14 @@ function SortableSection({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   function handleLessonDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIdx = section.lessons.findIndex(
-      (l) => `lesson-${l.id}` === active.id,
-    );
-    const newIdx = section.lessons.findIndex(
-      (l) => `lesson-${l.id}` === over.id,
-    );
+    const oldIdx = section.lessons.findIndex((l) => `lesson-${l.id}` === active.id);
+    const newIdx = section.lessons.findIndex((l) => `lesson-${l.id}` === over.id);
     if (oldIdx === -1 || newIdx === -1) return;
     onLessonReorder(arrayMove(section.lessons, oldIdx, newIdx));
   }
@@ -399,11 +372,7 @@ function SortableSection({
               onClick={() => setCollapsed((c) => !c)}
               className="flex items-center gap-1 flex-1 min-w-0"
             >
-              {collapsed ? (
-                <ChevronRight size={13} />
-              ) : (
-                <ChevronDown size={13} />
-              )}
+              {collapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
               <span className="text-xs font-semibold text-text-primary truncate">
                 {section.title}
               </span>
@@ -457,10 +426,7 @@ function SortableSection({
               collisionDetection={closestCenter}
               onDragEnd={handleLessonDragEnd}
             >
-              <SortableContext
-                items={lessonIds}
-                strategy={verticalListSortingStrategy}
-              >
+              <SortableContext items={lessonIds} strategy={verticalListSortingStrategy}>
                 {section.lessons.map((lesson) => (
                   <SortableLesson
                     key={lesson.id}
@@ -477,9 +443,7 @@ function SortableSection({
             </DndContext>
 
             {section.lessons.length === 0 && !showLessonInput && (
-              <p className="text-[11px] text-text-disabled px-3 py-2">
-                No lessons yet
-              </p>
+              <p className="text-[11px] text-text-disabled px-3 py-2">No lessons yet</p>
             )}
 
             {showLessonInput ? (
@@ -507,8 +471,7 @@ function SortableSection({
           <p className="text-sm text-text-muted -mt-2">
             This will permanently delete this section and all{" "}
             <strong>{section.lessons.length}</strong> lesson
-            {section.lessons.length !== 1 ? "s" : ""} inside it. This cannot
-            be undone.
+            {section.lessons.length !== 1 ? "s" : ""} inside it. This cannot be undone.
           </p>
           <div className="flex items-center justify-end gap-2 mt-4">
             <button
@@ -559,7 +522,7 @@ export function LessonList({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const sectionIds = sections.map((s) => `section-${s.id}`);
@@ -576,9 +539,7 @@ export function LessonList({
   }
 
   function handleLessonReorder(sectionId: string, newLessons: LessonItem[]) {
-    const reordered = sections.map((s) =>
-      s.id === sectionId ? { ...s, lessons: newLessons } : s,
-    );
+    const reordered = sections.map((s) => (s.id === sectionId ? { ...s, lessons: newLessons } : s));
     onReorder(reordered);
     persistReorder(courseId, reordered);
   }
@@ -591,10 +552,7 @@ export function LessonList({
           collisionDetection={closestCenter}
           onDragEnd={handleSectionDragEnd}
         >
-          <SortableContext
-            items={sectionIds}
-            strategy={verticalListSortingStrategy}
-          >
+          <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
             {sections.map((section) => (
               <SortableSection
                 key={section.id}
@@ -602,9 +560,7 @@ export function LessonList({
                 selectedLessonId={selectedLessonId}
                 onSelectLesson={onSelectLesson}
                 onAddLesson={() => setInlineFor(section.id)}
-                onLessonReorder={(newLessons) =>
-                  handleLessonReorder(section.id, newLessons)
-                }
+                onLessonReorder={(newLessons) => handleLessonReorder(section.id, newLessons)}
                 showLessonInput={inlineFor === section.id}
                 onLessonInputConfirm={(title) => {
                   onAddLesson(section.id, title);

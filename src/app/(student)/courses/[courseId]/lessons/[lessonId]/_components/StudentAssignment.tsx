@@ -1,21 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Star,
-  UploadCloud,
-  Loader2,
-  FileCheck,
-  X,
-} from "lucide-react";
+import Placeholder from "@tiptap/extension-placeholder";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import { format } from "date-fns";
 import { toast } from "gooey-toast";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  FileCheck,
+  Loader2,
+  Star,
+  UploadCloud,
+  X,
+} from "lucide-react";
+import { useState } from "react";
 
 import { useUploadThing } from "@/lib/uploadthing";
 
@@ -62,9 +62,7 @@ function ReadonlyHtml({ html }: { html: string }) {
   });
 
   if (!editor) {
-    return (
-      <div className="min-h-[80px] rounded-lg bg-surface-2 animate-pulse" />
-    );
+    return <div className="min-h-[80px] rounded-lg bg-surface-2 animate-pulse" />;
   }
 
   return (
@@ -75,12 +73,9 @@ function ReadonlyHtml({ html }: { html: string }) {
   );
 }
 
-export function StudentAssignment({
-  assignment,
-  onComplete,
-}: StudentAssignmentProps) {
+export function StudentAssignment({ assignment, onComplete }: StudentAssignmentProps) {
   const [submission, setSubmission] = useState<AssignmentSubmissionData | null>(
-    assignment.submission,
+    assignment.submission
   );
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -100,9 +95,7 @@ export function StudentAssignment({
   });
 
   const isLocked = submission?.status === "GRADED";
-  const isPastDue = assignment.dueDate
-    ? new Date() > new Date(assignment.dueDate)
-    : false;
+  const isPastDue = assignment.dueDate ? new Date() > new Date(assignment.dueDate) : false;
 
   const editor = useEditor({
     extensions: [
@@ -180,9 +173,7 @@ export function StudentAssignment({
       {/* Assignment brief */}
       <div className="bg-surface-1 border border-border rounded-lg p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-base font-semibold text-text-primary">
-            {assignment.title}
-          </h2>
+          <h2 className="text-base font-semibold text-text-primary">{assignment.title}</h2>
           {submission && (
             <span
               className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_CONFIG[submission.status].className}`}
@@ -223,14 +214,11 @@ export function StudentAssignment({
             </p>
           </div>
           {submission.feedback && (
-            <p className="text-sm text-text-primary pl-6">
-              {submission.feedback}
-            </p>
+            <p className="text-sm text-text-primary pl-6">{submission.feedback}</p>
           )}
           {submission.gradedAt && (
             <p className="text-xs text-text-muted pl-6">
-              Graded on{" "}
-              {format(new Date(submission.gradedAt), "MMM d, yyyy")}
+              Graded on {format(new Date(submission.gradedAt), "MMM d, yyyy")}
             </p>
           )}
         </div>
@@ -240,16 +228,10 @@ export function StudentAssignment({
       {!isLocked && (
         <div className="bg-surface-1 border border-border rounded-lg p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-text-primary">
-              Your submission
-            </p>
+            <p className="text-sm font-medium text-text-primary">Your submission</p>
             {submission && (
               <span className="text-xs text-text-muted">
-                Last submitted{" "}
-                {format(
-                  new Date(submission.submittedAt),
-                  "MMM d 'at' h:mm a",
-                )}
+                Last submitted {format(new Date(submission.submittedAt), "MMM d 'at' h:mm a")}
               </span>
             )}
           </div>
@@ -264,8 +246,7 @@ export function StudentAssignment({
           {/* Tiptap editor */}
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5">
-              Written response{" "}
-              <span className="text-text-disabled font-normal">(optional)</span>
+              Written response <span className="text-text-disabled font-normal">(optional)</span>
             </label>
             <div className="rounded-lg border border-border overflow-hidden">
               <EditorContent
@@ -279,9 +260,7 @@ export function StudentAssignment({
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5">
               File attachment{" "}
-              <span className="text-text-disabled font-normal">
-                (optional · max 32 MB)
-              </span>
+              <span className="text-text-disabled font-normal">(optional · max 32 MB)</span>
             </label>
 
             {uploadedFileUrl ? (
@@ -313,18 +292,10 @@ export function StudentAssignment({
                   className="text-text-muted group-hover:text-brand transition-colors"
                 />
                 <div className="text-center">
-                  <p className="text-sm font-medium text-text-primary">
-                    Click to upload a file
-                  </p>
-                  <p className="text-xs text-text-muted mt-0.5">
-                    Any file type · up to 32 MB
-                  </p>
+                  <p className="text-sm font-medium text-text-primary">Click to upload a file</p>
+                  <p className="text-xs text-text-muted mt-0.5">Any file type · up to 32 MB</p>
                 </div>
-                <input
-                  type="file"
-                  className="sr-only"
-                  onChange={handleFileChange}
-                />
+                <input type="file" className="sr-only" onChange={handleFileChange} />
               </label>
             )}
 

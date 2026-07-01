@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import { Space_Grotesk, Geist, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import type { Metadata } from "next";
+import { Geist, IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
 import { extractRouterConfig } from "uploadthing/server";
 
 import { ourFileRouter } from "@/app/api/uploadthing/core";

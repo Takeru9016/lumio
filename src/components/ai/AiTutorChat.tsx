@@ -44,8 +44,7 @@ export function AiTutorChat({
   });
 
   const isBusy = status === "submitted" || status === "streaming";
-  const awaitingReply =
-    isBusy && messages[messages.length - 1]?.role === "user";
+  const awaitingReply = isBusy && messages[messages.length - 1]?.role === "user";
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: messages and awaitingReply are intentional scroll triggers — the effect body reads a ref, not these values.
   useEffect(() => {
@@ -69,25 +68,18 @@ export function AiTutorChat({
         <span className="text-lg text-ai" aria-hidden>
           ✦
         </span>
-        <span className="text-sm font-semibold text-text-primary">
-          AI Tutor
-        </span>
+        <span className="text-sm font-semibold text-text-primary">AI Tutor</span>
         <AiBadge label="AI Tutor" />
       </div>
 
       {/* Messages */}
-      <div
-        ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto py-4 space-y-4"
-      >
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto py-4 space-y-4">
         {messages.length === 0 && !awaitingReply ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <span className="text-3xl text-ai mb-2" aria-hidden>
               ✦
             </span>
-            <p className="text-sm font-medium text-text-primary mb-1">
-              Ask the AI Tutor anything
-            </p>
+            <p className="text-sm font-medium text-text-primary mb-1">Ask the AI Tutor anything</p>
             <p className="text-xs text-text-muted max-w-xs">
               {lessonId
                 ? "Get explanations grounded in this lesson, or explore a concept deeper."
@@ -111,7 +103,7 @@ export function AiTutorChat({
                   {messageText(message)}
                 </div>
               </div>
-            ),
+            )
           )
         )}
 

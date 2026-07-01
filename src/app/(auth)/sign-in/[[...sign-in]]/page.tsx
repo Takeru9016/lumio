@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useSignIn } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSignIn } from "@clerk/nextjs";
+import { useState } from "react";
 
 export default function SignInPage() {
   const { signIn, errors, fetchStatus } = useSignIn();
@@ -61,12 +61,8 @@ export default function SignInPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-2 px-4">
         <div className="w-full max-w-sm bg-surface-1 rounded-xl shadow-(--shadow-lg) p-8">
-          <h1 className="text-2xl font-semibold text-text-primary mb-2">
-            Verify your identity
-          </h1>
-          <p className="text-sm text-text-muted mb-6">
-            Enter the code sent to your email address.
-          </p>
+          <h1 className="text-2xl font-semibold text-text-primary mb-2">Verify your identity</h1>
+          <p className="text-sm text-text-muted mb-6">Enter the code sent to your email address.</p>
 
           <form action={handleMFA} className="space-y-4">
             <div>
@@ -87,9 +83,7 @@ export default function SignInPage() {
                 placeholder="123456"
               />
               {errors?.fields?.code && (
-                <p className="mt-1.5 text-xs text-danger">
-                  {errors.fields.code.message}
-                </p>
+                <p className="mt-1.5 text-xs text-danger">{errors.fields.code.message}</p>
               )}
             </div>
 
@@ -122,23 +116,14 @@ export default function SignInPage() {
     <div className="min-h-screen flex items-center justify-center bg-surface-2 px-4">
       <div className="w-full max-w-sm bg-surface-1 rounded-xl shadow-(--shadow-lg) p-8">
         <div className="mb-8">
-          <span className="text-2xl font-bold text-brand tracking-tight">
-            Lumio
-          </span>
-          <h1 className="mt-4 text-2xl font-semibold text-text-primary">
-            Welcome back
-          </h1>
-          <p className="mt-1 text-sm text-text-muted">
-            Sign in to continue learning.
-          </p>
+          <span className="text-2xl font-bold text-brand tracking-tight">Lumio</span>
+          <h1 className="mt-4 text-2xl font-semibold text-text-primary">Welcome back</h1>
+          <p className="mt-1 text-sm text-text-muted">Sign in to continue learning.</p>
         </div>
 
         <form action={handleSignIn} className="space-y-4">
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-text-secondary mb-1.5"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1.5">
               Email
             </label>
             <input
@@ -151,18 +136,13 @@ export default function SignInPage() {
               placeholder="you@example.com"
             />
             {errors?.fields?.identifier && (
-              <p className="mt-1.5 text-xs text-danger">
-                {errors.fields.identifier.message}
-              </p>
+              <p className="mt-1.5 text-xs text-danger">{errors.fields.identifier.message}</p>
             )}
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-text-secondary"
-              >
+              <label htmlFor="password" className="text-sm font-medium text-text-secondary">
                 Password
               </label>
               <Link
@@ -182,9 +162,7 @@ export default function SignInPage() {
               placeholder="••••••••"
             />
             {errors?.fields?.password && (
-              <p className="mt-1.5 text-xs text-danger">
-                {errors.fields.password.message}
-              </p>
+              <p className="mt-1.5 text-xs text-danger">{errors.fields.password.message}</p>
             )}
           </div>
 
@@ -203,10 +181,7 @@ export default function SignInPage() {
 
         <p className="mt-6 text-center text-sm text-text-muted">
           Don&apos;t have an account?{" "}
-          <Link
-            href="/sign-up"
-            className="text-brand hover:text-brand-dark font-medium transition"
-          >
+          <Link href="/sign-up" className="text-brand hover:text-brand-dark font-medium transition">
             Sign up
           </Link>
         </p>

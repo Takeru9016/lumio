@@ -1,15 +1,11 @@
-import { NextRequest, NextResponse, after } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { after, type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib";
 import { embedLessonById } from "@/lib/ai/embeddings";
 
-async function resolveLessonOwnership(
-  courseId: string,
-  lessonId: string,
-  clerkId: string,
-) {
+async function resolveLessonOwnership(courseId: string, lessonId: string, clerkId: string) {
   const [dbUser, course, lesson] = await Promise.all([
     db.user.findUnique({ where: { clerkId }, select: { id: true } }),
     db.course.findUnique({
@@ -44,30 +40,19 @@ export async function GET(
     params,
   }: {
     params: Promise<{ courseId: string; sectionId: string; lessonId: string }>;
-  },
+  }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, sectionId, lessonId } = await params;
-  const { dbUser, course, lesson } = await resolveLessonOwnership(
-    courseId,
-    lessonId,
-    userId,
-  );
+  const { dbUser, course, lesson } = await resolveLessonOwnership(courseId, lessonId, userId);
 
-  if (!dbUser)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!course)
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (
-    !lesson ||
-    lesson.sectionId !== sectionId ||
-    lesson.section.courseId !== courseId
-  ) {
+  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== courseId) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -95,40 +80,25 @@ export async function PUT(
     params,
   }: {
     params: Promise<{ courseId: string; sectionId: string; lessonId: string }>;
-  },
+  }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, sectionId, lessonId } = await params;
-  const { dbUser, course, lesson } = await resolveLessonOwnership(
-    courseId,
-    lessonId,
-    userId,
-  );
+  const { dbUser, course, lesson } = await resolveLessonOwnership(courseId, lessonId, userId);
 
-  if (!dbUser)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!course)
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (
-    !lesson ||
-    lesson.sectionId !== sectionId ||
-    lesson.section.courseId !== courseId
-  ) {
+  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== courseId) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   const body = await req.json();
   const parsed = updateLessonSchema.safeParse(body);
-  if (!parsed.success)
-    return NextResponse.json(
-      { error: parsed.error.flatten() },
-      { status: 400 },
-    );
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   const updated = await db.lesson.update({
     where: { id: lessonId },
@@ -137,10 +107,7 @@ export async function PUT(
 
   // Re-embed when text content actually changed. Runs after the response via
   // after() so it survives on serverless; failures are logged, never fail the save.
-  if (
-    parsed.data.textContent !== undefined &&
-    parsed.data.textContent !== lesson.textContent
-  ) {
+  if (parsed.data.textContent !== undefined && parsed.data.textContent !== lesson.textContent) {
     after(async () => {
       try {
         await embedLessonById(lessonId);
@@ -159,30 +126,19 @@ export async function DELETE(
     params,
   }: {
     params: Promise<{ courseId: string; sectionId: string; lessonId: string }>;
-  },
+  }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, sectionId, lessonId } = await params;
-  const { dbUser, course, lesson } = await resolveLessonOwnership(
-    courseId,
-    lessonId,
-    userId,
-  );
+  const { dbUser, course, lesson } = await resolveLessonOwnership(courseId, lessonId, userId);
 
-  if (!dbUser)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!course)
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (
-    !lesson ||
-    lesson.sectionId !== sectionId ||
-    lesson.section.courseId !== courseId
-  ) {
+  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== courseId) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

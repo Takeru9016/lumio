@@ -1,5 +1,5 @@
-import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaClient } from "@/generated/prisma/client";
 
 function createPrismaClient() {
   const adapter = new PrismaNeon({
@@ -7,10 +7,7 @@ function createPrismaClient() {
   });
   return new PrismaClient({
     adapter,
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
+    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 }
 

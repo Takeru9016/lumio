@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib";
@@ -11,11 +11,7 @@ const bodySchema = z.object({
   maxScore: z.number().int().min(1).max(1000).default(100),
 });
 
-async function getInstructorLesson(
-  clerkId: string,
-  courseId: string,
-  lessonId: string,
-) {
+async function getInstructorLesson(clerkId: string, courseId: string, lessonId: string) {
   const dbUser = await db.user.findUnique({
     where: { clerkId },
     select: { id: true },
@@ -37,17 +33,15 @@ async function getInstructorLesson(
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ courseId: string; lessonId: string }> },
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, lessonId } = await params;
 
   const ctx = await getInstructorLesson(userId, courseId, lessonId);
-  if (!ctx)
-    return NextResponse.json({ error: "Not found or forbidden" }, { status: 404 });
+  if (!ctx) return NextResponse.json({ error: "Not found or forbidden" }, { status: 404 });
 
   const assignment = await db.assignment.findUnique({ where: { lessonId } });
 
@@ -56,24 +50,22 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ courseId: string; lessonId: string }> },
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, lessonId } = await params;
 
   const ctx = await getInstructorLesson(userId, courseId, lessonId);
-  if (!ctx)
-    return NextResponse.json({ error: "Not found or forbidden" }, { status: 404 });
+  if (!ctx) return NextResponse.json({ error: "Not found or forbidden" }, { status: 404 });
 
   const raw = await req.json();
   const parsed = bodySchema.safeParse(raw);
   if (!parsed.success)
     return NextResponse.json(
       { error: "Invalid body", issues: parsed.error.issues },
-      { status: 400 },
+      { status: 400 }
     );
 
   const { title, description, dueDate, maxScore } = parsed.data;

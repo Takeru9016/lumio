@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { Bell } from "lucide-react";
+import Link from "next/link";
 
 import { AiBadge } from "@/components/shared/AiBadge";
 
@@ -33,12 +33,11 @@ export function TopNav({ showAiBadge = false, currentStreak = 0 }: TopNavProps) 
         )}
 
         {currentStreak >= 2 && (
-          <span className="text-sm font-medium text-text-muted">
-            🔥 {currentStreak}-day
-          </span>
+          <span className="text-sm font-medium text-text-muted">🔥 {currentStreak}-day</span>
         )}
 
         <button
+          type="button"
           aria-label="Notifications"
           className="p-1.5 text-text-muted hover:text-text-primary hover:bg-surface-2 rounded-md transition-colors"
         >

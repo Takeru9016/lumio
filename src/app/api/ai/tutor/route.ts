@@ -52,7 +52,7 @@ async function persistChat(
   dbUserId: string,
   lessonId: string | undefined,
   chatId: string | undefined,
-  messages: UIMessage[],
+  messages: UIMessage[]
 ): Promise<void> {
   const data = messages as unknown as Prisma.InputJsonValue;
 
@@ -127,9 +127,7 @@ export async function POST(req: Request) {
     if (query) {
       const similar = await searchSimilarLessons(query, courseId, RAG_TOP_K);
       if (similar.length > 0) {
-        context = similar
-          .map((l) => `## ${l.title}\n${l.textContent ?? ""}`.trim())
-          .join("\n\n");
+        context = similar.map((l) => `## ${l.title}\n${l.textContent ?? ""}`.trim()).join("\n\n");
       }
     }
   }
@@ -137,9 +135,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: openai("gpt-5.4-mini"),
     system: TUTOR_SYSTEM_PROMPT(context),
-    messages: await convertToModelMessages(
-      messages.slice(-MODEL_CONTEXT_WINDOW),
-    ),
+    messages: await convertToModelMessages(messages.slice(-MODEL_CONTEXT_WINDOW)),
   });
 
   const stream = toUIMessageStream({

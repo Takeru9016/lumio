@@ -1,14 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import {
   CheckCircle2,
   Circle,
-  PlayCircle,
+  ClipboardList,
   FileText,
   HelpCircle,
-  ClipboardList,
+  PlayCircle,
 } from "lucide-react";
+import Link from "next/link";
 
 import type { LessonType } from "@/generated/prisma/enums";
 
@@ -70,30 +70,16 @@ export function LessonSidebar({
                 }`}
               >
                 {isCompleted ? (
-                  <CheckCircle2
-                    size={14}
-                    className="shrink-0 mt-0.5 text-success"
-                  />
+                  <CheckCircle2 size={14} className="shrink-0 mt-0.5 text-success" />
                 ) : isCurrent ? (
-                  <Circle
-                    size={14}
-                    strokeWidth={2.5}
-                    className="shrink-0 mt-0.5 text-brand"
-                  />
+                  <Circle size={14} strokeWidth={2.5} className="shrink-0 mt-0.5 text-brand" />
                 ) : (
-                  <Circle
-                    size={14}
-                    className="shrink-0 mt-0.5 text-border-strong"
-                  />
+                  <Circle size={14} className="shrink-0 mt-0.5 text-border-strong" />
                 )}
 
                 <span
                   className={`shrink-0 mt-0.5 ${
-                    lesson.isAiQuiz
-                      ? "text-ai"
-                      : isCurrent
-                        ? "text-brand"
-                        : "text-text-muted"
+                    lesson.isAiQuiz ? "text-ai" : isCurrent ? "text-brand" : "text-text-muted"
                   }`}
                 >
                   {lesson.isAiQuiz ? (
@@ -106,9 +92,7 @@ export function LessonSidebar({
                 <span className="flex-1 truncate">
                   {lesson.title}
                   {lesson.isAiQuiz && (
-                    <span className="ml-1 text-[10px] text-ai font-medium">
-                      (AI)
-                    </span>
+                    <span className="ml-1 text-[10px] text-ai font-medium">(AI)</span>
                   )}
                 </span>
               </Link>

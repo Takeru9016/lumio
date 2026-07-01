@@ -1,15 +1,14 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-import { db, awardXP, updateStreak, XP_EVENTS, generateCertificate } from "@/lib";
+import { awardXP, db, generateCertificate, updateStreak, XP_EVENTS } from "@/lib";
 
 export async function POST(
   _req: Request,
-  { params }: { params: Promise<{ courseId: string; lessonId: string }> },
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, lessonId } = await params;
 
@@ -17,8 +16,7 @@ export async function POST(
     where: { clerkId: userId },
     select: { id: true },
   });
-  if (!dbUser)
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const [enrollment, lesson] = await Promise.all([
     db.enrollment.findUnique({
@@ -31,10 +29,8 @@ export async function POST(
     }),
   ]);
 
-  if (!enrollment)
-    return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
-  if (!lesson)
-    return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+  if (!enrollment) return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
+  if (!lesson) return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
 
   const existing = await db.lessonProgress.findUnique({
     where: { userId_lessonId: { userId: dbUser.id, lessonId } },
@@ -84,9 +80,7 @@ export async function POST(
   const totalLessons = allPublishedLessons.length;
 
   if (totalLessons > 0 && totalCompleted >= totalLessons) {
-    const quizIds = allPublishedLessons
-      .map((l) => l.quiz?.id)
-      .filter((id): id is string => !!id);
+    const quizIds = allPublishedLessons.map((l) => l.quiz?.id).filter((id): id is string => !!id);
 
     let allQuizzesPassed = true;
     if (quizIds.length > 0) {

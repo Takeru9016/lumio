@@ -1,18 +1,10 @@
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { format } from "date-fns";
-import {
-  CheckCircle2,
-  Clock,
-  Star,
-  ClipboardList,
-  Award,
-  ExternalLink,
-} from "lucide-react";
+import { Award, CheckCircle2, ClipboardList, Clock, ExternalLink, Star } from "lucide-react";
 import Link from "next/link";
-
+import { redirect } from "next/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/lib";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default async function StudentSettingsPage() {
   const { userId } = await auth();
@@ -72,9 +64,7 @@ export default async function StudentSettingsPage() {
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-xl font-bold text-text-primary">Settings</h1>
-        <p className="text-sm text-text-muted">
-          Manage your account and view your grades.
-        </p>
+        <p className="text-sm text-text-muted">Manage your account and view your grades.</p>
       </div>
 
       <Tabs defaultValue="assignments">
@@ -115,15 +105,13 @@ export default async function StudentSettingsPage() {
                 </div>
               )}
               <div>
-                <p className="text-sm font-semibold text-text-primary">
-                  {dbUser.name ?? "—"}
-                </p>
+                <p className="text-sm font-semibold text-text-primary">{dbUser.name ?? "—"}</p>
                 <p className="text-xs text-text-muted">{dbUser.email}</p>
               </div>
             </div>
             <p className="text-xs text-text-muted">
-              Profile details are managed via Clerk. Visit your account settings
-              to update your name or avatar.
+              Profile details are managed via Clerk. Visit your account settings to update your name
+              or avatar.
             </p>
           </div>
         </TabsContent>
@@ -133,10 +121,7 @@ export default async function StudentSettingsPage() {
           <div className="mt-4 space-y-3">
             {gradedSubmissions.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-surface-2 py-12 text-center">
-                <ClipboardList
-                  size={28}
-                  className="text-text-disabled mx-auto mb-2"
-                />
+                <ClipboardList size={28} className="text-text-disabled mx-auto mb-2" />
                 <p className="text-sm font-medium text-text-primary mb-1">
                   No graded assignments yet
                 </p>
@@ -175,9 +160,7 @@ export default async function StudentSettingsPage() {
                             {sub.score}/{sub.assignment.maxScore}
                           </span>
                           {pct !== null && (
-                            <span className="text-xs text-text-muted">
-                              ({pct}%)
-                            </span>
+                            <span className="text-xs text-text-muted">({pct}%)</span>
                           )}
                         </div>
                       )}
@@ -191,8 +174,7 @@ export default async function StudentSettingsPage() {
                       {sub.gradedAt && (
                         <span className="flex items-center gap-1">
                           <Clock size={11} />
-                          Graded{" "}
-                          {format(new Date(sub.gradedAt), "MMM d, yyyy")}
+                          Graded {format(new Date(sub.gradedAt), "MMM d, yyyy")}
                         </span>
                       )}
                     </div>
@@ -202,9 +184,7 @@ export default async function StudentSettingsPage() {
                         <p className="text-xs font-medium text-text-secondary mb-0.5">
                           Instructor feedback
                         </p>
-                        <p className="text-sm text-text-primary">
-                          {sub.feedback}
-                        </p>
+                        <p className="text-sm text-text-primary">{sub.feedback}</p>
                       </div>
                     )}
                   </div>
@@ -220,12 +200,9 @@ export default async function StudentSettingsPage() {
             {certificates.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-surface-2 py-12 text-center">
                 <Award size={28} className="text-text-disabled mx-auto mb-2" />
-                <p className="text-sm font-medium text-text-primary mb-1">
-                  No certificates yet
-                </p>
+                <p className="text-sm font-medium text-text-primary mb-1">No certificates yet</p>
                 <p className="text-xs text-text-muted mb-4">
-                  Complete all lessons and quizzes in a course to earn your
-                  certificate.
+                  Complete all lessons and quizzes in a course to earn your certificate.
                 </p>
                 <Link
                   href="/courses"
@@ -262,8 +239,7 @@ export default async function StudentSettingsPage() {
                           {cert.course.title}
                         </p>
                         <p className="text-xs text-text-muted mt-0.5">
-                          Issued{" "}
-                          {format(new Date(cert.issuedAt), "MMM d, yyyy")}
+                          Issued {format(new Date(cert.issuedAt), "MMM d, yyyy")}
                         </p>
                       </div>
                       <div className="flex items-center justify-between">

@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "gooey-toast";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 
 interface XpToastProps {
   amount: number;

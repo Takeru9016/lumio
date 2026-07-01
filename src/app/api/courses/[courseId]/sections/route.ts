@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib";
@@ -17,11 +17,10 @@ async function getCourseAndUser(courseId: string, clerkId: string) {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> },
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId } = await params;
 
@@ -37,8 +36,7 @@ export async function GET(
     },
   });
 
-  if (!course)
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   return NextResponse.json(course.sections);
 }
@@ -49,29 +47,22 @@ const createSectionSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> },
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId } = await params;
   const { dbUser, course } = await getCourseAndUser(courseId, userId);
 
-  if (!dbUser)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!course)
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await req.json();
   const parsed = createSectionSchema.safeParse(body);
-  if (!parsed.success)
-    return NextResponse.json(
-      { error: parsed.error.flatten() },
-      { status: 400 },
-    );
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   const count = await db.section.count({ where: { courseId } });
 

@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "gooey-toast";
-
-import type { RazorpayOptions } from "@/types";
-
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useRazorpay } from "@/hooks";
+import type { RazorpayOptions } from "@/types";
 
 interface EnrollButtonProps {
   courseId: string;
@@ -139,6 +137,7 @@ export function EnrollButton({
 
     return (
       <button
+        type="button"
         onClick={hasLessons ? handleStartLearning : undefined}
         disabled={!hasLessons}
         title={!hasLessons ? "No lessons available yet" : undefined}
@@ -151,6 +150,7 @@ export function EnrollButton({
 
   return (
     <button
+      type="button"
       onClick={price === 0 ? handleFreeEnroll : handlePaidEnroll}
       disabled={busy}
       className="w-full py-3 px-6 rounded-xl font-semibold text-sm bg-brand text-white hover:bg-brand-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"

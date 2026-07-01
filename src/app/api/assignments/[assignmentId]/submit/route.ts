@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db, awardXP, XP_EVENTS } from "@/lib";
+import { awardXP, db, XP_EVENTS } from "@/lib";
 
 const bodySchema = z.object({
   textContent: z.string().optional().nullable(),
@@ -11,11 +11,10 @@ const bodySchema = z.object({
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ assignmentId: string }> },
+  { params }: { params: Promise<{ assignmentId: string }> }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { assignmentId } = await params;
 
@@ -23,8 +22,7 @@ export async function POST(
     where: { clerkId: userId },
     select: { id: true },
   });
-  if (!dbUser)
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const assignment = await db.assignment.findUnique({
     where: { id: assignmentId },
@@ -36,8 +34,7 @@ export async function POST(
       },
     },
   });
-  if (!assignment)
-    return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
+  if (!assignment) return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
 
   const enrollment = await db.enrollment.findUnique({
     where: {
@@ -48,8 +45,7 @@ export async function POST(
     },
     select: { id: true },
   });
-  if (!enrollment)
-    return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
+  if (!enrollment) return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
 
   const existing = await db.assignmentSubmission.findUnique({
     where: { userId_assignmentId: { userId: dbUser.id, assignmentId } },
@@ -58,7 +54,7 @@ export async function POST(
   if (existing?.status === "GRADED")
     return NextResponse.json(
       { error: "This submission has been graded and cannot be changed." },
-      { status: 409 },
+      { status: 409 }
     );
 
   const raw = await req.json();
@@ -66,15 +62,12 @@ export async function POST(
   if (!parsed.success)
     return NextResponse.json(
       { error: "Invalid body", issues: parsed.error.issues },
-      { status: 400 },
+      { status: 400 }
     );
 
   const { textContent, fileUrl } = parsed.data;
   if (!textContent && !fileUrl)
-    return NextResponse.json(
-      { error: "Submit at least text content or a file." },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Submit at least text content or a file." }, { status: 400 });
 
   const now = new Date();
   const isLate = assignment.dueDate ? now > assignment.dueDate : false;

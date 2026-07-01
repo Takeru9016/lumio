@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { motion } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
 
 import { AiBadge } from "@/components/shared/AiBadge";
 
@@ -32,16 +32,12 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
   const isEnrolled = !!enrollment;
   const progress =
     enrollment && enrollment.totalLessons > 0
-      ? Math.round(
-          (enrollment.completedLessons / enrollment.totalLessons) * 100,
-        )
+      ? Math.round((enrollment.completedLessons / enrollment.totalLessons) * 100)
       : 0;
   const isCompleted = enrollment?.status === "COMPLETED";
 
   const priceLabel =
-    course.price === 0
-      ? "Free"
-      : `${course.currency} ${course.price.toLocaleString("en-IN")}`;
+    course.price === 0 ? "Free" : `${course.currency} ${course.price.toLocaleString("en-IN")}`;
 
   return (
     <motion.div
@@ -49,10 +45,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
       transition={{ duration: 0.18, ease: "easeOut" }}
       className="bg-surface-1 border border-border rounded-xl overflow-hidden flex flex-col"
     >
-      <Link
-        href={`/courses/${course.id}`}
-        className="block relative aspect-video bg-surface-3"
-      >
+      <Link href={`/courses/${course.id}`} className="block relative aspect-video bg-surface-3">
         {course.thumbnailUrl ? (
           <Image
             src={course.thumbnailUrl}
@@ -62,9 +55,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-3xl">
-            📚
-          </div>
+          <div className="absolute inset-0 flex items-center justify-center text-3xl">📚</div>
         )}
         {course.hasAiContent && (
           <div className="absolute top-2 left-2">
@@ -80,9 +71,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
           </h3>
         </Link>
 
-        <p className="text-xs text-text-muted">
-          {course.instructor.name ?? "Instructor"}
-        </p>
+        <p className="text-xs text-text-muted">{course.instructor.name ?? "Instructor"}</p>
 
         {course.category && (
           <span className="inline-flex self-start items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-light text-brand">
@@ -102,9 +91,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
                   className="h-full rounded-full transition-all"
                   style={{
                     width: `${progress}%`,
-                    backgroundColor: isCompleted
-                      ? "var(--color-success)"
-                      : "var(--color-brand)",
+                    backgroundColor: isCompleted ? "var(--color-success)" : "var(--color-brand)",
                   }}
                 />
               </div>
@@ -117,9 +104,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-text-primary">
-                {priceLabel}
-              </span>
+              <span className="text-sm font-semibold text-text-primary">{priceLabel}</span>
               <Link
                 href={`/courses/${course.id}`}
                 className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border text-text-secondary hover:border-brand hover:text-brand transition-colors"

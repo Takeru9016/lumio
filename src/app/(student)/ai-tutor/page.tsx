@@ -38,11 +38,7 @@ export default async function AiTutorPage() {
       </div>
 
       <div className="flex-1 min-h-0 rounded-lg border border-border bg-surface-1 px-4 shadow-sm">
-        <AiTutorChat
-          className="h-full"
-          chatId={aiChat?.id}
-          initialMessages={initialMessages}
-        />
+        <AiTutorChat className="h-full" chatId={aiChat?.id} initialMessages={initialMessages} />
       </div>
     </div>
   );

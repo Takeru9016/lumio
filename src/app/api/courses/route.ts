@@ -1,10 +1,8 @@
-import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
-
-import { db } from "@/lib";
-
 import type { CourseStatus } from "@/generated/prisma/client";
+import { db } from "@/lib";
 
 const VALID_STATUSES: CourseStatus[] = ["DRAFT", "PUBLISHED", "ARCHIVED"];
 
@@ -20,10 +18,7 @@ export async function GET(req: NextRequest) {
   const tenantId = searchParams.get("tenantId") ?? undefined;
   const category = searchParams.get("category") ?? undefined;
   const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
-  const limit = Math.min(
-    50,
-    Math.max(1, Number(searchParams.get("limit") ?? "12")),
-  );
+  const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") ?? "12")));
 
   const status =
     statusParam && VALID_STATUSES.includes(statusParam as CourseStatus)
@@ -78,14 +73,9 @@ export async function GET(req: NextRequest) {
   ]);
 
   const shaped = courses.map((course) => {
-    const lessonCount = course.sections.reduce(
-      (sum, s) => sum + s._count.lessons,
-      0,
-    );
+    const lessonCount = course.sections.reduce((sum, s) => sum + s._count.lessons, 0);
     const hasAiContent = course.sections.some((s) =>
-      s.lessons.some(
-        (l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true,
-      ),
+      s.lessons.some((l) => l.aiSummary !== null || l.quiz?.isAiGenerated === true)
     );
     return {
       id: course.id,
@@ -146,8 +136,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { title, description, thumbnailUrl, category, level, price, currency } =
-    parsed.data;
+  const { title, description, thumbnailUrl, category, level, price, currency } = parsed.data;
 
   const course = await db.course.create({
     data: {

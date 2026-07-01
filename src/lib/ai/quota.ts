@@ -1,6 +1,6 @@
-import { db } from "@/lib/db";
 import { PLAN_LIMITS } from "@/constants/plans";
 import type { Plan } from "@/generated/prisma/enums";
+import { db } from "@/lib/db";
 
 /**
  * Checks a user's monthly AI quota ceiling WITHOUT incrementing usage.
@@ -9,7 +9,7 @@ import type { Plan } from "@/generated/prisma/enums";
  */
 export async function checkAiQuota(
   userId: string,
-  plan: Plan,
+  plan: Plan
 ): Promise<{ allowed: boolean; remaining: number }> {
   const limit = PLAN_LIMITS[plan].aiCallsPerMonth;
 

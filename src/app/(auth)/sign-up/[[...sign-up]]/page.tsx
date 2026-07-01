@@ -1,8 +1,8 @@
 "use client";
 
+import { useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSignUp } from "@clerk/nextjs";
 
 export default function SignUpPage() {
   const { signUp, errors, fetchStatus } = useSignUp();
@@ -51,12 +51,9 @@ export default function SignUpPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-2 px-4">
         <div className="w-full max-w-sm bg-surface-1 rounded-xl shadow-(--shadow-lg) p-8">
-          <h1 className="text-2xl font-semibold text-text-primary mb-2">
-            Check your email
-          </h1>
+          <h1 className="text-2xl font-semibold text-text-primary mb-2">Check your email</h1>
           <p className="text-sm text-text-muted mb-6">
-            We sent a 6-digit code to your email. Enter it below to verify your
-            account.
+            We sent a 6-digit code to your email. Enter it below to verify your account.
           </p>
 
           <form action={handleVerify} className="space-y-4">
@@ -78,9 +75,7 @@ export default function SignUpPage() {
                 placeholder="123456"
               />
               {errors?.fields?.code && (
-                <p className="mt-1.5 text-xs text-danger">
-                  {errors.fields.code.message}
-                </p>
+                <p className="mt-1.5 text-xs text-danger">{errors.fields.code.message}</p>
               )}
             </div>
 
@@ -113,15 +108,9 @@ export default function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-surface-2 px-4">
       <div className="w-full max-w-sm bg-surface-1 rounded-xl shadow-(--shadow-lg) p-8">
         <div className="mb-8">
-          <span className="text-2xl font-bold text-brand tracking-tight">
-            Lumio
-          </span>
-          <h1 className="mt-4 text-2xl font-semibold text-text-primary">
-            Create your account
-          </h1>
-          <p className="mt-1 text-sm text-text-muted">
-            Start learning with intelligence.
-          </p>
+          <span className="text-2xl font-bold text-brand tracking-tight">Lumio</span>
+          <h1 className="mt-4 text-2xl font-semibold text-text-primary">Create your account</h1>
+          <p className="mt-1 text-sm text-text-muted">Start learning with intelligence.</p>
         </div>
 
         <form action={handleSignUp} className="space-y-4">
@@ -143,9 +132,7 @@ export default function SignUpPage() {
                 placeholder="Jane"
               />
               {errors?.fields?.firstName && (
-                <p className="mt-1.5 text-xs text-danger">
-                  {errors.fields.firstName.message}
-                </p>
+                <p className="mt-1.5 text-xs text-danger">{errors.fields.firstName.message}</p>
               )}
             </div>
             <div>
@@ -165,18 +152,13 @@ export default function SignUpPage() {
                 placeholder="Doe"
               />
               {errors?.fields?.lastName && (
-                <p className="mt-1.5 text-xs text-danger">
-                  {errors.fields.lastName.message}
-                </p>
+                <p className="mt-1.5 text-xs text-danger">{errors.fields.lastName.message}</p>
               )}
             </div>
           </div>
 
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-text-secondary mb-1.5"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1.5">
               Email
             </label>
             <input
@@ -189,9 +171,7 @@ export default function SignUpPage() {
               placeholder="you@example.com"
             />
             {errors?.fields?.emailAddress && (
-              <p className="mt-1.5 text-xs text-danger">
-                {errors.fields.emailAddress.message}
-              </p>
+              <p className="mt-1.5 text-xs text-danger">{errors.fields.emailAddress.message}</p>
             )}
           </div>
 
@@ -212,9 +192,7 @@ export default function SignUpPage() {
               placeholder="Min. 8 characters"
             />
             {errors?.fields?.password && (
-              <p className="mt-1.5 text-xs text-danger">
-                {errors.fields.password.message}
-              </p>
+              <p className="mt-1.5 text-xs text-danger">{errors.fields.password.message}</p>
             )}
           </div>
 
@@ -236,10 +214,7 @@ export default function SignUpPage() {
 
         <p className="mt-6 text-center text-sm text-text-muted">
           Already have an account?{" "}
-          <Link
-            href="/sign-in"
-            className="text-brand hover:text-brand-dark font-medium transition"
-          >
+          <Link href="/sign-in" className="text-brand hover:text-brand-dark font-medium transition">
             Sign in
           </Link>
         </p>

@@ -1,14 +1,11 @@
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { format } from "date-fns";
 import { ClipboardList, Users } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { db } from "@/lib";
 
-import {
-  SubmissionsGrader,
-  type SubmissionItem,
-} from "./_components/SubmissionsGrader";
+import { type SubmissionItem, SubmissionsGrader } from "./_components/SubmissionsGrader";
 
 export default async function InstructorStudentsPage() {
   const { userId } = await auth();
@@ -48,7 +45,7 @@ export default async function InstructorStudentsPage() {
     if (!courseLessonIds.has(e.courseId)) {
       courseLessonIds.set(
         e.courseId,
-        e.course.sections.flatMap((s) => s.lessons.map((l) => l.id)),
+        e.course.sections.flatMap((s) => s.lessons.map((l) => l.id))
       );
     }
   }
@@ -70,16 +67,13 @@ export default async function InstructorStudentsPage() {
 
   const completedByUser = new Map<string, Set<string>>();
   for (const p of completedProgress) {
-    if (!completedByUser.has(p.userId))
-      completedByUser.set(p.userId, new Set());
+    if (!completedByUser.has(p.userId)) completedByUser.set(p.userId, new Set());
     completedByUser.get(p.userId)!.add(p.lessonId);
   }
 
   const enrolledStudents = rawEnrollments.map((e) => {
     const lessonIds = courseLessonIds.get(e.courseId) ?? [];
-    const completed = lessonIds.filter((id) =>
-      completedByUser.get(e.userId)?.has(id),
-    ).length;
+    const completed = lessonIds.filter((id) => completedByUser.get(e.userId)?.has(id)).length;
     return {
       id: e.id,
       studentName: e.user.name,
@@ -87,10 +81,7 @@ export default async function InstructorStudentsPage() {
       courseTitle: e.course.title,
       enrolledAt: e.createdAt,
       lastAccessed: e.lastAccessed,
-      progressPct:
-        lessonIds.length > 0
-          ? Math.round((completed / lessonIds.length) * 100)
-          : 0,
+      progressPct: lessonIds.length > 0 ? Math.round((completed / lessonIds.length) * 100) : 0,
     };
   });
 
@@ -157,8 +148,7 @@ export default async function InstructorStudentsPage() {
         <div>
           <h1 className="text-xl font-bold text-text-primary">Students</h1>
           <p className="text-sm text-text-muted">
-            {enrolledStudents.length} enrolled ·{" "}
-            {submissions.length} submission
+            {enrolledStudents.length} enrolled · {submissions.length} submission
             {submissions.length !== 1 ? "s" : ""} to grade
           </p>
         </div>
@@ -166,16 +156,12 @@ export default async function InstructorStudentsPage() {
 
       {/* Enrolled students */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-text-primary">
-          Enrolled Students
-        </h2>
+        <h2 className="text-sm font-semibold text-text-primary">Enrolled Students</h2>
 
         {enrolledStudents.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-surface-2 py-12 text-center">
             <Users size={28} className="text-text-disabled mx-auto mb-2" />
-            <p className="text-sm font-medium text-text-primary mb-1">
-              No students yet
-            </p>
+            <p className="text-sm font-medium text-text-primary mb-1">No students yet</p>
             <p className="text-xs text-text-muted">
               Students who enroll in your courses will appear here.
             </p>
@@ -222,9 +208,7 @@ export default async function InstructorStudentsPage() {
                       {format(s.enrolledAt, "MMM d, yyyy")}
                     </td>
                     <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
-                      {s.lastAccessed
-                        ? format(s.lastAccessed, "MMM d, yyyy")
-                        : "—"}
+                      {s.lastAccessed ? format(s.lastAccessed, "MMM d, yyyy") : "—"}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">

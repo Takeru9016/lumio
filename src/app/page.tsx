@@ -4,9 +4,7 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[#FAFAFA]">
       <div className="flex flex-col items-center gap-3">
-        <span className="text-4xl font-bold tracking-tight text-[#0F0F10]">
-          Lumio
-        </span>
+        <span className="text-4xl font-bold tracking-tight text-[#0F0F10]">Lumio</span>
         <p className="text-base text-text-muted">Learn with intelligence.</p>
       </div>
 

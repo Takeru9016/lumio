@@ -60,11 +60,7 @@ function displayAnswer(answer: string, question: StudentQuestion): string {
   return answer;
 }
 
-export function StudentQuiz({
-  quiz,
-  initialAttempts,
-  onComplete,
-}: StudentQuizProps) {
+export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizProps) {
   const [phase, setPhase] = useState<QuizPhase>("idle");
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -76,17 +72,14 @@ export function StudentQuiz({
     if (!result || result.xpAwarded === 0) return;
     toast.success({
       title: `+${result.xpAwarded} XP earned!`,
-      description:
-        result.score === 100 ? "Perfect score! Outstanding!" : "Quiz passed!",
+      description: result.score === 100 ? "Perfect score! Outstanding!" : "Quiz passed!",
     });
   }, [result]);
 
   if (!quiz) {
     return (
       <div className="rounded-lg border border-border bg-surface-2 px-6 py-10 text-center">
-        <p className="text-sm font-medium text-text-primary mb-1">
-          Quiz not set up yet
-        </p>
+        <p className="text-sm font-medium text-text-primary mb-1">Quiz not set up yet</p>
         <p className="text-xs text-text-muted">
           The instructor hasn&apos;t added questions for this lesson.
         </p>
@@ -100,9 +93,7 @@ export function StudentQuiz({
   if (totalQ === 0) {
     return (
       <div className="rounded-lg border border-border bg-surface-2 px-6 py-10 text-center">
-        <p className="text-sm font-medium text-text-primary mb-1">
-          Quiz has no questions
-        </p>
+        <p className="text-sm font-medium text-text-primary mb-1">Quiz has no questions</p>
         <p className="text-xs text-text-muted">Check back later.</p>
       </div>
     );
@@ -153,8 +144,7 @@ export function StudentQuiz({
   // ─── Idle / History ───────────────────────────────────────────────────────
 
   if (phase === "idle") {
-    const bestScore =
-      attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : null;
+    const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : null;
 
     return (
       <div className="space-y-4">
@@ -162,14 +152,11 @@ export function StudentQuiz({
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold text-text-primary">
-                  {quiz.title}
-                </h2>
+                <h2 className="text-base font-semibold text-text-primary">{quiz.title}</h2>
                 {quiz.isAiGenerated && <AiBadge label="AI-generated" />}
               </div>
               <p className="text-sm text-text-muted mt-0.5">
-                {totalQ} question{totalQ !== 1 ? "s" : ""} · Passing score{" "}
-                {quiz.passingScore}%
+                {totalQ} question{totalQ !== 1 ? "s" : ""} · Passing score {quiz.passingScore}%
               </p>
             </div>
             <button
@@ -185,24 +172,15 @@ export function StudentQuiz({
             <div className="mt-4 pt-4 border-t border-border">
               <p className="text-xs font-medium text-text-secondary mb-3">
                 Your best score:{" "}
-                <span className="text-text-primary font-semibold">
-                  {bestScore}%
-                </span>{" "}
-                · {attempts.length} attempt{attempts.length !== 1 ? "s" : ""}
+                <span className="text-text-primary font-semibold">{bestScore}%</span> ·{" "}
+                {attempts.length} attempt{attempts.length !== 1 ? "s" : ""}
               </p>
               <div className="space-y-1.5">
                 {attempts.map((attempt, i) => (
-                  <div
-                    key={attempt.id}
-                    className="flex items-center justify-between text-xs"
-                  >
-                    <span className="text-text-muted">
-                      Attempt {attempts.length - i}
-                    </span>
+                  <div key={attempt.id} className="flex items-center justify-between text-xs">
+                    <span className="text-text-muted">Attempt {attempts.length - i}</span>
                     <div className="flex items-center gap-3">
-                      <span className="font-medium text-text-primary">
-                        {attempt.score}%
-                      </span>
+                      <span className="font-medium text-text-primary">{attempt.score}%</span>
                       <span
                         className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
                           attempt.isPassed
@@ -250,9 +228,7 @@ export function StudentQuiz({
 
         {/* Question card */}
         <div className="bg-surface-1 border border-border rounded-lg p-5 space-y-4">
-          <p className="text-base font-medium text-text-primary">
-            {q.question}
-          </p>
+          <p className="text-base font-medium text-text-primary">{q.question}</p>
 
           {/* MCQ */}
           {q.type === "MCQ" && q.options && (
@@ -270,21 +246,15 @@ export function StudentQuiz({
                     type="radio"
                     name={`q-${q.id}`}
                     checked={currentAnswer === opt.id}
-                    onChange={() =>
-                      setAnswers((prev) => ({ ...prev, [q.id]: opt.id }))
-                    }
+                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: opt.id }))}
                     className="sr-only"
                   />
                   <span
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                      currentAnswer === opt.id
-                        ? "border-brand"
-                        : "border-border"
+                      currentAnswer === opt.id ? "border-brand" : "border-border"
                     }`}
                   >
-                    {currentAnswer === opt.id && (
-                      <span className="w-2 h-2 rounded-full bg-brand" />
-                    )}
+                    {currentAnswer === opt.id && <span className="w-2 h-2 rounded-full bg-brand" />}
                   </span>
                   <span className="text-sm text-text-primary">{opt.text}</span>
                 </label>
@@ -299,9 +269,7 @@ export function StudentQuiz({
                 <button
                   key={val}
                   type="button"
-                  onClick={() =>
-                    setAnswers((prev) => ({ ...prev, [q.id]: val }))
-                  }
+                  onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: val }))}
                   className={`flex-1 py-3 rounded-lg border-2 text-sm font-medium capitalize transition-colors ${
                     currentAnswer === val
                       ? "border-brand bg-brand-light text-brand"
@@ -319,9 +287,7 @@ export function StudentQuiz({
             <div>
               <textarea
                 value={currentAnswer}
-                onChange={(e) =>
-                  setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))
-                }
+                onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
                 rows={4}
                 placeholder="Type your answer…"
                 className="w-full border border-border rounded-lg px-3 py-2.5 text-sm text-text-primary bg-surface-2 focus:outline-none focus:border-brand resize-none"
@@ -351,9 +317,7 @@ export function StudentQuiz({
               disabled={isSubmitting}
               className="flex items-center gap-1.5 px-4 py-1.5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-dark disabled:opacity-50 transition-colors"
             >
-              {isSubmitting ? (
-                <Loader2 size={13} className="animate-spin" />
-              ) : null}
+              {isSubmitting ? <Loader2 size={13} className="animate-spin" /> : null}
               Submit Quiz
             </button>
           ) : (
@@ -373,39 +337,25 @@ export function StudentQuiz({
   // ─── Results ──────────────────────────────────────────────────────────────
 
   if (phase === "results" && result) {
-    const correctMap = new Map(
-      result.correctAnswers.map((ca) => [ca.questionId, ca]),
-    );
+    const correctMap = new Map(result.correctAnswers.map((ca) => [ca.questionId, ca]));
 
     return (
       <div className="space-y-4">
         {/* Score summary */}
         <div className="bg-surface-1 border border-border rounded-lg p-6 text-center">
-          <div className="text-5xl font-bold text-text-primary mb-2">
-            {result.score}%
-          </div>
+          <div className="text-5xl font-bold text-text-primary mb-2">{result.score}%</div>
           <div
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium mb-2 ${
-              result.isPassed
-                ? "bg-success-bg text-success"
-                : "bg-danger-bg text-danger"
+              result.isPassed ? "bg-success-bg text-success" : "bg-danger-bg text-danger"
             }`}
           >
-            {result.isPassed ? (
-              <CheckCircle2 size={14} />
-            ) : (
-              <XCircle size={14} />
-            )}
+            {result.isPassed ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
             {result.isPassed ? "Passed" : "Failed"}
           </div>
           {result.xpAwarded > 0 && (
-            <p className="text-sm font-medium text-text-secondary">
-              +{result.xpAwarded} XP earned
-            </p>
+            <p className="text-sm font-medium text-text-secondary">+{result.xpAwarded} XP earned</p>
           )}
-          <p className="text-xs text-text-muted mt-1">
-            Passing score: {quiz.passingScore}%
-          </p>
+          <p className="text-xs text-text-muted mt-1">Passing score: {quiz.passingScore}%</p>
         </div>
 
         {/* Question review */}
@@ -414,18 +364,13 @@ export function StudentQuiz({
             const studentAns = answers[q.id] ?? "";
             const correctInfo = correctMap.get(q.id);
             const isShortAnswer = q.type === "SHORT_ANSWER";
-            const isCorrect =
-              !isShortAnswer && studentAns === correctInfo?.correctAnswer;
+            const isCorrect = !isShortAnswer && studentAns === correctInfo?.correctAnswer;
 
             return (
               <div
                 key={q.id}
                 className={`bg-surface-1 border rounded-lg p-4 ${
-                  isShortAnswer
-                    ? "border-border"
-                    : isCorrect
-                      ? "border-success"
-                      : "border-danger"
+                  isShortAnswer ? "border-border" : isCorrect ? "border-success" : "border-danger"
                 }`}
               >
                 <div className="flex items-start gap-2.5">
@@ -434,15 +379,9 @@ export function StudentQuiz({
                       Manual
                     </span>
                   ) : isCorrect ? (
-                    <CheckCircle2
-                      size={16}
-                      className="mt-0.5 text-success shrink-0"
-                    />
+                    <CheckCircle2 size={16} className="mt-0.5 text-success shrink-0" />
                   ) : (
-                    <XCircle
-                      size={16}
-                      className="mt-0.5 text-danger shrink-0"
-                    />
+                    <XCircle size={16} className="mt-0.5 text-danger shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-text-primary">
@@ -451,9 +390,7 @@ export function StudentQuiz({
                     <p className="text-xs text-text-muted mt-1">
                       Your answer:{" "}
                       <span className="text-text-secondary">
-                        {studentAns
-                          ? displayAnswer(studentAns, q)
-                          : "(not answered)"}
+                        {studentAns ? displayAnswer(studentAns, q) : "(not answered)"}
                       </span>
                     </p>
                     {!isShortAnswer && !isCorrect && correctInfo && (

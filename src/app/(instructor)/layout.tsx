@@ -1,15 +1,11 @@
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 import { Sidebar, TopNav } from "@/components";
 
 import { db, getRoleDashboard } from "@/lib";
 
-export default async function InstructorLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function InstructorLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 

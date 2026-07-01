@@ -1,25 +1,21 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db, awardXP, XP_EVENTS } from "@/lib";
+import { awardXP, db, XP_EVENTS } from "@/lib";
 
 const bodySchema = z.object({
   answers: z.array(
     z.object({
       questionId: z.string(),
       answer: z.string(),
-    }),
+    })
   ),
 });
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ quizId: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ quizId: string }> }) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { quizId } = await params;
 
@@ -27,8 +23,7 @@ export async function POST(
     where: { clerkId: userId },
     select: { id: true },
   });
-  if (!dbUser)
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const quiz = await db.quiz.findUnique({
     where: { id: quizId },
@@ -48,8 +43,7 @@ export async function POST(
       },
     },
   });
-  if (!quiz)
-    return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+  if (!quiz) return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
 
   const courseId = quiz.lesson.section.courseId;
 
@@ -57,13 +51,11 @@ export async function POST(
     where: { userId_courseId: { userId: dbUser.id, courseId } },
     select: { id: true },
   });
-  if (!enrollment)
-    return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
+  if (!enrollment) return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
 
   const raw = await req.json();
   const parsed = bodySchema.safeParse(raw);
-  if (!parsed.success)
-    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+  if (!parsed.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
   const { answers } = parsed.data;
   const answerMap = new Map(answers.map((a) => [a.questionId, a.answer]));
@@ -90,8 +82,7 @@ export async function POST(
     answerRows.push({ questionId: q.id, answer: studentAnswer, isCorrect });
   }
 
-  const score =
-    scoreable === 0 ? 0 : Math.round((correct / scoreable) * 100);
+  const score = scoreable === 0 ? 0 : Math.round((correct / scoreable) * 100);
   const isPassed = score >= quiz.passingScore;
   const isPerfect = scoreable > 0 && correct === scoreable;
 

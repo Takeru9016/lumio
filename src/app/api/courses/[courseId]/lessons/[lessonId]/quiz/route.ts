@@ -25,11 +25,10 @@ const bodySchema = z.object({
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ courseId: string; lessonId: string }> },
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, lessonId } = await params;
 
@@ -37,8 +36,7 @@ export async function GET(
     where: { clerkId: userId },
     select: { id: true },
   });
-  if (!dbUser)
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const lesson = await db.lesson.findFirst({
     where: { id: lessonId, section: { courseId } },
@@ -47,8 +45,7 @@ export async function GET(
       section: { select: { course: { select: { instructorId: true } } } },
     },
   });
-  if (!lesson)
-    return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+  if (!lesson) return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
   if (lesson.section.course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -64,11 +61,10 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ courseId: string; lessonId: string }> },
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> }
 ) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId, lessonId } = await params;
 
@@ -76,8 +72,7 @@ export async function POST(
     where: { clerkId: userId },
     select: { id: true },
   });
-  if (!dbUser)
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const lesson = await db.lesson.findFirst({
     where: { id: lessonId, section: { courseId } },
@@ -86,8 +81,7 @@ export async function POST(
       section: { select: { course: { select: { instructorId: true } } } },
     },
   });
-  if (!lesson)
-    return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
+  if (!lesson) return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
   if (lesson.section.course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -96,7 +90,7 @@ export async function POST(
   if (!parsed.success)
     return NextResponse.json(
       { error: "Invalid body", issues: parsed.error.issues },
-      { status: 400 },
+      { status: 400 }
     );
 
   const { title, passingScore, isAiGenerated, questions } = parsed.data;

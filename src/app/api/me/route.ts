@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 
-import { db, awardXP, updateStreak, XP_EVENTS } from "@/lib";
+import { awardXP, db, updateStreak, XP_EVENTS } from "@/lib";
 
 function isSameDay(a: Date, b: Date): boolean {
   return (
@@ -42,8 +42,7 @@ export async function GET() {
   }
 
   const today = new Date();
-  const isFirstCallToday =
-    !user.lastActiveDate || !isSameDay(user.lastActiveDate, today);
+  const isFirstCallToday = !user.lastActiveDate || !isSameDay(user.lastActiveDate, today);
 
   if (isFirstCallToday) {
     await Promise.all([

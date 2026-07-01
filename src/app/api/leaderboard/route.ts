@@ -1,5 +1,5 @@
-import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import type { NextRequest } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib";
 
@@ -58,9 +58,7 @@ export async function GET(req: NextRequest) {
 
   // Weekly: sum XPTransaction amounts from last 7 days
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const tenantFilter = tenantId
-    ? Prisma.sql`AND u."tenantId" = ${tenantId}`
-    : Prisma.sql``;
+  const tenantFilter = tenantId ? Prisma.sql`AND u."tenantId" = ${tenantId}` : Prisma.sql``;
 
   const rows = await db.$queryRaw<WeeklyRow[]>(
     Prisma.sql`

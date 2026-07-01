@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Loader2, Save, ClipboardList } from "lucide-react";
 import { toast } from "gooey-toast";
+import { ClipboardList, Loader2, Save } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { TextEditor } from "./TextEditor";
 
@@ -31,20 +31,14 @@ export function AssignmentBuilder({ courseId, lessonId }: AssignmentBuilderProps
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(
-          `/api/courses/${courseId}/lessons/${lessonId}/assignment`,
-        );
+        const res = await fetch(`/api/courses/${courseId}/lessons/${lessonId}/assignment`);
         if (!res.ok) return;
         const data = (await res.json()) as { assignment: AssignmentData | null };
         if (data.assignment) {
           setTitle(data.assignment.title);
           setDescription(data.assignment.description);
           descriptionRef.current = data.assignment.description;
-          setDueDate(
-            data.assignment.dueDate
-              ? data.assignment.dueDate.slice(0, 10)
-              : "",
-          );
+          setDueDate(data.assignment.dueDate ? data.assignment.dueDate.slice(0, 10) : "");
           setMaxScore(data.assignment.maxScore);
         }
       } catch {
@@ -68,19 +62,16 @@ export function AssignmentBuilder({ courseId, lessonId }: AssignmentBuilderProps
     }
     setIsSaving(true);
     try {
-      const res = await fetch(
-        `/api/courses/${courseId}/lessons/${lessonId}/assignment`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: title.trim(),
-            description: desc,
-            dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-            maxScore,
-          }),
-        },
-      );
+      const res = await fetch(`/api/courses/${courseId}/lessons/${lessonId}/assignment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: desc,
+          dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+          maxScore,
+        }),
+      });
       if (!res.ok) throw new Error();
       toast.success({ title: "Assignment saved" });
     } catch {
@@ -103,9 +94,7 @@ export function AssignmentBuilder({ courseId, lessonId }: AssignmentBuilderProps
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ClipboardList size={16} className="text-text-muted" />
-          <p className="text-sm font-medium text-text-primary">
-            Assignment Details
-          </p>
+          <p className="text-sm font-medium text-text-primary">Assignment Details</p>
         </div>
         <button
           type="button"
@@ -113,20 +102,14 @@ export function AssignmentBuilder({ courseId, lessonId }: AssignmentBuilderProps
           disabled={isSaving}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-brand text-white rounded-md hover:bg-brand-dark disabled:opacity-50 transition-colors"
         >
-          {isSaving ? (
-            <Loader2 size={13} className="animate-spin" />
-          ) : (
-            <Save size={13} />
-          )}
+          {isSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
           Save assignment
         </button>
       </div>
 
       {/* Title */}
       <div>
-        <label className="block text-xs font-medium text-text-secondary mb-1">
-          Title
-        </label>
+        <label className="block text-xs font-medium text-text-secondary mb-1">Title</label>
         <input
           type="text"
           value={title}
@@ -138,9 +121,7 @@ export function AssignmentBuilder({ courseId, lessonId }: AssignmentBuilderProps
 
       {/* Instructions */}
       <div>
-        <label className="block text-xs font-medium text-text-secondary mb-1">
-          Instructions
-        </label>
+        <label className="block text-xs font-medium text-text-secondary mb-1">Instructions</label>
         <TextEditor
           content={description}
           onChange={(html) => {
@@ -154,8 +135,7 @@ export function AssignmentBuilder({ courseId, lessonId }: AssignmentBuilderProps
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-text-secondary mb-1">
-            Due date{" "}
-            <span className="text-text-disabled font-normal">(optional)</span>
+            Due date <span className="text-text-disabled font-normal">(optional)</span>
           </label>
           <input
             type="date"
@@ -165,9 +145,7 @@ export function AssignmentBuilder({ courseId, lessonId }: AssignmentBuilderProps
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1">
-            Max score
-          </label>
+          <label className="block text-xs font-medium text-text-secondary mb-1">Max score</label>
           <input
             type="number"
             value={maxScore}

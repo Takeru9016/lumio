@@ -1,11 +1,8 @@
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib";
-import {
-  LeaderboardClient,
-  type LeaderboardData,
-} from "./LeaderboardClient";
+import { LeaderboardClient, type LeaderboardData } from "./LeaderboardClient";
 
 type WeeklyRow = {
   id: string;
@@ -21,9 +18,7 @@ async function fetchWeekly(
   tenantId: string | null
 ): Promise<LeaderboardData> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const tenantFilter = tenantId
-    ? Prisma.sql`AND u."tenantId" = ${tenantId}`
-    : Prisma.sql``;
+  const tenantFilter = tenantId ? Prisma.sql`AND u."tenantId" = ${tenantId}` : Prisma.sql``;
 
   const rows = await db.$queryRaw<WeeklyRow[]>(
     Prisma.sql`
@@ -147,9 +142,7 @@ export default async function LeaderboardPage() {
         >
           Leaderboard
         </h1>
-        <p className="text-sm text-text-muted">
-          See how you rank against other learners.
-        </p>
+        <p className="text-sm text-text-muted">See how you rank against other learners.</p>
       </div>
 
       <LeaderboardClient

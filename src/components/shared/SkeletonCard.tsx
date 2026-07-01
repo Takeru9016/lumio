@@ -19,6 +19,7 @@ export function SkeletonCard({ count = 1 }: SkeletonCardProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from({ length: count }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: static placeholder list, no data, never reordered
         <CourseCardSkeleton key={i} />
       ))}
     </div>

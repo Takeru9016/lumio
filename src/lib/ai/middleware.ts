@@ -1,12 +1,10 @@
 import type { Ratelimit } from "@upstash/ratelimit";
-import { db } from "@/lib/db";
 import { checkAiQuota } from "@/lib/ai/quota";
+import { db } from "@/lib/db";
 
 type User = NonNullable<Awaited<ReturnType<typeof db.user.findUnique>>>;
 
-type GuardResult =
-  | { ok: true; user: User }
-  | { ok: false; response: Response };
+type GuardResult = { ok: true; user: User } | { ok: false; response: Response };
 
 /**
  * Guards every /api/ai/* route in order:
@@ -19,7 +17,7 @@ type GuardResult =
  */
 export async function withAiGuards(
   userId: string | null | undefined,
-  limiter: Ratelimit,
+  limiter: Ratelimit
 ): Promise<GuardResult> {
   if (!userId) {
     return {
@@ -32,10 +30,7 @@ export async function withAiGuards(
   if (!success) {
     return {
       ok: false,
-      response: Response.json(
-        { error: "Rate limit exceeded" },
-        { status: 429 },
-      ),
+      response: Response.json({ error: "Rate limit exceeded" }, { status: 429 }),
     };
   }
 
@@ -53,7 +48,7 @@ export async function withAiGuards(
       ok: false,
       response: Response.json(
         { error: "AI quota exceeded", upgradeRequired: true },
-        { status: 403 },
+        { status: 403 }
       ),
     };
   }

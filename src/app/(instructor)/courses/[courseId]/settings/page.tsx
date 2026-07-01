@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 
 import { CourseSettingsForm } from "@/components";
 
@@ -11,9 +11,7 @@ interface CourseSettingsPageProps {
   params: Promise<{ courseId: string }>;
 }
 
-export default async function CourseSettingsPage({
-  params,
-}: CourseSettingsPageProps) {
+export default async function CourseSettingsPage({ params }: CourseSettingsPageProps) {
   const { courseId } = await params;
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
@@ -50,9 +48,7 @@ export default async function CourseSettingsPage({
           <ArrowLeft size={14} />
           Back to editor
         </Link>
-        <h1 className="text-xl font-semibold font-heading text-text-primary">
-          Course settings
-        </h1>
+        <h1 className="text-xl font-semibold font-heading text-text-primary">Course settings</h1>
         <p className="text-sm text-text-muted mt-1">{course.title}</p>
       </div>
 

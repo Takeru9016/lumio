@@ -1,9 +1,7 @@
 import { headers } from "next/headers";
 import { Webhook } from "svix";
-
-import { db } from "@/lib";
-
 import type { Role } from "@/generated/prisma/client";
+import { db } from "@/lib";
 
 type ClerkWebhookEvent = {
   type: string;
@@ -63,11 +61,8 @@ export async function POST(req: Request) {
   const { type, data } = event;
 
   if (type === "user.created") {
-    const primaryEmail = data.email_addresses.find(
-      (e) => e.id === data.primary_email_address_id,
-    );
-    const email =
-      primaryEmail?.email_address ?? data.email_addresses[0]?.email_address;
+    const primaryEmail = data.email_addresses.find((e) => e.id === data.primary_email_address_id);
+    const email = primaryEmail?.email_address ?? data.email_addresses[0]?.email_address;
     if (!email) {
       return Response.json({ error: "No email found" }, { status: 400 });
     }
@@ -76,8 +71,7 @@ export async function POST(req: Request) {
       data: {
         clerkId: data.id,
         email,
-        name:
-          [data.first_name, data.last_name].filter(Boolean).join(" ") || null,
+        name: [data.first_name, data.last_name].filter(Boolean).join(" ") || null,
         avatarUrl: data.image_url,
         role: resolveRole(data.public_metadata.role),
         plan: "FREE",
@@ -86,17 +80,14 @@ export async function POST(req: Request) {
   }
 
   if (type === "user.updated") {
-    const primaryEmail = data.email_addresses.find(
-      (e) => e.id === data.primary_email_address_id,
-    );
+    const primaryEmail = data.email_addresses.find((e) => e.id === data.primary_email_address_id);
     const email = primaryEmail?.email_address;
 
     await db.user.update({
       where: { clerkId: data.id },
       data: {
         ...(email ? { email } : {}),
-        name:
-          [data.first_name, data.last_name].filter(Boolean).join(" ") || null,
+        name: [data.first_name, data.last_name].filter(Boolean).join(" ") || null,
         avatarUrl: data.image_url,
         role: resolveRole(data.public_metadata.role),
       },

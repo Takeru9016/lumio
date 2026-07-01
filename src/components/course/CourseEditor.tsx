@@ -1,16 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "gooey-toast";
 import { AlertCircle, X } from "lucide-react";
-
-import {
-  LessonList,
-  type SectionItem,
-  type LessonItem,
-} from "@/components/course/LessonList";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { LessonEditor } from "@/components/course/LessonEditor";
+import { type LessonItem, LessonList, type SectionItem } from "@/components/course/LessonList";
 
 type CourseStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -21,21 +16,20 @@ interface CourseEditorProps {
   courseStatus: CourseStatus;
 }
 
-const STATUS_BADGE: Record<CourseStatus, { label: string; className: string }> =
-  {
-    DRAFT: {
-      label: "Draft",
-      className: "bg-(--color-surface-3) text-(--color-text-muted)",
-    },
-    PUBLISHED: {
-      label: "Live",
-      className: "bg-(--color-success-bg) text-(--color-success)",
-    },
-    ARCHIVED: {
-      label: "Archived",
-      className: "bg-amber-50 text-amber-600",
-    },
-  };
+const STATUS_BADGE: Record<CourseStatus, { label: string; className: string }> = {
+  DRAFT: {
+    label: "Draft",
+    className: "bg-(--color-surface-3) text-(--color-text-muted)",
+  },
+  PUBLISHED: {
+    label: "Live",
+    className: "bg-(--color-success-bg) text-(--color-success)",
+  },
+  ARCHIVED: {
+    label: "Archived",
+    className: "bg-amber-50 text-amber-600",
+  },
+};
 
 export function CourseEditor({
   courseId,
@@ -51,12 +45,8 @@ export function CourseEditor({
   const [isPublishing, setIsPublishing] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
 
-  const selectedSection = sections.find((s) =>
-    s.lessons.some((l) => l.id === selectedLessonId),
-  );
-  const selectedLesson = selectedSection?.lessons.find(
-    (l) => l.id === selectedLessonId,
-  );
+  const selectedSection = sections.find((s) => s.lessons.some((l) => l.id === selectedLessonId));
+  const selectedLesson = selectedSection?.lessons.find((l) => l.id === selectedLessonId);
 
   function findSectionForLesson(lessonId: string): string | undefined {
     return sections.find((s) => s.lessons.some((l) => l.id === lessonId))?.id;
@@ -76,24 +66,19 @@ export function CourseEditor({
 
   async function addLesson(sectionId: string, title: string) {
     const section = sections.find((s) => s.id === sectionId);
-    const res = await fetch(
-      `/api/courses/${courseId}/sections/${sectionId}/lessons`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          type: "VIDEO",
-          order: section?.lessons.length ?? 0,
-        }),
-      },
-    );
+    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        type: "VIDEO",
+        order: section?.lessons.length ?? 0,
+      }),
+    });
     if (res.ok) {
       const lesson = (await res.json()) as LessonItem;
       setSections((prev) =>
-        prev.map((s) =>
-          s.id === sectionId ? { ...s, lessons: [...s.lessons, lesson] } : s,
-        ),
+        prev.map((s) => (s.id === sectionId ? { ...s, lessons: [...s.lessons, lesson] } : s))
       );
       setSelectedLessonId(lesson.id);
     }
@@ -103,10 +88,8 @@ export function CourseEditor({
     setSections((prev) =>
       prev.map((s) => ({
         ...s,
-        lessons: s.lessons.map((l) =>
-          l.id === lessonId ? { ...l, ...patch } : l,
-        ),
-      })),
+        lessons: s.lessons.map((l) => (l.id === lessonId ? { ...l, ...patch } : l)),
+      }))
     );
   }
 
@@ -120,22 +103,17 @@ export function CourseEditor({
       toast.error({ title: "Failed to rename section" });
       return;
     }
-    setSections((prev) =>
-      prev.map((s) => (s.id === sectionId ? { ...s, title } : s)),
-    );
+    setSections((prev) => prev.map((s) => (s.id === sectionId ? { ...s, title } : s)));
   }
 
   async function renameLesson(lessonId: string, title: string) {
     const sectionId = findSectionForLesson(lessonId);
     if (!sectionId) return;
-    const res = await fetch(
-      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
-      },
-    );
+    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
     if (!res.ok) {
       toast.error({ title: "Failed to rename lesson" });
       return;
@@ -154,9 +132,7 @@ export function CourseEditor({
 
     const deletedSection = sections.find((s) => s.id === sectionId);
     if (deletedSection?.lessons.some((l) => l.id === selectedLessonId)) {
-      const otherLessons = sections
-        .filter((s) => s.id !== sectionId)
-        .flatMap((s) => s.lessons);
+      const otherLessons = sections.filter((s) => s.id !== sectionId).flatMap((s) => s.lessons);
       setSelectedLessonId(otherLessons[0]?.id ?? null);
     }
 
@@ -165,10 +141,9 @@ export function CourseEditor({
   }
 
   async function deleteLesson(lessonId: string, sectionId: string) {
-    const res = await fetch(
-      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
-      { method: "DELETE" },
-    );
+    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`, {
+      method: "DELETE",
+    });
     if (!res.ok) {
       toast.error({ title: "Failed to delete lesson" });
       return;
@@ -176,21 +151,16 @@ export function CourseEditor({
 
     if (selectedLessonId === lessonId) {
       const currentSection = sections.find((s) => s.id === sectionId);
-      const remainingInSection =
-        currentSection?.lessons.filter((l) => l.id !== lessonId) ?? [];
-      const otherLessons = sections
-        .filter((s) => s.id !== sectionId)
-        .flatMap((s) => s.lessons);
+      const remainingInSection = currentSection?.lessons.filter((l) => l.id !== lessonId) ?? [];
+      const otherLessons = sections.filter((s) => s.id !== sectionId).flatMap((s) => s.lessons);
       const nextLesson = remainingInSection[0] ?? otherLessons[0] ?? null;
       setSelectedLessonId(nextLesson?.id ?? null);
     }
 
     setSections((prev) =>
       prev.map((s) =>
-        s.id === sectionId
-          ? { ...s, lessons: s.lessons.filter((l) => l.id !== lessonId) }
-          : s,
-      ),
+        s.id === sectionId ? { ...s, lessons: s.lessons.filter((l) => l.id !== lessonId) } : s
+      )
     );
     toast.success({ title: "Lesson deleted" });
   }
@@ -198,14 +168,11 @@ export function CourseEditor({
   async function archiveLesson(lessonId: string) {
     const sectionId = findSectionForLesson(lessonId);
     if (!sectionId) return;
-    const res = await fetch(
-      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isArchived: true }),
-      },
-    );
+    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isArchived: true }),
+    });
     if (!res.ok) {
       toast.error({ title: "Failed to archive lesson" });
       return;
@@ -217,14 +184,11 @@ export function CourseEditor({
   async function unarchiveLesson(lessonId: string) {
     const sectionId = findSectionForLesson(lessonId);
     if (!sectionId) return;
-    const res = await fetch(
-      `/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isArchived: false }),
-      },
-    );
+    const res = await fetch(`/api/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isArchived: false }),
+    });
     if (!res.ok) {
       toast.error({ title: "Failed to unarchive lesson" });
       return;
@@ -311,12 +275,8 @@ export function CourseEditor({
       <aside className="w-64 shrink-0 border-r border-border flex flex-col overflow-hidden">
         <div className="px-4 py-3 border-b border-border flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-xs text-text-muted font-medium uppercase tracking-wide">
-              Course
-            </p>
-            <p className="text-sm font-semibold text-text-primary truncate">
-              {courseTitle}
-            </p>
+            <p className="text-xs text-text-muted font-medium uppercase tracking-wide">Course</p>
+            <p className="text-sm font-semibold text-text-primary truncate">{courseTitle}</p>
           </div>
           <span
             className={`shrink-0 text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.className}`}
@@ -333,16 +293,10 @@ export function CourseEditor({
           onAddSection={(title) => void addSection(title)}
           onAddLesson={(sectionId, title) => void addLesson(sectionId, title)}
           onReorder={setSections}
-          onRenameSection={(sectionId, title) =>
-            void renameSection(sectionId, title)
-          }
-          onRenameLesson={(lessonId, title) =>
-            void renameLesson(lessonId, title)
-          }
+          onRenameSection={(sectionId, title) => void renameSection(sectionId, title)}
+          onRenameLesson={(lessonId, title) => void renameLesson(lessonId, title)}
           onDeleteSection={(sectionId) => void deleteSection(sectionId)}
-          onDeleteLesson={(lessonId, sectionId) =>
-            void deleteLesson(lessonId, sectionId)
-          }
+          onDeleteLesson={(lessonId, sectionId) => void deleteLesson(lessonId, sectionId)}
           onArchiveLesson={(lessonId) => void archiveLesson(lessonId)}
           onUnarchiveLesson={(lessonId) => void unarchiveLesson(lessonId)}
         />
@@ -395,11 +349,7 @@ export function CourseEditor({
               disabled={!canPublish || isPublishing}
               className="bg-brand text-white rounded-md px-3 py-1.5 text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isPublishing
-                ? "Publishing…"
-                : status === "PUBLISHED"
-                  ? "Published"
-                  : "Publish"}
+              {isPublishing ? "Publishing…" : status === "PUBLISHED" ? "Published" : "Publish"}
             </button>
           </div>
         </div>
@@ -413,8 +363,8 @@ export function CourseEditor({
                 Fix these issues before publishing:
               </p>
               <ul className="space-y-0.5">
-                {publishErrors.map((err, i) => (
-                  <li key={i} className="text-sm text-red-600">
+                {publishErrors.map((err) => (
+                  <li key={err} className="text-sm text-red-600">
                     · {err}
                   </li>
                 ))}

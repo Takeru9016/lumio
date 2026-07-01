@@ -1,15 +1,11 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 import { db } from "@/lib";
 
-export async function POST(
-  _req: Request,
-  { params }: { params: Promise<{ courseId: string }> },
-) {
+export async function POST(_req: Request, { params }: { params: Promise<{ courseId: string }> }) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId } = await params;
 
@@ -17,22 +13,17 @@ export async function POST(
     where: { clerkId: userId },
     select: { id: true },
   });
-  if (!dbUser)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const course = await db.course.findUnique({
     where: { id: courseId, instructorId: dbUser.id },
     select: { id: true, status: true },
   });
 
-  if (!course)
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   if (course.status === "ARCHIVED") {
-    return NextResponse.json(
-      { error: "Course is already archived" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Course is already archived" }, { status: 400 });
   }
 
   const updated = await db.course.update({

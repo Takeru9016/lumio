@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
 import { Flame, Trophy } from "lucide-react";
+import { motion } from "motion/react";
+import { useState } from "react";
 
 export type LeaderboardEntry = {
   id: string;
@@ -61,8 +61,7 @@ export function LeaderboardClient({
 
   const { entries, currentUserEntry } = current;
   const isCurrentUserInList = entries.some((e) => e.id === currentUserId);
-  const extraRow =
-    !isCurrentUserInList && currentUserEntry ? currentUserEntry : null;
+  const extraRow = !isCurrentUserInList && currentUserEntry ? currentUserEntry : null;
 
   return (
     <div className="space-y-4">
@@ -72,6 +71,7 @@ export function LeaderboardClient({
           {(["weekly", "alltime"] as const).map((p) => (
             <button
               key={p}
+              type="button"
               onClick={() => setPeriod(p)}
               className={`px-3 py-1.5 rounded font-medium transition-colors ${
                 period === p
@@ -89,6 +89,7 @@ export function LeaderboardClient({
             {(["platform", "org"] as const).map((s) => (
               <button
                 key={s}
+                type="button"
                 onClick={() => setScope(s)}
                 className={`px-3 py-1.5 rounded font-medium transition-colors ${
                   scope === s
@@ -107,9 +108,7 @@ export function LeaderboardClient({
       <div className="bg-white border border-border rounded-lg overflow-hidden shadow-sm">
         {/* Header row */}
         <div className="grid grid-cols-[48px_1fr_80px_72px] px-4 py-2.5 border-b border-border bg-surface-2">
-          <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
-            #
-          </span>
+          <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">#</span>
           <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
             Student
           </span>
@@ -124,9 +123,7 @@ export function LeaderboardClient({
         {entries.length === 0 ? (
           <div className="py-16 text-center">
             <Trophy size={28} className="text-text-disabled mx-auto mb-2" />
-            <p className="text-sm font-medium text-text-primary">
-              No activity yet
-            </p>
+            <p className="text-sm font-medium text-text-primary">No activity yet</p>
             <p className="text-xs text-text-muted mt-1">
               Complete lessons to earn XP and appear here.
             </p>
@@ -185,9 +182,7 @@ function LeaderboardRow({
         {medal ? (
           <span className="text-base leading-none">{medal}</span>
         ) : (
-          <span className="text-sm font-semibold text-text-muted tabular-nums">
-            {entry.rank}
-          </span>
+          <span className="text-sm font-semibold text-text-muted tabular-nums">{entry.rank}</span>
         )}
       </div>
 
@@ -209,16 +204,12 @@ function LeaderboardRow({
         )}
         <span
           className={`text-sm truncate ${
-            isCurrentUser
-              ? "font-semibold text-[var(--color-brand)]"
-              : "text-text-primary"
+            isCurrentUser ? "font-semibold text-[var(--color-brand)]" : "text-text-primary"
           }`}
         >
           {entry.name ?? "Unknown"}
           {isCurrentUser && (
-            <span className="ml-1.5 text-xs font-normal text-[var(--color-brand)]">
-              (you)
-            </span>
+            <span className="ml-1.5 text-xs font-normal text-[var(--color-brand)]">(you)</span>
           )}
         </span>
       </div>
@@ -235,13 +226,9 @@ function LeaderboardRow({
       <div className="flex items-center justify-end gap-1">
         <Flame
           size={12}
-          className={
-            entry.currentStreak > 0 ? "text-warning" : "text-text-disabled"
-          }
+          className={entry.currentStreak > 0 ? "text-warning" : "text-text-disabled"}
         />
-        <span className="text-sm tabular-nums text-text-secondary">
-          {entry.currentStreak}
-        </span>
+        <span className="text-sm tabular-nums text-text-secondary">{entry.currentStreak}</span>
       </div>
     </motion.div>
   );

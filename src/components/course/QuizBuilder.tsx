@@ -18,14 +18,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "gooey-toast";
-import {
-  GripVertical,
-  HelpCircle,
-  Loader2,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { GripVertical, HelpCircle, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useCallback, useEffect, useState } from "react";
 
@@ -106,9 +99,7 @@ function questionToForm(q: BuilderQuestion) {
       questionText: q.question,
       optionTexts: ["", "", "", ""] as [string, string, string, string],
       correctOptionIdx: 0,
-      correctTF: (q.correctAnswer === "true" ? "true" : "false") as
-        | "true"
-        | "false",
+      correctTF: (q.correctAnswer === "true" ? "true" : "false") as "true" | "false",
       sampleAnswer: "",
       explanation: q.explanation,
     };
@@ -126,7 +117,7 @@ function questionToForm(q: BuilderQuestion) {
 
 function formToQuestion(
   form: ReturnType<typeof defaultForm>,
-  localId: string,
+  localId: string
 ): BuilderQuestion | null {
   if (!form.questionText.trim()) return null;
 
@@ -173,14 +164,10 @@ interface SortableQuestionItemProps {
   onDelete: () => void;
 }
 
-function SortableQuestionItem({
-  q,
-  index,
-  onEdit,
-  onDelete,
-}: SortableQuestionItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: q.localId });
+function SortableQuestionItem({ q, index, onEdit, onDelete }: SortableQuestionItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: q.localId,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -280,14 +267,10 @@ function QuestionForm({ initial, onSave, onCancel }: QuestionFormProps) {
 
       {/* Question */}
       <div>
-        <label className="block text-xs font-medium text-text-secondary mb-1">
-          Question
-        </label>
+        <label className="block text-xs font-medium text-text-secondary mb-1">Question</label>
         <textarea
           value={form.questionText}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, questionText: e.target.value }))
-          }
+          onChange={(e) => setForm((f) => ({ ...f, questionText: e.target.value }))}
           rows={2}
           placeholder="Enter your question…"
           className="w-full border border-border rounded-md px-3 py-2 text-sm text-text-primary bg-surface-1 focus:outline-none focus:border-brand resize-none"
@@ -301,7 +284,7 @@ function QuestionForm({ initial, onSave, onCancel }: QuestionFormProps) {
             Options — select the correct answer
           </label>
           {form.optionTexts.map((text, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div key={OPTION_IDS[i]} className="flex items-center gap-2">
               <input
                 type="radio"
                 name="correct-option"
@@ -316,12 +299,7 @@ function QuestionForm({ initial, onSave, onCancel }: QuestionFormProps) {
                 type="text"
                 value={text}
                 onChange={(e) => {
-                  const next = [...form.optionTexts] as [
-                    string,
-                    string,
-                    string,
-                    string,
-                  ];
+                  const next = [...form.optionTexts] as [string, string, string, string];
                   next[i] = e.target.value;
                   setForm((f) => ({ ...f, optionTexts: next }));
                 }}
@@ -363,15 +341,11 @@ function QuestionForm({ initial, onSave, onCancel }: QuestionFormProps) {
         <div>
           <label className="block text-xs font-medium text-text-secondary mb-1">
             Sample answer{" "}
-            <span className="text-text-disabled font-normal">
-              (for manual grading reference)
-            </span>
+            <span className="text-text-disabled font-normal">(for manual grading reference)</span>
           </label>
           <textarea
             value={form.sampleAnswer}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, sampleAnswer: e.target.value }))
-            }
+            onChange={(e) => setForm((f) => ({ ...f, sampleAnswer: e.target.value }))}
             rows={2}
             placeholder="Example correct answer…"
             className="w-full border border-border rounded-md px-3 py-2 text-sm text-text-primary bg-surface-1 focus:outline-none focus:border-brand resize-none"
@@ -382,15 +356,12 @@ function QuestionForm({ initial, onSave, onCancel }: QuestionFormProps) {
       {/* Explanation */}
       <div>
         <label className="block text-xs font-medium text-text-secondary mb-1">
-          Explanation{" "}
-          <span className="text-text-disabled font-normal">(optional)</span>
+          Explanation <span className="text-text-disabled font-normal">(optional)</span>
         </label>
         <input
           type="text"
           value={form.explanation}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, explanation: e.target.value }))
-          }
+          onChange={(e) => setForm((f) => ({ ...f, explanation: e.target.value }))}
           placeholder="Shown after submission…"
           className="w-full border border-border rounded-md px-3 py-2 text-sm text-text-primary bg-surface-1 focus:outline-none focus:border-brand"
         />
@@ -429,31 +400,26 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [dialogForm, setDialogForm] =
-    useState<ReturnType<typeof defaultForm>>(defaultForm);
+  const [dialogForm, setDialogForm] = useState<ReturnType<typeof defaultForm>>(defaultForm);
 
   // AI generation + preview
   const [isGenerating, setIsGenerating] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewQuestions, setPreviewQuestions] = useState<BuilderQuestion[]>(
-    [],
-  );
+  const [previewQuestions, setPreviewQuestions] = useState<BuilderQuestion[]>([]);
   const [previewEditIndex, setPreviewEditIndex] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const fetchQuiz = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `/api/courses/${courseId}/lessons/${lessonId}/quiz`,
-      );
+      const res = await fetch(`/api/courses/${courseId}/lessons/${lessonId}/quiz`);
       if (!res.ok) return;
       const data = (await res.json()) as {
         quiz: {
@@ -476,7 +442,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
             options: (q.options as MCQOption[]) ?? [],
             correctAnswer: q.correctAnswer,
             explanation: q.explanation ?? "",
-          })),
+          }))
         );
       }
     } catch {
@@ -513,15 +479,12 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
   }
 
   function handleSaveQuestion(form: ReturnType<typeof defaultForm>) {
-    const localId =
-      editingIndex !== null ? questions[editingIndex].localId : nanoid();
+    const localId = editingIndex !== null ? questions[editingIndex].localId : nanoid();
     const q = formToQuestion(form, localId);
     if (!q) return;
 
     if (editingIndex !== null) {
-      setQuestions((prev) =>
-        prev.map((item, i) => (i === editingIndex ? q : item)),
-      );
+      setQuestions((prev) => prev.map((item, i) => (i === editingIndex ? q : item)));
     } else {
       setQuestions((prev) => [...prev, q]);
     }
@@ -534,30 +497,24 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
 
   // Persists a set of questions to the lesson quiz. `aiGenerated` is only sent
   // when true so a manual re-save never clears the AI-generated flag.
-  async function persistQuestions(
-    qs: BuilderQuestion[],
-    aiGenerated: boolean,
-  ): Promise<boolean> {
-    const res = await fetch(
-      `/api/courses/${courseId}/lessons/${lessonId}/quiz`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "Quiz",
-          passingScore: 70,
-          ...(aiGenerated ? { isAiGenerated: true } : {}),
-          questions: qs.map((q, i) => ({
-            question: q.question,
-            type: q.type,
-            options: q.options.length > 0 ? q.options : null,
-            correctAnswer: q.correctAnswer,
-            explanation: q.explanation || null,
-            order: i,
-          })),
-        }),
-      },
-    );
+  async function persistQuestions(qs: BuilderQuestion[], aiGenerated: boolean): Promise<boolean> {
+    const res = await fetch(`/api/courses/${courseId}/lessons/${lessonId}/quiz`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Quiz",
+        passingScore: 70,
+        ...(aiGenerated ? { isAiGenerated: true } : {}),
+        questions: qs.map((q, i) => ({
+          question: q.question,
+          type: q.type,
+          options: q.options.length > 0 ? q.options : null,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation || null,
+          order: i,
+        })),
+      }),
+    });
     return res.ok;
   }
 
@@ -621,7 +578,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
           options: q.options ?? [],
           correctAnswer: q.correctAnswer,
           explanation: q.explanation ?? "",
-        })),
+        }))
       );
       setPreviewEditIndex(null);
       setPreviewOpen(true);
@@ -655,9 +612,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
     if (previewEditIndex === null) return;
     const q = formToQuestion(form, previewQuestions[previewEditIndex].localId);
     if (!q) return;
-    setPreviewQuestions((prev) =>
-      prev.map((item, i) => (i === previewEditIndex ? q : item)),
-    );
+    setPreviewQuestions((prev) => prev.map((item, i) => (i === previewEditIndex ? q : item)));
     setPreviewEditIndex(null);
   }
 
@@ -678,9 +633,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-text-primary">
-            Quiz Questions
-          </p>
+          <p className="text-sm font-medium text-text-primary">Quiz Questions</p>
           <p className="text-xs text-text-muted">
             {questions.length === 0
               ? "No questions yet"
@@ -708,11 +661,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
           </p>
         </div>
       ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext
             items={questions.map((q) => q.localId)}
             strategy={verticalListSortingStrategy}
@@ -762,9 +711,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
       {/* Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <DialogTitle>
-            {editingIndex !== null ? "Edit question" : "Add question"}
-          </DialogTitle>
+          <DialogTitle>{editingIndex !== null ? "Edit question" : "Add question"}</DialogTitle>
           <QuestionForm
             initial={dialogForm}
             onSave={handleSaveQuestion}
@@ -799,8 +746,8 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
               </DialogTitle>
               <p className="text-xs text-text-muted -mt-2">
                 Review the {previewQuestions.length} generated question
-                {previewQuestions.length !== 1 ? "s" : ""} before saving. Edit
-                or regenerate as needed.
+                {previewQuestions.length !== 1 ? "s" : ""} before saving. Edit or regenerate as
+                needed.
               </p>
 
               <div className="max-h-[50vh] space-y-2 overflow-y-auto py-1">
@@ -814,9 +761,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
                         <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-text-muted">
                           {TYPE_LABELS[q.type]}
                         </span>
-                        <span className="text-[10px] text-text-disabled">
-                          #{i + 1}
-                        </span>
+                        <span className="text-[10px] text-text-disabled">#{i + 1}</span>
                       </div>
                       <p className="text-sm text-text-primary">{q.question}</p>
                     </div>
@@ -847,9 +792,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
                   disabled={isGenerating || isApproving}
                   className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-ai hover:bg-ai-bg disabled:opacity-50 transition-colors"
                 >
-                  {isGenerating ? (
-                    <Loader2 size={13} className="animate-spin" />
-                  ) : null}
+                  {isGenerating ? <Loader2 size={13} className="animate-spin" /> : null}
                   Regenerate
                 </button>
                 <div className="flex items-center gap-2">
@@ -867,9 +810,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
                     disabled={isApproving || previewQuestions.length === 0}
                     className="flex items-center gap-1.5 rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50 transition-colors"
                   >
-                    {isApproving ? (
-                      <Loader2 size={13} className="animate-spin" />
-                    ) : null}
+                    {isApproving ? <Loader2 size={13} className="animate-spin" /> : null}
                     Approve &amp; Save
                   </button>
                 </div>

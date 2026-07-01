@@ -20,9 +20,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       {icon && <div className="text-4xl mb-3">{icon}</div>}
-      <h3 className="text-base font-semibold text-text-primary mb-1">
-        {title}
-      </h3>
+      <h3 className="text-base font-semibold text-text-primary mb-1">{title}</h3>
       <p className="text-sm text-text-muted mb-4 max-w-xs">{description}</p>
       {ctaLabel && ctaHref && (
         <Link
@@ -34,6 +32,7 @@ export function EmptyState({
       )}
       {ctaLabel && onCta && !ctaHref && (
         <button
+          type="button"
           onClick={onCta}
           className="bg-brand text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-brand-dark transition-colors"
         >

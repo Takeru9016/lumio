@@ -16,9 +16,7 @@ export function VideoPlayer({
   onComplete,
 }: VideoPlayerProps) {
   if (videoStatus !== "READY") {
-    return (
-      <div className="w-full aspect-video rounded-lg bg-neutral-900 animate-pulse" />
-    );
+    return <div className="w-full aspect-video rounded-lg bg-neutral-900 animate-pulse" />;
   }
 
   return (

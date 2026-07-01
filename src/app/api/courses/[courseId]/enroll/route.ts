@@ -1,11 +1,11 @@
-import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import type { NextRequest } from "next/server";
 
 import { db, razorpay, resend } from "@/lib";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> },
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   const { userId } = await auth();
   if (!userId) {
@@ -20,10 +20,7 @@ export async function POST(
   });
 
   if (!user || user.role !== "STUDENT") {
-    return Response.json(
-      { error: "Only students can enroll" },
-      { status: 403 },
-    );
+    return Response.json({ error: "Only students can enroll" }, { status: 403 });
   }
 
   const course = await db.course.findUnique({
@@ -60,7 +57,7 @@ export async function POST(
     if (!body.razorpayPaymentId) {
       return Response.json(
         { error: "razorpayPaymentId required for paid courses" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -71,9 +68,7 @@ export async function POST(
     };
     let payment: PaymentResult;
     try {
-      payment = (await razorpay.payments.fetch(
-        body.razorpayPaymentId,
-      )) as unknown as PaymentResult;
+      payment = (await razorpay.payments.fetch(body.razorpayPaymentId)) as unknown as PaymentResult;
     } catch {
       return Response.json({ error: "Invalid payment ID" }, { status: 402 });
     }
@@ -86,10 +81,7 @@ export async function POST(
       Number(payment.amount) !== Math.round(course.price * 100) ||
       payment.currency !== course.currency
     ) {
-      return Response.json(
-        { error: "Payment amount mismatch" },
-        { status: 402 },
-      );
+      return Response.json({ error: "Payment amount mismatch" }, { status: 402 });
     }
   }
 

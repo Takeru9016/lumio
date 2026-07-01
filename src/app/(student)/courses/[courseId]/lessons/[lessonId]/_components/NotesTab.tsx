@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { useEffect, useRef } from "react";
 
 interface NotesTabProps {
   lessonId: string;
@@ -69,9 +69,7 @@ export function NotesTab({ lessonId }: NotesTabProps) {
               action();
             }}
             className={`w-7 h-7 rounded text-sm font-medium transition-colors ${
-              active
-                ? "bg-brand text-white"
-                : "text-text-muted hover:bg-surface-3"
+              active ? "bg-brand text-white" : "text-text-muted hover:bg-surface-3"
             }`}
           >
             {label}
@@ -92,9 +90,7 @@ export function NotesTab({ lessonId }: NotesTabProps) {
         >
           • List
         </button>
-        <span className="ml-auto text-[10px] text-text-disabled">
-          Auto-saved
-        </span>
+        <span className="ml-auto text-[10px] text-text-disabled">Auto-saved</span>
       </div>
       <EditorContent
         editor={editor}

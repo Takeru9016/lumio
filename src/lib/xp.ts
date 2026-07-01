@@ -11,11 +11,7 @@ export const XP_EVENTS = {
 
 export type XPEvent = keyof typeof XP_EVENTS;
 
-export async function awardXP(
-  userId: string,
-  event: XPEvent,
-  amount: number,
-): Promise<number> {
+export async function awardXP(userId: string, event: XPEvent, amount: number): Promise<number> {
   const [updated] = await Promise.all([
     db.user.update({
       where: { id: userId },

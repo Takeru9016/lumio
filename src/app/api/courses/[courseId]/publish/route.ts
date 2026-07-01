@@ -1,15 +1,11 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 import { db } from "@/lib";
 
-export async function POST(
-  _req: Request,
-  { params }: { params: Promise<{ courseId: string }> },
-) {
+export async function POST(_req: Request, { params }: { params: Promise<{ courseId: string }> }) {
   const { userId } = await auth();
-  if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { courseId } = await params;
 
@@ -17,8 +13,7 @@ export async function POST(
     where: { clerkId: userId },
     select: { id: true },
   });
-  if (!dbUser)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const course = await db.course.findUnique({
     where: { id: courseId, instructorId: dbUser.id },
@@ -40,8 +35,7 @@ export async function POST(
     },
   });
 
-  if (!course)
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const errors: string[] = [];
 
@@ -64,15 +58,13 @@ export async function POST(
     if (emptySections.length > 0) {
       const names = emptySections.map((s) => `"${s.title}"`).join(", ");
       errors.push(
-        `${emptySections.length === 1 ? "Section" : "Sections"} ${names} ${emptySections.length === 1 ? "has" : "have"} no lessons`,
+        `${emptySections.length === 1 ? "Section" : "Sections"} ${names} ${emptySections.length === 1 ? "has" : "have"} no lessons`
       );
     }
   }
 
   const allLessons = course.sections.flatMap((s) => s.lessons);
-  const hasReadyVideo = allLessons.some(
-    (l) => l.type === "VIDEO" && l.videoStatus === "READY",
-  );
+  const hasReadyVideo = allLessons.some((l) => l.type === "VIDEO" && l.videoStatus === "READY");
   if (!hasReadyVideo) {
     errors.push("At least one video lesson must be fully processed (READY)");
   }
