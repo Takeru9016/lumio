@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib";
@@ -19,14 +19,13 @@ const questionSchema = z.object({
 const bodySchema = z.object({
   title: z.string().min(1).default("Quiz"),
   passingScore: z.number().int().min(0).max(100).default(70),
+  isAiGenerated: z.boolean().optional(),
   questions: z.array(questionSchema),
 });
 
 export async function GET(
   _req: Request,
-  {
-    params,
-  }: { params: Promise<{ courseId: string; lessonId: string }> },
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> },
 ) {
   const { userId } = await auth();
   if (!userId)
@@ -65,9 +64,7 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  {
-    params,
-  }: { params: Promise<{ courseId: string; lessonId: string }> },
+  { params }: { params: Promise<{ courseId: string; lessonId: string }> },
 ) {
   const { userId } = await auth();
   if (!userId)
@@ -102,12 +99,23 @@ export async function POST(
       { status: 400 },
     );
 
-  const { title, passingScore, questions } = parsed.data;
+  const { title, passingScore, isAiGenerated, questions } = parsed.data;
 
   const quiz = await db.quiz.upsert({
     where: { lessonId },
-    create: { lessonId, title, passingScore },
-    update: { title, passingScore },
+    create: {
+      lessonId,
+      title,
+      passingScore,
+      isAiGenerated: isAiGenerated ?? false,
+    },
+    // Only overwrite the AI flag when the caller sends it, so a manual re-save
+    // never clears a quiz's AI-generated provenance.
+    update: {
+      title,
+      passingScore,
+      ...(isAiGenerated !== undefined ? { isAiGenerated } : {}),
+    },
   });
 
   await db.quizQuestion.deleteMany({ where: { quizId: quiz.id } });

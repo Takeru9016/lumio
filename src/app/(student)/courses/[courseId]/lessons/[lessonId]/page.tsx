@@ -71,6 +71,7 @@ export default async function LessonPage({
             id: true,
             title: true,
             passingScore: true,
+            isAiGenerated: true,
             questions: {
               orderBy: { order: "asc" },
               select: {
@@ -170,6 +171,7 @@ export default async function LessonPage({
         id: lesson.quiz.id,
         title: lesson.quiz.title,
         passingScore: lesson.quiz.passingScore,
+        isAiGenerated: lesson.quiz.isAiGenerated,
         questions: lesson.quiz.questions.map((q) => ({
           id: q.id,
           question: q.question,

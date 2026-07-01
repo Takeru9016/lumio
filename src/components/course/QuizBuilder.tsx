@@ -1,45 +1,49 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import {
-  DndContext,
   closestCenter,
-  PointerSensor,
+  DndContext,
+  type DragEndEvent,
   KeyboardSensor,
+  PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
+  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { toast } from "gooey-toast";
 import {
   GripVertical,
-  Pencil,
-  Trash2,
-  Plus,
-  Loader2,
   HelpCircle,
+  Loader2,
+  Pencil,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { nanoid } from "nanoid";
-import { toast } from "gooey-toast";
+import { useCallback, useEffect, useState } from "react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 type QuestionType = "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER";
 
 interface MCQOption {
   id: string;
   text: string;
+}
+
+interface AiQuestion {
+  question: string;
+  type: "MCQ" | "TRUE_FALSE";
+  options?: MCQOption[];
+  correctAnswer: string;
+  explanation: string;
 }
 
 interface BuilderQuestion {
@@ -302,9 +306,7 @@ function QuestionForm({ initial, onSave, onCancel }: QuestionFormProps) {
                 type="radio"
                 name="correct-option"
                 checked={form.correctOptionIdx === i}
-                onChange={() =>
-                  setForm((f) => ({ ...f, correctOptionIdx: i }))
-                }
+                onChange={() => setForm((f) => ({ ...f, correctOptionIdx: i }))}
                 className="accent-brand shrink-0"
               />
               <span className="text-xs text-text-disabled font-mono w-4 shrink-0">
@@ -430,6 +432,15 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
   const [dialogForm, setDialogForm] =
     useState<ReturnType<typeof defaultForm>>(defaultForm);
 
+  // AI generation + preview
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewQuestions, setPreviewQuestions] = useState<BuilderQuestion[]>(
+    [],
+  );
+  const [previewEditIndex, setPreviewEditIndex] = useState<number | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -508,7 +519,9 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
     if (!q) return;
 
     if (editingIndex !== null) {
-      setQuestions((prev) => prev.map((item, i) => (i === editingIndex ? q : item)));
+      setQuestions((prev) =>
+        prev.map((item, i) => (i === editingIndex ? q : item)),
+      );
     } else {
       setQuestions((prev) => [...prev, q]);
     }
@@ -519,6 +532,35 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
     setQuestions((prev) => prev.filter((_, i) => i !== index));
   }
 
+  // Persists a set of questions to the lesson quiz. `aiGenerated` is only sent
+  // when true so a manual re-save never clears the AI-generated flag.
+  async function persistQuestions(
+    qs: BuilderQuestion[],
+    aiGenerated: boolean,
+  ): Promise<boolean> {
+    const res = await fetch(
+      `/api/courses/${courseId}/lessons/${lessonId}/quiz`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "Quiz",
+          passingScore: 70,
+          ...(aiGenerated ? { isAiGenerated: true } : {}),
+          questions: qs.map((q, i) => ({
+            question: q.question,
+            type: q.type,
+            options: q.options.length > 0 ? q.options : null,
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation || null,
+            order: i,
+          })),
+        }),
+      },
+    );
+    return res.ok;
+  }
+
   async function saveQuiz() {
     if (questions.length === 0) {
       toast.error({ title: "Add at least one question before saving." });
@@ -526,26 +568,8 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
     }
     setIsSaving(true);
     try {
-      const res = await fetch(
-        `/api/courses/${courseId}/lessons/${lessonId}/quiz`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: "Quiz",
-            passingScore: 70,
-            questions: questions.map((q, i) => ({
-              question: q.question,
-              type: q.type,
-              options: q.options.length > 0 ? q.options : null,
-              correctAnswer: q.correctAnswer,
-              explanation: q.explanation || null,
-              order: i,
-            })),
-          }),
-        },
-      );
-      if (!res.ok) throw new Error();
+      const ok = await persistQuestions(questions, false);
+      if (!ok) throw new Error();
       toast.success({ title: "Quiz saved" });
       await fetchQuiz();
     } catch {
@@ -553,6 +577,92 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
     } finally {
       setIsSaving(false);
     }
+  }
+
+  async function generateQuiz() {
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/ai/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonId }),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          upgradeRequired?: boolean;
+        };
+        if (res.status === 429) {
+          toast.error({
+            title: "Rate limit reached",
+            description: "Too many requests — try again in a minute.",
+          });
+        } else if (res.status === 403 && data.upgradeRequired) {
+          toast.error({
+            title: "AI quota reached",
+            description: "Upgrade your plan to generate more quizzes.",
+          });
+        } else {
+          toast.error({
+            title: "Couldn't generate quiz",
+            description: data.error ?? "Please try again.",
+          });
+        }
+        return;
+      }
+
+      const data = (await res.json()) as { questions: AiQuestion[] };
+      setPreviewQuestions(
+        data.questions.map((q) => ({
+          localId: nanoid(),
+          type: q.type,
+          question: q.question,
+          options: q.options ?? [],
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation ?? "",
+        })),
+      );
+      setPreviewEditIndex(null);
+      setPreviewOpen(true);
+    } catch {
+      toast.error({
+        title: "Network error",
+        description: "Couldn't reach the AI service.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function approvePreview() {
+    if (previewQuestions.length === 0) return;
+    setIsApproving(true);
+    try {
+      const ok = await persistQuestions(previewQuestions, true);
+      if (!ok) throw new Error();
+      toast.success({ title: "AI quiz saved" });
+      setPreviewOpen(false);
+      await fetchQuiz();
+    } catch {
+      toast.error({ title: "Failed to save quiz" });
+    } finally {
+      setIsApproving(false);
+    }
+  }
+
+  function savePreviewQuestion(form: ReturnType<typeof defaultForm>) {
+    if (previewEditIndex === null) return;
+    const q = formToQuestion(form, previewQuestions[previewEditIndex].localId);
+    if (!q) return;
+    setPreviewQuestions((prev) =>
+      prev.map((item, i) => (i === previewEditIndex ? q : item)),
+    );
+    setPreviewEditIndex(null);
+  }
+
+  function deletePreviewQuestion(index: number) {
+    setPreviewQuestions((prev) => prev.filter((_, i) => i !== index));
   }
 
   if (isLoading) {
@@ -583,9 +693,7 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
           disabled={isSaving}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-brand text-white rounded-md hover:bg-brand-dark disabled:opacity-50 transition-colors"
         >
-          {isSaving ? (
-            <Loader2 size={13} className="animate-spin" />
-          ) : null}
+          {isSaving ? <Loader2 size={13} className="animate-spin" /> : null}
           Save quiz
         </button>
       </div>
@@ -634,10 +742,22 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
         Add question
       </button>
 
-      {/* AI note */}
-      <p className="flex items-center gap-1.5 text-xs text-ai font-medium">
-        ✦ AI quiz generation available in Phase 4
-      </p>
+      {/* AI generation */}
+      <button
+        type="button"
+        onClick={() => void generateQuiz()}
+        disabled={isGenerating}
+        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-ai bg-ai-bg py-2.5 text-sm font-medium text-ai hover:bg-ai hover:text-white disabled:opacity-60 transition-colors"
+      >
+        {isGenerating ? (
+          <>
+            <Loader2 size={14} className="animate-spin" />
+            Generating quiz…
+          </>
+        ) : (
+          "✦ Generate Quiz"
+        )}
+      </button>
 
       {/* Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -650,6 +770,112 @@ export function QuizBuilder({ courseId, lessonId }: QuizBuilderProps) {
             onSave={handleSaveQuestion}
             onCancel={() => setDialogOpen(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* AI preview */}
+      <Dialog
+        open={previewOpen}
+        onOpenChange={(open) => {
+          if (isApproving) return;
+          setPreviewOpen(open);
+          if (!open) setPreviewEditIndex(null);
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          {previewEditIndex !== null ? (
+            <>
+              <DialogTitle>Edit question</DialogTitle>
+              <QuestionForm
+                initial={questionToForm(previewQuestions[previewEditIndex])}
+                onSave={savePreviewQuestion}
+                onCancel={() => setPreviewEditIndex(null)}
+              />
+            </>
+          ) : (
+            <>
+              <DialogTitle className="flex items-center gap-1.5 text-ai">
+                ✦ AI-generated quiz
+              </DialogTitle>
+              <p className="text-xs text-text-muted -mt-2">
+                Review the {previewQuestions.length} generated question
+                {previewQuestions.length !== 1 ? "s" : ""} before saving. Edit
+                or regenerate as needed.
+              </p>
+
+              <div className="max-h-[50vh] space-y-2 overflow-y-auto py-1">
+                {previewQuestions.map((q, i) => (
+                  <div
+                    key={q.localId}
+                    className="flex items-start gap-2 rounded-lg border border-border bg-surface-1 p-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-0.5 flex items-center gap-2">
+                        <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-text-muted">
+                          {TYPE_LABELS[q.type]}
+                        </span>
+                        <span className="text-[10px] text-text-disabled">
+                          #{i + 1}
+                        </span>
+                      </div>
+                      <p className="text-sm text-text-primary">{q.question}</p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewEditIndex(i)}
+                        className="rounded p-1 text-text-muted transition-colors hover:bg-surface-3 hover:text-text-primary"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deletePreviewQuestion(i)}
+                        className="rounded p-1 text-text-muted transition-colors hover:bg-danger-bg hover:text-danger"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
+                <button
+                  type="button"
+                  onClick={() => void generateQuiz()}
+                  disabled={isGenerating || isApproving}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-ai hover:bg-ai-bg disabled:opacity-50 transition-colors"
+                >
+                  {isGenerating ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : null}
+                  Regenerate
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewOpen(false)}
+                    disabled={isApproving}
+                    className="rounded-md border border-border px-3 py-1.5 text-sm text-text-muted hover:bg-surface-2 disabled:opacity-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void approvePreview()}
+                    disabled={isApproving || previewQuestions.length === 0}
+                    className="flex items-center gap-1.5 rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50 transition-colors"
+                  >
+                    {isApproving ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : null}
+                    Approve &amp; Save
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

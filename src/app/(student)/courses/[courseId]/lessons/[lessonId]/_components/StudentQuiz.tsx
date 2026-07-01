@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { CheckCircle2, XCircle, RotateCcw, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "gooey-toast";
+import { CheckCircle2, Loader2, RotateCcw, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { AiBadge } from "@/components/shared/AiBadge";
 
 export interface StudentQuestion {
   id: string;
@@ -17,6 +19,7 @@ export interface QuizData {
   id: string;
   title: string;
   passingScore: number;
+  isAiGenerated: boolean;
   questions: StudentQuestion[];
 }
 
@@ -47,10 +50,7 @@ interface StudentQuizProps {
   onComplete?: () => void;
 }
 
-function displayAnswer(
-  answer: string,
-  question: StudentQuestion,
-): string {
+function displayAnswer(answer: string, question: StudentQuestion): string {
   if (question.type === "MCQ" && question.options) {
     return question.options.find((o) => o.id === answer)?.text ?? answer;
   }
@@ -60,7 +60,11 @@ function displayAnswer(
   return answer;
 }
 
-export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizProps) {
+export function StudentQuiz({
+  quiz,
+  initialAttempts,
+  onComplete,
+}: StudentQuizProps) {
   const [phase, setPhase] = useState<QuizPhase>("idle");
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -157,9 +161,12 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
         <div className="bg-surface-1 border border-border rounded-lg p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-base font-semibold text-text-primary">
-                {quiz.title}
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-text-primary">
+                  {quiz.title}
+                </h2>
+                {quiz.isAiGenerated && <AiBadge label="AI-generated" />}
+              </div>
               <p className="text-sm text-text-muted mt-0.5">
                 {totalQ} question{totalQ !== 1 ? "s" : ""} · Passing score{" "}
                 {quiz.passingScore}%
@@ -451,8 +458,7 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
                     </p>
                     {!isShortAnswer && !isCorrect && correctInfo && (
                       <p className="text-xs text-success mt-0.5">
-                        Correct:{" "}
-                        {displayAnswer(correctInfo.correctAnswer, q)}
+                        Correct: {displayAnswer(correctInfo.correctAnswer, q)}
                       </p>
                     )}
                     {correctInfo?.explanation && (

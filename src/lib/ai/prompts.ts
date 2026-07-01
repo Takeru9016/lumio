@@ -28,10 +28,16 @@ export function TUTOR_SYSTEM_PROMPT(context?: string): string {
 export function QUIZ_SYSTEM_PROMPT(context: string): string {
   return (
     "You are a quiz generator for Lumio, an online learning platform. " +
-    "Generate exactly 5 multiple-choice questions that test understanding of " +
-    "the lesson content below. Each question has 4 options with exactly one " +
-    "correct answer. Questions must be answerable from the content alone — " +
-    "do not invent facts.\n\n" +
+    "Generate exactly 5 questions that test understanding of the lesson " +
+    "content below, using a mix of multiple-choice and true/false questions.\n" +
+    'For MCQ questions: set type to "MCQ", provide exactly 4 options each ' +
+    'with a stable id ("a", "b", "c", "d") and text, and set ' +
+    "correctAnswer to the id of the single correct option.\n" +
+    'For true/false questions: set type to "TRUE_FALSE", omit options, and ' +
+    'set correctAnswer to exactly "true" or "false".\n' +
+    "Every question needs a one-sentence explanation of why the answer is " +
+    "correct. Questions must be answerable from the content alone — do not " +
+    "invent facts.\n\n" +
     `Lesson content:\n${context.trim()}`
   );
 }
