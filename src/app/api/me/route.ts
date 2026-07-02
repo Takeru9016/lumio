@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 
-import { awardXP, db, updateStreak, XP_EVENTS } from "@/lib";
+import { db } from "@/lib/db";
+import { updateStreak } from "@/lib/streak";
+import { awardXP, XP_EVENTS } from "@/lib/xp";
 
 function isSameDay(a: Date, b: Date): boolean {
   return (

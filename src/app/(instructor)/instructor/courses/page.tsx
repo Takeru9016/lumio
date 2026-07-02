@@ -8,7 +8,7 @@ import { EmptyState } from "@/components";
 
 import type { CourseStatus } from "@/generated/prisma/enums";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 const STATUS_BADGE: Record<CourseStatus, { label: string; className: string }> = {
   DRAFT: {

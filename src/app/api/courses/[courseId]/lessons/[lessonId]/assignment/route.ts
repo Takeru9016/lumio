@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 const bodySchema = z.object({
   title: z.string().min(1),

@@ -2,7 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { z } from "zod";
 
-import { db, mux } from "@/lib";
+import { db } from "@/lib/db";
+import { mux } from "@/lib/mux";
 
 const f = createUploadthing();
 

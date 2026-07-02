@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 const questionSchema = z.object({
   question: z.string().min(1),

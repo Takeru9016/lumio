@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { CourseSettingsForm } from "@/components";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 interface CourseSettingsPageProps {
   params: Promise<{ courseId: string }>;

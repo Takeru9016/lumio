@@ -1,7 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { awardXP, db, generateCertificate, updateStreak, XP_EVENTS } from "@/lib";
+import { generateCertificate } from "@/lib/certificate";
+import { db } from "@/lib/db";
+import { updateStreak } from "@/lib/streak";
+import { awardXP, XP_EVENTS } from "@/lib/xp";
 
 export async function POST(
   _req: Request,

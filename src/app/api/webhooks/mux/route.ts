@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
-import { db, mux } from "@/lib";
+import { db } from "@/lib/db";
+import { mux } from "@/lib/mux";
 
 export async function POST(req: Request) {
   const body = await req.text();

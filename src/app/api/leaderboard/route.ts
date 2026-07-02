@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 type WeeklyRow = {
   id: string;

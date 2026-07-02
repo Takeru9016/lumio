@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import type { LessonType } from "@/generated/prisma/client";
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 async function resolveSectionOwnership(courseId: string, sectionId: string, clerkId: string) {
   const [dbUser, course, section] = await Promise.all([

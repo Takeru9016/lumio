@@ -4,7 +4,7 @@ import { Award, CheckCircle2, ClipboardList, Clock, ExternalLink, Star } from "l
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 export default async function StudentSettingsPage() {
   const { userId } = await auth();

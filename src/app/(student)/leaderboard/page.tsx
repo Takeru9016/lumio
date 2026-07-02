@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 import { LeaderboardClient, type LeaderboardData } from "./LeaderboardClient";
 
 type WeeklyRow = {

@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 
 import { Sidebar, TopNav } from "@/components";
 
-import { db, getRoleDashboard } from "@/lib";
+import { db } from "@/lib/db";
+import { getRoleDashboard } from "@/lib/role-redirect";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();

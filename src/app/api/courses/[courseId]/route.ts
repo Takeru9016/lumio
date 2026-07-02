@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 const patchCourseSchema = z.object({
   title: z.string().min(3).max(100).optional(),

@@ -1,9 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { after, type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-
-import { db } from "@/lib";
 import { embedLessonById } from "@/lib/ai/embeddings";
+import { db } from "@/lib/db";
 
 async function resolveLessonOwnership(courseId: string, lessonId: string, clerkId: string) {
   const [dbUser, course, lesson] = await Promise.all([

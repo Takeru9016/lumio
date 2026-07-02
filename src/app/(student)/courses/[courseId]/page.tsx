@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { AiBadge } from "@/components";
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 import { EnrollButton } from "./_components/EnrollButton";
 
 const LESSON_ICONS = {

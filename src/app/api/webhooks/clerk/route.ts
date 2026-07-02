@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { Webhook } from "svix";
 import type { Role } from "@/generated/prisma/client";
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 type ClerkWebhookEvent = {
   type: string;

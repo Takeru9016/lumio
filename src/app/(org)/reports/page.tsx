@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { Award, ExternalLink } from "lucide-react";
 import { redirect } from "next/navigation";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 export default async function OrgReportsPage() {
   const { userId } = await auth();

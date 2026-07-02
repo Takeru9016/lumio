@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { ClipboardList, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 import { type SubmissionItem, SubmissionsGrader } from "./_components/SubmissionsGrader";
 

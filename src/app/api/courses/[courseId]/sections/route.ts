@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 async function getCourseAndUser(courseId: string, clerkId: string) {
   const [dbUser, course] = await Promise.all([

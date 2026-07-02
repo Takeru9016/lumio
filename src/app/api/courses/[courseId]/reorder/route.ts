@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 const reorderSchema = z.object({
   type: z.enum(["section", "lesson"]),

@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { UIMessage } from "ai";
 import { notFound, redirect } from "next/navigation";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 import { CoursePlayerClient } from "./_components/CoursePlayerClient";
 import type { SidebarSection } from "./_components/LessonSidebar";

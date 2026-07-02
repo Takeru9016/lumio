@@ -3,7 +3,7 @@ import type { UIMessage } from "ai";
 import { redirect } from "next/navigation";
 
 import { AiTutorChat } from "@/components";
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 export default async function AiTutorPage() {
   const { userId } = await auth();

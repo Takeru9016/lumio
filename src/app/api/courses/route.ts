@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import type { CourseStatus } from "@/generated/prisma/client";
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 const VALID_STATUSES: CourseStatus[] = ["DRAFT", "PUBLISHED", "ARCHIVED"];
 

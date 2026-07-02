@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { CourseCard, EmptyState } from "@/components";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 type Tab = "all" | "in-progress" | "completed";
 

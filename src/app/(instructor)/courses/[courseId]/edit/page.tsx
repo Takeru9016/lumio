@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { CourseEditor, type SectionItem } from "@/components";
 
-import { db } from "@/lib";
+import { db } from "@/lib/db";
 
 interface EditCoursePageProps {
   params: Promise<{ courseId: string }>;

@@ -2,7 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { awardXP, db, XP_EVENTS } from "@/lib";
+import { db } from "@/lib/db";
+import { awardXP, XP_EVENTS } from "@/lib/xp";
 
 const bodySchema = z.object({
   textContent: z.string().optional().nullable(),

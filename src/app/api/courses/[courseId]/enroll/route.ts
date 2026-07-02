@@ -1,7 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
-import { db, razorpay, resend } from "@/lib";
+import { db } from "@/lib/db";
+import { razorpay } from "@/lib/razorpay";
+import { resend } from "@/lib/resend";
 
 export async function POST(
   req: NextRequest,
