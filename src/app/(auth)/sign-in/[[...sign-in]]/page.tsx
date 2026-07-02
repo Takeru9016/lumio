@@ -16,7 +16,10 @@ export default function SignInPage() {
       password: formData.get("password") as string,
     });
 
-    if (signIn.status === "needs_second_factor") {
+    // needs_client_trust: valid password from a new device without MFA — Clerk
+    // requires an email/phone code before creating the session. Handle it like a
+    // second factor so the verification UI is shown.
+    if (signIn.status === "needs_second_factor" || signIn.status === "needs_client_trust") {
       await signIn.mfa.sendEmailCode();
       setNeedsMFA(true);
       return;

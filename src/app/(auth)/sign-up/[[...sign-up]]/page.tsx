@@ -1,11 +1,12 @@
 "use client";
 
-import { useSignUp } from "@clerk/nextjs";
+import { useAuth, useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
   const { signUp, errors, fetchStatus } = useSignUp();
+  const { isSignedIn } = useAuth();
   const router = useRouter();
 
   const handleSignUp = async (formData: FormData) => {
@@ -15,6 +16,13 @@ export default function SignUpPage() {
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
     });
+
+    // An account already exists for this identifier — hand off to the sign-in flow
+    // instead of dead-ending on an error.
+    if (signUp.isTransferable) {
+      router.push("/sign-in");
+      return;
+    }
 
     if (!error) {
       await signUp.verifications.sendEmailCode();
@@ -42,6 +50,11 @@ export default function SignUpPage() {
   };
 
   const isLoading = fetchStatus === "fetching";
+
+  if (signUp.status === "complete" || isSignedIn) {
+    return null;
+  }
+
   const needsVerification =
     signUp.status === "missing_requirements" &&
     signUp.unverifiedFields.includes("email_address") &&
