@@ -54,3 +54,27 @@ export function SUMMARY_SYSTEM_PROMPT(context: string): string {
     `Lesson content:\n${context.trim()}`
   );
 }
+
+/**
+ * Learning path system prompt. `context` is a pre-built block containing the
+ * student's progress/quiz stats followed by the candidate lesson list the
+ * model must choose lessonId values from.
+ */
+export function LEARNING_PATH_SYSTEM_PROMPT(context: string): string {
+  return (
+    "You are a learning path advisor for Lumio, an online learning platform. " +
+    "Recommend up to 5 lessons the student should focus on next, based on the " +
+    "progress and quiz performance below. Prioritize lessons in courses where " +
+    "the student is behind or scoring poorly on quizzes.\n" +
+    "Only recommend lessonId values that appear in the candidate lesson list " +
+    "below — never invent an id, and never recommend the same lessonId twice.\n" +
+    'Set priority to "HIGH" for lessons the student should do next, "MEDIUM" ' +
+    'for important but less urgent lessons, and "LOW" for optional ' +
+    "reinforcement.\n" +
+    "Each reason must be a specific, one-sentence explanation referencing the " +
+    "student's actual progress or quiz scores — not generic advice.\n" +
+    "Also write a 2-3 sentence encouraging summary of the student's overall " +
+    "progress and what following this path will help them achieve.\n\n" +
+    context.trim()
+  );
+}
