@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { generateCertificate } from "@/lib/certificate";
 import { db } from "@/lib/db";
+import { recordMandatoryTrainingCompletion } from "@/lib/mandatory-training";
 import { updateStreak } from "@/lib/streak";
 import { awardXP, XP_EVENTS } from "@/lib/xp";
 
@@ -107,6 +108,7 @@ export async function POST(
           }),
           awardXP(dbUser.id, "COURSE_COMPLETE", XP_EVENTS.COURSE_COMPLETE),
           generateCertificate(dbUser.id, course.id),
+          recordMandatoryTrainingCompletion(dbUser.id, course.id),
         ]);
         courseXpEarned = XP_EVENTS.COURSE_COMPLETE;
       } else {
