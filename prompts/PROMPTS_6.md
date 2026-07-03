@@ -1,7 +1,8 @@
 # PROMPTS_6.md — Phase 6: Billing, White-Label & Production
 
-> Phase 6 tasks 6A, 6B, 6D, 6E must use Opus-class model.
+> Phase 6 tasks 6A, 6B, 6D, 6E, 6G must use Opus-class model.
 > Tasks 6C and 6F can use Sonnet.
+> 6G (Enterprise SSO) is an Enterprise feature — run it after 6D, before the final 6F audit, or defer post-MVP.
 
 ---
 
@@ -280,4 +281,52 @@ This is the final task. Do a full audit before starting.
    Must show 0 errors.
 
 Commit: phase/6-task/F: sentry, skeletons, empty states, resend emails, production build pass
+```
+
+---
+
+## Task 6G — Enterprise SSO (SAML) Configuration
+
+```
+/start
+
+Read CLAUDE.md and docs/API.md before writing any code.
+This is an Enterprise-only feature. Reuse the 6C plan-gating pattern — do not
+build a bespoke gate.
+
+Note on routing: org pages live under /org/* (e.g. /org/settings, /org/settings/billing).
+CLAUDE.md's structure lists (org)/settings/sso, but follow the real convention:
+build at (org)/org/settings/sso → /org/settings/sso, and add an SSO card to the
+existing /org/settings landing page.
+
+1. Create src/app/(org)/org/settings/sso/page.tsx:
+   Guard: ORG_ADMIN (redirect non-admins).
+   Load: Tenant plan, samlEnabled, samlMetadataUrl.
+   - If Tenant.plan !== "ENTERPRISE": render the Enterprise-only lock state
+     (reuse UpgradeModal / Enterprise badge from 6C) with a "Contact sales / Upgrade"
+     CTA. Do NOT render the config form.
+   - If ENTERPRISE: render the SSO config client component.
+
+2. Create src/components/org/SsoSettings.tsx (client):
+   - Enable SSO toggle → Tenant.samlEnabled
+   - IdP metadata URL input (validate it's a URL; required when enabled)
+   - Save → PATCH /api/org/sso
+   - Show current connection status; link out to Clerk's SSO setup docs
+   - Explain: Clerk owns the SAML connection (Enterprise SSO via Clerk organizations);
+     Lumio stores the toggle + metadata URL and defers auth to Clerk.
+
+3. Create src/app/api/org/sso/route.ts:
+   Guard: ORG_ADMIN.
+   PATCH body: { samlEnabled: boolean, samlMetadataUrl?: string }
+   - Reject if tenant plan !== ENTERPRISE (403 with upgrade prompt).
+   - If samlEnabled === true, require a valid samlMetadataUrl.
+   - Update Tenant.samlEnabled, Tenant.samlMetadataUrl.
+   - Return { success: true }.
+
+4. Add an "SSO" card to src/app/(org)/org/settings/page.tsx:
+   - Same pattern as the Billing card (icon + label + ChevronRight, links to /org/settings/sso).
+   - Show an "Enterprise" badge on the card when Tenant.plan !== ENTERPRISE.
+
+Run npx tsc --noEmit.
+Commit: phase/6-task/G: enterprise saml sso configuration page with clerk
 ```

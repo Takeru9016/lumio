@@ -333,6 +333,17 @@
   - **Model:** Sonnet
   - **Commit:** `phase/6-task/F: sentry, skeletons, empty states, resend emails, production build pass`
 
+- [ ] **6G** — Enterprise SSO (SAML) configuration
+  - **Ordering:** Enterprise feature — build after 6D (branding) and before the final 6F audit; may be deferred post-MVP. Depends on 6C Enterprise gating.
+  - `src/app/(org)/org/settings/sso/page.tsx` — SAML config page (route follows the `/org/*` convention, not the literal `/settings/sso`)
+  - Enterprise-gated: if `Tenant.plan !== ENTERPRISE`, show the Enterprise-only lock/upgrade state (reuse 6C gating)
+  - Form: IdP metadata URL + enable toggle → stores `Tenant.samlEnabled`, `Tenant.samlMetadataUrl`
+  - `PATCH /api/org/sso` (Guard: `ORG_ADMIN`) — validates + persists the SSO config
+  - Clerk owns the actual SAML connection (Enterprise SSO via Clerk organizations); this page stores our metadata/toggle and links out to Clerk's SSO setup
+  - Add an "SSO" card to `src/app/(org)/org/settings/page.tsx` (same pattern as the Billing card)
+  - **Model:** Opus
+  - **Commit:** `phase/6-task/G: enterprise saml sso configuration page with clerk`
+
 ---
 
 ## Checkpoint Tracker (copy into notes)
@@ -343,5 +354,5 @@ Phase 2: [ ] 2A [ ] 2B [ ] 2C [ ] 2D [ ] 2E
 Phase 3: [ ] 3A [ ] 3B [ ] 3C [ ] 3D [ ] 3E
 Phase 4: [ ] 4A [ ] 4B [ ] 4C [ ] 4D [ ] 4E
 Phase 5: [ ] 5A [ ] 5B [ ] 5C [ ] 5D [ ] 5E
-Phase 6: [ ] 6A [ ] 6B [ ] 6C [ ] 6D [ ] 6E [ ] 6F
+Phase 6: [ ] 6A [ ] 6B [ ] 6C [ ] 6D [ ] 6E [ ] 6F [ ] 6G
 ```
