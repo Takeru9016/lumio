@@ -12,6 +12,7 @@ export { TextEditor } from "./course/TextEditor";
 export { VideoPlayer } from "./course/VideoPlayer";
 export { Sidebar } from "./layout/Sidebar";
 export { TopNav } from "./layout/TopNav";
+export { CompletionReportClient } from "./org/CompletionReportClient";
 export { CoursesClient } from "./org/CoursesClient";
 export { SendNudgeButton } from "./org/SendNudgeButton";
 export { TeamsClient } from "./org/TeamsClient";
