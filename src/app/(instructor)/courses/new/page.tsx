@@ -65,7 +65,7 @@ export default function NewCoursePage() {
       });
       if (!res.ok) throw new Error(await res.text());
       const course = await res.json();
-      router.push(`/courses/${course.id}/edit`);
+      router.push(`/courses/${course.slug}/edit`);
     } catch (e) {
       toast.error({
         title: "Failed to create course",

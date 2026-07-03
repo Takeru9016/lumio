@@ -72,6 +72,7 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
   );
   const [pendingType, setPendingType] = useState<LessonType | null>(null);
   const [isRenamingTitle, setIsRenamingTitle] = useState(false);
+  const [description, setDescription] = useState(lesson.description ?? "");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -260,6 +261,30 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
     }
   }
 
+  async function saveDescription(text: string) {
+    setSaveStatus("saving");
+    try {
+      const res = await fetch(
+        `/api/courses/${courseId}/sections/${sectionId}/lessons/${lesson.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description: text }),
+        }
+      );
+      if (!res.ok) throw new Error("Save failed");
+      onUpdateRef.current(lesson.id, { description: text });
+      setSaveStatus("saved");
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), 2000);
+    } catch {
+      setSaveStatus("error");
+      toast.error({ title: "Failed to save description" });
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), 3000);
+    }
+  }
+
   async function saveTitle(title: string) {
     try {
       const res = await fetch(
@@ -389,6 +414,28 @@ export function LessonEditor({ lesson, courseId, sectionId, onUpdate }: LessonEd
       {/* VIDEO */}
       {localType === "VIDEO" && (
         <div className="space-y-4">
+          <div>
+            <label
+              htmlFor={`description-${lesson.id}`}
+              className="block text-xs font-medium text-text-muted mb-1"
+            >
+              Description <span className="text-text-disabled">(shown to students)</span>
+            </label>
+            <textarea
+              id={`description-${lesson.id}`}
+              value={description}
+              onChange={(e) => {
+                const value = e.target.value;
+                setDescription(value);
+                if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+                saveTimerRef.current = setTimeout(() => void saveDescription(value), 1000);
+              }}
+              placeholder="What is this video about?"
+              rows={2}
+              className="w-full rounded-lg border border-border bg-surface-1 px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-2 focus:ring-brand/40 resize-none"
+            />
+          </div>
+
           {(uploadState === "uploading" || isUploading) && (
             <div className="space-y-2">
               <div className="w-full h-1.5 bg-surface-3 rounded-full overflow-hidden">

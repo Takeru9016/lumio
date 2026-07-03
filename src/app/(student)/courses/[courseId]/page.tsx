@@ -31,7 +31,7 @@ export default async function CourseDetailPage({
       select: { id: true, email: true, name: true },
     }),
     db.course.findUnique({
-      where: { id: courseId },
+      where: { slug: courseId },
       select: {
         id: true,
         title: true,
@@ -55,6 +55,7 @@ export default async function CourseDetailPage({
               orderBy: { order: "asc" },
               select: {
                 id: true,
+                slug: true,
                 title: true,
                 type: true,
                 isFree: true,
@@ -75,7 +76,7 @@ export default async function CourseDetailPage({
   if (!course || course.status === "DRAFT") notFound();
 
   const enrollment = await db.enrollment.findUnique({
-    where: { userId_courseId: { userId: dbUser.id, courseId } },
+    where: { userId_courseId: { userId: dbUser.id, courseId: course.id } },
     select: {
       id: true,
       status: true,
@@ -104,7 +105,7 @@ export default async function CourseDetailPage({
     const completedSet = new Set(completedProgress.map((p) => p.lessonId));
     const firstUncompleted = publishedLessons.find((l) => !completedSet.has(l.id));
     resumeLessonId =
-      firstUncompleted?.id ?? publishedLessons[publishedLessons.length - 1]?.id ?? null;
+      firstUncompleted?.slug ?? publishedLessons[publishedLessons.length - 1]?.slug ?? null;
   }
 
   const totalLessons = publishedLessons.length;
@@ -239,7 +240,7 @@ export default async function CourseDetailPage({
                       <li key={lesson.id}>
                         {isAccessible ? (
                           <Link
-                            href={`/courses/${courseId}/lessons/${lesson.id}`}
+                            href={`/courses/${courseId}/lessons/${lesson.slug}`}
                             className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2 transition-colors"
                           >
                             <Icon size={16} className="shrink-0 text-text-muted" />

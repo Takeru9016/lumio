@@ -21,7 +21,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
   if (!user) redirect("/sign-in");
 
   const course = await db.course.findUnique({
-    where: { id: courseId, instructorId: user.id },
+    where: { slug: courseId, instructorId: user.id },
     include: {
       sections: {
         orderBy: { order: "asc" },
@@ -39,6 +39,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
               videoDuration: true,
               muxPlaybackId: true,
               textContent: true,
+              description: true,
               quiz: { select: { id: true } },
               assignment: { select: { id: true } },
             },
@@ -65,6 +66,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       videoDuration: l.videoDuration,
       muxPlaybackId: l.muxPlaybackId,
       textContent: l.textContent,
+      description: l.description,
       hasQuiz: l.quiz !== null,
       hasAssignment: l.assignment !== null,
     })),
@@ -73,7 +75,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
   return (
     <div className="flex flex-col h-full">
       <CourseEditor
-        courseId={course.id}
+        courseId={course.slug}
         initialSections={sections}
         courseTitle={course.title}
         courseStatus={course.status}

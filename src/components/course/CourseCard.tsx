@@ -8,6 +8,7 @@ import { AiBadge } from "@/components/shared/AiBadge";
 
 interface CourseCardCourse {
   id: string;
+  slug: string;
   title: string;
   thumbnailUrl: string | null;
   instructor: { name: string | null };
@@ -45,7 +46,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
       transition={{ duration: 0.18, ease: "easeOut" }}
       className="bg-surface-1 border border-border rounded-xl overflow-hidden flex flex-col"
     >
-      <Link href={`/courses/${course.id}`} className="block relative aspect-video bg-surface-3">
+      <Link href={`/courses/${course.slug}`} className="block relative aspect-video bg-surface-3">
         {course.thumbnailUrl ? (
           <Image
             src={course.thumbnailUrl}
@@ -65,7 +66,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
       </Link>
 
       <div className="p-4 flex flex-col gap-2 flex-1">
-        <Link href={`/courses/${course.id}`}>
+        <Link href={`/courses/${course.slug}`}>
           <h3 className="font-semibold text-sm leading-snug line-clamp-2 text-text-primary hover:text-brand transition-colors">
             {course.title}
           </h3>
@@ -96,7 +97,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
                 />
               </div>
               <Link
-                href={`/courses/${course.id}`}
+                href={`/courses/${course.slug}`}
                 className="mt-2 flex items-center justify-center w-full py-1.5 text-xs font-semibold rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors"
               >
                 {isCompleted ? "Review" : "Continue"}
@@ -106,7 +107,7 @@ export function CourseCard({ course, enrollment }: CourseCardProps) {
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-text-primary">{priceLabel}</span>
               <Link
-                href={`/courses/${course.id}`}
+                href={`/courses/${course.slug}`}
                 className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border text-text-secondary hover:border-brand hover:text-brand transition-colors"
               >
                 View

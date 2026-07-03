@@ -35,6 +35,7 @@ export default async function CoursesPage({
         course: {
           select: {
             id: true,
+            slug: true,
             title: true,
             thumbnailUrl: true,
             category: true,
@@ -69,6 +70,7 @@ export default async function CoursesPage({
           },
           select: {
             id: true,
+            slug: true,
             title: true,
             thumbnailUrl: true,
             category: true,
@@ -108,6 +110,7 @@ export default async function CoursesPage({
       return {
         course: {
           id: e.course.id,
+          slug: e.course.slug,
           title: e.course.title,
           thumbnailUrl: e.course.thumbnailUrl,
           instructor: e.course.instructor,
@@ -132,6 +135,7 @@ export default async function CoursesPage({
     return {
       course: {
         id: c.id,
+        slug: c.slug,
         title: c.title,
         thumbnailUrl: c.thumbnailUrl,
         instructor: c.instructor,

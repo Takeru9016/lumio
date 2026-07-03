@@ -15,19 +15,20 @@ export async function POST(
 
   const { courseId, lessonId } = await params;
 
-  const dbUser = await db.user.findUnique({
-    where: { clerkId: userId },
-    select: { id: true },
-  });
+  const [dbUser, course] = await Promise.all([
+    db.user.findUnique({ where: { clerkId: userId }, select: { id: true } }),
+    db.course.findUnique({ where: { slug: courseId }, select: { id: true } }),
+  ]);
   if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!course) return NextResponse.json({ error: "Course not found" }, { status: 404 });
 
   const [enrollment, lesson] = await Promise.all([
     db.enrollment.findUnique({
-      where: { userId_courseId: { userId: dbUser.id, courseId } },
+      where: { userId_courseId: { userId: dbUser.id, courseId: course.id } },
       select: { id: true, status: true },
     }),
     db.lesson.findFirst({
-      where: { id: lessonId, section: { courseId } },
+      where: { id: lessonId, section: { courseId: course.id } },
       select: { id: true },
     }),
   ]);
@@ -65,7 +66,7 @@ export async function POST(
     where: {
       userId: dbUser.id,
       isCompleted: true,
-      lesson: { section: { courseId } },
+      lesson: { section: { courseId: course.id } },
     },
   });
 
@@ -76,7 +77,7 @@ export async function POST(
   let courseXpEarned = 0;
 
   const allPublishedLessons = await db.lesson.findMany({
-    where: { section: { courseId }, isPublished: true, isArchived: false },
+    where: { section: { courseId: course.id }, isPublished: true, isArchived: false },
     select: { quiz: { select: { id: true } } },
   });
 
@@ -105,11 +106,11 @@ export async function POST(
             data: { status: "COMPLETED", completedAt: new Date() },
           }),
           awardXP(dbUser.id, "COURSE_COMPLETE", XP_EVENTS.COURSE_COMPLETE),
-          generateCertificate(dbUser.id, courseId),
+          generateCertificate(dbUser.id, course.id),
         ]);
         courseXpEarned = XP_EVENTS.COURSE_COMPLETE;
       } else {
-        await generateCertificate(dbUser.id, courseId);
+        await generateCertificate(dbUser.id, course.id);
       }
     }
   }

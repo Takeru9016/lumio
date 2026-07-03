@@ -27,7 +27,7 @@ export async function PATCH(
   const [dbUser, course] = await Promise.all([
     db.user.findUnique({ where: { clerkId: userId }, select: { id: true } }),
     db.course.findUnique({
-      where: { id: courseId },
+      where: { slug: courseId },
       select: { id: true, instructorId: true },
     }),
   ]);
@@ -42,7 +42,7 @@ export async function PATCH(
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   const updated = await db.course.update({
-    where: { id: courseId },
+    where: { id: course.id },
     data: parsed.data,
   });
 

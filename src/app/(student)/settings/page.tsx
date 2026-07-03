@@ -35,7 +35,7 @@ export default async function StudentSettingsPage() {
                 section: {
                   select: {
                     course: {
-                      select: { id: true, title: true },
+                      select: { id: true, slug: true, title: true },
                     },
                   },
                 },
@@ -147,7 +147,7 @@ export default async function StudentSettingsPage() {
                           {sub.assignment.title}
                         </p>
                         <Link
-                          href={`/courses/${course.id}`}
+                          href={`/courses/${course.slug}`}
                           className="text-xs text-brand hover:underline"
                         >
                           {course.title}

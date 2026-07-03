@@ -11,10 +11,11 @@ type Priority = "HIGH" | "MEDIUM" | "LOW";
 
 interface Recommendation {
   lessonId: string;
+  lessonSlug: string;
   reason: string;
   priority: Priority;
   lessonTitle: string;
-  courseId: string;
+  courseSlug: string;
   courseTitle: string;
 }
 
@@ -130,7 +131,7 @@ export function LearningPathClient() {
               </div>
 
               <Link
-                href={`/courses/${rec.courseId}/lessons/${rec.lessonId}`}
+                href={`/courses/${rec.courseSlug}/lessons/${rec.lessonSlug}`}
                 className="shrink-0 flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-dark transition-colors"
               >
                 Start Lesson <ArrowRight size={14} />

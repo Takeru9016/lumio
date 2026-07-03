@@ -14,6 +14,7 @@ import type { LessonType } from "@/generated/prisma/enums";
 
 export interface SidebarLesson {
   id: string;
+  slug: string;
   title: string;
   type: LessonType;
   isAiQuiz: boolean;
@@ -62,7 +63,7 @@ export function LessonSidebar({
             return (
               <Link
                 key={lesson.id}
-                href={`/courses/${courseId}/lessons/${lesson.id}`}
+                href={`/courses/${courseId}/lessons/${lesson.slug}`}
                 className={`flex items-start gap-2.5 px-4 py-2.5 text-xs leading-snug transition-colors ${
                   isCurrent
                     ? "bg-brand-light text-brand font-medium"

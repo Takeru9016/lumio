@@ -4,11 +4,11 @@ import { z } from "zod";
 import { embedLessonById } from "@/lib/ai/embeddings";
 import { db } from "@/lib/db";
 
-async function resolveLessonOwnership(courseId: string, lessonId: string, clerkId: string) {
+async function resolveLessonOwnership(courseSlug: string, lessonId: string, clerkId: string) {
   const [dbUser, course, lesson] = await Promise.all([
     db.user.findUnique({ where: { clerkId }, select: { id: true } }),
     db.course.findUnique({
-      where: { id: courseId },
+      where: { slug: courseSlug },
       select: { id: true, instructorId: true },
     }),
     db.lesson.findUnique({
@@ -51,7 +51,7 @@ export async function GET(
   if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== courseId) {
+  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== course.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -91,7 +91,7 @@ export async function PUT(
   if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== courseId) {
+  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== course.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -137,7 +137,7 @@ export async function DELETE(
   if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== courseId) {
+  if (!lesson || lesson.sectionId !== sectionId || lesson.section.courseId !== course.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

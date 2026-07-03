@@ -11,7 +11,7 @@ const bodySchema = z.object({
   maxScore: z.number().int().min(1).max(1000).default(100),
 });
 
-async function getInstructorLesson(clerkId: string, courseId: string, lessonId: string) {
+async function getInstructorLesson(clerkId: string, courseSlug: string, lessonId: string) {
   const dbUser = await db.user.findUnique({
     where: { clerkId },
     select: { id: true },
@@ -19,7 +19,7 @@ async function getInstructorLesson(clerkId: string, courseId: string, lessonId: 
   if (!dbUser) return null;
 
   const lesson = await db.lesson.findFirst({
-    where: { id: lessonId, section: { courseId } },
+    where: { id: lessonId, section: { course: { slug: courseSlug } } },
     select: {
       id: true,
       section: { select: { course: { select: { instructorId: true } } } },

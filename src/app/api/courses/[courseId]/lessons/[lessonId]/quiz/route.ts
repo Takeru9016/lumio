@@ -39,7 +39,7 @@ export async function GET(
   if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const lesson = await db.lesson.findFirst({
-    where: { id: lessonId, section: { courseId } },
+    where: { id: lessonId, section: { course: { slug: courseId } } },
     select: {
       id: true,
       section: { select: { course: { select: { instructorId: true } } } },
@@ -75,7 +75,7 @@ export async function POST(
   if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const lesson = await db.lesson.findFirst({
-    where: { id: lessonId, section: { courseId } },
+    where: { id: lessonId, section: { course: { slug: courseId } } },
     select: {
       id: true,
       section: { select: { course: { select: { instructorId: true } } } },

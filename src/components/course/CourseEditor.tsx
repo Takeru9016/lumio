@@ -197,13 +197,6 @@ export function CourseEditor({
     toast.success({ title: "Lesson unarchived" });
   }
 
-  function handleAiOutline() {
-    toast.info({
-      title: "Coming in Phase 4",
-      description: "AI outline will be available soon.",
-    });
-  }
-
   async function handlePublish() {
     setIsPublishing(true);
     setPublishErrors([]);
@@ -324,14 +317,6 @@ export function CourseEditor({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleAiOutline}
-              className="flex items-center gap-1.5 bg-ai text-white rounded-md px-3 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              ✦ AI Outline
-            </button>
-
             {canArchive && (
               <button
                 type="button"

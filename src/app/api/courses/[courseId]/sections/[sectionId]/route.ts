@@ -4,11 +4,11 @@ import { z } from "zod";
 
 import { db } from "@/lib/db";
 
-async function verifyOwnership(courseId: string, sectionId: string, clerkId: string) {
+async function verifyOwnership(courseSlug: string, sectionId: string, clerkId: string) {
   const [dbUser, course, section] = await Promise.all([
     db.user.findUnique({ where: { clerkId }, select: { id: true } }),
     db.course.findUnique({
-      where: { id: courseId },
+      where: { slug: courseSlug },
       select: { id: true, instructorId: true },
     }),
     db.section.findUnique({
@@ -37,7 +37,7 @@ export async function PUT(
   if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!section || section.courseId !== courseId)
+  if (!section || section.courseId !== course.id)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const body = await req.json();
@@ -66,7 +66,7 @@ export async function DELETE(
   if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!section || section.courseId !== courseId)
+  if (!section || section.courseId !== course.id)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await db.section.delete({ where: { id: sectionId } });

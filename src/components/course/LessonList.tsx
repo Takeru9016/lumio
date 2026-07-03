@@ -50,6 +50,7 @@ export interface LessonItem {
   videoDuration: number | null;
   muxPlaybackId?: string | null;
   textContent?: string | null;
+  description?: string | null;
   hasQuiz?: boolean;
   hasAssignment?: boolean;
 }

@@ -16,7 +16,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ course
   if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const course = await db.course.findUnique({
-    where: { id: courseId, instructorId: dbUser.id },
+    where: { slug: courseId, instructorId: dbUser.id },
     select: { id: true, status: true },
   });
 
@@ -27,7 +27,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ course
   }
 
   const updated = await db.course.update({
-    where: { id: courseId },
+    where: { id: course.id },
     data: { status: "ARCHIVED" },
     select: { id: true, status: true },
   });

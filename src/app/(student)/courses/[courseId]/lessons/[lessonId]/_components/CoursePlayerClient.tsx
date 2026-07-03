@@ -19,6 +19,7 @@ interface LessonData {
   id: string;
   title: string;
   type: LessonType;
+  description: string | null;
   muxPlaybackId: string | null;
   videoStatus: VideoStatus;
   textContent: string | null;
@@ -173,7 +174,12 @@ export function CoursePlayerClient({
         <div className="flex-1 min-w-0 overflow-y-auto">
           <div className="p-4 md:p-6 space-y-4">
             {/* Lesson title */}
-            <h1 className="text-xl font-bold text-text-primary">{lesson.title}</h1>
+            <div>
+              <h1 className="text-xl font-bold text-text-primary">{lesson.title}</h1>
+              {lesson.type === "VIDEO" && lesson.description && (
+                <p className="mt-1 text-sm text-text-muted">{lesson.description}</p>
+              )}
+            </div>
 
             {/* Video or text or quiz or assignment content */}
             {lesson.type === "VIDEO" ? (

@@ -25,42 +25,47 @@ export default async function LessonPage({
   });
   if (!dbUser) redirect("/sign-in");
 
-  const [enrollment, course, lesson] = await Promise.all([
-    db.enrollment.findUnique({
-      where: { userId_courseId: { userId: dbUser.id, courseId } },
-      select: { id: true },
-    }),
-    db.course.findUnique({
-      where: { id: courseId },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        sections: {
-          orderBy: { order: "asc" },
-          select: {
-            id: true,
-            title: true,
-            lessons: {
-              where: { isPublished: true, isArchived: false },
-              orderBy: { order: "asc" },
-              select: {
-                id: true,
-                title: true,
-                type: true,
-                quiz: { select: { isAiGenerated: true } },
-              },
+  const course = await db.course.findUnique({
+    where: { slug: courseId },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      sections: {
+        orderBy: { order: "asc" },
+        select: {
+          id: true,
+          title: true,
+          lessons: {
+            where: { isPublished: true, isArchived: false },
+            orderBy: { order: "asc" },
+            select: {
+              id: true,
+              slug: true,
+              title: true,
+              type: true,
+              quiz: { select: { isAiGenerated: true } },
             },
           },
         },
       },
+    },
+  });
+
+  if (!course) notFound();
+
+  const [enrollment, lesson] = await Promise.all([
+    db.enrollment.findUnique({
+      where: { userId_courseId: { userId: dbUser.id, courseId: course.id } },
+      select: { id: true },
     }),
     db.lesson.findFirst({
-      where: { id: lessonId, section: { courseId } },
+      where: { slug: lessonId, section: { courseId: course.id } },
       select: {
         id: true,
         title: true,
         type: true,
+        description: true,
         muxPlaybackId: true,
         videoStatus: true,
         textContent: true,
@@ -111,14 +116,14 @@ export default async function LessonPage({
     }),
   ]);
 
-  if (!course || course.status === "DRAFT") notFound();
+  if (course.status === "DRAFT") notFound();
   // Archived courses: only enrolled students may continue their lessons
   if (course.status === "ARCHIVED" && !enrollment) notFound();
   if (!lesson || !lesson.isPublished || lesson.isArchived) notFound();
   if (!enrollment) redirect(`/courses/${courseId}`);
 
   const allPublishedLessons = course.sections.flatMap((s) => s.lessons);
-  const lessonIndex = allPublishedLessons.findIndex((l) => l.id === lessonId);
+  const lessonIndex = allPublishedLessons.findIndex((l) => l.id === lesson.id);
 
   let initialAttempts: AttemptSummary[] = [];
   if (lesson.type === "QUIZ" && lesson.quiz) {
@@ -159,6 +164,7 @@ export default async function LessonPage({
       title: s.title,
       lessons: s.lessons.map((l) => ({
         id: l.id,
+        slug: l.slug,
         title: l.title,
         type: l.type,
         isAiQuiz: l.quiz?.isAiGenerated === true,
@@ -212,6 +218,7 @@ export default async function LessonPage({
         id: lesson.id,
         title: lesson.title,
         type: lesson.type,
+        description: lesson.description,
         muxPlaybackId: lesson.muxPlaybackId,
         videoStatus: lesson.videoStatus,
         textContent: lesson.textContent,

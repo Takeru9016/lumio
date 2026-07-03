@@ -26,7 +26,7 @@ export async function POST(
   }
 
   const course = await db.course.findUnique({
-    where: { id: courseId },
+    where: { slug: courseId },
     select: {
       id: true,
       title: true,
@@ -41,7 +41,7 @@ export async function POST(
   }
 
   const existing = await db.enrollment.findUnique({
-    where: { userId_courseId: { userId: user.id, courseId } },
+    where: { userId_courseId: { userId: user.id, courseId: course.id } },
   });
 
   if (existing) {
@@ -88,7 +88,7 @@ export async function POST(
   }
 
   const enrollment = await db.enrollment.create({
-    data: { userId: user.id, courseId },
+    data: { userId: user.id, courseId: course.id },
     select: {
       id: true,
       status: true,

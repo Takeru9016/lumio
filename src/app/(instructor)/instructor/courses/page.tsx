@@ -40,6 +40,7 @@ export default async function InstructorCoursesPage() {
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
+      slug: true,
       title: true,
       thumbnailUrl: true,
       status: true,
@@ -122,7 +123,7 @@ export default async function InstructorCoursesPage() {
                 </div>
 
                 <Link
-                  href={`/courses/${course.id}/edit`}
+                  href={`/courses/${course.slug}/edit`}
                   className="shrink-0 flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-dark transition-colors"
                 >
                   <Pencil size={13} />

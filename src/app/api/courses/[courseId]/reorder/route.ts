@@ -21,7 +21,7 @@ export async function POST(
   const [dbUser, course] = await Promise.all([
     db.user.findUnique({ where: { clerkId: userId }, select: { id: true } }),
     db.course.findUnique({
-      where: { id: courseId },
+      where: { slug: courseId },
       select: { id: true, instructorId: true },
     }),
   ]);
@@ -41,7 +41,7 @@ export async function POST(
     items.map((item) =>
       type === "section"
         ? db.section.update({
-            where: { id: item.id, courseId },
+            where: { id: item.id, courseId: course.id },
             data: { order: item.order },
           })
         : db.lesson.update({

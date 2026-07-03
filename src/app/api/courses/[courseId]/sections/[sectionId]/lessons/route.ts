@@ -3,12 +3,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import type { LessonType } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import { generateUniqueLessonSlug } from "@/lib/slug";
 
-async function resolveSectionOwnership(courseId: string, sectionId: string, clerkId: string) {
+async function resolveSectionOwnership(courseSlug: string, sectionId: string, clerkId: string) {
   const [dbUser, course, section] = await Promise.all([
     db.user.findUnique({ where: { clerkId }, select: { id: true } }),
     db.course.findUnique({
-      where: { id: courseId },
+      where: { slug: courseSlug },
       select: { id: true, instructorId: true },
     }),
     db.section.findUnique({
@@ -28,8 +29,11 @@ export async function GET(
 
   const { courseId, sectionId } = await params;
 
+  const course = await db.course.findUnique({ where: { slug: courseId }, select: { id: true } });
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const section = await db.section.findUnique({
-    where: { id: sectionId, courseId },
+    where: { id: sectionId, courseId: course.id },
     include: { lessons: { orderBy: { order: "asc" } } },
   });
 
@@ -57,18 +61,22 @@ export async function POST(
   if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (course.instructorId !== dbUser.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!section || section.courseId !== courseId)
+  if (!section || section.courseId !== course.id)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const body = await req.json();
   const parsed = createLessonSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const count = await db.lesson.count({ where: { sectionId } });
+  const [count, slug] = await Promise.all([
+    db.lesson.count({ where: { sectionId } }),
+    generateUniqueLessonSlug(parsed.data.title, course.id),
+  ]);
 
   const lesson = await db.lesson.create({
     data: {
       title: parsed.data.title,
+      slug,
       type: parsed.data.type as LessonType,
       order: count + 1,
       sectionId,

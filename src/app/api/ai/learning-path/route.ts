@@ -134,8 +134,9 @@ export async function POST(req: Request) {
         take: MAX_CANDIDATE_LESSONS,
         select: {
           id: true,
+          slug: true,
           title: true,
-          section: { select: { course: { select: { id: true, title: true } } } },
+          section: { select: { course: { select: { id: true, slug: true, title: true } } } },
         },
       }),
     ]);
@@ -234,7 +235,8 @@ export async function POST(req: Request) {
     return {
       ...r,
       lessonTitle: lesson?.title ?? "",
-      courseId: lesson?.section.course.id ?? "",
+      lessonSlug: lesson?.slug ?? "",
+      courseSlug: lesson?.section.course.slug ?? "",
       courseTitle: lesson?.section.course.title ?? "",
     };
   });

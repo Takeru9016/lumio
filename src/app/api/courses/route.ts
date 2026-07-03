@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import type { CourseStatus } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import { generateUniqueCourseSlug } from "@/lib/slug";
 
 const VALID_STATUSES: CourseStatus[] = ["DRAFT", "PUBLISHED", "ARCHIVED"];
 
@@ -37,6 +38,7 @@ export async function GET(req: NextRequest) {
       where,
       select: {
         id: true,
+        slug: true,
         title: true,
         description: true,
         thumbnailUrl: true,
@@ -79,6 +81,7 @@ export async function GET(req: NextRequest) {
     );
     return {
       id: course.id,
+      slug: course.slug,
       title: course.title,
       description: course.description,
       thumbnailUrl: course.thumbnailUrl,
@@ -137,10 +140,12 @@ export async function POST(req: NextRequest) {
   }
 
   const { title, description, thumbnailUrl, category, level, price, currency } = parsed.data;
+  const slug = await generateUniqueCourseSlug(title);
 
   const course = await db.course.create({
     data: {
       title,
+      slug,
       description,
       thumbnailUrl,
       category,

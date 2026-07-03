@@ -4,11 +4,11 @@ import { z } from "zod";
 
 import { db } from "@/lib/db";
 
-async function getCourseAndUser(courseId: string, clerkId: string) {
+async function getCourseAndUser(courseSlug: string, clerkId: string) {
   const [dbUser, course] = await Promise.all([
     db.user.findUnique({ where: { clerkId }, select: { id: true } }),
     db.course.findUnique({
-      where: { id: courseId },
+      where: { slug: courseSlug },
       select: { id: true, instructorId: true },
     }),
   ]);
@@ -25,7 +25,7 @@ export async function GET(
   const { courseId } = await params;
 
   const course = await db.course.findUnique({
-    where: { id: courseId },
+    where: { slug: courseId },
     select: {
       sections: {
         orderBy: { order: "asc" },
@@ -64,13 +64,13 @@ export async function POST(
   const parsed = createSectionSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const count = await db.section.count({ where: { courseId } });
+  const count = await db.section.count({ where: { courseId: course.id } });
 
   const section = await db.section.create({
     data: {
       title: parsed.data.title,
       order: count + 1,
-      courseId,
+      courseId: course.id,
     },
   });
 

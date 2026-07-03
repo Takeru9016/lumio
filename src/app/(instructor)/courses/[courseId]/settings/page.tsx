@@ -23,9 +23,10 @@ export default async function CourseSettingsPage({ params }: CourseSettingsPageP
   if (!dbUser) redirect("/sign-in");
 
   const course = await db.course.findUnique({
-    where: { id: courseId, instructorId: dbUser.id },
+    where: { slug: courseId, instructorId: dbUser.id },
     select: {
       id: true,
+      slug: true,
       title: true,
       description: true,
       thumbnailUrl: true,
@@ -53,7 +54,7 @@ export default async function CourseSettingsPage({ params }: CourseSettingsPageP
       </div>
 
       <div className="bg-white rounded-xl border border-border p-6">
-        <CourseSettingsForm courseId={course.id} initialData={course} />
+        <CourseSettingsForm courseId={course.slug} initialData={course} />
       </div>
     </div>
   );

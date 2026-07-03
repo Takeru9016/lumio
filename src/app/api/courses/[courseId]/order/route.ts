@@ -25,7 +25,7 @@ export async function POST(
   }
 
   const course = await db.course.findUnique({
-    where: { id: courseId },
+    where: { slug: courseId },
     select: {
       id: true,
       title: true,
@@ -44,14 +44,14 @@ export async function POST(
   }
 
   const existing = await db.enrollment.findUnique({
-    where: { userId_courseId: { userId: user.id, courseId } },
+    where: { userId_courseId: { userId: user.id, courseId: course.id } },
   });
 
   if (existing) {
     return Response.json({ error: "Already enrolled" }, { status: 409 });
   }
 
-  const receipt = `c_${courseId}_${user.id}`.slice(0, 40);
+  const receipt = `c_${course.id}_${user.id}`.slice(0, 40);
   const order = await razorpay.orders.create({
     amount: Math.round(course.price * 100),
     currency: course.currency,

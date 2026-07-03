@@ -38,6 +38,7 @@ export type LessonSumAggregateOutputType = {
 
 export type LessonMinAggregateOutputType = {
   id: string | null
+  slug: string | null
   title: string | null
   description: string | null
   type: $Enums.LessonType | null
@@ -58,6 +59,7 @@ export type LessonMinAggregateOutputType = {
 
 export type LessonMaxAggregateOutputType = {
   id: string | null
+  slug: string | null
   title: string | null
   description: string | null
   type: $Enums.LessonType | null
@@ -78,6 +80,7 @@ export type LessonMaxAggregateOutputType = {
 
 export type LessonCountAggregateOutputType = {
   id: number
+  slug: number
   title: number
   description: number
   type: number
@@ -110,6 +113,7 @@ export type LessonSumAggregateInputType = {
 
 export type LessonMinAggregateInputType = {
   id?: true
+  slug?: true
   title?: true
   description?: true
   type?: true
@@ -130,6 +134,7 @@ export type LessonMinAggregateInputType = {
 
 export type LessonMaxAggregateInputType = {
   id?: true
+  slug?: true
   title?: true
   description?: true
   type?: true
@@ -150,6 +155,7 @@ export type LessonMaxAggregateInputType = {
 
 export type LessonCountAggregateInputType = {
   id?: true
+  slug?: true
   title?: true
   description?: true
   type?: true
@@ -257,6 +263,7 @@ export type LessonGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 
 export type LessonGroupByOutputType = {
   id: string
+  slug: string
   title: string
   description: string | null
   type: $Enums.LessonType
@@ -300,6 +307,7 @@ export type LessonWhereInput = {
   OR?: Prisma.LessonWhereInput[]
   NOT?: Prisma.LessonWhereInput | Prisma.LessonWhereInput[]
   id?: Prisma.StringFilter<"Lesson"> | string
+  slug?: Prisma.StringFilter<"Lesson"> | string
   title?: Prisma.StringFilter<"Lesson"> | string
   description?: Prisma.StringNullableFilter<"Lesson"> | string | null
   type?: Prisma.EnumLessonTypeFilter<"Lesson"> | $Enums.LessonType
@@ -325,6 +333,7 @@ export type LessonWhereInput = {
 
 export type LessonOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -350,9 +359,11 @@ export type LessonOrderByWithRelationInput = {
 
 export type LessonWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  sectionId_slug?: Prisma.LessonSectionIdSlugCompoundUniqueInput
   AND?: Prisma.LessonWhereInput | Prisma.LessonWhereInput[]
   OR?: Prisma.LessonWhereInput[]
   NOT?: Prisma.LessonWhereInput | Prisma.LessonWhereInput[]
+  slug?: Prisma.StringFilter<"Lesson"> | string
   title?: Prisma.StringFilter<"Lesson"> | string
   description?: Prisma.StringNullableFilter<"Lesson"> | string | null
   type?: Prisma.EnumLessonTypeFilter<"Lesson"> | $Enums.LessonType
@@ -374,10 +385,11 @@ export type LessonWhereUniqueInput = Prisma.AtLeast<{
   quiz?: Prisma.XOR<Prisma.QuizNullableScalarRelationFilter, Prisma.QuizWhereInput> | null
   assignment?: Prisma.XOR<Prisma.AssignmentNullableScalarRelationFilter, Prisma.AssignmentWhereInput> | null
   aiChats?: Prisma.AIChatListRelationFilter
-}, "id">
+}, "id" | "sectionId_slug">
 
 export type LessonOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -406,6 +418,7 @@ export type LessonScalarWhereWithAggregatesInput = {
   OR?: Prisma.LessonScalarWhereWithAggregatesInput[]
   NOT?: Prisma.LessonScalarWhereWithAggregatesInput | Prisma.LessonScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Lesson"> | string
+  slug?: Prisma.StringWithAggregatesFilter<"Lesson"> | string
   title?: Prisma.StringWithAggregatesFilter<"Lesson"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Lesson"> | string | null
   type?: Prisma.EnumLessonTypeWithAggregatesFilter<"Lesson"> | $Enums.LessonType
@@ -426,6 +439,7 @@ export type LessonScalarWhereWithAggregatesInput = {
 
 export type LessonCreateInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -450,6 +464,7 @@ export type LessonCreateInput = {
 
 export type LessonUncheckedCreateInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -474,6 +489,7 @@ export type LessonUncheckedCreateInput = {
 
 export type LessonUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -498,6 +514,7 @@ export type LessonUpdateInput = {
 
 export type LessonUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -522,6 +539,7 @@ export type LessonUncheckedUpdateInput = {
 
 export type LessonCreateManyInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -542,6 +560,7 @@ export type LessonCreateManyInput = {
 
 export type LessonUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -561,6 +580,7 @@ export type LessonUpdateManyMutationInput = {
 
 export type LessonUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -589,8 +609,14 @@ export type LessonOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type LessonSectionIdSlugCompoundUniqueInput = {
+  sectionId: string
+  slug: string
+}
+
 export type LessonCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -616,6 +642,7 @@ export type LessonAvgOrderByAggregateInput = {
 
 export type LessonMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -636,6 +663,7 @@ export type LessonMaxOrderByAggregateInput = {
 
 export type LessonMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -787,6 +815,7 @@ export type LessonUpdateOneWithoutAiChatsNestedInput = {
 
 export type LessonCreateWithoutSectionInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -810,6 +839,7 @@ export type LessonCreateWithoutSectionInput = {
 
 export type LessonUncheckedCreateWithoutSectionInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -862,6 +892,7 @@ export type LessonScalarWhereInput = {
   OR?: Prisma.LessonScalarWhereInput[]
   NOT?: Prisma.LessonScalarWhereInput | Prisma.LessonScalarWhereInput[]
   id?: Prisma.StringFilter<"Lesson"> | string
+  slug?: Prisma.StringFilter<"Lesson"> | string
   title?: Prisma.StringFilter<"Lesson"> | string
   description?: Prisma.StringNullableFilter<"Lesson"> | string | null
   type?: Prisma.EnumLessonTypeFilter<"Lesson"> | $Enums.LessonType
@@ -882,6 +913,7 @@ export type LessonScalarWhereInput = {
 
 export type LessonCreateWithoutProgressInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -905,6 +937,7 @@ export type LessonCreateWithoutProgressInput = {
 
 export type LessonUncheckedCreateWithoutProgressInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -944,6 +977,7 @@ export type LessonUpdateToOneWithWhereWithoutProgressInput = {
 
 export type LessonUpdateWithoutProgressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -967,6 +1001,7 @@ export type LessonUpdateWithoutProgressInput = {
 
 export type LessonUncheckedUpdateWithoutProgressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -990,6 +1025,7 @@ export type LessonUncheckedUpdateWithoutProgressInput = {
 
 export type LessonCreateWithoutQuizInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -1013,6 +1049,7 @@ export type LessonCreateWithoutQuizInput = {
 
 export type LessonUncheckedCreateWithoutQuizInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -1052,6 +1089,7 @@ export type LessonUpdateToOneWithWhereWithoutQuizInput = {
 
 export type LessonUpdateWithoutQuizInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1075,6 +1113,7 @@ export type LessonUpdateWithoutQuizInput = {
 
 export type LessonUncheckedUpdateWithoutQuizInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1098,6 +1137,7 @@ export type LessonUncheckedUpdateWithoutQuizInput = {
 
 export type LessonCreateWithoutAssignmentInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -1121,6 +1161,7 @@ export type LessonCreateWithoutAssignmentInput = {
 
 export type LessonUncheckedCreateWithoutAssignmentInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -1160,6 +1201,7 @@ export type LessonUpdateToOneWithWhereWithoutAssignmentInput = {
 
 export type LessonUpdateWithoutAssignmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1183,6 +1225,7 @@ export type LessonUpdateWithoutAssignmentInput = {
 
 export type LessonUncheckedUpdateWithoutAssignmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1206,6 +1249,7 @@ export type LessonUncheckedUpdateWithoutAssignmentInput = {
 
 export type LessonCreateWithoutAiChatsInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -1229,6 +1273,7 @@ export type LessonCreateWithoutAiChatsInput = {
 
 export type LessonUncheckedCreateWithoutAiChatsInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -1268,6 +1313,7 @@ export type LessonUpdateToOneWithWhereWithoutAiChatsInput = {
 
 export type LessonUpdateWithoutAiChatsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1291,6 +1337,7 @@ export type LessonUpdateWithoutAiChatsInput = {
 
 export type LessonUncheckedUpdateWithoutAiChatsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1314,6 +1361,7 @@ export type LessonUncheckedUpdateWithoutAiChatsInput = {
 
 export type LessonCreateManySectionInput = {
   id?: string
+  slug: string
   title: string
   description?: string | null
   type?: $Enums.LessonType
@@ -1333,6 +1381,7 @@ export type LessonCreateManySectionInput = {
 
 export type LessonUpdateWithoutSectionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1356,6 +1405,7 @@ export type LessonUpdateWithoutSectionInput = {
 
 export type LessonUncheckedUpdateWithoutSectionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1379,6 +1429,7 @@ export type LessonUncheckedUpdateWithoutSectionInput = {
 
 export type LessonUncheckedUpdateManyWithoutSectionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
@@ -1438,6 +1489,7 @@ export type LessonCountOutputTypeCountAiChatsArgs<ExtArgs extends runtime.Types.
 
 export type LessonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  slug?: boolean
   title?: boolean
   description?: boolean
   type?: boolean
@@ -1464,6 +1516,7 @@ export type LessonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 
 export type LessonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  slug?: boolean
   title?: boolean
   description?: boolean
   type?: boolean
@@ -1485,6 +1538,7 @@ export type LessonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
 
 export type LessonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  slug?: boolean
   title?: boolean
   description?: boolean
   type?: boolean
@@ -1506,6 +1560,7 @@ export type LessonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 
 export type LessonSelectScalar = {
   id?: boolean
+  slug?: boolean
   title?: boolean
   description?: boolean
   type?: boolean
@@ -1524,7 +1579,7 @@ export type LessonSelectScalar = {
   updatedAt?: boolean
 }
 
-export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "type" | "order" | "isPublished" | "isFree" | "muxAssetId" | "muxPlaybackId" | "videoStatus" | "videoDuration" | "textContent" | "isArchived" | "sectionId" | "aiSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>
+export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "description" | "type" | "order" | "isPublished" | "isFree" | "muxAssetId" | "muxPlaybackId" | "videoStatus" | "videoDuration" | "textContent" | "isArchived" | "sectionId" | "aiSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>
 export type LessonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   section?: boolean | Prisma.SectionDefaultArgs<ExtArgs>
   progress?: boolean | Prisma.Lesson$progressArgs<ExtArgs>
@@ -1551,6 +1606,7 @@ export type $LessonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    slug: string
     title: string
     description: string | null
     type: $Enums.LessonType
@@ -1996,6 +2052,7 @@ export interface Prisma__LessonClient<T, Null = never, ExtArgs extends runtime.T
  */
 export interface LessonFieldRefs {
   readonly id: Prisma.FieldRef<"Lesson", 'String'>
+  readonly slug: Prisma.FieldRef<"Lesson", 'String'>
   readonly title: Prisma.FieldRef<"Lesson", 'String'>
   readonly description: Prisma.FieldRef<"Lesson", 'String'>
   readonly type: Prisma.FieldRef<"Lesson", 'LessonType'>
