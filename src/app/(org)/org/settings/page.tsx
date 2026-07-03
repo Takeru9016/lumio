@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { ChevronRight, CreditCard, Palette } from "lucide-react";
+import { ChevronRight, CreditCard, KeyRound, Palette } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -104,6 +104,30 @@ export default async function OrgSettingsPage() {
           </div>
         </div>
         <ChevronRight size={18} className="text-text-muted" />
+      </Link>
+
+      {/* SSO link */}
+      <Link
+        href="/org/settings/sso"
+        className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-1 p-5 transition-colors hover:bg-surface-2"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-light text-[var(--color-brand)]">
+            <KeyRound size={18} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-text-primary">Single Sign-On</p>
+            <p className="text-xs text-text-muted">Configure SAML SSO for your organisation.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {tenant.plan !== "ENTERPRISE" && (
+            <span className="rounded-full bg-brand-light px-2.5 py-1 text-xs font-semibold text-[var(--color-brand-dark)]">
+              Enterprise
+            </span>
+          )}
+          <ChevronRight size={18} className="text-text-muted" />
+        </div>
       </Link>
     </div>
   );
