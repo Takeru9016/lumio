@@ -307,13 +307,6 @@ export function CourseEditor({
             >
               Settings
             </button>
-            <button
-              type="button"
-              onClick={() => router.push(`/courses/${courseId}/analytics`)}
-              className="text-sm text-text-muted hover:text-text-primary transition-colors"
-            >
-              Analytics →
-            </button>
           </div>
 
           <div className="flex items-center gap-2">

@@ -36,11 +36,6 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Settings", href: "/settings", icon: Settings },
   ],
   INSTRUCTOR: [
-    {
-      label: "Dashboard",
-      href: "/instructor/dashboard",
-      icon: LayoutDashboard,
-    },
     { label: "My Courses", href: "/instructor/courses", icon: BookOpen },
     { label: "Students", href: "/instructor/students", icon: Users },
     { label: "Earnings", href: "/instructor/earnings", icon: DollarSign },

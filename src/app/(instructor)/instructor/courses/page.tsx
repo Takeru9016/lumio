@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { Pencil, Plus } from "lucide-react";
+import { BarChart2, Pencil, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -122,13 +122,22 @@ export default async function InstructorCoursesPage() {
                   </p>
                 </div>
 
-                <Link
-                  href={`/courses/${course.slug}/edit`}
-                  className="shrink-0 flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-dark transition-colors"
-                >
-                  <Pencil size={13} />
-                  Edit
-                </Link>
+                <div className="shrink-0 flex items-center gap-4">
+                  <Link
+                    href={`/courses/${course.slug}/analytics`}
+                    className="flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    <BarChart2 size={13} />
+                    Analytics
+                  </Link>
+                  <Link
+                    href={`/courses/${course.slug}/edit`}
+                    className="flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-dark transition-colors"
+                  >
+                    <Pencil size={13} />
+                    Edit
+                  </Link>
+                </div>
               </div>
             );
           })}
