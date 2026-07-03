@@ -1,14 +1,22 @@
 import { auth } from "@clerk/nextjs/server";
-import { BarChart2, Pencil, Plus } from "lucide-react";
+import { BarChart2, Pencil } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { EmptyState } from "@/components";
+import { CreateCourseButton, EmptyState } from "@/components";
+import { PLAN_LIMITS } from "@/constants/plans";
 
 import type { CourseStatus } from "@/generated/prisma/enums";
 
 import { db } from "@/lib/db";
+
+const PLAN_NAME: Record<string, string> = {
+  FREE: "Free",
+  STARTER: "Starter",
+  PRO: "Pro",
+  ENTERPRISE: "Enterprise",
+};
 
 const STATUS_BADGE: Record<CourseStatus, { label: string; className: string }> = {
   DRAFT: {
@@ -31,7 +39,7 @@ export default async function InstructorCoursesPage() {
 
   const dbUser = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true },
+    select: { id: true, plan: true },
   });
   if (!dbUser) redirect("/sign-in");
 
@@ -54,6 +62,9 @@ export default async function InstructorCoursesPage() {
     },
   });
 
+  const maxCourses = PLAN_LIMITS[dbUser.plan].maxCourses;
+  const atCourseLimit = courses.length >= maxCourses;
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -61,13 +72,11 @@ export default async function InstructorCoursesPage() {
           <h1 className="text-2xl font-bold text-text-primary">My Courses</h1>
           <p className="text-sm text-text-muted mt-1">Manage and publish your courses.</p>
         </div>
-        <Link
-          href="/courses/new"
-          className="flex items-center gap-2 bg-brand text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-brand-dark transition-colors"
-        >
-          <Plus size={15} />
-          New Course
-        </Link>
+        <CreateCourseButton
+          disabled={atCourseLimit}
+          planName={PLAN_NAME[dbUser.plan] ?? dbUser.plan}
+          label="New Course"
+        />
       </div>
 
       {courses.length === 0 ? (

@@ -7,9 +7,18 @@ import { BillingSettings } from "@/components/billing/BillingSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/lib/db";
 
-export default async function StudentSettingsPage() {
+interface StudentSettingsPageProps {
+  searchParams: Promise<{ tab?: string }>;
+}
+
+const VALID_TABS = ["profile", "plan", "assignments", "certificates"] as const;
+
+export default async function StudentSettingsPage({ searchParams }: StudentSettingsPageProps) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
+
+  const { tab } = await searchParams;
+  const defaultTab = VALID_TABS.includes(tab as (typeof VALID_TABS)[number]) ? tab : "assignments";
 
   const dbUser = await db.user.findUnique({
     where: { clerkId: userId },
@@ -76,7 +85,7 @@ export default async function StudentSettingsPage() {
         <p className="text-sm text-text-muted">Manage your account and view your grades.</p>
       </div>
 
-      <Tabs defaultValue="assignments">
+      <Tabs defaultValue={defaultTab}>
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="plan">Plan</TabsTrigger>

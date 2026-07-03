@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { AiTutorChat, VideoPlayer } from "@/components";
 import type { LessonType, VideoStatus } from "@/generated/prisma/enums";
+import { usePlan } from "@/hooks/usePlan";
 import { LessonSidebar, type SidebarSection } from "./LessonSidebar";
 import { NotesTab } from "./NotesTab";
 import { StudentAssignment, type StudentAssignmentData } from "./StudentAssignment";
@@ -87,6 +88,8 @@ export function CoursePlayerClient({
   const [completedIds, setCompletedIds] = useState<Set<string>>(() => new Set(initialCompletedIds));
   const [activeTab, setActiveTab] = useState<Tab>("notes");
   const hasPostedRef = useRef(false);
+  const { canUseAI, aiCallsRemaining } = usePlan();
+  const canSendAI = canUseAI && aiCallsRemaining > 0;
 
   const completedCount = completedIds.size;
   const progress = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
@@ -241,27 +244,35 @@ export function CoursePlayerClient({
             {/* Tabs */}
             <div className="bg-surface-1 border border-border rounded-lg overflow-hidden">
               <div className="flex border-b border-border">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-3 text-sm font-medium transition-colors relative ${
-                      activeTab === tab.id
-                        ? "text-brand"
-                        : "text-text-muted hover:text-text-primary"
-                    }`}
-                  >
-                    {tab.id === "ai-tutor" ? (
-                      <span className="flex items-center gap-1">✦ AI Tutor</span>
-                    ) : (
-                      tab.label
-                    )}
-                    {activeTab === tab.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
-                    )}
-                  </button>
-                ))}
+                {TABS.map((tab) => {
+                  const isAiTutorLocked = tab.id === "ai-tutor" && !canSendAI;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      disabled={isAiTutorLocked}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-4 py-3 text-sm font-medium transition-colors relative ${
+                        isAiTutorLocked
+                          ? "text-text-disabled cursor-not-allowed"
+                          : activeTab === tab.id
+                            ? "text-brand"
+                            : "text-text-muted hover:text-text-primary"
+                      }`}
+                    >
+                      {tab.id === "ai-tutor" ? (
+                        <span className="flex items-center gap-1">
+                          ✦ {isAiTutorLocked ? "Upgrade for more AI" : "AI Tutor"}
+                        </span>
+                      ) : (
+                        tab.label
+                      )}
+                      {activeTab === tab.id && !isAiTutorLocked && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="p-4">

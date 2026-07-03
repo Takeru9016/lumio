@@ -1,8 +1,11 @@
 export { AiTutorChat } from "./ai/AiTutorChat";
+export { EnterpriseGateOverlay } from "./billing/EnterpriseGateOverlay";
+export { UpgradeModal } from "./billing/UpgradeModal";
 export { AssignmentBuilder } from "./course/AssignmentBuilder";
 export { CourseCard } from "./course/CourseCard";
 export { CourseEditor } from "./course/CourseEditor";
 export { CourseSettingsForm } from "./course/CourseSettingsForm";
+export { CreateCourseButton } from "./course/CreateCourseButton";
 export { EnrollmentChart } from "./course/EnrollmentChart";
 export { InlineInput } from "./course/InlineInput";
 export { LessonEditor } from "./course/LessonEditor";

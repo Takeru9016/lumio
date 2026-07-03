@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import { PLAN_LIMITS } from "@/constants/plans";
 import type { CourseStatus } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { generateUniqueCourseSlug } from "@/lib/slug";
@@ -126,11 +127,22 @@ export async function POST(req: NextRequest) {
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true, role: true },
+    select: { id: true, role: true, plan: true },
   });
 
   if (!user || user.role !== "INSTRUCTOR") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const maxCourses = PLAN_LIMITS[user.plan].maxCourses;
+  if (maxCourses !== Infinity) {
+    const courseCount = await db.course.count({ where: { instructorId: user.id } });
+    if (courseCount >= maxCourses) {
+      return Response.json(
+        { error: "Course limit reached for your plan", upgradeRequired: true },
+        { status: 403 }
+      );
+    }
   }
 
   const body = await req.json();

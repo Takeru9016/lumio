@@ -53,6 +53,7 @@ export function TeamsClient({ initialTeams, seatCount, seatLimit }: TeamsClientP
   const [removeTarget, setRemoveTarget] = useState<{ userId: string; name: string } | null>(null);
 
   const isSeatLimitReached = seatCount >= seatLimit;
+  const isSeatLimitNearFull = !isSeatLimitReached && seatLimit > 0 && seatCount / seatLimit > 0.8;
   const detailTeam = initialTeams.find((t) => t.id === detailTeamId) ?? null;
 
   async function handleCreateTeam() {
@@ -114,7 +115,20 @@ export function TeamsClient({ initialTeams, seatCount, seatLimit }: TeamsClientP
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <div>
+          {isSeatLimitReached ? (
+            <span className="inline-flex items-center rounded-full bg-(--color-danger-bg) px-2.5 py-0.5 text-xs font-medium text-(--color-danger)">
+              Seats full ({seatCount}/{seatLimit})
+            </span>
+          ) : (
+            isSeatLimitNearFull && (
+              <span className="inline-flex items-center rounded-full bg-(--color-warning-bg) px-2.5 py-0.5 text-xs font-medium text-(--color-warning)">
+                {seatCount}/{seatLimit} seats used
+              </span>
+            )
+          )}
+        </div>
         <button
           type="button"
           onClick={() => setCreateOpen(true)}

@@ -5,7 +5,11 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { SendHorizonal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { AiBadge } from "@/components";
+import { AiBadge, UpgradeModal } from "@/components";
+import { usePlan } from "@/hooks/usePlan";
+import type { Plan } from "@/types";
+
+const PLAN_ORDER: Plan[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
 
 interface AiTutorChatProps {
   lessonId?: string;
@@ -32,7 +36,11 @@ export function AiTutorChat({
   className = "",
 }: AiTutorChatProps) {
   const [input, setInput] = useState("");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { plan, canUseAI, aiCallsRemaining } = usePlan();
+  const canSendAI = canUseAI && aiCallsRemaining > 0;
+  const nextPlan = PLAN_ORDER[Math.min(PLAN_ORDER.indexOf(plan) + 1, PLAN_ORDER.length - 1)];
 
   const { messages, sendMessage, status, error } = useChat({
     id: chatId,
@@ -57,19 +65,36 @@ export function AiTutorChat({
   function submit() {
     const text = input.trim();
     if (!text || isBusy) return;
+    if (!canSendAI) {
+      setShowUpgradeModal(true);
+      return;
+    }
     void sendMessage({ text });
     setInput("");
   }
 
   return (
     <div className={`flex flex-col ${className}`}>
+      {showUpgradeModal && (
+        <UpgradeModal
+          feature="AI tutor call"
+          requiredPlan={nextPlan}
+          onClose={() => setShowUpgradeModal(false)}
+        />
+      )}
+
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-border pb-3">
-        <span className="text-lg text-ai" aria-hidden>
-          ✦
-        </span>
-        <span className="text-sm font-semibold text-text-primary">AI Tutor</span>
-        <AiBadge label="AI Tutor" />
+      <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-lg text-ai" aria-hidden>
+            ✦
+          </span>
+          <span className="text-sm font-semibold text-text-primary">AI Tutor</span>
+          <AiBadge label="AI Tutor" />
+        </div>
+        {aiCallsRemaining !== Infinity && (
+          <span className="text-xs text-text-muted">{aiCallsRemaining} calls left</span>
+        )}
       </div>
 
       {/* Messages */}
