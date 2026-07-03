@@ -12,6 +12,7 @@ export { TextEditor } from "./course/TextEditor";
 export { VideoPlayer } from "./course/VideoPlayer";
 export { Sidebar } from "./layout/Sidebar";
 export { TopNav } from "./layout/TopNav";
+export { SendNudgeButton } from "./org/SendNudgeButton";
 export { AiBadge } from "./shared/AiBadge";
 export { EmptyState } from "./shared/EmptyState";
 export { GooeyToaster } from "./shared/GooeyToaster";
