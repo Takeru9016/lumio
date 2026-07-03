@@ -3,12 +3,12 @@ import type { Role } from "@/generated/prisma/enums";
 export function getRoleDashboard(role: Role): string {
   switch (role) {
     case "STUDENT":
-      return "/courses";
+      return "/dashboard";
     case "INSTRUCTOR":
       return "/instructor/courses";
     case "ORG_ADMIN":
-      return "/courses";
+      return "/reports";
     case "SUPER_ADMIN":
-      return "/courses";
+      return "/";
   }
 }

@@ -27,11 +27,11 @@ import type { NavItem } from "@/types";
 
 const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
   STUDENT: [
-    { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
+    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "My Courses", href: "/courses", icon: BookOpen },
-    { label: "Learning Path", href: "/student/learning-path", icon: MapIcon },
-    { label: "AI Tutor", href: "/student/ai-tutor", icon: Sparkles },
-    { label: "Assignments", href: "/student/assignments", icon: ClipboardList },
+    { label: "Learning Path", href: "/learning-path", icon: MapIcon },
+    { label: "AI Tutor", href: "/ai-tutor", icon: Sparkles },
+    { label: "Assignments", href: "/assignments", icon: ClipboardList },
     { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
     { label: "Settings", href: "/settings", icon: Settings },
   ],
@@ -49,7 +49,7 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Overview", href: "/org/dashboard", icon: LayoutDashboard },
     { label: "Teams", href: "/org/teams", icon: Users2 },
     { label: "Courses", href: "/org/courses", icon: BookOpen },
-    { label: "Reports", href: "/org/reports", icon: BarChart2 },
+    { label: "Reports", href: "/reports", icon: BarChart2 },
     { label: "Settings", href: "/org/settings", icon: Settings },
   ],
   SUPER_ADMIN: [
