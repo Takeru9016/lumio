@@ -8,7 +8,6 @@ import {
   ChevronRight,
   ClipboardList,
   CreditCard,
-  DollarSign,
   Globe,
   LayoutDashboard,
   Map as MapIcon,
@@ -38,7 +37,6 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
   INSTRUCTOR: [
     { label: "My Courses", href: "/instructor/courses", icon: BookOpen },
     { label: "Students", href: "/instructor/students", icon: Users },
-    { label: "Earnings", href: "/instructor/earnings", icon: DollarSign },
   ],
   ORG_ADMIN: [
     { label: "Overview", href: "/org/dashboard", icon: LayoutDashboard },
