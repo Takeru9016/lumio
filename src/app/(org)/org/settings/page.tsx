@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { ChevronRight, CreditCard } from "lucide-react";
+import { ChevronRight, CreditCard, Palette } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -84,6 +84,23 @@ export default async function OrgSettingsPage() {
           <div>
             <p className="text-sm font-semibold text-text-primary">Billing & Plan</p>
             <p className="text-xs text-text-muted">Manage your plan, seats, and subscription.</p>
+          </div>
+        </div>
+        <ChevronRight size={18} className="text-text-muted" />
+      </Link>
+
+      {/* Branding link */}
+      <Link
+        href="/org/settings/branding"
+        className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-1 p-5 transition-colors hover:bg-surface-2"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-light text-[var(--color-brand)]">
+            <Palette size={18} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-text-primary">Branding</p>
+            <p className="text-xs text-text-muted">Customise your logo and brand colour.</p>
           </div>
         </div>
         <ChevronRight size={18} className="text-text-muted" />

@@ -19,6 +19,18 @@ async function getInstructor() {
   return userId;
 }
 
+async function getOrgAdmin() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  const user = await db.user.findUnique({
+    where: { clerkId: userId },
+    select: { id: true, role: true },
+  });
+  if (!user) throw new Error("User not found");
+  if (user.role !== "ORG_ADMIN" && user.role !== "SUPER_ADMIN") throw new Error("Forbidden");
+  return userId;
+}
+
 async function getStudent() {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
@@ -58,6 +70,15 @@ export const ourFileRouter = {
   thumbnailUploader: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .middleware(async () => {
       const userId = await getInstructor();
+      return { userId };
+    })
+    .onUploadComplete(async ({ file }) => {
+      return { url: file.ufsUrl };
+    }),
+
+  logoUploader: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
+    .middleware(async () => {
+      const userId = await getOrgAdmin();
       return { userId };
     })
     .onUploadComplete(async ({ file }) => {
