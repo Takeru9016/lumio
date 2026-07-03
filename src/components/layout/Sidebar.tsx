@@ -43,6 +43,7 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Teams", href: "/org/teams", icon: Users2 },
     { label: "Courses", href: "/org/courses", icon: BookOpen },
     { label: "Reports", href: "/reports", icon: BarChart2 },
+    { label: "Billing", href: "/org/settings/billing", icon: CreditCard },
     { label: "Settings", href: "/org/settings", icon: Settings },
   ],
   SUPER_ADMIN: [
