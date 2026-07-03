@@ -3,6 +3,7 @@ export { AssignmentBuilder } from "./course/AssignmentBuilder";
 export { CourseCard } from "./course/CourseCard";
 export { CourseEditor } from "./course/CourseEditor";
 export { CourseSettingsForm } from "./course/CourseSettingsForm";
+export { EnrollmentChart } from "./course/EnrollmentChart";
 export { InlineInput } from "./course/InlineInput";
 export { LessonEditor } from "./course/LessonEditor";
 export { LessonList, type SectionItem } from "./course/LessonList";
