@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { RazorpayOptions } from "@/types";
 
 export function useRazorpay() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,5 +24,15 @@ export function useRazorpay() {
     });
   };
 
-  return { loadRazorpay, isLoading };
+  // Loads checkout.js (if needed) then opens the Razorpay modal.
+  const openCheckout = async (options: RazorpayOptions): Promise<void> => {
+    await loadRazorpay();
+    if (!window.Razorpay) {
+      throw new Error("Razorpay checkout failed to load");
+    }
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
+  return { loadRazorpay, openCheckout, isLoading };
 }

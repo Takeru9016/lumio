@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Award, CheckCircle2, ClipboardList, Clock, ExternalLink, Star } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BillingSettings } from "@/components/billing/BillingSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/lib/db";
 
@@ -12,7 +13,15 @@ export default async function StudentSettingsPage() {
 
   const dbUser = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true, name: true, email: true, avatarUrl: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      avatarUrl: true,
+      plan: true,
+      aiCallsUsed: true,
+      subscriptionStatus: true,
+    },
   });
   if (!dbUser) redirect("/sign-in");
 
@@ -70,6 +79,7 @@ export default async function StudentSettingsPage() {
       <Tabs defaultValue="assignments">
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="plan">Plan</TabsTrigger>
           <TabsTrigger value="assignments">
             Assignments
             {gradedSubmissions.length > 0 && (
@@ -113,6 +123,19 @@ export default async function StudentSettingsPage() {
               Profile details are managed via Clerk. Visit your account settings to update your name
               or avatar.
             </p>
+          </div>
+        </TabsContent>
+
+        {/* Plan tab */}
+        <TabsContent value="plan">
+          <div className="mt-4">
+            <BillingSettings
+              plan={dbUser.plan}
+              aiCallsUsed={dbUser.aiCallsUsed}
+              subscriptionStatus={dbUser.subscriptionStatus}
+              email={dbUser.email}
+              name={dbUser.name}
+            />
           </div>
         </TabsContent>
 

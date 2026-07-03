@@ -59,6 +59,7 @@ export type UserMinAggregateOutputType = {
   subscriptionStatus: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd: boolean | null
   currentPeriodEnd: Date | null
+  scheduledDowngradeAt: Date | null
   tenantId: string | null
   deletedAt: Date | null
   createdAt: Date | null
@@ -84,6 +85,7 @@ export type UserMaxAggregateOutputType = {
   subscriptionStatus: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd: boolean | null
   currentPeriodEnd: Date | null
+  scheduledDowngradeAt: Date | null
   tenantId: string | null
   deletedAt: Date | null
   createdAt: Date | null
@@ -109,6 +111,7 @@ export type UserCountAggregateOutputType = {
   subscriptionStatus: number
   cancelAtPeriodEnd: number
   currentPeriodEnd: number
+  scheduledDowngradeAt: number
   tenantId: number
   deletedAt: number
   createdAt: number
@@ -150,6 +153,7 @@ export type UserMinAggregateInputType = {
   subscriptionStatus?: true
   cancelAtPeriodEnd?: true
   currentPeriodEnd?: true
+  scheduledDowngradeAt?: true
   tenantId?: true
   deletedAt?: true
   createdAt?: true
@@ -175,6 +179,7 @@ export type UserMaxAggregateInputType = {
   subscriptionStatus?: true
   cancelAtPeriodEnd?: true
   currentPeriodEnd?: true
+  scheduledDowngradeAt?: true
   tenantId?: true
   deletedAt?: true
   createdAt?: true
@@ -200,6 +205,7 @@ export type UserCountAggregateInputType = {
   subscriptionStatus?: true
   cancelAtPeriodEnd?: true
   currentPeriodEnd?: true
+  scheduledDowngradeAt?: true
   tenantId?: true
   deletedAt?: true
   createdAt?: true
@@ -312,6 +318,7 @@ export type UserGroupByOutputType = {
   subscriptionStatus: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd: boolean
   currentPeriodEnd: Date | null
+  scheduledDowngradeAt: Date | null
   tenantId: string | null
   deletedAt: Date | null
   createdAt: Date
@@ -360,6 +367,7 @@ export type UserWhereInput = {
   subscriptionStatus?: Prisma.EnumSubscriptionStatusNullableFilter<"User"> | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFilter<"User"> | boolean
   currentPeriodEnd?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  scheduledDowngradeAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   tenantId?: Prisma.StringNullableFilter<"User"> | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -395,6 +403,7 @@ export type UserOrderByWithRelationInput = {
   subscriptionStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelAtPeriodEnd?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduledDowngradeAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -433,6 +442,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   subscriptionStatus?: Prisma.EnumSubscriptionStatusNullableFilter<"User"> | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFilter<"User"> | boolean
   currentPeriodEnd?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  scheduledDowngradeAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   tenantId?: Prisma.StringNullableFilter<"User"> | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -468,6 +478,7 @@ export type UserOrderByWithAggregationInput = {
   subscriptionStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelAtPeriodEnd?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduledDowngradeAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -501,6 +512,7 @@ export type UserScalarWhereWithAggregatesInput = {
   subscriptionStatus?: Prisma.EnumSubscriptionStatusNullableWithAggregatesFilter<"User"> | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   currentPeriodEnd?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  scheduledDowngradeAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   tenantId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -526,6 +538,7 @@ export type UserCreateInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -560,6 +573,7 @@ export type UserUncheckedCreateInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -594,6 +608,7 @@ export type UserUpdateInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -628,6 +643,7 @@ export type UserUncheckedUpdateInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -662,6 +678,7 @@ export type UserCreateManyInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -687,6 +704,7 @@ export type UserUpdateManyMutationInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -711,6 +729,7 @@ export type UserUncheckedUpdateManyInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -736,6 +755,7 @@ export type UserCountOrderByAggregateInput = {
   subscriptionStatus?: Prisma.SortOrder
   cancelAtPeriodEnd?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrder
+  scheduledDowngradeAt?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -768,6 +788,7 @@ export type UserMaxOrderByAggregateInput = {
   subscriptionStatus?: Prisma.SortOrder
   cancelAtPeriodEnd?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrder
+  scheduledDowngradeAt?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -793,6 +814,7 @@ export type UserMinOrderByAggregateInput = {
   subscriptionStatus?: Prisma.SortOrder
   cancelAtPeriodEnd?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrder
+  scheduledDowngradeAt?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -1048,6 +1070,7 @@ export type UserCreateWithoutTenantInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1081,6 +1104,7 @@ export type UserUncheckedCreateWithoutTenantInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1143,6 +1167,7 @@ export type UserScalarWhereInput = {
   subscriptionStatus?: Prisma.EnumSubscriptionStatusNullableFilter<"User"> | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFilter<"User"> | boolean
   currentPeriodEnd?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  scheduledDowngradeAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   tenantId?: Prisma.StringNullableFilter<"User"> | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -1168,6 +1193,7 @@ export type UserCreateWithoutTeamMembersInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1201,6 +1227,7 @@ export type UserUncheckedCreateWithoutTeamMembersInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1250,6 +1277,7 @@ export type UserUpdateWithoutTeamMembersInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1283,6 +1311,7 @@ export type UserUncheckedUpdateWithoutTeamMembersInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1316,6 +1345,7 @@ export type UserCreateWithoutCoursesInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1349,6 +1379,7 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1398,6 +1429,7 @@ export type UserUpdateWithoutCoursesInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1431,6 +1463,7 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1464,6 +1497,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1497,6 +1531,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1546,6 +1581,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1579,6 +1615,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1612,6 +1649,7 @@ export type UserCreateWithoutLessonProgressInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1645,6 +1683,7 @@ export type UserUncheckedCreateWithoutLessonProgressInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1694,6 +1733,7 @@ export type UserUpdateWithoutLessonProgressInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1727,6 +1767,7 @@ export type UserUncheckedUpdateWithoutLessonProgressInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1760,6 +1801,7 @@ export type UserCreateWithoutQuizAttemptsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1793,6 +1835,7 @@ export type UserUncheckedCreateWithoutQuizAttemptsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1842,6 +1885,7 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1875,6 +1919,7 @@ export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1908,6 +1953,7 @@ export type UserCreateWithoutSubmissionsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1941,6 +1987,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1990,6 +2037,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2023,6 +2071,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2056,6 +2105,7 @@ export type UserCreateWithoutXpTransactionsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2089,6 +2139,7 @@ export type UserUncheckedCreateWithoutXpTransactionsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -2138,6 +2189,7 @@ export type UserUpdateWithoutXpTransactionsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2171,6 +2223,7 @@ export type UserUncheckedUpdateWithoutXpTransactionsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2204,6 +2257,7 @@ export type UserCreateWithoutCertificatesInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2237,6 +2291,7 @@ export type UserUncheckedCreateWithoutCertificatesInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -2286,6 +2341,7 @@ export type UserUpdateWithoutCertificatesInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2319,6 +2375,7 @@ export type UserUncheckedUpdateWithoutCertificatesInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2352,6 +2409,7 @@ export type UserCreateWithoutAiChatsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2385,6 +2443,7 @@ export type UserUncheckedCreateWithoutAiChatsInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   tenantId?: string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -2434,6 +2493,7 @@ export type UserUpdateWithoutAiChatsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2467,6 +2527,7 @@ export type UserUncheckedUpdateWithoutAiChatsInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2500,6 +2561,7 @@ export type UserCreateManyTenantInput = {
   subscriptionStatus?: $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2524,6 +2586,7 @@ export type UserUpdateWithoutTenantInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2557,6 +2620,7 @@ export type UserUncheckedUpdateWithoutTenantInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2590,6 +2654,7 @@ export type UserUncheckedUpdateManyWithoutTenantInput = {
   subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2717,6 +2782,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   subscriptionStatus?: boolean
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: boolean
+  scheduledDowngradeAt?: boolean
   tenantId?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -2753,6 +2819,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   subscriptionStatus?: boolean
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: boolean
+  scheduledDowngradeAt?: boolean
   tenantId?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -2779,6 +2846,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   subscriptionStatus?: boolean
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: boolean
+  scheduledDowngradeAt?: boolean
   tenantId?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -2805,13 +2873,14 @@ export type UserSelectScalar = {
   subscriptionStatus?: boolean
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: boolean
+  scheduledDowngradeAt?: boolean
   tenantId?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clerkId" | "email" | "name" | "avatarUrl" | "role" | "plan" | "aiCallsUsed" | "aiQuotaResetAt" | "xpTotal" | "currentStreak" | "longestStreak" | "lastActiveDate" | "razorpayCustomerId" | "razorpaySubId" | "subscriptionStatus" | "cancelAtPeriodEnd" | "currentPeriodEnd" | "tenantId" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clerkId" | "email" | "name" | "avatarUrl" | "role" | "plan" | "aiCallsUsed" | "aiQuotaResetAt" | "xpTotal" | "currentStreak" | "longestStreak" | "lastActiveDate" | "razorpayCustomerId" | "razorpaySubId" | "subscriptionStatus" | "cancelAtPeriodEnd" | "currentPeriodEnd" | "scheduledDowngradeAt" | "tenantId" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.User$tenantArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
@@ -2865,6 +2934,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     subscriptionStatus: $Enums.SubscriptionStatus | null
     cancelAtPeriodEnd: boolean
     currentPeriodEnd: Date | null
+    scheduledDowngradeAt: Date | null
     tenantId: string | null
     deletedAt: Date | null
     createdAt: Date
@@ -3320,6 +3390,7 @@ export interface UserFieldRefs {
   readonly subscriptionStatus: Prisma.FieldRef<"User", 'SubscriptionStatus'>
   readonly cancelAtPeriodEnd: Prisma.FieldRef<"User", 'Boolean'>
   readonly currentPeriodEnd: Prisma.FieldRef<"User", 'DateTime'>
+  readonly scheduledDowngradeAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly tenantId: Prisma.FieldRef<"User", 'String'>
   readonly deletedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>

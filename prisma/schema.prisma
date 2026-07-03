@@ -95,6 +95,8 @@ model User {
   subscriptionStatus   SubscriptionStatus?
   cancelAtPeriodEnd    Boolean @default(false)
   currentPeriodEnd     DateTime?
+  // Set on subscription.cancelled — a cron flips plan to FREE once this passes
+  scheduledDowngradeAt DateTime?
 
   // Relations
   tenantId     String?
