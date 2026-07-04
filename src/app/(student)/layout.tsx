@@ -1,10 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { Sidebar, TopNav } from "@/components";
+import { ErrorBoundary, Sidebar, TopNav } from "@/components";
 
 import { db } from "@/lib/db";
 import { getRoleDashboard } from "@/lib/role-redirect";
+
+export const dynamic = "force-dynamic";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
@@ -21,10 +23,14 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar role="STUDENT" />
+      <ErrorBoundary>
+        <Sidebar role="STUDENT" />
+      </ErrorBoundary>
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopNav showAiBadge currentStreak={user.currentStreak} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
       </div>
     </div>
   );

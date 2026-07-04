@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 import { UTApi } from "uploadthing/server";
 
 import { db } from "./db";
+import { CertificateEmail } from "./emails/certificate";
 import { resend } from "./resend";
 
 const utapi = new UTApi();
@@ -145,46 +146,6 @@ function buildCertHtml(params: {
 </html>`;
 }
 
-function buildEmailHtml(params: {
-  studentName: string;
-  courseTitle: string;
-  certUrl: string;
-  certId: string;
-}): string {
-  const { studentName, courseTitle, certUrl, certId } = params;
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family:system-ui,sans-serif;background:#f5f5f6;padding:32px;margin:0;">
-  <div style="max-width:560px;margin:0 auto;background:white;border-radius:12px;border:1px solid #e5e5e7;padding:40px;">
-    <p style="font-size:22px;font-weight:700;color:#4f6ef7;margin:0 0 24px;">✦ Lumio</p>
-    <h1 style="font-size:22px;font-weight:700;color:#0f0f10;margin:0 0 12px;letter-spacing:-0.02em;">
-      Congratulations, ${studentName}!
-    </h1>
-    <p style="font-size:15px;color:#3d3d3f;margin:0 0 8px;">
-      You've successfully completed:
-    </p>
-    <p style="font-size:17px;font-weight:600;color:#4f6ef7;margin:0 0 28px;">
-      ${courseTitle}
-    </p>
-    <p style="font-size:14px;color:#737380;margin:0 0 24px;">
-      Your certificate is ready. You can view and share it at any time using the link below.
-    </p>
-    <a href="${certUrl}"
-       style="display:inline-block;background:#4f6ef7;color:white;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;">
-      View Certificate →
-    </a>
-    <p style="font-size:12px;color:#a8a8b0;margin:24px 0 0;">
-      Certificate ID: ${certId}
-    </p>
-  </div>
-</body>
-</html>`;
-}
-
 export async function generateCertificate(userId: string, courseId: string): Promise<void> {
   const existing = await db.certificate.findUnique({
     where: { userId_courseId: { userId, courseId } },
@@ -232,8 +193,8 @@ export async function generateCertificate(userId: string, courseId: string): Pro
     from: "Lumio <no-reply@lumio.io>",
     to: user.email,
     subject: `You've completed "${course.title}" — your certificate is ready`,
-    html: buildEmailHtml({
-      studentName,
+    react: CertificateEmail({
+      name: studentName,
       courseTitle: course.title,
       certUrl: cert.certificateUrl,
       certId: cert.id,

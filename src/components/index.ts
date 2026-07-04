@@ -22,5 +22,6 @@ export { SendNudgeButton } from "./org/SendNudgeButton";
 export { TeamsClient } from "./org/TeamsClient";
 export { AiBadge } from "./shared/AiBadge";
 export { EmptyState } from "./shared/EmptyState";
+export { ErrorBoundary } from "./shared/ErrorBoundary";
 export { GooeyToaster } from "./shared/GooeyToaster";
 export { SkeletonCard } from "./shared/SkeletonCard";

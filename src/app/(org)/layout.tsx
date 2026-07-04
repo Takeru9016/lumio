@@ -1,11 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { Sidebar, TopNav } from "@/components";
+import { ErrorBoundary, Sidebar, TopNav } from "@/components";
 
 import { db } from "@/lib/db";
 import { getRoleDashboard } from "@/lib/role-redirect";
 import { getTenantCss } from "@/lib/tenant-css";
+
+export const dynamic = "force-dynamic";
 
 export default async function OrgLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
@@ -36,10 +38,14 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
     <div data-tenant={tenant?.id} className="flex h-screen overflow-hidden">
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: tenantCss contains only hex-validated custom-property values — getTenantCss rejects any non-hex brandColor, and the PATCH route validates before persisting. */}
       {tenantCss && <style dangerouslySetInnerHTML={{ __html: tenantCss }} />}
-      <Sidebar role="ORG_ADMIN" />
+      <ErrorBoundary>
+        <Sidebar role="ORG_ADMIN" />
+      </ErrorBoundary>
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopNav currentStreak={user.currentStreak} logoUrl={tenant?.logoUrl ?? null} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
       </div>
     </div>
   );

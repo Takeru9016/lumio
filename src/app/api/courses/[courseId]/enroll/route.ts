@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
+import { EnrollmentEmail } from "@/lib/emails/enrollment";
 import { razorpay } from "@/lib/razorpay";
 import { resend } from "@/lib/resend";
 
@@ -104,7 +105,11 @@ export async function POST(
       from: "Lumio <hello@lumio.io>",
       to: user.email,
       subject: `You're enrolled in "${course.title}"`,
-      html: `<p>Hi ${user.name ?? "there"},</p><p>You're now enrolled in <strong>${course.title}</strong>. Jump in and start learning at your own pace.</p><p>— The Lumio Team</p>`,
+      react: EnrollmentEmail({
+        name: user.name ?? user.email.split("@")[0],
+        courseTitle: course.title,
+        courseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/courses/${courseId}`,
+      }),
     })
     .catch(() => {});
 

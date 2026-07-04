@@ -6,7 +6,7 @@ import { extractRouterConfig } from "uploadthing/server";
 
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 
-import { GooeyToaster } from "@/components";
+import { ErrorBoundary, GooeyToaster } from "@/components";
 
 import "./globals.css";
 
@@ -48,7 +48,7 @@ export default function RootLayout({
       >
         <body className="min-h-full flex flex-col">
           <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
-          {children}
+          <ErrorBoundary>{children}</ErrorBoundary>
           <GooeyToaster />
         </body>
       </html>

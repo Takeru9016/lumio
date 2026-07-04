@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import type { Plan } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
+import { DunningEmail } from "@/lib/emails/dunning";
 import { resend } from "@/lib/resend";
 
 type SubscriptionEntity = {
@@ -140,13 +141,10 @@ export async function POST(req: Request) {
         from: "Lumio <no-reply@lumio.io>",
         to: user.email,
         subject: "Action needed: your Lumio payment failed",
-        html: `
-          <p>Hi ${user.name ?? "there"},</p>
-          <p>We couldn't process your latest Lumio subscription payment, so your account is now marked <strong>past due</strong>.</p>
-          <p>Please update your payment method to keep your plan active and avoid losing access to premium features.</p>
-          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/settings">Update payment method →</a></p>
-          <p>— The Lumio team</p>
-        `,
+        react: DunningEmail({
+          name: user.name ?? "there",
+          billingUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings?tab=plan`,
+        }),
       });
       break;
     }

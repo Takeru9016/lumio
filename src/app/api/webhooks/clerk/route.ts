@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { Webhook } from "svix";
 import type { Role } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import { WelcomeEmail } from "@/lib/emails/welcome";
+import { resend } from "@/lib/resend";
 
 type ClerkWebhookEvent = {
   type: string;
@@ -67,16 +69,31 @@ export async function POST(req: Request) {
       return Response.json({ error: "No email found" }, { status: 400 });
     }
 
+    const name = [data.first_name, data.last_name].filter(Boolean).join(" ") || null;
+
     await db.user.create({
       data: {
         clerkId: data.id,
         email,
-        name: [data.first_name, data.last_name].filter(Boolean).join(" ") || null,
+        name,
         avatarUrl: data.image_url,
         role: resolveRole(data.public_metadata.role),
         plan: "FREE",
       },
     });
+
+    // Fire-and-forget — email failure must not roll back the webhook ack
+    resend.emails
+      .send({
+        from: "Lumio <hello@lumio.io>",
+        to: email,
+        subject: "Welcome to Lumio",
+        react: WelcomeEmail({
+          name: name ?? email.split("@")[0],
+          dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+        }),
+      })
+      .catch(() => {});
   }
 
   if (type === "user.updated") {
