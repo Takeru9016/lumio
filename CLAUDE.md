@@ -409,6 +409,9 @@ RESEND_API_KEY=
 # Sentry
 NEXT_PUBLIC_SENTRY_DSN=
 SENTRY_AUTH_TOKEN=
+
+# Cron (Vercel auto-sends this as the Bearer token on scheduled invocations)
+CRON_SECRET=
 ```
 
 ---

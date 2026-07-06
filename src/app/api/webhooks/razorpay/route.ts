@@ -70,14 +70,38 @@ export async function POST(req: Request) {
       const rawPlan = sub?.notes?.plan as Plan | undefined;
       if (!clerkId || !rawPlan || !PAID_PLANS.has(rawPlan)) break;
 
-      await db.user.updateMany({
+      const subscriber = await db.user.findUnique({
         where: { clerkId },
-        data: {
-          plan: rawPlan,
-          subscriptionStatus: "ACTIVE",
-          currentPeriodEnd: toDate(sub?.current_end),
-        },
+        select: { id: true, tenantId: true },
       });
+      if (!subscriber) break;
+
+      await db.$transaction([
+        db.user.update({
+          where: { id: subscriber.id },
+          data: {
+            plan: rawPlan,
+            subscriptionStatus: "ACTIVE",
+            currentPeriodEnd: toDate(sub?.current_end),
+          },
+        }),
+        // Org subscriptions: the whole tenant shares the plan tier, same as the
+        // native change-plan flow (src/app/api/billing/change-plan/route.ts) —
+        // otherwise Tenant.plan stays FREE forever on a tenant's first-ever
+        // subscription, wrongly blocking Enterprise-gated features like SSO.
+        ...(subscriber.tenantId
+          ? [
+              db.tenant.update({
+                where: { id: subscriber.tenantId },
+                data: { plan: rawPlan },
+              }),
+              db.user.updateMany({
+                where: { tenantId: subscriber.tenantId },
+                data: { plan: rawPlan },
+              }),
+            ]
+          : []),
+      ]);
       break;
     }
 
@@ -102,7 +126,8 @@ export async function POST(req: Request) {
       const clerkId = sub?.notes?.userId;
       if (!clerkId) break;
 
-      // Record the cancellation; a cron flips plan → FREE once the period ends.
+      // Record the cancellation; /api/cron/downgrade-subscriptions (hourly, see
+      // vercel.json) flips plan → FREE once scheduledDowngradeAt passes.
       await db.user.updateMany({
         where: { clerkId },
         data: {

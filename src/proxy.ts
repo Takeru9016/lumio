@@ -14,6 +14,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks/(.*)",
   "/api/uploadthing(.*)",
   "/api/ai/embed-lesson",
+  "/api/cron/(.*)",
 ]);
 
 const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
