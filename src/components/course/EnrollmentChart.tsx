@@ -5,6 +5,7 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 
 interface EnrollmentChartProps {
   data: { date: string; count: number }[];
+  seriesName?: string;
 }
 
 function formatTick(date: string | number) {
@@ -15,7 +16,7 @@ function formatLabel(label: ReactNode) {
   return typeof label === "string" ? formatTick(label) : label;
 }
 
-export function EnrollmentChart({ data }: EnrollmentChartProps) {
+export function EnrollmentChart({ data, seriesName = "Enrollments" }: EnrollmentChartProps) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -45,7 +46,7 @@ export function EnrollmentChart({ data }: EnrollmentChartProps) {
         <Line
           type="monotone"
           dataKey="count"
-          name="Enrollments"
+          name={seriesName}
           stroke="var(--color-brand)"
           strokeWidth={2}
           dot={false}

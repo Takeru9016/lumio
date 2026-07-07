@@ -35,6 +35,7 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Settings", href: "/settings", icon: Settings },
   ],
   INSTRUCTOR: [
+    { label: "Dashboard", href: "/instructor/dashboard", icon: LayoutDashboard },
     { label: "My Courses", href: "/instructor/courses", icon: BookOpen },
     { label: "Students", href: "/instructor/students", icon: Users },
   ],
@@ -63,6 +64,13 @@ export function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
   const items = ROLE_NAV_ITEMS[role];
 
+  // Nav items can share a URL prefix (e.g. "/org/settings" and "/org/settings/billing"),
+  // so matching each item independently would light up both. Only the longest matching
+  // href — the most specific one — should be treated as active.
+  const activeHref = items
+    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   useEffect(() => {
     const stored = localStorage.getItem("sidebar-collapsed");
     if (stored !== null) setIsCollapsed(stored === "true");
@@ -83,7 +91,7 @@ export function Sidebar({ role }: SidebarProps) {
     >
       <div className="flex-1 flex flex-col py-3 px-2 gap-0.5">
         {items.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isActive = item.href === activeHref;
           const Icon = item.icon;
 
           return (

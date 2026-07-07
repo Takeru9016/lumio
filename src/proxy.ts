@@ -8,6 +8,7 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/pricing",
   "/about",
+  "/suspended",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/onboarding",
@@ -18,6 +19,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+const isSuspendedPage = createRouteMatcher(["/suspended"]);
 
 // The apex/root domain. On a subdomain like `acme.lumio.io` the part before this
 // (`acme`) is treated as the tenant slug.
@@ -75,6 +77,29 @@ async function resolveTenantId(slug: string): Promise<string | null> {
   return tenant?.id ?? null;
 }
 
+/**
+ * Whether the signed-in user's tenant has been suspended by a Super Admin
+ * (src/app/api/admin/tenants/[tenantId]/route.ts). Cached for 60s per user so a
+ * reactivation propagates quickly without hitting the DB on every request.
+ */
+async function isUserOrgSuspended(clerkId: string): Promise<boolean> {
+  const cacheKey = `user:org-suspended:${clerkId}`;
+
+  const cached = await redis.get<string>(cacheKey);
+  if (cached !== null) {
+    return cached !== TENANT_NONE;
+  }
+
+  const user = await db.user.findUnique({
+    where: { clerkId },
+    select: { tenant: { select: { suspendedAt: true } } },
+  });
+
+  const suspended = Boolean(user?.tenant?.suspendedAt);
+  await redis.set(cacheKey, suspended ? "1" : TENANT_NONE, { ex: 60 });
+  return suspended;
+}
+
 export default clerkMiddleware(async (auth, request) => {
   // 1. Strip any inbound `x-tenant-id` FIRST, before anything else. This header is set
   //    only by this middleware after verifying the tenant; a client that forges it would
@@ -94,6 +119,14 @@ export default clerkMiddleware(async (auth, request) => {
 
   if (!isPublicRoute(request)) {
     await auth.protect();
+  }
+
+  // 2b. Block app access for members of a suspended tenant. Public marketing pages
+  //     and the /suspended page itself stay reachable so the user can see why.
+  if (userId && !isPublicRoute(request) && !isSuspendedPage(request)) {
+    if (await isUserOrgSuspended(userId)) {
+      return NextResponse.redirect(new URL("/suspended", request.url));
+    }
   }
 
   // 3. Subdomain detection.

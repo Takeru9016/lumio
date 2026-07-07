@@ -69,7 +69,8 @@ export const ModelName = {
   XPTransaction: 'XPTransaction',
   Certificate: 'Certificate',
   AIChat: 'AIChat',
-  MandatoryTraining: 'MandatoryTraining'
+  MandatoryTraining: 'MandatoryTraining',
+  AdminAuditLog: 'AdminAuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -130,6 +131,7 @@ export const TenantScalarFieldEnum = {
   razorpaySubId: 'razorpaySubId',
   samlEnabled: 'samlEnabled',
   samlMetadataUrl: 'samlMetadataUrl',
+  suspendedAt: 'suspendedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -369,6 +371,19 @@ export const MandatoryTrainingScalarFieldEnum = {
 } as const
 
 export type MandatoryTrainingScalarFieldEnum = (typeof MandatoryTrainingScalarFieldEnum)[keyof typeof MandatoryTrainingScalarFieldEnum]
+
+
+export const AdminAuditLogScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  action: 'action',
+  targetType: 'targetType',
+  targetId: 'targetId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AdminAuditLogScalarFieldEnum = (typeof AdminAuditLogScalarFieldEnum)[keyof typeof AdminAuditLogScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -110,6 +110,7 @@ model User {
   aiChats        AIChat[]
   teamMembers    TeamMember[]
   xpTransactions XPTransaction[]
+  adminAuditLogs AdminAuditLog[] @relation("AdminAuditLogActor")
 
   deletedAt DateTime?
 
@@ -142,6 +143,9 @@ model Tenant {
   // SSO (Enterprise only)
   samlEnabled     Boolean @default(false)
   samlMetadataUrl String?
+
+  // Set by a Super Admin via /admin/tenants — blocks access for all members
+  suspendedAt DateTime?
 
   // Relations
   users     User[]
@@ -499,4 +503,24 @@ model MandatoryTraining {
 
   @@unique([courseId, teamId])
   @@index([tenantId])
+}
+
+// ============================================================
+// SUPER ADMIN
+// ============================================================
+
+model AdminAuditLog {
+  id     String @id @default(cuid())
+  actorId String
+  actor   User   @relation("AdminAuditLogActor", fields: [actorId], references: [id])
+
+  action     String // e.g. "TENANT_SUSPENDED", "TENANT_REACTIVATED", "USER_ROLE_CHANGED", "USER_PLAN_CHANGED"
+  targetType String // "Tenant" | "User"
+  targetId   String
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([actorId])
 }

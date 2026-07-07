@@ -9,6 +9,6 @@ export function getRoleDashboard(role: Role): string {
     case "ORG_ADMIN":
       return "/org/dashboard";
     case "SUPER_ADMIN":
-      return "/";
+      return "/admin/dashboard";
   }
 }

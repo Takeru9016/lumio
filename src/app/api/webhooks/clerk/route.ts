@@ -1,8 +1,10 @@
+import { clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
 import type { Role } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { WelcomeEmail } from "@/lib/emails/welcome";
+import { generateUniqueTenantSlug } from "@/lib/org-slug";
 import { resend } from "@/lib/resend";
 
 type ClerkWebhookEvent = {
@@ -17,16 +19,34 @@ type ClerkWebhookEvent = {
     public_metadata: {
       role?: string;
     };
+    unsafe_metadata: {
+      role?: string;
+      orgName?: string;
+    };
     deleted?: boolean;
   };
 };
 
+// Trusted source (Clerk publicMetadata, only ever written by our own backend). Includes
+// SUPER_ADMIN — that value only ever reaches publicMetadata via the Super Admin panel
+// or a manual grant, never directly from a user.
 function resolveRole(raw: string | undefined): Role {
   const map: Record<string, Role> = {
     STUDENT: "STUDENT",
     INSTRUCTOR: "INSTRUCTOR",
     ORG_ADMIN: "ORG_ADMIN",
     SUPER_ADMIN: "SUPER_ADMIN",
+  };
+  return raw ? (map[raw.toUpperCase()] ?? "STUDENT") : "STUDENT";
+}
+
+// Untrusted source (Clerk unsafeMetadata, set client-side at sign-up). SUPER_ADMIN is
+// deliberately excluded — that privilege must never be grantable by the signing-up user.
+function resolveSelfServeRole(raw: string | undefined): Role {
+  const map: Record<string, Role> = {
+    STUDENT: "STUDENT",
+    INSTRUCTOR: "INSTRUCTOR",
+    ORG_ADMIN: "ORG_ADMIN",
   };
   return raw ? (map[raw.toUpperCase()] ?? "STUDENT") : "STUDENT";
 }
@@ -71,16 +91,52 @@ export async function POST(req: Request) {
 
     const name = [data.first_name, data.last_name].filter(Boolean).join(" ") || null;
 
-    await db.user.create({
-      data: {
-        clerkId: data.id,
-        email,
-        name,
-        avatarUrl: data.image_url,
-        role: resolveRole(data.public_metadata.role),
-        plan: "FREE",
-      },
-    });
+    let role = resolveSelfServeRole(data.unsafe_metadata.role);
+    const orgName = data.unsafe_metadata.orgName?.trim();
+
+    // ORG_ADMIN requires a Tenant to exist — without a name to create one from, this
+    // is either malformed input or a bypass of the sign-up form's required field.
+    // Falling back to STUDENT keeps that case safe rather than creating a blank org.
+    if (role === "ORG_ADMIN" && (!orgName || orgName.length > 100)) {
+      role = "STUDENT";
+    }
+
+    if (role === "ORG_ADMIN" && orgName) {
+      const slug = await generateUniqueTenantSlug(orgName);
+      await db.$transaction(async (tx) => {
+        const tenant = await tx.tenant.create({
+          data: { name: orgName, slug },
+        });
+        await tx.user.create({
+          data: {
+            clerkId: data.id,
+            email,
+            name,
+            avatarUrl: data.image_url,
+            role: "ORG_ADMIN",
+            plan: "FREE",
+            tenantId: tenant.id,
+          },
+        });
+      });
+    } else {
+      await db.user.create({
+        data: {
+          clerkId: data.id,
+          email,
+          name,
+          avatarUrl: data.image_url,
+          role,
+          plan: "FREE",
+        },
+      });
+    }
+
+    // Promote the now-validated role into Clerk's trusted publicMetadata. From this
+    // point on, publicMetadata.role — not the client-supplied unsafeMetadata — is the
+    // source of truth for every future user.updated event.
+    const client = await clerkClient();
+    await client.users.updateUserMetadata(data.id, { publicMetadata: { role } });
 
     // Fire-and-forget — email failure must not roll back the webhook ack
     resend.emails
@@ -106,7 +162,13 @@ export async function POST(req: Request) {
         ...(email ? { email } : {}),
         name: [data.first_name, data.last_name].filter(Boolean).join(" ") || null,
         avatarUrl: data.image_url,
-        role: resolveRole(data.public_metadata.role),
+        // Only touch role when publicMetadata actually carries one — an absent value
+        // must never be read as "demote to STUDENT" (e.g. a plain name edit in Clerk
+        // still sends the full user object, but a user promoted before this field
+        // existed would have no publicMetadata.role at all).
+        ...(data.public_metadata.role !== undefined
+          ? { role: resolveRole(data.public_metadata.role) }
+          : {}),
       },
     });
   }

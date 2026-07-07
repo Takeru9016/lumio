@@ -20,16 +20,20 @@ function rgbToHex(r: number, g: number, b: number): string {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-// Lighten: move each channel 20% toward white.
+// Lighten: move each channel 88% toward white, producing a pale wash regardless of the
+// input's saturation — needed so text rendered in the full brand color stays readable
+// on top of it. A shallower blend (e.g. 20%) keeps too much of the original saturation
+// and can end up close in tone to the brand color itself, killing contrast.
 function lighten(hex: string): string {
   const [r, g, b] = hexToRgb(hex);
-  return rgbToHex(r + (255 - r) * 0.2, g + (255 - g) * 0.2, b + (255 - b) * 0.2);
+  return rgbToHex(r + (255 - r) * 0.88, g + (255 - g) * 0.88, b + (255 - b) * 0.88);
 }
 
-// Darken: scale each channel down 15% toward black.
+// Darken: move each channel 30% toward black — dark enough that white text placed on
+// top (e.g. button hover states) keeps sufficient contrast across arbitrary hues.
 function darken(hex: string): string {
   const [r, g, b] = hexToRgb(hex);
-  return rgbToHex(r * 0.85, g * 0.85, b * 0.85);
+  return rgbToHex(r * 0.7, g * 0.7, b * 0.7);
 }
 
 /**

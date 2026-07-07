@@ -182,11 +182,11 @@ lumio/
     │   ├── (marketing)/               ← public marketing pages
     │   │   ├── pricing/page.tsx
     │   │   ├── about/page.tsx
-    │   │   └── blog/
+    │   │   └── blog/                  ← not scheduled in PHASES.md, doc-only aspiration
     │   ├── (auth)/                    ← Clerk auth pages
     │   │   ├── sign-in/[[...sign-in]]/page.tsx
     │   │   └── sign-up/[[...sign-up]]/page.tsx
-    │   ├── (student)/                 ← student-facing app
+    │   ├── (student)/                 ← student-facing app, all under /
     │   │   ├── layout.tsx
     │   │   ├── dashboard/page.tsx
     │   │   ├── courses/
@@ -199,30 +199,43 @@ lumio/
     │   │   ├── assignments/page.tsx
     │   │   ├── leaderboard/page.tsx
     │   │   └── settings/page.tsx
-    │   ├── (instructor)/              ← instructor app
+    │   ├── (instructor)/              ← instructor app, all under /instructor/*
+    │   │   │                            (prefixed to avoid colliding with the
+    │   │   │                             student group's bare /dashboard, /courses)
     │   │   ├── layout.tsx
-    │   │   ├── dashboard/page.tsx
+    │   │   ├── instructor/
+    │   │   │   ├── dashboard/page.tsx
+    │   │   │   ├── courses/page.tsx
+    │   │   │   └── students/page.tsx
     │   │   ├── courses/
-    │   │   │   ├── page.tsx
     │   │   │   ├── new/page.tsx
     │   │   │   └── [courseId]/
     │   │   │       ├── edit/page.tsx
+    │   │   │       ├── settings/page.tsx
     │   │   │       └── analytics/page.tsx
-    │   │   ├── students/page.tsx
-    │   │   └── earnings/page.tsx
-    │   ├── (org)/                     ← org admin app
+    │   │   └── students/page.tsx      ← redirect stub → /instructor/students
+    │   │                                (earnings/page.tsx: deferred, not built —
+    │   │                                 no nav link, no payment-ledger model to back it)
+    │   ├── (org)/                     ← org admin app, all under /org/* (except
+    │   │   │                            /reports, which predates the /org/* prefix)
     │   │   ├── layout.tsx
-    │   │   ├── dashboard/page.tsx
-    │   │   ├── teams/page.tsx
-    │   │   ├── courses/page.tsx
-    │   │   ├── reports/page.tsx
-    │   │   └── settings/
-    │   │       ├── billing/page.tsx
-    │   │       ├── branding/page.tsx
-    │   │       └── sso/page.tsx
-    │   ├── (admin)/                   ← super admin (internal)
+    │   │   ├── org/
+    │   │   │   ├── dashboard/page.tsx
+    │   │   │   ├── teams/page.tsx
+    │   │   │   ├── courses/page.tsx
+    │   │   │   └── settings/
+    │   │   │       ├── page.tsx
+    │   │   │       ├── billing/page.tsx
+    │   │   │       ├── branding/page.tsx
+    │   │   │       └── sso/page.tsx
+    │   │   └── reports/page.tsx
+    │   ├── (admin)/                   ← super admin app, all under /admin/*
     │   │   ├── layout.tsx
-    │   │   └── dashboard/page.tsx
+    │   │   └── admin/
+    │   │       ├── dashboard/page.tsx
+    │   │       ├── tenants/page.tsx
+    │   │       ├── users/page.tsx
+    │   │       └── billing/page.tsx
     │   ├── [tenant]/                  ← white-label subdomain routing
     │   │   └── page.tsx
     │   └── api/

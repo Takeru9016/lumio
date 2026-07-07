@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type { Role } from "@/generated/prisma/enums";
+import { getRoleDashboard } from "@/lib/role-redirect";
 
 const MAX_ATTEMPTS = 10;
 const POLL_INTERVAL_MS = 2000;
@@ -18,7 +20,8 @@ export function OnboardingClient() {
       try {
         const res = await fetch("/api/me");
         if (res.ok) {
-          router.replace("/dashboard");
+          const user = (await res.json()) as { role: Role };
+          router.replace(getRoleDashboard(user.role));
           return;
         }
       } catch {

@@ -49,6 +49,7 @@ export type TenantMinAggregateOutputType = {
   razorpaySubId: string | null
   samlEnabled: boolean | null
   samlMetadataUrl: string | null
+  suspendedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +67,7 @@ export type TenantMaxAggregateOutputType = {
   razorpaySubId: string | null
   samlEnabled: boolean | null
   samlMetadataUrl: string | null
+  suspendedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -83,6 +85,7 @@ export type TenantCountAggregateOutputType = {
   razorpaySubId: number
   samlEnabled: number
   samlMetadataUrl: number
+  suspendedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -112,6 +115,7 @@ export type TenantMinAggregateInputType = {
   razorpaySubId?: true
   samlEnabled?: true
   samlMetadataUrl?: true
+  suspendedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -129,6 +133,7 @@ export type TenantMaxAggregateInputType = {
   razorpaySubId?: true
   samlEnabled?: true
   samlMetadataUrl?: true
+  suspendedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -146,6 +151,7 @@ export type TenantCountAggregateInputType = {
   razorpaySubId?: true
   samlEnabled?: true
   samlMetadataUrl?: true
+  suspendedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -250,6 +256,7 @@ export type TenantGroupByOutputType = {
   razorpaySubId: string | null
   samlEnabled: boolean
   samlMetadataUrl: string | null
+  suspendedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: TenantCountAggregateOutputType | null
@@ -290,6 +297,7 @@ export type TenantWhereInput = {
   razorpaySubId?: Prisma.StringNullableFilter<"Tenant"> | string | null
   samlEnabled?: Prisma.BoolFilter<"Tenant"> | boolean
   samlMetadataUrl?: Prisma.StringNullableFilter<"Tenant"> | string | null
+  suspendedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   users?: Prisma.UserListRelationFilter
@@ -311,6 +319,7 @@ export type TenantOrderByWithRelationInput = {
   razorpaySubId?: Prisma.SortOrderInput | Prisma.SortOrder
   samlEnabled?: Prisma.SortOrder
   samlMetadataUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   users?: Prisma.UserOrderByRelationAggregateInput
@@ -335,6 +344,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   razorpaySubId?: Prisma.StringNullableFilter<"Tenant"> | string | null
   samlEnabled?: Prisma.BoolFilter<"Tenant"> | boolean
   samlMetadataUrl?: Prisma.StringNullableFilter<"Tenant"> | string | null
+  suspendedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   users?: Prisma.UserListRelationFilter
@@ -356,6 +366,7 @@ export type TenantOrderByWithAggregationInput = {
   razorpaySubId?: Prisma.SortOrderInput | Prisma.SortOrder
   samlEnabled?: Prisma.SortOrder
   samlMetadataUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TenantCountOrderByAggregateInput
@@ -381,6 +392,7 @@ export type TenantScalarWhereWithAggregatesInput = {
   razorpaySubId?: Prisma.StringNullableWithAggregatesFilter<"Tenant"> | string | null
   samlEnabled?: Prisma.BoolWithAggregatesFilter<"Tenant"> | boolean
   samlMetadataUrl?: Prisma.StringNullableWithAggregatesFilter<"Tenant"> | string | null
+  suspendedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tenant"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tenant"> | Date | string
 }
@@ -398,6 +410,7 @@ export type TenantCreateInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
@@ -419,6 +432,7 @@ export type TenantUncheckedCreateInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
@@ -440,6 +454,7 @@ export type TenantUpdateInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
@@ -461,6 +476,7 @@ export type TenantUncheckedUpdateInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
@@ -482,6 +498,7 @@ export type TenantCreateManyInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -499,6 +516,7 @@ export type TenantUpdateManyMutationInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -516,6 +534,7 @@ export type TenantUncheckedUpdateManyInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -538,6 +557,7 @@ export type TenantCountOrderByAggregateInput = {
   razorpaySubId?: Prisma.SortOrder
   samlEnabled?: Prisma.SortOrder
   samlMetadataUrl?: Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -560,6 +580,7 @@ export type TenantMaxOrderByAggregateInput = {
   razorpaySubId?: Prisma.SortOrder
   samlEnabled?: Prisma.SortOrder
   samlMetadataUrl?: Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -577,6 +598,7 @@ export type TenantMinOrderByAggregateInput = {
   razorpaySubId?: Prisma.SortOrder
   samlEnabled?: Prisma.SortOrder
   samlMetadataUrl?: Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -664,6 +686,7 @@ export type TenantCreateWithoutUsersInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamCreateNestedManyWithoutTenantInput
@@ -684,6 +707,7 @@ export type TenantUncheckedCreateWithoutUsersInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutTenantInput
@@ -720,6 +744,7 @@ export type TenantUpdateWithoutUsersInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUpdateManyWithoutTenantNestedInput
@@ -740,6 +765,7 @@ export type TenantUncheckedUpdateWithoutUsersInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teams?: Prisma.TeamUncheckedUpdateManyWithoutTenantNestedInput
@@ -760,6 +786,7 @@ export type TenantCreateWithoutTeamsInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
@@ -780,6 +807,7 @@ export type TenantUncheckedCreateWithoutTeamsInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
@@ -816,6 +844,7 @@ export type TenantUpdateWithoutTeamsInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
@@ -836,6 +865,7 @@ export type TenantUncheckedUpdateWithoutTeamsInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
@@ -856,6 +886,7 @@ export type TenantCreateWithoutCoursesInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
@@ -876,6 +907,7 @@ export type TenantUncheckedCreateWithoutCoursesInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
@@ -912,6 +944,7 @@ export type TenantUpdateWithoutCoursesInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
@@ -932,6 +965,7 @@ export type TenantUncheckedUpdateWithoutCoursesInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
@@ -952,6 +986,7 @@ export type TenantCreateWithoutMandatoryTrainingsInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
@@ -972,6 +1007,7 @@ export type TenantUncheckedCreateWithoutMandatoryTrainingsInput = {
   razorpaySubId?: string | null
   samlEnabled?: boolean
   samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
@@ -1008,6 +1044,7 @@ export type TenantUpdateWithoutMandatoryTrainingsInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
@@ -1028,6 +1065,7 @@ export type TenantUncheckedUpdateWithoutMandatoryTrainingsInput = {
   razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
@@ -1106,6 +1144,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   razorpaySubId?: boolean
   samlEnabled?: boolean
   samlMetadataUrl?: boolean
+  suspendedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   users?: boolean | Prisma.Tenant$usersArgs<ExtArgs>
@@ -1128,6 +1167,7 @@ export type TenantSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   razorpaySubId?: boolean
   samlEnabled?: boolean
   samlMetadataUrl?: boolean
+  suspendedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tenant"]>
@@ -1145,6 +1185,7 @@ export type TenantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   razorpaySubId?: boolean
   samlEnabled?: boolean
   samlMetadataUrl?: boolean
+  suspendedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["tenant"]>
@@ -1162,11 +1203,12 @@ export type TenantSelectScalar = {
   razorpaySubId?: boolean
   samlEnabled?: boolean
   samlMetadataUrl?: boolean
+  suspendedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "logoUrl" | "brandColor" | "customDomain" | "plan" | "seatLimit" | "seatCount" | "razorpaySubId" | "samlEnabled" | "samlMetadataUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
+export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "logoUrl" | "brandColor" | "customDomain" | "plan" | "seatLimit" | "seatCount" | "razorpaySubId" | "samlEnabled" | "samlMetadataUrl" | "suspendedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
 export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.Tenant$usersArgs<ExtArgs>
   teams?: boolean | Prisma.Tenant$teamsArgs<ExtArgs>
@@ -1198,6 +1240,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     razorpaySubId: string | null
     samlEnabled: boolean
     samlMetadataUrl: string | null
+    suspendedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["tenant"]>
@@ -1639,6 +1682,7 @@ export interface TenantFieldRefs {
   readonly razorpaySubId: Prisma.FieldRef<"Tenant", 'String'>
   readonly samlEnabled: Prisma.FieldRef<"Tenant", 'Boolean'>
   readonly samlMetadataUrl: Prisma.FieldRef<"Tenant", 'String'>
+  readonly suspendedAt: Prisma.FieldRef<"Tenant", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Tenant", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tenant", 'DateTime'>
 }

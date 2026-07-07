@@ -112,3 +112,8 @@ export type AIChat = Prisma.AIChatModel
  * 
  */
 export type MandatoryTraining = Prisma.MandatoryTrainingModel
+/**
+ * Model AdminAuditLog
+ * 
+ */
+export type AdminAuditLog = Prisma.AdminAuditLogModel

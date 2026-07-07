@@ -3,11 +3,21 @@
 import { useAuth, useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+type SignUpRole = "STUDENT" | "INSTRUCTOR" | "ORG_ADMIN";
+
+const ROLE_OPTIONS: Array<{ value: SignUpRole; label: string; description: string }> = [
+  { value: "STUDENT", label: "Student", description: "Learn from courses" },
+  { value: "INSTRUCTOR", label: "Instructor", description: "Create and teach courses" },
+  { value: "ORG_ADMIN", label: "Organization", description: "Train your team" },
+];
 
 export default function SignUpPage() {
   const { signUp, errors, fetchStatus } = useSignUp();
   const { isSignedIn } = useAuth();
   const router = useRouter();
+  const [role, setRole] = useState<SignUpRole>("STUDENT");
 
   const handleSignUp = async (formData: FormData) => {
     const { error } = await signUp.password({
@@ -15,6 +25,10 @@ export default function SignUpPage() {
       password: formData.get("password") as string,
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
+      unsafeMetadata: {
+        role,
+        ...(role === "ORG_ADMIN" ? { orgName: formData.get("orgName") as string } : {}),
+      },
     });
 
     // An account already exists for this identifier — hand off to the sign-in flow
@@ -64,6 +78,14 @@ export default function SignUpPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-2 px-4">
         <div className="w-full max-w-sm bg-surface-1 rounded-xl shadow-(--shadow-lg) p-8">
+          <button
+            type="button"
+            onClick={() => signUp.reset()}
+            className="mb-4 text-xs text-text-muted hover:text-text-secondary transition"
+          >
+            ← Back to sign up
+          </button>
+
           <h1 className="text-2xl font-semibold text-text-primary mb-2">Check your email</h1>
           <p className="text-sm text-text-muted mb-6">
             We sent a 6-digit code to your email. Enter it below to verify your account.
@@ -127,6 +149,52 @@ export default function SignUpPage() {
         </div>
 
         <form action={handleSignUp} className="space-y-4">
+          <fieldset>
+            <legend className="block text-sm font-medium text-text-secondary mb-1.5">
+              I'm signing up as a
+            </legend>
+            <div className="grid grid-cols-3 gap-2">
+              {ROLE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRole(option.value)}
+                  aria-pressed={role === option.value}
+                  className={`rounded-md border px-2.5 py-2 text-left text-xs transition ${
+                    role === option.value
+                      ? "border-brand bg-brand-light text-brand-dark"
+                      : "border-border bg-surface-1 text-text-secondary hover:border-text-disabled"
+                  }`}
+                >
+                  <span className="block font-medium">{option.label}</span>
+                  <span className="block text-[11px] text-text-muted mt-0.5">
+                    {option.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          {role === "ORG_ADMIN" && (
+            <div>
+              <label
+                htmlFor="orgName"
+                className="block text-sm font-medium text-text-secondary mb-1.5"
+              >
+                Organization name
+              </label>
+              <input
+                id="orgName"
+                name="orgName"
+                type="text"
+                required
+                maxLength={100}
+                className="w-full px-3.5 py-2.5 rounded-md border border-border bg-surface-1 text-text-primary text-sm placeholder:text-text-disabled focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition"
+                placeholder="Acme Inc."
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label

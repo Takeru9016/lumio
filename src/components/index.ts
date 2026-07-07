@@ -1,3 +1,5 @@
+export { TenantsClient } from "./admin/TenantsClient";
+export { UsersClient } from "./admin/UsersClient";
 export { AiTutorChat } from "./ai/AiTutorChat";
 export { EnterpriseGateOverlay } from "./billing/EnterpriseGateOverlay";
 export { UpgradeModal } from "./billing/UpgradeModal";
@@ -35,3 +37,4 @@ export { EmptyState } from "./shared/EmptyState";
 export { ErrorBoundary } from "./shared/ErrorBoundary";
 export { GooeyToaster } from "./shared/GooeyToaster";
 export { SkeletonCard } from "./shared/SkeletonCard";
+export { StatCard } from "./shared/StatCard";
