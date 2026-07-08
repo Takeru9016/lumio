@@ -17,12 +17,16 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
-          <h1 className="max-w-xl text-4xl font-semibold text-text-primary md:text-5xl lg:text-6xl">
-            Run your courses. Let AI handle the busywork.
+          <span className="inline-flex items-center rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-medium text-text-secondary">
+            One platform, every role
+          </span>
+          <h1 className="mt-4 max-w-xl text-4xl font-semibold text-text-primary md:text-5xl lg:text-6xl">
+            One learning platform, built for students, instructors, and admins alike.
           </h1>
           <p className="mt-5 max-w-md text-base text-text-muted md:text-lg">
-            Video lessons, adaptive quizzes, and an AI tutor that answers from your own course
-            content, for teams and independent instructors.
+            Students learn with video lessons and an AI tutor grounded in the actual course content.
+            Instructors build and grade in a fraction of the time. Org admins track training
+            completion across every team, in one dashboard.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
@@ -32,10 +36,10 @@ export function Hero() {
               Get started free
             </Link>
             <Link
-              href="/pricing"
+              href="/#solutions"
               className="rounded-md border border-border bg-white px-5 py-2.5 text-sm font-medium text-text-primary transition-colors hover:bg-surface-2"
             >
-              See pricing
+              See how it works
             </Link>
           </div>
         </motion.div>
@@ -47,17 +51,10 @@ export function Hero() {
           className="relative"
         >
           <div className="overflow-hidden rounded-xl border border-border bg-white shadow-lg">
-            <div className="relative aspect-video">
-              <img
-                src="https://picsum.photos/seed/lumio-systems-design/640/360"
-                alt="Lesson video thumbnail"
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-text-primary shadow-md">
-                  <Play size={20} fill="currentColor" />
-                </span>
-              </div>
+            <div className="relative flex aspect-video items-center justify-center bg-linear-to-br from-brand-light via-white to-ai-bg">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-text-primary shadow-md">
+                <Play size={20} fill="currentColor" />
+              </span>
             </div>
             <div className="p-4">
               <p className="text-xs font-medium text-text-muted">Systems Design 101</p>

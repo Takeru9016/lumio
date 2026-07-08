@@ -18,7 +18,7 @@
   - `next.config.ts` with `serverExternalPackages: ["@prisma/client", "prisma"]`
   - `postcss.config.mjs` with `@tailwindcss/postcss`
   - `src/app/globals.css` with full `@theme {}` block (see DESIGN_SYSTEM.md)
-  - `src/proxy.ts` — Clerk middleware (public routes: `/`, `/pricing`, `/sign-in`, `/sign-up`, `/api/webhooks/*`)
+  - `src/proxy.ts` — Clerk middleware (public routes: `/`, `/sign-in`, `/sign-up`, `/api/webhooks/*`)
   - `.env.local` template
   - `AGENTS.md` at root
   - **Model:** Sonnet

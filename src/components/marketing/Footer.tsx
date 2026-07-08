@@ -2,8 +2,10 @@ import { GraduationCap } from "lucide-react";
 import Link from "next/link";
 
 const PRODUCT_LINKS = [
+  { href: "/#solutions", label: "Solutions" },
   { href: "/#capabilities", label: "Features" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/#pricing", label: "Pricing" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 const ACCOUNT_LINKS = [

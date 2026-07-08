@@ -6,8 +6,6 @@ import { redis } from "@/lib/redis";
 
 const isPublicRoute = createRouteMatcher([
   "/",
-  "/pricing",
-  "/about",
   "/suspended",
   "/sign-in(.*)",
   "/sign-up(.*)",

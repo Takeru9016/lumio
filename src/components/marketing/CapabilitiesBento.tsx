@@ -4,11 +4,18 @@ import { AiBadge } from "@/components/shared/AiBadge";
 
 export function CapabilitiesBento() {
   return (
-    <section id="capabilities" className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28">
+    <section
+      id="capabilities"
+      className="mx-auto max-w-7xl scroll-mt-16 px-4 py-20 md:px-6 md:py-28"
+    >
       <RevealOnScroll>
         <h2 className="max-w-lg text-3xl font-semibold text-text-primary md:text-4xl">
-          Everything a course needs, in one place.
+          One platform underneath all three roles.
         </h2>
+        <p className="mt-3 max-w-lg text-base text-text-muted">
+          Every capability below is shared infrastructure — students, instructors, and org admins
+          each get the parts of it that matter to them.
+        </p>
       </RevealOnScroll>
 
       <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3 md:grid-rows-2">
@@ -16,12 +23,10 @@ export function CapabilitiesBento() {
           delay={0.05}
           className="overflow-hidden rounded-lg border border-border bg-white shadow-sm md:col-span-2 md:row-span-2"
         >
-          <div className="relative aspect-[16/9] md:aspect-auto md:h-56">
-            <img
-              src="https://picsum.photos/seed/lumio-course-builder/800/450"
-              alt="Course builder with drag-to-reorder lessons"
-              className="h-full w-full object-cover"
-            />
+          <div className="relative flex aspect-video items-center justify-center bg-linear-to-br from-surface-2 to-brand-light md:aspect-auto md:h-56">
+            <span className="flex h-14 w-14 items-center justify-center rounded-md bg-white text-brand shadow-sm">
+              <PlayCircle size={26} />
+            </span>
           </div>
           <div className="p-5">
             <span className="flex h-9 w-9 items-center justify-center rounded-md bg-brand-light text-brand">

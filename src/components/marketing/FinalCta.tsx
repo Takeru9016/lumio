@@ -15,7 +15,7 @@ export function FinalCta() {
         >
           Get started free
         </Link>
-        <Link href="/pricing" className="text-sm font-medium text-white/80 hover:text-white">
+        <Link href="/#pricing" className="text-sm font-medium text-white/80 hover:text-white">
           or see pricing
         </Link>
       </RevealOnScroll>

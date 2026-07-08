@@ -178,11 +178,8 @@ lumio/
     ├── app/
     │   ├── globals.css                ← Tailwind v4 @theme config lives here
     │   ├── layout.tsx                 ← root layout, ClerkProvider, fonts
-    │   ├── page.tsx                   ← marketing homepage
-    │   ├── (marketing)/               ← public marketing pages
-    │   │   ├── pricing/page.tsx
-    │   │   ├── about/page.tsx
-    │   │   └── blog/                  ← not scheduled in PHASES.md, doc-only aspiration
+    │   ├── page.tsx                   ← marketing homepage (single page: hero, audience
+    │   │                                showcase, capabilities, pricing, FAQ, all in one)
     │   ├── (auth)/                    ← Clerk auth pages
     │   │   ├── sign-in/[[...sign-in]]/page.tsx
     │   │   └── sign-up/[[...sign-up]]/page.tsx
