@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { BookOpen, GraduationCap, Users } from "lucide-react";
+import { BookOpen, ClipboardList, GraduationCap, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -41,6 +41,25 @@ export default async function InstructorDashboardPage() {
         <StatCard label="Published courses" value={data.publishedCourseCount} icon={BookOpen} />
         <StatCard label="Total students" value={data.totalStudents} icon={Users} />
         <StatCard label="Total courses" value={data.courses.length} icon={GraduationCap} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <StatCard label="Completion rate" value={`${data.completionRate}%`} icon={TrendingUp} />
+        <Link
+          href="/instructor/students"
+          className="rounded-lg border border-border bg-white p-4 shadow-sm transition-colors hover:bg-surface-2"
+        >
+          <div className="flex items-center gap-2 text-text-muted">
+            <ClipboardList size={15} />
+            <span className="text-xs font-medium">Pending grading</span>
+          </div>
+          <p
+            className="mt-2 text-2xl font-bold text-text-primary"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            {data.pendingGradingCount}
+          </p>
+        </Link>
       </div>
 
       <div className="rounded-lg border border-border bg-white p-5 shadow-sm">

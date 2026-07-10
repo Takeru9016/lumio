@@ -56,7 +56,7 @@ export default async function AssignmentsPage() {
             return (
               <li key={item.assignmentId}>
                 <Link
-                  href={`/courses/${item.courseId}/lessons/${item.lessonId}`}
+                  href={`/courses/${item.courseSlug}/lessons/${item.lessonSlug}`}
                   className="flex items-center justify-between gap-4 rounded-lg border border-border bg-white p-4 shadow-sm transition-colors hover:bg-surface-2"
                 >
                   <div className="min-w-0">

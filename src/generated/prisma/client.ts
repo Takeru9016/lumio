@@ -62,6 +62,21 @@ export type Team = Prisma.TeamModel
  */
 export type TeamMember = Prisma.TeamMemberModel
 /**
+ * Model Invitation
+ * 
+ */
+export type Invitation = Prisma.InvitationModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model OrgRequest
+ * 
+ */
+export type OrgRequest = Prisma.OrgRequestModel
+/**
  * Model Course
  * 
  */

@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { seatLimitForPlan } from "@/constants/plans";
 import type { Plan } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { DunningEmail } from "@/lib/emails/dunning";
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
           ? [
               db.tenant.update({
                 where: { id: subscriber.tenantId },
-                data: { plan: rawPlan },
+                data: { plan: rawPlan, seatLimit: seatLimitForPlan(rawPlan) },
               }),
               db.user.updateMany({
                 where: { tenantId: subscriber.tenantId },

@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/downgrade-subscriptions",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/decay-streaks",
+      "schedule": "0 0 * * *"
     }
   ]
 }

@@ -14,12 +14,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { role: true },
+    select: { id: true, role: true },
   });
 
   if (!user || user.role !== "SUPER_ADMIN") {
     redirect(user ? getRoleDashboard(user.role) : "/onboarding");
   }
+
+  const unreadCount = await db.notification.count({ where: { userId: user.id, isRead: false } });
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -27,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Sidebar role="SUPER_ADMIN" />
       </ErrorBoundary>
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <TopNav />
+        <TopNav initialUnreadCount={unreadCount} />
         <main className="flex-1 overflow-y-auto">
           <ErrorBoundary>{children}</ErrorBoundary>
         </main>

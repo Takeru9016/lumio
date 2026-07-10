@@ -15,12 +15,14 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { role: true, currentStreak: true, tenantId: true },
+    select: { id: true, role: true, currentStreak: true, tenantId: true },
   });
 
   if (!user || user.role !== "ORG_ADMIN") {
     redirect(user ? getRoleDashboard(user.role) : "/onboarding");
   }
+
+  const unreadCount = await db.notification.count({ where: { userId: user.id, isRead: false } });
 
   const tenant = user.tenantId
     ? await db.tenant.findUnique({
@@ -42,7 +44,11 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
         <Sidebar role="ORG_ADMIN" />
       </ErrorBoundary>
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <TopNav currentStreak={user.currentStreak} logoUrl={tenant?.logoUrl ?? null} />
+        <TopNav
+          currentStreak={user.currentStreak}
+          logoUrl={tenant?.logoUrl ?? null}
+          initialUnreadCount={unreadCount}
+        />
         <main className="flex-1 overflow-y-auto">
           <ErrorBoundary>{children}</ErrorBoundary>
         </main>

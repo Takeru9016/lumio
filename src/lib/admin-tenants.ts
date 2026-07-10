@@ -5,7 +5,6 @@ export interface TenantListItem {
   name: string;
   slug: string;
   plan: string;
-  seatCount: number;
   seatLimit: number;
   memberCount: number;
   suspendedAt: Date | null;
@@ -19,7 +18,6 @@ export async function getAllTenants(): Promise<TenantListItem[]> {
       name: true,
       slug: true,
       plan: true,
-      seatCount: true,
       seatLimit: true,
       suspendedAt: true,
       createdAt: true,
@@ -33,8 +31,9 @@ export async function getAllTenants(): Promise<TenantListItem[]> {
     name: t.name,
     slug: t.slug,
     plan: t.plan,
-    seatCount: t.seatCount,
     seatLimit: t.seatLimit,
+    // `Tenant.seatCount` is never written anywhere in this codebase — the real
+    // member count (`_count.users`) is used instead.
     memberCount: t._count.users,
     suspendedAt: t.suspendedAt,
     createdAt: t.createdAt,

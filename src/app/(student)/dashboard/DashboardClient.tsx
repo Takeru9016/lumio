@@ -1,9 +1,10 @@
 "use client";
 
-import { BookOpen, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { BookOpen, ChevronDown, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 import { EmptyState } from "@/components";
 
@@ -22,6 +23,7 @@ interface DashboardClientProps {
   avgCompletion: number;
   xpThisWeek: number;
   continueLearning: ContinueLearningItem[];
+  completedCourses: ContinueLearningItem[];
 }
 
 const containerVariants = {
@@ -42,7 +44,10 @@ export function DashboardClient({
   avgCompletion,
   xpThisWeek,
   continueLearning,
+  completedCourses,
 }: DashboardClientProps) {
+  const [showCompleted, setShowCompleted] = useState(false);
+
   const stats = [
     { icon: BookOpen, label: "Enrolled courses", value: enrolledCount.toString() },
     { icon: TrendingUp, label: "Avg completion", value: `${avgCompletion}%` },
@@ -142,6 +147,54 @@ export function DashboardClient({
           ))
         )}
       </div>
+
+      {completedCourses.length > 0 && (
+        <motion.div variants={itemVariants} className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setShowCompleted((v) => !v)}
+            className="flex items-center gap-1.5 text-sm font-semibold text-text-primary"
+          >
+            Completed ({completedCourses.length})
+            <ChevronDown
+              size={15}
+              className={`text-text-muted transition-transform ${showCompleted ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {showCompleted && (
+            <div className="space-y-3">
+              {completedCourses.map((course) => (
+                <Link
+                  key={course.courseSlug}
+                  href={`/courses/${course.courseSlug}`}
+                  className="flex items-center gap-4 bg-surface-1 border border-border rounded-lg p-4 shadow-sm hover:border-border-strong transition-colors"
+                >
+                  <div className="relative h-12 w-20 shrink-0 rounded-md overflow-hidden bg-surface-3 flex items-center justify-center text-lg">
+                    {course.thumbnailUrl ? (
+                      <Image
+                        src={course.thumbnailUrl}
+                        alt={course.title}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    ) : (
+                      "📚"
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-text-primary truncate">
+                      {course.title}
+                    </p>
+                    <span className="text-xs text-text-muted">Completed</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
 
       <motion.div variants={itemVariants}>
         <Link

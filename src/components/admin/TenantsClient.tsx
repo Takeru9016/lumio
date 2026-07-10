@@ -64,7 +64,6 @@ export function TenantsClient({ initialTenants }: TenantsClientProps) {
               <th className="px-4 py-3 font-medium text-text-muted">Organization</th>
               <th className="px-4 py-3 font-medium text-text-muted">Plan</th>
               <th className="px-4 py-3 font-medium text-text-muted">Seats</th>
-              <th className="px-4 py-3 font-medium text-text-muted">Members</th>
               <th className="px-4 py-3 font-medium text-text-muted">Status</th>
               <th className="px-4 py-3 font-medium text-text-muted">Created</th>
               <th className="px-4 py-3 font-medium text-text-muted" />
@@ -81,9 +80,8 @@ export function TenantsClient({ initialTenants }: TenantsClientProps) {
                   </td>
                   <td className="px-4 py-3 text-text-secondary">{tenant.plan}</td>
                   <td className="px-4 py-3 text-text-secondary">
-                    {tenant.seatCount}/{tenant.seatLimit}
+                    {tenant.memberCount}/{tenant.seatLimit}
                   </td>
-                  <td className="px-4 py-3 text-text-secondary">{tenant.memberCount}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${

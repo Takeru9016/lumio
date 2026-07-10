@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { seatLimitForPlan } from "@/constants/plans";
 import { db } from "@/lib/db";
 
 /**
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
         ? [
             db.tenant.update({
               where: { id: user.tenantId },
-              data: { plan: "FREE", razorpaySubId: null },
+              data: { plan: "FREE", razorpaySubId: null, seatLimit: seatLimitForPlan("FREE") },
             }),
             db.user.updateMany({
               where: { tenantId: user.tenantId },

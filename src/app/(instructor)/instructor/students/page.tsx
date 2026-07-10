@@ -1,9 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { format } from "date-fns";
 import { ClipboardList, Users } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
+import { getInstructorStudents } from "@/lib/instructor-students";
 
 import { type SubmissionItem, SubmissionsGrader } from "./_components/SubmissionsGrader";
 
@@ -17,73 +19,8 @@ export default async function InstructorStudentsPage() {
   });
   if (!dbUser) redirect("/sign-in");
 
-  // ── Enrolled students ──────────────────────────────────────────────────────
-  const rawEnrollments = await db.enrollment.findMany({
-    where: { course: { instructorId: dbUser.id } },
-    select: {
-      id: true,
-      status: true,
-      createdAt: true,
-      lastAccessed: true,
-      userId: true,
-      courseId: true,
-      user: { select: { name: true, email: true } },
-      course: {
-        select: {
-          id: true,
-          title: true,
-          sections: { select: { lessons: { select: { id: true } } } },
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  // Build courseId → lesson ID list map
-  const courseLessonIds = new Map<string, string[]>();
-  for (const e of rawEnrollments) {
-    if (!courseLessonIds.has(e.courseId)) {
-      courseLessonIds.set(
-        e.courseId,
-        e.course.sections.flatMap((s) => s.lessons.map((l) => l.id))
-      );
-    }
-  }
-
-  const allLessonIds = [...new Set([...courseLessonIds.values()].flat())];
-  const allUserIds = [...new Set(rawEnrollments.map((e) => e.userId))];
-
-  const completedProgress =
-    allLessonIds.length > 0 && allUserIds.length > 0
-      ? await db.lessonProgress.findMany({
-          where: {
-            userId: { in: allUserIds },
-            lessonId: { in: allLessonIds },
-            isCompleted: true,
-          },
-          select: { userId: true, lessonId: true },
-        })
-      : [];
-
-  const completedByUser = new Map<string, Set<string>>();
-  for (const p of completedProgress) {
-    if (!completedByUser.has(p.userId)) completedByUser.set(p.userId, new Set());
-    completedByUser.get(p.userId)!.add(p.lessonId);
-  }
-
-  const enrolledStudents = rawEnrollments.map((e) => {
-    const lessonIds = courseLessonIds.get(e.courseId) ?? [];
-    const completed = lessonIds.filter((id) => completedByUser.get(e.userId)?.has(id)).length;
-    return {
-      id: e.id,
-      studentName: e.user.name,
-      studentEmail: e.user.email,
-      courseTitle: e.course.title,
-      enrolledAt: e.createdAt,
-      lastAccessed: e.lastAccessed,
-      progressPct: lessonIds.length > 0 ? Math.round((completed / lessonIds.length) * 100) : 0,
-    };
-  });
+  // ── Enrolled students (rolled up per student, across all their courses) ───
+  const enrolledStudents = await getInstructorStudents(dbUser.id);
 
   // ── Submissions to grade ───────────────────────────────────────────────────
   const rawSubmissions = await db.assignmentSubmission.findMany({
@@ -175,7 +112,7 @@ export default async function InstructorStudentsPage() {
                     Student
                   </th>
                   <th className="px-4 py-2.5 text-left text-xs font-semibold text-text-secondary">
-                    Course
+                    Courses
                   </th>
                   <th className="px-4 py-2.5 text-left text-xs font-semibold text-text-secondary">
                     Enrolled
@@ -184,25 +121,30 @@ export default async function InstructorStudentsPage() {
                     Last active
                   </th>
                   <th className="px-4 py-2.5 text-right text-xs font-semibold text-text-secondary">
+                    Quiz avg
+                  </th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-text-secondary">
                     Progress
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {enrolledStudents.map((s) => (
-                  <tr key={s.id} className="bg-surface-1 hover:bg-surface-2 transition-colors">
+                  <tr key={s.userId} className="bg-surface-1 hover:bg-surface-2 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-text-primary truncate max-w-[160px]">
-                        {s.studentName ?? s.studentEmail}
-                      </p>
-                      {s.studentName && (
-                        <p className="text-xs text-text-muted truncate max-w-[160px]">
-                          {s.studentEmail}
+                      <Link href={`/instructor/students/${s.userId}`} className="hover:underline">
+                        <p className="font-medium text-text-primary truncate max-w-[160px]">
+                          {s.name ?? s.email}
                         </p>
-                      )}
+                        {s.name && (
+                          <p className="text-xs text-text-muted truncate max-w-[160px]">
+                            {s.email}
+                          </p>
+                        )}
+                      </Link>
                     </td>
                     <td className="px-4 py-3 text-text-secondary truncate max-w-[180px]">
-                      {s.courseTitle}
+                      {s.courseCount === 1 ? s.courseTitles[0] : `${s.courseCount} courses`}
                     </td>
                     <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
                       {format(s.enrolledAt, "MMM d, yyyy")}
@@ -210,16 +152,19 @@ export default async function InstructorStudentsPage() {
                     <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
                       {s.lastAccessed ? format(s.lastAccessed, "MMM d, yyyy") : "—"}
                     </td>
+                    <td className="px-4 py-3 text-text-muted text-xs text-right whitespace-nowrap">
+                      {s.quizAvg != null ? `${s.quizAvg}%` : "—"}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-16 h-1.5 bg-surface-3 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-brand rounded-full"
-                            style={{ width: `${s.progressPct}%` }}
+                            style={{ width: `${s.avgProgress}%` }}
                           />
                         </div>
                         <span className="text-xs text-text-muted w-8 text-right">
-                          {s.progressPct}%
+                          {s.avgProgress}%
                         </span>
                       </div>
                     </td>

@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { TeamsClient } from "@/components";
 import { db } from "@/lib/db";
@@ -15,7 +16,7 @@ export default async function OrgTeamsPage() {
   if (!dbUser || dbUser.role !== "ORG_ADMIN") redirect("/dashboard");
   if (!dbUser.tenantId) redirect("/onboarding");
 
-  const [teams, tenant] = await Promise.all([
+  const [teams, tenant, pendingInvitations, activeMemberCount] = await Promise.all([
     db.team.findMany({
       where: { tenantId: dbUser.tenantId },
       select: {
@@ -32,8 +33,17 @@ export default async function OrgTeamsPage() {
     }),
     db.tenant.findUniqueOrThrow({
       where: { id: dbUser.tenantId },
-      select: { seatCount: true, seatLimit: true },
+      select: { seatLimit: true },
     }),
+    db.invitation.findMany({
+      where: { tenantId: dbUser.tenantId, status: "PENDING" },
+      select: { id: true, email: true, role: true, createdAt: true, expiresAt: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    // `Tenant.seatCount` is never written anywhere in this codebase, so it isn't a live
+    // member counter — the real active-member count is used instead (matches the org
+    // dashboard's query in src/lib/org-dashboard.ts).
+    db.user.count({ where: { tenantId: dbUser.tenantId, deletedAt: null } }),
   ]);
 
   return (
@@ -45,7 +55,14 @@ export default async function OrgTeamsPage() {
         </p>
       </div>
 
-      <TeamsClient initialTeams={teams} seatCount={tenant.seatCount} seatLimit={tenant.seatLimit} />
+      <Suspense fallback={null}>
+        <TeamsClient
+          initialTeams={teams}
+          seatCount={activeMemberCount}
+          seatLimit={tenant.seatLimit}
+          initialInvitations={pendingInvitations}
+        />
+      </Suspense>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 
+import { seatLimitForPlan } from "@/constants/plans";
 import type { Plan } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { razorpay } from "@/lib/razorpay";
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
   await db.$transaction([
     db.tenant.update({
       where: { id: admin.tenantId },
-      data: { plan: newPlan },
+      data: { plan: newPlan, seatLimit: seatLimitForPlan(newPlan) },
     }),
     db.user.updateMany({
       where: { tenantId: admin.tenantId },

@@ -32,20 +32,38 @@ export default async function DashboardPage() {
   });
   if (!dbUser) redirect("/onboarding");
 
-  const activeEnrollments = await db.enrollment.findMany({
-    where: { userId: dbUser.id, status: "ACTIVE" },
-    orderBy: { lastAccessed: "desc" },
-    select: {
-      courseId: true,
-      course: { select: { slug: true, title: true, thumbnailUrl: true } },
-    },
-  });
+  const [activeEnrollments, completedEnrollments] = await Promise.all([
+    db.enrollment.findMany({
+      where: { userId: dbUser.id, status: "ACTIVE" },
+      orderBy: { lastAccessed: "desc" },
+      select: {
+        courseId: true,
+        course: { select: { slug: true, title: true, thumbnailUrl: true } },
+      },
+    }),
+    db.enrollment.findMany({
+      where: { userId: dbUser.id, status: "COMPLETED" },
+      orderBy: { lastAccessed: "desc" },
+      select: {
+        courseId: true,
+        course: { select: { slug: true, title: true, thumbnailUrl: true } },
+      },
+    }),
+  ]);
 
   const sevenDaysAgo = new Date(Date.now() - SEVEN_DAYS_MS);
 
-  const [enrollmentsWithProgress, xpAgg] = await Promise.all([
+  const [enrollmentsWithProgress, completedWithProgress, xpAgg] = await Promise.all([
     Promise.all(
       activeEnrollments.map(async (e) => ({
+        courseSlug: e.course.slug,
+        title: e.course.title,
+        thumbnailUrl: e.course.thumbnailUrl,
+        progress: await getCourseProgress(dbUser.id, e.courseId),
+      }))
+    ),
+    Promise.all(
+      completedEnrollments.map(async (e) => ({
         courseSlug: e.course.slug,
         title: e.course.title,
         thumbnailUrl: e.course.thumbnailUrl,
@@ -58,10 +76,13 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  const enrolledCount = enrollmentsWithProgress.length;
+  const enrolledCount = enrollmentsWithProgress.length + completedWithProgress.length;
   const avgCompletion =
-    enrolledCount > 0
-      ? Math.round(enrollmentsWithProgress.reduce((sum, e) => sum + e.progress, 0) / enrolledCount)
+    enrollmentsWithProgress.length > 0
+      ? Math.round(
+          enrollmentsWithProgress.reduce((sum, e) => sum + e.progress, 0) /
+            enrollmentsWithProgress.length
+        )
       : 0;
 
   const hour = new Date().getHours();
@@ -75,7 +96,8 @@ export default async function DashboardPage() {
       enrolledCount={enrolledCount}
       avgCompletion={avgCompletion}
       xpThisWeek={xpAgg._sum.amount ?? 0}
-      continueLearning={enrollmentsWithProgress.slice(0, 3)}
+      continueLearning={enrollmentsWithProgress}
+      completedCourses={completedWithProgress}
     />
   );
 }

@@ -24,7 +24,7 @@ type SubscriptionStatus = "ACTIVE" | "CANCELLED" | "PAST_DUE" | "PAUSED" | null;
 const PLAN_ORDER: Plan[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
 
 const PLAN_COPY: Record<Plan, { name: string; price: string; blurb: string }> = {
-  FREE: { name: "Free", price: "₹0", blurb: "1 course · no AI calls" },
+  FREE: { name: "Free", price: "₹0", blurb: "1 course · no AI calls · 3 seats" },
   STARTER: { name: "Starter", price: "₹1,499/mo", blurb: "50 AI calls · 10 courses · 10 seats" },
   PRO: { name: "Pro", price: "₹4,999/mo", blurb: "200 AI calls · unlimited courses · 100 seats" },
   ENTERPRISE: {

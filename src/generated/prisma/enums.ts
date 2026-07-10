@@ -84,3 +84,42 @@ export const SubmissionStatus = {
 } as const
 
 export type SubmissionStatus = (typeof SubmissionStatus)[keyof typeof SubmissionStatus]
+
+
+export const InvitationStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REVOKED: 'REVOKED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus]
+
+
+export const NotificationType = {
+  ASSIGNMENT_GRADED: 'ASSIGNMENT_GRADED',
+  INVITATION_ACCEPTED: 'INVITATION_ACCEPTED',
+  ORG_REQUEST_CREATED: 'ORG_REQUEST_CREATED',
+  ORG_REQUEST_RESOLVED: 'ORG_REQUEST_RESOLVED'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const OrgRequestType = {
+  SEAT_INCREASE: 'SEAT_INCREASE',
+  ACCOUNT_CREATE: 'ACCOUNT_CREATE',
+  COURSE_CAPACITY: 'COURSE_CAPACITY',
+  OTHER: 'OTHER'
+} as const
+
+export type OrgRequestType = (typeof OrgRequestType)[keyof typeof OrgRequestType]
+
+
+export const OrgRequestStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  DENIED: 'DENIED'
+} as const
+
+export type OrgRequestStatus = (typeof OrgRequestStatus)[keyof typeof OrgRequestStatus]

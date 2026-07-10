@@ -25,21 +25,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ teamId:
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
-  const [team, tenant] = await Promise.all([
-    db.team.findUnique({ where: { id: teamId }, select: { tenantId: true } }),
-    db.tenant.findUnique({
-      where: { id: dbUser.tenantId },
-      select: { seatCount: true, seatLimit: true },
-    }),
-  ]);
+  const team = await db.team.findUnique({ where: { id: teamId }, select: { tenantId: true } });
 
   if (!team || team.tenantId !== dbUser.tenantId) {
     return NextResponse.json({ error: "Team not found" }, { status: 404 });
   }
-  if (!tenant || tenant.seatCount >= tenant.seatLimit) {
-    return NextResponse.json({ error: "Seat limit reached" }, { status: 403 });
-  }
 
+  // No seat-limit check here: this only assigns an *existing* tenant member (verified
+  // below) to a team. They already occupy a seat — team membership doesn't consume
+  // another one. Seat limits are enforced where new members actually join the tenant
+  // (POST /api/org/invitations).
   const member = await db.user.findUnique({
     where: { email: email.trim().toLowerCase() },
     select: { id: true, name: true, email: true, role: true, tenantId: true, deletedAt: true },

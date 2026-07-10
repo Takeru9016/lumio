@@ -142,8 +142,6 @@ export default async function StudentSettingsPage({ searchParams }: StudentSetti
               plan={dbUser.plan}
               aiCallsUsed={dbUser.aiCallsUsed}
               subscriptionStatus={dbUser.subscriptionStatus}
-              email={dbUser.email}
-              name={dbUser.name}
             />
           </div>
         </TabsContent>

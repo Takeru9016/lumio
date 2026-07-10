@@ -23,10 +23,15 @@ export default async function OrgSettingsPage() {
   if (!admin || admin.role !== "ORG_ADMIN") redirect("/dashboard");
   if (!admin.tenantId) redirect("/onboarding");
 
-  const tenant = await db.tenant.findUnique({
-    where: { id: admin.tenantId },
-    select: { name: true, slug: true, plan: true, seatCount: true, seatLimit: true },
-  });
+  const [tenant, activeMemberCount] = await Promise.all([
+    db.tenant.findUnique({
+      where: { id: admin.tenantId },
+      select: { name: true, slug: true, plan: true, seatLimit: true },
+    }),
+    // `Tenant.seatCount` is never written anywhere in this codebase — the real
+    // active-member count is used instead (matches org dashboard / teams page).
+    db.user.count({ where: { tenantId: admin.tenantId, deletedAt: null } }),
+  ]);
   if (!tenant) redirect("/onboarding");
 
   return (
@@ -62,7 +67,7 @@ export default async function OrgSettingsPage() {
           <div>
             <p className="text-xs text-text-muted">Seats</p>
             <p className="text-sm font-semibold text-text-primary">
-              {tenant.seatCount} / {tenant.seatLimit}
+              {activeMemberCount} / {tenant.seatLimit}
             </p>
           </div>
         </div>

@@ -1,18 +1,24 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { Bell } from "lucide-react";
 import Link from "next/link";
 
+import { NotificationBell } from "@/components/layout/NotificationBell";
 import { AiBadge } from "@/components/shared/AiBadge";
 
 interface TopNavProps {
   showAiBadge?: boolean;
   currentStreak?: number;
   logoUrl?: string | null;
+  initialUnreadCount?: number;
 }
 
-export function TopNav({ showAiBadge = false, currentStreak = 0, logoUrl = null }: TopNavProps) {
+export function TopNav({
+  showAiBadge = false,
+  currentStreak = 0,
+  logoUrl = null,
+  initialUnreadCount = 0,
+}: TopNavProps) {
   return (
     <header
       className="h-[52px] flex items-center justify-between px-4 bg-white shrink-0"
@@ -43,13 +49,7 @@ export function TopNav({ showAiBadge = false, currentStreak = 0, logoUrl = null 
           <span className="text-sm font-medium text-text-muted">🔥 {currentStreak}-day</span>
         )}
 
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="p-1.5 text-text-muted hover:text-text-primary hover:bg-surface-2 rounded-md transition-colors"
-        >
-          <Bell size={18} />
-        </button>
+        <NotificationBell initialUnreadCount={initialUnreadCount} />
 
         <UserButton />
       </div>

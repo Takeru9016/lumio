@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 export type StudentAssignmentStatus = "NOT_SUBMITTED" | "OVERDUE" | "SUBMITTED" | "LATE" | "GRADED";
 
 export interface StudentAssignmentItem {
-  courseId: string;
+  courseSlug: string;
   courseTitle: string;
-  lessonId: string;
+  lessonSlug: string;
   assignmentId: string;
   title: string;
   dueDate: Date | null;
@@ -31,7 +31,8 @@ export async function getStudentAssignments(userId: string): Promise<StudentAssi
     },
     select: {
       id: true,
-      section: { select: { course: { select: { id: true, title: true } } } },
+      slug: true,
+      section: { select: { course: { select: { slug: true, title: true } } } },
       assignment: {
         select: {
           id: true,
@@ -61,9 +62,9 @@ export async function getStudentAssignments(userId: string): Promise<StudentAssi
       }
 
       return {
-        courseId: lesson.section.course.id,
+        courseSlug: lesson.section.course.slug,
         courseTitle: lesson.section.course.title,
-        lessonId: lesson.id,
+        lessonSlug: lesson.slug,
         assignmentId: assignment.id,
         title: assignment.title,
         dueDate: assignment.dueDate,

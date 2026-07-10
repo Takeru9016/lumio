@@ -5,7 +5,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { SendHorizonal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { AiBadge, UpgradeModal } from "@/components";
+import { UpgradeModal } from "@/components";
 import { usePlan } from "@/hooks/usePlan";
 import type { Plan } from "@/types";
 
@@ -83,19 +83,13 @@ export function AiTutorChat({
         />
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-lg text-ai" aria-hidden>
-            ✦
-          </span>
-          <span className="text-sm font-semibold text-text-primary">AI Tutor</span>
-          <AiBadge label="AI Tutor" />
-        </div>
-        {aiCallsRemaining !== Infinity && (
+      {/* Header — no title here: the standalone page's <h1> and the course player's tab
+          label already say "AI Tutor", so this only needs the quota counter. */}
+      {aiCallsRemaining !== Infinity && (
+        <div className="flex items-center justify-end gap-2 border-b border-border pb-3">
           <span className="text-xs text-text-muted">{aiCallsRemaining} calls left</span>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto py-4 space-y-4">

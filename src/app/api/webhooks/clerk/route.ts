@@ -1,9 +1,11 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
+import { seatLimitForPlan } from "@/constants/plans";
 import type { Role } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { WelcomeEmail } from "@/lib/emails/welcome";
+import { createNotification } from "@/lib/notifications";
 import { generateUniqueTenantSlug } from "@/lib/org-slug";
 import { resend } from "@/lib/resend";
 
@@ -91,6 +93,63 @@ export async function POST(req: Request) {
 
     const name = [data.first_name, data.last_name].filter(Boolean).join(" ") || null;
 
+    // Authoritative source for invited instructors/students: our own Invitation row,
+    // looked up by email. Deliberately not relying on Clerk's publicMetadata
+    // propagating onto this webhook payload — that's a timing assumption this code
+    // shouldn't depend on when a DB-backed lookup is just as easy and always correct.
+    const pendingInvitation = await db.invitation.findFirst({
+      where: { email: email.toLowerCase(), status: "PENDING" },
+      select: { id: true, tenantId: true, role: true, invitedById: true },
+    });
+
+    if (pendingInvitation) {
+      await db.$transaction([
+        db.user.create({
+          data: {
+            clerkId: data.id,
+            email,
+            name,
+            avatarUrl: data.image_url,
+            role: pendingInvitation.role,
+            plan: "FREE",
+            tenantId: pendingInvitation.tenantId,
+          },
+        }),
+        db.invitation.update({
+          where: { id: pendingInvitation.id },
+          data: { status: "ACCEPTED" },
+        }),
+      ]);
+
+      const client = await clerkClient();
+      await client.users.updateUserMetadata(data.id, {
+        publicMetadata: { role: pendingInvitation.role },
+      });
+
+      await createNotification({
+        userId: pendingInvitation.invitedById,
+        tenantId: pendingInvitation.tenantId,
+        type: "INVITATION_ACCEPTED",
+        title: "Invitation accepted",
+        body: `${name ?? email} joined as ${pendingInvitation.role.toLowerCase()}`,
+        link: "/org/teams",
+      }).catch(() => {});
+
+      resend.emails
+        .send({
+          from: "Lumio <hello@lumio.io>",
+          to: email,
+          subject: "Welcome to Lumio",
+          react: WelcomeEmail({
+            name: name ?? email.split("@")[0],
+            dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+          }),
+        })
+        .catch(() => {});
+
+      return Response.json({ received: true });
+    }
+
     let role = resolveSelfServeRole(data.unsafe_metadata.role);
     const orgName = data.unsafe_metadata.orgName?.trim();
 
@@ -105,7 +164,7 @@ export async function POST(req: Request) {
       const slug = await generateUniqueTenantSlug(orgName);
       await db.$transaction(async (tx) => {
         const tenant = await tx.tenant.create({
-          data: { name: orgName, slug },
+          data: { name: orgName, slug, seatLimit: seatLimitForPlan("FREE") },
         });
         await tx.user.create({
           data: {

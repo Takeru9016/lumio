@@ -16,6 +16,8 @@ export interface InstructorDashboardData {
   totalStudents: number;
   publishedCourseCount: number;
   enrollmentsByDay: { date: string; count: number }[];
+  completionRate: number;
+  pendingGradingCount: number;
 }
 
 export async function getInstructorDashboardData(
@@ -23,28 +25,48 @@ export async function getInstructorDashboardData(
 ): Promise<InstructorDashboardData> {
   const thirtyDaysAgo = new Date(Date.now() - THIRTY_DAYS_MS);
 
-  const [courses, distinctStudents, recentEnrollments] = await Promise.all([
-    db.course.findMany({
-      where: { instructorId },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        status: true,
-        _count: { select: { enrollments: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    db.enrollment.findMany({
-      where: { course: { instructorId } },
-      select: { userId: true },
-      distinct: ["userId"],
-    }),
-    db.enrollment.findMany({
-      where: { course: { instructorId }, createdAt: { gte: thirtyDaysAgo } },
-      select: { createdAt: true },
-    }),
-  ]);
+  const [courses, distinctStudents, recentEnrollments, enrollmentStatuses, pendingGradingCount] =
+    await Promise.all([
+      db.course.findMany({
+        where: { instructorId },
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          status: true,
+          _count: { select: { enrollments: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      db.enrollment.findMany({
+        where: { course: { instructorId } },
+        select: { userId: true },
+        distinct: ["userId"],
+      }),
+      db.enrollment.findMany({
+        where: { course: { instructorId }, createdAt: { gte: thirtyDaysAgo } },
+        select: { createdAt: true },
+      }),
+      db.enrollment.findMany({
+        where: { course: { instructorId }, status: { in: ["ACTIVE", "COMPLETED"] } },
+        select: { status: true },
+      }),
+      db.assignmentSubmission.count({
+        where: {
+          status: { in: ["SUBMITTED", "LATE"] },
+          assignment: { lesson: { section: { course: { instructorId } } } },
+        },
+      }),
+    ]);
+
+  const completionRate =
+    enrollmentStatuses.length > 0
+      ? Math.round(
+          (enrollmentStatuses.filter((e) => e.status === "COMPLETED").length /
+            enrollmentStatuses.length) *
+            100
+        )
+      : 0;
 
   const countByDate = new Map<string, number>();
   for (const e of recentEnrollments) {
@@ -67,5 +89,7 @@ export async function getInstructorDashboardData(
     totalStudents: distinctStudents.length,
     publishedCourseCount: courses.filter((c) => c.status === "PUBLISHED").length,
     enrollmentsByDay,
+    completionRate,
+    pendingGradingCount,
   };
 }

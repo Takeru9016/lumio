@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
+import { createNotification } from "@/lib/notifications";
 
 const bodySchema = z.object({
   score: z.number().int().min(0),
@@ -33,11 +34,12 @@ export async function PUT(
   const assignment = await db.assignment.findUnique({
     where: { id: assignmentId },
     select: {
+      title: true,
       maxScore: true,
       lesson: {
         select: {
           section: {
-            select: { course: { select: { instructorId: true } } },
+            select: { course: { select: { instructorId: true, title: true } } },
           },
         },
       },
@@ -64,7 +66,7 @@ export async function PUT(
 
   const existingSubmission = await db.assignmentSubmission.findFirst({
     where: { id: submissionId, assignmentId },
-    select: { id: true },
+    select: { id: true, userId: true, user: { select: { tenantId: true } } },
   });
   if (!existingSubmission)
     return NextResponse.json({ error: "Submission not found" }, { status: 404 });
@@ -78,6 +80,17 @@ export async function PUT(
       gradedAt: new Date(),
     },
   });
+
+  if (existingSubmission.user.tenantId) {
+    await createNotification({
+      userId: existingSubmission.userId,
+      tenantId: existingSubmission.user.tenantId,
+      type: "ASSIGNMENT_GRADED",
+      title: "Assignment graded",
+      body: `"${assignment.title}" in ${assignment.lesson.section.course.title} scored ${score}/${assignment.maxScore}`,
+      link: "/assignments",
+    }).catch(() => {});
+  }
 
   return NextResponse.json({ submission });
 }

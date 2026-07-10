@@ -20,7 +20,7 @@ export default async function OrgDashboardPage() {
   const data = await getOrgDashboardData(dbUser.tenantId);
   const mostUrgentTraining = data.overdueTrainings[0];
   const seatUsagePct = Math.min(
-    Math.round((data.tenant.seatCount / Math.max(data.tenant.seatLimit, 1)) * 100),
+    Math.round((data.activeMembers / Math.max(data.tenant.seatLimit, 1)) * 100),
     100
   );
   const isNearSeatLimit = seatUsagePct >= 80;
@@ -43,6 +43,16 @@ export default async function OrgDashboardPage() {
           <p className="text-2xl font-bold text-text-primary font-heading">
             {data.completionRate}%
           </p>
+          {data.completionRateDelta !== 0 && (
+            <p
+              className={`text-xs mt-1 font-medium ${
+                data.completionRateDelta > 0 ? "text-success" : "text-danger"
+              }`}
+            >
+              {data.completionRateDelta > 0 ? "+" : ""}
+              {data.completionRateDelta} completions vs. prior 30 days
+            </p>
+          )}
         </div>
         <div className="bg-white border border-border rounded-lg p-4 shadow-sm">
           <p className="text-xs font-medium text-text-muted mb-2">Overdue training</p>
@@ -84,7 +94,8 @@ export default async function OrgDashboardPage() {
         </div>
       )}
 
-      {/* AI Skills Gap card */}
+      {/* AI Skills Gap — feature is still a "coming soon" placeholder in Reports,
+          so this must not claim it's ready (see reports/page.tsx skills-gap tab). */}
       <Link
         href="/reports"
         className="block bg-(--color-ai-bg) border border-(--color-ai-border) rounded-lg p-4
@@ -92,17 +103,114 @@ export default async function OrgDashboardPage() {
       >
         <span className="text-xl">✦</span>
         <div>
-          <p className="text-sm font-semibold text-(--color-ai)">Skills gap report ready</p>
-          <p className="text-xs text-text-muted">View the full breakdown in Reports</p>
+          <p className="text-sm font-semibold text-(--color-ai)">
+            AI skills gap analysis — coming soon
+          </p>
+          <p className="text-xs text-text-muted">Preview what's coming in Reports</p>
         </div>
       </Link>
+
+      {/* Per-team / per-course completion breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white border border-border rounded-lg overflow-hidden shadow-sm">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-sm font-semibold text-text-primary">Completion by team</p>
+          </div>
+          {data.teamBreakdown.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-text-muted text-center">No teams yet.</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {data.teamBreakdown.map((team) => (
+                <div
+                  key={team.teamId}
+                  className="flex items-center justify-between gap-4 px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-text-primary truncate">
+                      {team.teamName}
+                    </p>
+                    <p className="text-xs text-text-muted">{team.memberCount} members</p>
+                  </div>
+                  <span className="text-sm font-semibold text-text-primary shrink-0">
+                    {team.completionRate}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white border border-border rounded-lg overflow-hidden shadow-sm">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-sm font-semibold text-text-primary">Completion by course</p>
+          </div>
+          {data.courseBreakdown.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-text-muted text-center">No enrollments yet.</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {data.courseBreakdown.map((course) => (
+                <div
+                  key={course.courseId}
+                  className="flex items-center justify-between gap-4 px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-text-primary truncate">
+                      {course.courseTitle}
+                    </p>
+                    <p className="text-xs text-text-muted">{course.enrollmentCount} enrolled</p>
+                  </div>
+                  <span className="text-sm font-semibold text-text-primary shrink-0">
+                    {course.completionRate}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* At-risk members */}
+      <div className="bg-white border border-border rounded-lg overflow-hidden shadow-sm">
+        <div className="px-4 py-3 border-b border-border">
+          <p className="text-sm font-semibold text-text-primary">At-risk members</p>
+          <p className="text-xs text-text-muted mt-0.5">
+            Enrolled but inactive for 14+ days on their oldest active course
+          </p>
+        </div>
+        {data.atRiskMembers.length === 0 ? (
+          <p className="px-4 py-6 text-sm text-text-muted text-center">
+            No one is currently falling behind.
+          </p>
+        ) : (
+          <div className="divide-y divide-border">
+            {data.atRiskMembers.map((member) => (
+              <div
+                key={member.userId}
+                className="flex items-center justify-between gap-4 px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-text-primary truncate">
+                    {member.name ?? member.email}
+                  </p>
+                  <p className="text-xs text-text-muted truncate">{member.courseTitle}</p>
+                </div>
+                <span className="text-xs text-danger shrink-0">
+                  {member.daysSinceActive != null
+                    ? `${member.daysSinceActive}d inactive`
+                    : "Never active"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Seat usage */}
       <div className="bg-white border border-border rounded-lg p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm font-semibold text-text-primary">Seat usage</p>
           <p className="text-xs text-text-muted">
-            {data.tenant.seatCount} of {data.tenant.seatLimit} seats used
+            {data.activeMembers} of {data.tenant.seatLimit} seats used
           </p>
         </div>
         <div className="h-1.5 rounded-full bg-surface-3">

@@ -66,6 +66,33 @@ enum SubmissionStatus {
   LATE
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum NotificationType {
+  ASSIGNMENT_GRADED
+  INVITATION_ACCEPTED
+  ORG_REQUEST_CREATED
+  ORG_REQUEST_RESOLVED
+}
+
+enum OrgRequestType {
+  SEAT_INCREASE
+  ACCOUNT_CREATE
+  COURSE_CAPACITY
+  OTHER
+}
+
+enum OrgRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
 // ============================================================
 // USER & AUTH
 // ============================================================
@@ -111,6 +138,10 @@ model User {
   teamMembers    TeamMember[]
   xpTransactions XPTransaction[]
   adminAuditLogs AdminAuditLog[] @relation("AdminAuditLogActor")
+  invitationsSent Invitation[]
+  notifications   Notification[]
+  orgRequestsMade     OrgRequest[] @relation("OrgRequestRequester")
+  orgRequestsResolved OrgRequest[] @relation("OrgRequestResolver")
 
   deletedAt DateTime?
 
@@ -152,6 +183,9 @@ model Tenant {
   teams     Team[]
   courses   Course[]
   mandatoryTrainings MandatoryTraining[]
+  invitations        Invitation[]
+  notifications      Notification[]
+  orgRequests        OrgRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -185,6 +219,72 @@ model TeamMember {
 
   @@unique([userId, teamId])
   @@index([teamId])
+}
+
+// An org admin's invite to a specific email to join their tenant as INSTRUCTOR/STUDENT.
+// Authoritative source of tenantId+role for that email on the Clerk `user.created`
+// webhook — not Clerk's publicMetadata propagation, which is a timing assumption.
+model Invitation {
+  id                String            @id @default(cuid())
+  email             String
+  role              Role
+  status            InvitationStatus  @default(PENDING)
+  clerkInvitationId String            @unique
+
+  tenantId   String
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invitedById String
+  invitedBy   User   @relation(fields: [invitedById], references: [id])
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([email, status])
+}
+
+model Notification {
+  id     String           @id @default(cuid())
+  type   NotificationType
+  title  String
+  body   String
+  link   String?
+  isRead Boolean          @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+model OrgRequest {
+  id      String           @id @default(cuid())
+  type    OrgRequestType
+  payload Json
+  message String?
+  status  OrgRequestStatus @default(PENDING)
+
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  requesterId String
+  requester   User   @relation("OrgRequestRequester", fields: [requesterId], references: [id])
+
+  resolvedById String?
+  resolvedBy   User?     @relation("OrgRequestResolver", fields: [resolvedById], references: [id])
+  resolvedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([requesterId])
 }
 
 // ============================================================

@@ -17,13 +17,13 @@ export default async function OrgBillingPage() {
 
   const tenant = await db.tenant.findUnique({
     where: { id: admin.tenantId },
-    select: { plan: true, seatCount: true, seatLimit: true, razorpaySubId: true },
+    select: { plan: true, seatLimit: true, razorpaySubId: true },
   });
   if (!tenant) redirect("/onboarding");
 
   // Subscription status/period lives on the user who created the subscription,
   // not necessarily the admin viewing this page — look it up by the shared sub id.
-  const [subOwner, aiUsage] = await Promise.all([
+  const [subOwner, aiUsage, activeMemberCount] = await Promise.all([
     tenant.razorpaySubId
       ? db.user.findFirst({
           where: { tenantId: admin.tenantId, razorpaySubId: tenant.razorpaySubId },
@@ -38,6 +38,9 @@ export default async function OrgBillingPage() {
       where: { tenantId: admin.tenantId },
       _sum: { aiCallsUsed: true },
     }),
+    // `Tenant.seatCount` is never written anywhere in this codebase — the real
+    // active-member count is used instead (matches org dashboard / teams page).
+    db.user.count({ where: { tenantId: admin.tenantId, deletedAt: null } }),
   ]);
 
   return (
@@ -59,7 +62,7 @@ export default async function OrgBillingPage() {
         subscriptionStatus={subOwner?.subscriptionStatus ?? null}
         currentPeriodEnd={subOwner?.currentPeriodEnd?.toISOString() ?? null}
         cancelAtPeriodEnd={subOwner?.cancelAtPeriodEnd ?? false}
-        seatCount={tenant.seatCount}
+        seatCount={activeMemberCount}
         seatLimit={tenant.seatLimit}
         aiCallsUsed={aiUsage._sum.aiCallsUsed ?? 0}
       />
