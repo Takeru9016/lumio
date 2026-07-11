@@ -30,6 +30,29 @@ const RESERVED_SUBDOMAINS = new Set(["www", "app"]);
 // bogus subdomain doesn't hammer the DB on every hit.
 const TENANT_NONE = "__none__";
 
+// Redis is a cache, not a dependency this middleware can afford to crash on — a
+// misconfigured/unavailable Upstash instance must degrade to an uncached DB lookup,
+// not take down every authenticated request site-wide (this is what actually happened
+// in production when UPSTASH_REDIS_REST_URL/TOKEN were unset: the client tried to fetch
+// a relative "/pipeline" path and threw, and since this runs in middleware, it crashed
+// the request before any page code ran).
+async function safeRedisGet<T>(key: string): Promise<T | null> {
+  try {
+    return await redis.get<T>(key);
+  } catch (err) {
+    console.error("[proxy] redis get failed, falling back to DB", err);
+    return null;
+  }
+}
+
+async function safeRedisSet(key: string, value: string, opts: { ex: number }): Promise<void> {
+  try {
+    await redis.set(key, value, opts);
+  } catch (err) {
+    console.error("[proxy] redis set failed, cache skipped", err);
+  }
+}
+
 /**
  * Derive the tenant slug from the request host.
  *
@@ -61,7 +84,7 @@ function getTenantSlug(host: string, searchParams: URLSearchParams): string | nu
 async function resolveTenantId(slug: string): Promise<string | null> {
   const cacheKey = `tenant:slug:${slug}`;
 
-  const cached = await redis.get<string>(cacheKey);
+  const cached = await safeRedisGet<string>(cacheKey);
   if (cached !== null) {
     return cached === TENANT_NONE ? null : cached;
   }
@@ -71,7 +94,7 @@ async function resolveTenantId(slug: string): Promise<string | null> {
     select: { id: true },
   });
 
-  await redis.set(cacheKey, tenant?.id ?? TENANT_NONE, { ex: 300 });
+  await safeRedisSet(cacheKey, tenant?.id ?? TENANT_NONE, { ex: 300 });
   return tenant?.id ?? null;
 }
 
@@ -83,7 +106,7 @@ async function resolveTenantId(slug: string): Promise<string | null> {
 async function isUserOrgSuspended(clerkId: string): Promise<boolean> {
   const cacheKey = `user:org-suspended:${clerkId}`;
 
-  const cached = await redis.get<string>(cacheKey);
+  const cached = await safeRedisGet<string>(cacheKey);
   if (cached !== null) {
     return cached !== TENANT_NONE;
   }
@@ -94,7 +117,7 @@ async function isUserOrgSuspended(clerkId: string): Promise<boolean> {
   });
 
   const suspended = Boolean(user?.tenant?.suspendedAt);
-  await redis.set(cacheKey, suspended ? "1" : TENANT_NONE, { ex: 60 });
+  await safeRedisSet(cacheKey, suspended ? "1" : TENANT_NONE, { ex: 60 });
   return suspended;
 }
 
