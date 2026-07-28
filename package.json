@@ -47,7 +47,7 @@
     "lucide-react": "^1.21.0",
     "motion": "^12.42.0",
     "nanoid": "^5.1.16",
-    "next": "16.2.9",
+    "next": "16.2.11",
     "razorpay": "^2.9.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
