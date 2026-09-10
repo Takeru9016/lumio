@@ -1,5 +1,18 @@
 # Lumio V2 Domain Model
 
+## Implementation status (2026-09-10, Phase 4)
+
+Phase 4 (AI Course Creator) required **zero schema changes** — confirmed via `git diff --stat
+prisma/schema.prisma` returning empty. The existing `Course`/`Section`/`Lesson`/`Quiz`/
+`QuizQuestion`/`CourseSkill`/`Skill` models were sufficient; the AI-generated `CourseProposal` is a
+Zod-validated, in-memory/client-state shape (`src/lib/domain/course-creator/schema.ts`), never a
+persisted draft table. One deliberate gap: the model's per-lesson `supportsSkillNames` has no
+table to persist into (no `LessonSkill`/`AssessmentSkill` model exists) — this stays
+proposal-only/deferred rather than motivating a new table (see `docs/V2_AI_ARCHITECTURE.md`, "AI
+Course Creator"). `src/lib/domain/course/authorization.ts` (`assertCanCreateCourse`) was extracted
+from `POST /api/courses`'s inline instructor-role + plan-limit check so both the human and AI
+Course Creator save paths enforce identically — not new authorization logic, a refactor of existing logic.
+
 ## Implementation status (2026-09-10, Phase 3)
 
 Phase 3 (AI runtime + AI context foundation) required **zero schema changes** — verified by test

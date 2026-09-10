@@ -13,7 +13,18 @@ sits between every AI-invoking route and the model/Knowledge layers, and `/api/a
 refactored (not rewritten) to go through it. See `docs/V2_AI_ARCHITECTURE.md`, "AI runtime
 (implemented, Phase 3)" for the full flow. No schema changes were required for Phase 3 — the
 existing `AIExecution.id`/`AIConversation.id` correlation chain from Phase 1 was sufficient
-(verified by test, not assumed).
+(verified by test, not assumed). A subsequent reliability fix (2026-09-10) made the runtime's
+`AIExecution` lifecycle robust: `src/lib/ai/runtime/execution.ts`'s `createExecutionTracker`
+guarantees every started execution reaches `SUCCEEDED` or `FAILED`, closing a previously-known gap
+where a provider/stream failure could leave an execution `RUNNING` forever.
+
+Phase 4 (AI Course Creator) is implemented as of this update: the first non-TUTOR consumer of the
+runtime (`AISurface.COURSE_CREATOR`), and the first surface where AI output becomes a persisted
+proposal rather than a chat message. Curriculum, lesson-content and assessment generation are all
+`READ`+`GENERATE` only — `WRITE`/`EXECUTE` remain denied, unchanged from Phase 3 — and the human
+save action (`src/lib/domain/course-creator/saveDraft.ts`) is ordinary authenticated application
+code with no AI runtime involvement at all. No schema changes were required. See
+`docs/V2_AI_ARCHITECTURE.md`, "AI Course Creator" for the full design.
 
 ## Product thesis
 Lumio should evolve from a course-centric LMS into an AI-native learning and capability platform that connects:

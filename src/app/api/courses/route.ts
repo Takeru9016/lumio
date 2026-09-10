@@ -1,9 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { PLAN_LIMITS } from "@/constants/plans";
 import type { CourseStatus } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import { assertCanCreateCourse, CourseAuthorizationError } from "@/lib/domain/course/authorization";
 import { generateUniqueCourseSlug } from "@/lib/slug";
 
 const VALID_STATUSES: CourseStatus[] = ["DRAFT", "PUBLISHED", "ARCHIVED"];
@@ -129,20 +129,20 @@ export async function POST(req: NextRequest) {
     where: { clerkId: userId },
     select: { id: true, role: true, plan: true },
   });
-
-  if (!user || user.role !== "INSTRUCTOR") {
+  if (!user) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const maxCourses = PLAN_LIMITS[user.plan].maxCourses;
-  if (maxCourses !== Infinity) {
-    const courseCount = await db.course.count({ where: { instructorId: user.id } });
-    if (courseCount >= maxCourses) {
+  try {
+    await assertCanCreateCourse(user.id);
+  } catch (err) {
+    if (err instanceof CourseAuthorizationError) {
       return Response.json(
-        { error: "Course limit reached for your plan", upgradeRequired: true },
-        { status: 403 }
+        { error: err.message, upgradeRequired: err.upgradeRequired },
+        { status: err.status }
       );
     }
+    throw err;
   }
 
   const body = await req.json();

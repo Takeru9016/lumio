@@ -75,18 +75,19 @@ The current package uses Next 16, React 19, Prisma 7, AI SDK 7, Clerk 7 and rela
 
 ### Phase 2 — Course Builder
 
-**Not implemented.** Note: the conversational task that drove this session called its own work
-"Phase 2: Knowledge + Permission-Aware RAG Foundation" — that work actually corresponds to this
-document's **Phase 3 (Learner Intelligence)** bullet "Rebuild tutor on knowledge-layer retrieval"
-below (partially: retrieval + auth foundation done, tutor integration additive/partial — see
-Phase 3 status note), not to this "Phase 2 — Course Builder" section. Flagging the numbering
-mismatch here rather than silently renumbering either document.
+**Status (2026-09-10): implemented**, under the conversational task's own "Phase 4: AI Course
+Creator Foundation" label — same numbering mismatch as the Phase 3 note below, flagged rather than
+silently renumbering either document. All five bullets below are done:
 
-- Add AI course creation workspace.
-- Generate curriculum proposal from goals and source material.
-- Generate activities and assessments.
-- Map generated content to skills.
-- Require human review before publishing.
+- Add AI course creation workspace. — `src/app/(instructor)/courses/create-ai/page.tsx`.
+- Generate curriculum proposal from goals and source material. — `src/lib/domain/course-creator/generate.ts`, Knowledge-aware via `searchKnowledge()`.
+- Generate activities and assessments. — `content.ts` (lesson content, structured blocks) and `assessment.ts` (MCQ), both proposal-only.
+- Map generated content to skills. — course-level only, via `CourseSkill` at save time; lesson-level mapping stays proposal metadata (no `LessonSkill` table — deferred).
+- Require human review before publishing. — enforced twice over: the review UI, and the fact that `saveDraft.ts` never calls the AI runtime and the existing `publish/route.ts` validation gate is untouched.
+
+See `docs/V2_AI_ARCHITECTURE.md`, "AI Course Creator" for the full design, and the Phase 4 report
+for what was deferred (Knowledge-document and Skill pickers in the UI, lesson-content/assessment
+generation UI wiring).
 
 ### Phase 3 — Learner Intelligence
 

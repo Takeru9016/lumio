@@ -202,13 +202,74 @@ uniform catch-all:
 | AI policy denial | Request fails before any model call (`assertActionAllowed` throws `AIRuntimeError("POLICY_DENIED")`). For TUTOR/GENERATE this never actually fires today — the check exists so a future WRITE/EXECUTE attempt fails loudly, not silently. |
 | Quota/rate-limit failure | Unchanged — `withAiGuards` (429/403), before any model call. |
 | Knowledge retrieval failure | **Logged (`console.error`), not thrown.** `buildAIContext` degrades to an empty knowledge array; the tutor still has lesson-scoped context as a fallback. This is a considered choice, not an oversight: now that the runtime is the retrieval path, silent-with-no-log would hide real breakage — Phase 2's original bare `catch {}` was upgraded to a logged catch for this reason. |
-| Provider/model failure | Not specially handled by the runtime — an AI SDK stream error propagates to the client via the existing `toUIMessageStream` error surface, same as before this phase. An `AIExecution` left in `RUNNING` status is a known, accepted gap this phase (see "Deferred" in the Phase 3 report) — it is not marked `FAILED` automatically. |
+| Provider/model failure | An AI SDK stream error propagates to the client via the existing `toUIMessageStream` error surface (streaming surfaces) or a generic 502 (non-streaming, e.g. Course Creator's `generateObject` calls). **Updated (2026-09-10, reliability fix):** `src/lib/ai/runtime/execution.ts`'s `createExecutionTracker` guarantees every started `AIExecution` reaches `SUCCEEDED` or `FAILED` — it is no longer left in `RUNNING`. See "AI Course Creator" below and the tutor route for the two wiring patterns (streaming: three call sites into one idempotent tracker; non-streaming: a single try/catch). |
 | Persistence/usage-event failure (after a successful model response) | **Logged, response still succeeds.** The user has already received their answer by the time V2 persistence runs in `onEnd`; failing the response retroactively over a bookkeeping error would be worse than losing one usage-event row. Legacy `AIChat`/`aiCallsUsed` persistence is unconditional and separate from this — it is not subject to this fallback. |
 
 No security failure (auth, policy, quota) is ever silently swallowed — every one of those either
 throws before reaching the model or short-circuits the route with an error response. Only
 non-critical observability paths (Knowledge retrieval quality, V2 bookkeeping) degrade silently
 to the *user*, and even those are logged server-side.
+
+## AI Course Creator (Phase 4, 2026-09-10)
+
+The first non-TUTOR consumer of the runtime (`AISurface.COURSE_CREATOR`), and the first surface
+this codebase persists an AI-generated *proposal* from rather than a chat response. Domain layer
+at `src/lib/domain/course-creator/{types,schema,generate,content,assessment,saveDraft}.ts`; routes
+at `src/app/api/ai/course-creator/{generate,content,assessment,save}/route.ts`; UI at
+`src/app/(instructor)/courses/create-ai/page.tsx`.
+
+**The architectural boundary is enforced by construction, not convention:**
+
+```text
+AI:              READ + GENERATE   (generate/content/assessment routes — assertActionAllowed)
+Human/Application: WRITE + PUBLISH (save route — no AI runtime import at all)
+```
+
+`save/route.ts` and `saveDraft.ts` do not import anything from `src/lib/ai/runtime/*`. There is no
+`assertActionAllowed(COURSE_CREATOR, WRITE)` call anywhere in the codebase — that action stays
+denied in `policy.ts`, unchanged from Phase 3. The save path is authenticated and authorized purely
+through `requireAuthContext()` and `assertCanCreateCourse()` (`src/lib/domain/course/authorization.ts`
+— shared with, and extracted from, `POST /api/courses`), exactly like a human-authored course.
+
+**Curriculum proposal contract** (`schema.ts`): a `CourseProposal` — title, description, learning
+objectives, suggested skill *names* (not ids), sections of lessons (title/objective/estimated
+minutes/contentType/citation indices), assessment strategy. Every array is bounded
+(`MAX_SECTIONS`, `MAX_LESSONS_PER_SECTION`, etc.) and `contentType` is restricted to the real
+`LessonType` enum. The model never sees or emits a database id, tenantId, userId, or publication
+state — Knowledge citations are index references into a numbered list the server built
+(`citationIndices: number[]`), resolved back to real `chunkId`s server-side after generation, so an
+invented or out-of-range citation fails schema validation rather than silently becoming a fake
+source.
+
+**Lesson content** (`content.ts`): the model returns structured blocks (heading/paragraph/list/code
+— `schema.ts`'s `contentBlockSchema`), never raw HTML. `serializeBlocksToHtml()` renders them
+through a fixed allowlisted tag set with every text value escaped — this is the only lesson-content
+generation path in the codebase and was built this way specifically so model output can never
+inject arbitrary markup into `Lesson.textContent` (which Tiptap's `TextEditor` renders as trusted
+HTML).
+
+**Assessment** (`assessment.ts`): MCQ generation matching the existing `Quiz`/`QuizQuestion` shape.
+`correctAnswer` is validated (via a Zod `.refine`) to equal one of the question's own option ids —
+the model cannot reference a non-existent option.
+
+**Knowledge retrieval**: exclusively through `searchKnowledge()` — never a direct `KnowledgeChunk`
+query. When the creator selects specific documents, retrieval is repeated per-document (still
+authorized identically by `searchKnowledge`'s inlined SQL); with no selection, one tenant-wide
+semantic search runs instead. Results are deduplicated and capped (`MAX_KNOWLEDGE_ITEMS`) before
+ever reaching the prompt.
+
+**Save boundary** (`saveDraft.ts`): treats its input as fully untrusted. `saveDraftInputSchema` is
+`.strict()` — `tenantId`/`userId`/`creatorId`/`courseId`/publication-state are not even accepted
+keys, so a client that sends them gets a 400. `tenantId` and `instructorId` come from the
+authenticated `AuthContext` only. Every `targetSkillId` is re-queried against the database scoped
+to the caller's own tenant before a `CourseSkill` row is created — an id from another tenant is
+dropped, not trusted. The Course is always created `status: "DRAFT"`; Course/Section/Lesson/
+CourseSkill are created inside one `db.$transaction`.
+
+**Lesson-level skill mapping is proposal-only** — the model's `supportsSkillNames` per lesson has
+nowhere to persist (no `LessonSkill` table exists, and none was added — see "Deferred" in the Phase
+4 report). Only course-level `CourseSkill` is ever written, and only for skill ids the human
+selected and the server verified.
 
 ## AI safety and trust UX
 
@@ -223,7 +284,7 @@ AI UI must make the following visible where relevant:
 
 ## First AI workflows
 
-1. **AI Course Builder** — turn goals/source material into a proposed curriculum, activities, assessments and skill mappings. Not started.
+1. **AI Course Builder** — turn goals/source material into a proposed curriculum, activities, assessments and skill mappings. **Started (Phase 4, 2026-09-10):** curriculum, lesson-content and assessment generation all implemented as proposal-only operations (see "AI Course Creator" above); human review/edit UI and the save boundary are implemented. Not yet built: a Knowledge-document picker and Skill picker in the UI (the domain layer accepts `knowledgeDocumentIds`/`targetSkillIds`, but no browsing UI exists for either — see the Phase 4 report's "Deferred" section), lesson-content/assessment generation UI (the routes exist, not yet wired into `create-ai/page.tsx`), and auto-linking AI-suggested skill *names* to real `Skill` records.
 2. **AI Tutor** — grounded learner assistance across the authorized knowledge base, not just the current lesson. Partially started: `/api/ai/tutor` is now refactored onto the shared runtime (Phase 3 — policy check, `buildAIContext`, V2 persistence) on top of Phase 2G's additive `searchKnowledge()` call. Still lesson-scoped by trigger condition (`lessonId` required), not yet a standalone "ask anything the tenant has indexed" experience.
 3. **AI Learning Coach** — explain progress, skill gaps and recommended next actions. Not started.
 4. **AI Analytics** — natural-language questions over governed analytics data with evidence. Not started.
