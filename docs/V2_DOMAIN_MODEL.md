@@ -1,16 +1,77 @@
 # Lumio V2 Domain Model
 
-## Implementation status (2026-09-09)
+## Implementation status (2026-09-10, Phase 2)
 
-Phase 1 (Foundation, per `V2_MIGRATION_MAP.md`) is implemented in `prisma/schema.prisma`:
-Skill, SkillCategory, JobRole, RoleSkill, UserJobRole, UserSkill, SkillEvidence, CourseSkill,
-KnowledgeSource, KnowledgeDocument, KnowledgeChunk, AIConversation, AIMessage, AIToolCall,
-AISourceCitation, AIExecution, AIUsageEvent, LearningEvent — plus 9 new enums. All additive;
-see `docs/V2_DATABASE_MIGRATION.md` for the exact migration contents. **Not yet implemented**
-from this document: `OrganizationMembership`, `Permission`, `RolePermission`, `LearningProgram`,
-`LearningProgramItem`, `Activity`, `Assessment`, `AssessmentItem`, `LearningGoal`, `SkillLevel`,
-`SkillGap`, `KnowledgeAccess`, `KnowledgeCitation` (superseded by `AISourceCitation`),
-`AIAgentRun`, `EvidenceEvent`. Those remain design intent below, not code.
+Phase 1 (Foundation) schema is implemented in `prisma/schema.prisma`: Skill, SkillCategory,
+JobRole, RoleSkill, UserJobRole, UserSkill, SkillEvidence, CourseSkill, KnowledgeSource,
+KnowledgeDocument, KnowledgeChunk, AIConversation, AIMessage, AIToolCall, AISourceCitation,
+AIExecution, AIUsageEvent, LearningEvent.
+
+Phase 2 (Knowledge + permission-aware RAG foundation) added, on top of that:
+
+- **`KnowledgeAccess`** model + `KnowledgeAccessScope` enum (TENANT/TEAM/USER) — the minimal
+  policy schema this document previously deferred. See "Knowledge ownership and authorization"
+  below.
+- **`KnowledgeDocument.visibility`** (`KnowledgeVisibility`: TENANT default / RESTRICTED).
+- **`KnowledgeDocument.activeVersion`** and **`KnowledgeChunk.version`** — the versioning fields
+  described in "Document versioning / re-indexing" below.
+- A real service layer under `src/lib/domain/knowledge/`: `access.ts` (authorization),
+  `ingestion.ts` (write path), `retrieval.ts` (permission-aware search), `chunking.ts` (pure text
+  chunker), `lessonBridge.ts` (Lesson coexistence plan — see docs/V2_AI_ARCHITECTURE.md).
+- `/api/ai/tutor` additively calls the new retrieval service alongside the existing
+  `searchSimilarLessons` — see "V1/V2 coexistence" below.
+
+**Still not implemented** from this document's original design intent: `OrganizationMembership`,
+`Permission`, `RolePermission`, `LearningProgram`, `LearningProgramItem`, `Activity`, `Assessment`,
+`AssessmentItem`, `LearningGoal`, `SkillLevel`, `SkillGap`, `KnowledgeCitation` (superseded by
+`AISourceCitation`), `AIAgentRun`, `EvidenceEvent`. Those remain design intent below, not code.
+
+## Knowledge ownership and authorization (Phase 2B/2C)
+
+Every Knowledge row (`KnowledgeSource`, `KnowledgeDocument`, `KnowledgeChunk`) carries a direct
+`tenantId` — not solely inherited through a parent. Nothing in Postgres enforces that a
+`KnowledgeDocument.sourceId` points at a `KnowledgeSource` in the *same* tenant (see
+`docs/V2_DATABASE_MIGRATION.md` §8 for why this is a known, accepted class of gap across the whole
+schema); every write path in `src/lib/domain/knowledge/ingestion.ts` calls
+`assertSameTenant()` (`src/lib/domain/knowledge/access.ts`) to check this in application code
+instead, and `retrieval.security.test.ts` proves the rejection.
+
+Per-document readability is a two-layer policy, evaluated by `canReadKnowledgeDocument()` (pure
+function, `access.ts`) and reproduced verbatim as inline SQL in `retrieval.ts`:
+
+1. **Tenant boundary** (hard gate): `document.tenantId === ctx.tenantId`, always, first.
+2. **Status**: only `READY` documents are retrievable.
+3. **Visibility**: `TENANT` (default) — any authenticated tenant member can read it, no
+   `KnowledgeAccess` rows needed. `RESTRICTED` — fail-closed; readable only via a matching
+   `KnowledgeAccess` row: `TENANT`-scope (opt back in), `TEAM`-scope (user is a `TeamMember` of
+   that team), or `USER`-scope (row's `userId` matches).
+
+This is deliberately not a general RBAC/ACL system — no roles, no permission strings, no
+inheritance hierarchy, no per-chunk overrides. It answers exactly one question ("can this user
+read this document") for exactly the three ownership shapes Phase 2C asked for.
+
+## Document versioning / re-indexing (Phase 2A)
+
+No separate version/snapshot table. `KnowledgeDocument.activeVersion` (default `0`, meaning
+"never successfully indexed") names the only chunk version retrieval is allowed to read;
+`KnowledgeChunk.version` (default `1`) tags which indexing run a chunk belongs to, with
+`@@unique([documentId, version, chunkIndex])` preventing duplicate/corrupt ordering within a run.
+
+`indexDocument()` (`src/lib/domain/knowledge/ingestion.ts`) writes all of a run's chunks at
+`version = activeVersion + 1` — invisible to retrieval, since `retrieval.ts`'s SQL filters
+`c.version = d.activeVersion` — then flips `activeVersion` in one update only after every chunk
+persisted successfully. An interrupted run simply never advances `activeVersion`, so the previous
+version keeps serving; nothing can mix. Old-version chunks are not deleted automatically (no
+cleanup job exists yet — deferred, see "Deferred work").
+
+## V1/V2 coexistence
+
+`Lesson.embedding`, `AIChat`, `User.aiCallsUsed`, `searchSimilarLessons`
+(`src/lib/ai/search.ts`), and the pre-Phase-2 `/api/ai/tutor` behavior are all unchanged and
+untouched by any Phase 2 code. `/api/ai/tutor` now additionally calls `searchKnowledge()` for
+tenant users, merges its results into the same context string, and falls back silently (try/catch)
+if that call fails — the existing lesson-only RAG path runs exactly as before for FREE-plan users
+(`user.tenantId === null`) and as an unconditional fallback for everyone else.
 
 ## Goal
 Move from a primarily `User → Course → Section → Lesson` model toward a capability-aware learning platform while retaining backward compatibility.

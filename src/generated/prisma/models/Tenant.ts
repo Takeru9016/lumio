@@ -316,6 +316,7 @@ export type TenantWhereInput = {
   knowledgeSources?: Prisma.KnowledgeSourceListRelationFilter
   knowledgeDocuments?: Prisma.KnowledgeDocumentListRelationFilter
   knowledgeChunks?: Prisma.KnowledgeChunkListRelationFilter
+  knowledgeAccess?: Prisma.KnowledgeAccessListRelationFilter
   aiConversations?: Prisma.AIConversationListRelationFilter
   aiExecutions?: Prisma.AIExecutionListRelationFilter
   aiUsageEvents?: Prisma.AIUsageEventListRelationFilter
@@ -354,6 +355,7 @@ export type TenantOrderByWithRelationInput = {
   knowledgeSources?: Prisma.KnowledgeSourceOrderByRelationAggregateInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentOrderByRelationAggregateInput
   knowledgeChunks?: Prisma.KnowledgeChunkOrderByRelationAggregateInput
+  knowledgeAccess?: Prisma.KnowledgeAccessOrderByRelationAggregateInput
   aiConversations?: Prisma.AIConversationOrderByRelationAggregateInput
   aiExecutions?: Prisma.AIExecutionOrderByRelationAggregateInput
   aiUsageEvents?: Prisma.AIUsageEventOrderByRelationAggregateInput
@@ -395,6 +397,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   knowledgeSources?: Prisma.KnowledgeSourceListRelationFilter
   knowledgeDocuments?: Prisma.KnowledgeDocumentListRelationFilter
   knowledgeChunks?: Prisma.KnowledgeChunkListRelationFilter
+  knowledgeAccess?: Prisma.KnowledgeAccessListRelationFilter
   aiConversations?: Prisma.AIConversationListRelationFilter
   aiExecutions?: Prisma.AIExecutionListRelationFilter
   aiUsageEvents?: Prisma.AIUsageEventListRelationFilter
@@ -477,6 +480,7 @@ export type TenantCreateInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -515,6 +519,7 @@ export type TenantUncheckedCreateInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -553,6 +558,7 @@ export type TenantUpdateInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -591,6 +597,7 @@ export type TenantUncheckedUpdateInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -939,6 +946,20 @@ export type TenantUpdateOneRequiredWithoutKnowledgeDocumentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutKnowledgeDocumentsInput, Prisma.TenantUpdateWithoutKnowledgeDocumentsInput>, Prisma.TenantUncheckedUpdateWithoutKnowledgeDocumentsInput>
 }
 
+export type TenantCreateNestedOneWithoutKnowledgeAccessInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutKnowledgeAccessInput, Prisma.TenantUncheckedCreateWithoutKnowledgeAccessInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutKnowledgeAccessInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutKnowledgeAccessNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutKnowledgeAccessInput, Prisma.TenantUncheckedCreateWithoutKnowledgeAccessInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutKnowledgeAccessInput
+  upsert?: Prisma.TenantUpsertWithoutKnowledgeAccessInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutKnowledgeAccessInput, Prisma.TenantUpdateWithoutKnowledgeAccessInput>, Prisma.TenantUncheckedUpdateWithoutKnowledgeAccessInput>
+}
+
 export type TenantCreateNestedOneWithoutKnowledgeChunksInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutKnowledgeChunksInput, Prisma.TenantUncheckedCreateWithoutKnowledgeChunksInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutKnowledgeChunksInput
@@ -1040,6 +1061,7 @@ export type TenantCreateWithoutUsersInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -1077,6 +1099,7 @@ export type TenantUncheckedCreateWithoutUsersInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -1130,6 +1153,7 @@ export type TenantUpdateWithoutUsersInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -1167,6 +1191,7 @@ export type TenantUncheckedUpdateWithoutUsersInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -1204,6 +1229,7 @@ export type TenantCreateWithoutTeamsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -1241,6 +1267,7 @@ export type TenantUncheckedCreateWithoutTeamsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -1294,6 +1321,7 @@ export type TenantUpdateWithoutTeamsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -1331,6 +1359,7 @@ export type TenantUncheckedUpdateWithoutTeamsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -1368,6 +1397,7 @@ export type TenantCreateWithoutInvitationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -1405,6 +1435,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -1458,6 +1489,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -1495,6 +1527,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -1532,6 +1565,7 @@ export type TenantCreateWithoutNotificationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -1569,6 +1603,7 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -1622,6 +1657,7 @@ export type TenantUpdateWithoutNotificationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -1659,6 +1695,7 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -1696,6 +1733,7 @@ export type TenantCreateWithoutOrgRequestsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -1733,6 +1771,7 @@ export type TenantUncheckedCreateWithoutOrgRequestsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -1786,6 +1825,7 @@ export type TenantUpdateWithoutOrgRequestsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -1823,6 +1863,7 @@ export type TenantUncheckedUpdateWithoutOrgRequestsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -1860,6 +1901,7 @@ export type TenantCreateWithoutCoursesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -1897,6 +1939,7 @@ export type TenantUncheckedCreateWithoutCoursesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -1950,6 +1993,7 @@ export type TenantUpdateWithoutCoursesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -1987,6 +2031,7 @@ export type TenantUncheckedUpdateWithoutCoursesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -2024,6 +2069,7 @@ export type TenantCreateWithoutMandatoryTrainingsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -2061,6 +2107,7 @@ export type TenantUncheckedCreateWithoutMandatoryTrainingsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -2114,6 +2161,7 @@ export type TenantUpdateWithoutMandatoryTrainingsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -2151,6 +2199,7 @@ export type TenantUncheckedUpdateWithoutMandatoryTrainingsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -2188,6 +2237,7 @@ export type TenantCreateWithoutSkillCategoriesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -2225,6 +2275,7 @@ export type TenantUncheckedCreateWithoutSkillCategoriesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -2278,6 +2329,7 @@ export type TenantUpdateWithoutSkillCategoriesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -2315,6 +2367,7 @@ export type TenantUncheckedUpdateWithoutSkillCategoriesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -2352,6 +2405,7 @@ export type TenantCreateWithoutSkillsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -2389,6 +2443,7 @@ export type TenantUncheckedCreateWithoutSkillsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -2442,6 +2497,7 @@ export type TenantUpdateWithoutSkillsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -2479,6 +2535,7 @@ export type TenantUncheckedUpdateWithoutSkillsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -2516,6 +2573,7 @@ export type TenantCreateWithoutJobRolesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -2553,6 +2611,7 @@ export type TenantUncheckedCreateWithoutJobRolesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -2606,6 +2665,7 @@ export type TenantUpdateWithoutJobRolesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -2643,6 +2703,7 @@ export type TenantUncheckedUpdateWithoutJobRolesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -2680,6 +2741,7 @@ export type TenantCreateWithoutUserJobRolesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -2717,6 +2779,7 @@ export type TenantUncheckedCreateWithoutUserJobRolesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -2770,6 +2833,7 @@ export type TenantUpdateWithoutUserJobRolesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -2807,6 +2871,7 @@ export type TenantUncheckedUpdateWithoutUserJobRolesInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -2844,6 +2909,7 @@ export type TenantCreateWithoutUserSkillsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -2881,6 +2947,7 @@ export type TenantUncheckedCreateWithoutUserSkillsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -2934,6 +3001,7 @@ export type TenantUpdateWithoutUserSkillsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -2971,6 +3039,7 @@ export type TenantUncheckedUpdateWithoutUserSkillsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -3008,6 +3077,7 @@ export type TenantCreateWithoutSkillEvidenceInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -3045,6 +3115,7 @@ export type TenantUncheckedCreateWithoutSkillEvidenceInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -3098,6 +3169,7 @@ export type TenantUpdateWithoutSkillEvidenceInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -3135,6 +3207,7 @@ export type TenantUncheckedUpdateWithoutSkillEvidenceInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -3172,6 +3245,7 @@ export type TenantCreateWithoutKnowledgeSourcesInput = {
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -3209,6 +3283,7 @@ export type TenantUncheckedCreateWithoutKnowledgeSourcesInput = {
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -3262,6 +3337,7 @@ export type TenantUpdateWithoutKnowledgeSourcesInput = {
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -3299,6 +3375,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeSourcesInput = {
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -3336,6 +3413,7 @@ export type TenantCreateWithoutKnowledgeDocumentsInput = {
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutTenantInput
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -3373,6 +3451,7 @@ export type TenantUncheckedCreateWithoutKnowledgeDocumentsInput = {
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -3426,6 +3505,7 @@ export type TenantUpdateWithoutKnowledgeDocumentsInput = {
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutTenantNestedInput
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -3462,6 +3542,175 @@ export type TenantUncheckedUpdateWithoutKnowledgeDocumentsInput = {
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutTenantNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
+  aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
+  aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutKnowledgeAccessInput = {
+  id?: string
+  name: string
+  slug: string
+  logoUrl?: string | null
+  brandColor?: string | null
+  customDomain?: string | null
+  plan?: $Enums.Plan
+  seatLimit?: number
+  seatCount?: number
+  razorpaySubId?: string | null
+  samlEnabled?: boolean
+  samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserCreateNestedManyWithoutTenantInput
+  teams?: Prisma.TeamCreateNestedManyWithoutTenantInput
+  courses?: Prisma.CourseCreateNestedManyWithoutTenantInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
+  orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
+  skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
+  skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
+  jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
+  userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutTenantInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutTenantInput
+  skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutTenantInput
+  knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
+  knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
+  aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
+  aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutKnowledgeAccessInput = {
+  id?: string
+  name: string
+  slug: string
+  logoUrl?: string | null
+  brandColor?: string | null
+  customDomain?: string | null
+  plan?: $Enums.Plan
+  seatLimit?: number
+  seatCount?: number
+  razorpaySubId?: string | null
+  samlEnabled?: boolean
+  samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutTenantInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutTenantInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
+  orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
+  skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
+  jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutTenantInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutTenantInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
+  aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutKnowledgeAccessInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutKnowledgeAccessInput, Prisma.TenantUncheckedCreateWithoutKnowledgeAccessInput>
+}
+
+export type TenantUpsertWithoutKnowledgeAccessInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutKnowledgeAccessInput, Prisma.TenantUncheckedUpdateWithoutKnowledgeAccessInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutKnowledgeAccessInput, Prisma.TenantUncheckedCreateWithoutKnowledgeAccessInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutKnowledgeAccessInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutKnowledgeAccessInput, Prisma.TenantUncheckedUpdateWithoutKnowledgeAccessInput>
+}
+
+export type TenantUpdateWithoutKnowledgeAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  seatLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  seatCount?: Prisma.IntFieldUpdateOperationsInput | number
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUpdateManyWithoutTenantNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutTenantNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutTenantNestedInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
+  orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
+  skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
+  jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
+  userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutTenantNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutTenantNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutTenantNestedInput
+  knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
+  aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutKnowledgeAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  seatLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  seatCount?: Prisma.IntFieldUpdateOperationsInput | number
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutTenantNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutTenantNestedInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
+  orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
+  skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
+  jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutTenantNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutTenantNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
@@ -3500,6 +3749,7 @@ export type TenantCreateWithoutKnowledgeChunksInput = {
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutTenantInput
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -3537,6 +3787,7 @@ export type TenantUncheckedCreateWithoutKnowledgeChunksInput = {
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -3590,6 +3841,7 @@ export type TenantUpdateWithoutKnowledgeChunksInput = {
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutTenantNestedInput
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -3627,6 +3879,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeChunksInput = {
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -3665,6 +3918,7 @@ export type TenantCreateWithoutAiConversationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
@@ -3702,6 +3956,7 @@ export type TenantUncheckedCreateWithoutAiConversationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
@@ -3755,6 +4010,7 @@ export type TenantUpdateWithoutAiConversationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
@@ -3792,6 +4048,7 @@ export type TenantUncheckedUpdateWithoutAiConversationsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -3829,6 +4086,7 @@ export type TenantCreateWithoutAiExecutionsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
@@ -3866,6 +4124,7 @@ export type TenantUncheckedCreateWithoutAiExecutionsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
@@ -3919,6 +4178,7 @@ export type TenantUpdateWithoutAiExecutionsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
@@ -3956,6 +4216,7 @@ export type TenantUncheckedUpdateWithoutAiExecutionsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -3993,6 +4254,7 @@ export type TenantCreateWithoutAiUsageEventsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
@@ -4030,6 +4292,7 @@ export type TenantUncheckedCreateWithoutAiUsageEventsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
@@ -4083,6 +4346,7 @@ export type TenantUpdateWithoutAiUsageEventsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
@@ -4120,6 +4384,7 @@ export type TenantUncheckedUpdateWithoutAiUsageEventsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -4157,6 +4422,7 @@ export type TenantCreateWithoutLearningEventsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
@@ -4194,6 +4460,7 @@ export type TenantUncheckedCreateWithoutLearningEventsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
   aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
@@ -4247,6 +4514,7 @@ export type TenantUpdateWithoutLearningEventsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
@@ -4284,6 +4552,7 @@ export type TenantUncheckedUpdateWithoutLearningEventsInput = {
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
@@ -4311,6 +4580,7 @@ export type TenantCountOutputType = {
   knowledgeSources: number
   knowledgeDocuments: number
   knowledgeChunks: number
+  knowledgeAccess: number
   aiConversations: number
   aiExecutions: number
   aiUsageEvents: number
@@ -4334,6 +4604,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   knowledgeSources?: boolean | TenantCountOutputTypeCountKnowledgeSourcesArgs
   knowledgeDocuments?: boolean | TenantCountOutputTypeCountKnowledgeDocumentsArgs
   knowledgeChunks?: boolean | TenantCountOutputTypeCountKnowledgeChunksArgs
+  knowledgeAccess?: boolean | TenantCountOutputTypeCountKnowledgeAccessArgs
   aiConversations?: boolean | TenantCountOutputTypeCountAiConversationsArgs
   aiExecutions?: boolean | TenantCountOutputTypeCountAiExecutionsArgs
   aiUsageEvents?: boolean | TenantCountOutputTypeCountAiUsageEventsArgs
@@ -4465,6 +4736,13 @@ export type TenantCountOutputTypeCountKnowledgeChunksArgs<ExtArgs extends runtim
 /**
  * TenantCountOutputType without action
  */
+export type TenantCountOutputTypeCountKnowledgeAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeAccessWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
 export type TenantCountOutputTypeCountAiConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AIConversationWhereInput
 }
@@ -4523,6 +4801,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   knowledgeSources?: boolean | Prisma.Tenant$knowledgeSourcesArgs<ExtArgs>
   knowledgeDocuments?: boolean | Prisma.Tenant$knowledgeDocumentsArgs<ExtArgs>
   knowledgeChunks?: boolean | Prisma.Tenant$knowledgeChunksArgs<ExtArgs>
+  knowledgeAccess?: boolean | Prisma.Tenant$knowledgeAccessArgs<ExtArgs>
   aiConversations?: boolean | Prisma.Tenant$aiConversationsArgs<ExtArgs>
   aiExecutions?: boolean | Prisma.Tenant$aiExecutionsArgs<ExtArgs>
   aiUsageEvents?: boolean | Prisma.Tenant$aiUsageEventsArgs<ExtArgs>
@@ -4602,6 +4881,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   knowledgeSources?: boolean | Prisma.Tenant$knowledgeSourcesArgs<ExtArgs>
   knowledgeDocuments?: boolean | Prisma.Tenant$knowledgeDocumentsArgs<ExtArgs>
   knowledgeChunks?: boolean | Prisma.Tenant$knowledgeChunksArgs<ExtArgs>
+  knowledgeAccess?: boolean | Prisma.Tenant$knowledgeAccessArgs<ExtArgs>
   aiConversations?: boolean | Prisma.Tenant$aiConversationsArgs<ExtArgs>
   aiExecutions?: boolean | Prisma.Tenant$aiExecutionsArgs<ExtArgs>
   aiUsageEvents?: boolean | Prisma.Tenant$aiUsageEventsArgs<ExtArgs>
@@ -4630,6 +4910,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     knowledgeSources: Prisma.$KnowledgeSourcePayload<ExtArgs>[]
     knowledgeDocuments: Prisma.$KnowledgeDocumentPayload<ExtArgs>[]
     knowledgeChunks: Prisma.$KnowledgeChunkPayload<ExtArgs>[]
+    knowledgeAccess: Prisma.$KnowledgeAccessPayload<ExtArgs>[]
     aiConversations: Prisma.$AIConversationPayload<ExtArgs>[]
     aiExecutions: Prisma.$AIExecutionPayload<ExtArgs>[]
     aiUsageEvents: Prisma.$AIUsageEventPayload<ExtArgs>[]
@@ -5061,6 +5342,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   knowledgeSources<T extends Prisma.Tenant$knowledgeSourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$knowledgeSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   knowledgeDocuments<T extends Prisma.Tenant$knowledgeDocumentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$knowledgeDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   knowledgeChunks<T extends Prisma.Tenant$knowledgeChunksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$knowledgeChunksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeAccess<T extends Prisma.Tenant$knowledgeAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$knowledgeAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiConversations<T extends Prisma.Tenant$aiConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiExecutions<T extends Prisma.Tenant$aiExecutionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$aiExecutionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIExecutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiUsageEvents<T extends Prisma.Tenant$aiUsageEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$aiUsageEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIUsageEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5883,6 +6165,30 @@ export type Tenant$knowledgeChunksArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.KnowledgeChunkScalarFieldEnum | Prisma.KnowledgeChunkScalarFieldEnum[]
+}
+
+/**
+ * Tenant.knowledgeAccess
+ */
+export type Tenant$knowledgeAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeAccess
+   */
+  select?: Prisma.KnowledgeAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeAccess
+   */
+  omit?: Prisma.KnowledgeAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeAccessInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeAccessWhereInput
+  orderBy?: Prisma.KnowledgeAccessOrderByWithRelationInput | Prisma.KnowledgeAccessOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeAccessScalarFieldEnum | Prisma.KnowledgeAccessScalarFieldEnum[]
 }
 
 /**

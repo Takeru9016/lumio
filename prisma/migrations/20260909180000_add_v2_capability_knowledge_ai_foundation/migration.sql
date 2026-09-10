@@ -17,6 +17,12 @@ CREATE TYPE "KnowledgeSourceType" AS ENUM ('COURSE', 'LESSON', 'DOCUMENT', 'POLI
 CREATE TYPE "KnowledgeStatus" AS ENUM ('PENDING', 'PROCESSING', 'READY', 'ERROR');
 
 -- CreateEnum
+CREATE TYPE "KnowledgeVisibility" AS ENUM ('TENANT', 'RESTRICTED');
+
+-- CreateEnum
+CREATE TYPE "KnowledgeAccessScope" AS ENUM ('TENANT', 'TEAM', 'USER');
+
+-- CreateEnum
 CREATE TYPE "AIConversationType" AS ENUM ('TUTOR', 'COURSE_BUILDER', 'ANALYTICS', 'COACH', 'GENERAL');
 
 -- CreateEnum
@@ -167,11 +173,26 @@ CREATE TABLE "KnowledgeDocument" (
     "url" TEXT,
     "textContent" TEXT,
     "status" "KnowledgeStatus" NOT NULL DEFAULT 'PENDING',
+    "visibility" "KnowledgeVisibility" NOT NULL DEFAULT 'TENANT',
     "metadata" JSONB,
+    "activeVersion" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "KnowledgeDocument_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "KnowledgeAccess" (
+    "id" TEXT NOT NULL,
+    "tenantId" TEXT NOT NULL,
+    "documentId" TEXT NOT NULL,
+    "scope" "KnowledgeAccessScope" NOT NULL,
+    "teamId" TEXT,
+    "userId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "KnowledgeAccess_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -183,6 +204,7 @@ CREATE TABLE "KnowledgeChunk" (
     "chunkIndex" INTEGER NOT NULL,
     "tokenCount" INTEGER,
     "metadata" JSONB,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "embedding" vector(1536),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -378,13 +400,25 @@ CREATE INDEX "KnowledgeDocument_sourceId_idx" ON "KnowledgeDocument"("sourceId")
 CREATE INDEX "KnowledgeDocument_tenantId_status_idx" ON "KnowledgeDocument"("tenantId", "status");
 
 -- CreateIndex
+CREATE INDEX "KnowledgeAccess_tenantId_idx" ON "KnowledgeAccess"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "KnowledgeAccess_documentId_idx" ON "KnowledgeAccess"("documentId");
+
+-- CreateIndex
+CREATE INDEX "KnowledgeAccess_teamId_idx" ON "KnowledgeAccess"("teamId");
+
+-- CreateIndex
+CREATE INDEX "KnowledgeAccess_userId_idx" ON "KnowledgeAccess"("userId");
+
+-- CreateIndex
 CREATE INDEX "KnowledgeChunk_tenantId_idx" ON "KnowledgeChunk"("tenantId");
 
 -- CreateIndex
 CREATE INDEX "KnowledgeChunk_documentId_idx" ON "KnowledgeChunk"("documentId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "KnowledgeChunk_documentId_chunkIndex_key" ON "KnowledgeChunk"("documentId", "chunkIndex");
+CREATE UNIQUE INDEX "KnowledgeChunk_documentId_version_chunkIndex_key" ON "KnowledgeChunk"("documentId", "version", "chunkIndex");
 
 -- CreateIndex
 CREATE INDEX "AIConversation_tenantId_idx" ON "AIConversation"("tenantId");
@@ -514,6 +548,18 @@ ALTER TABLE "KnowledgeDocument" ADD CONSTRAINT "KnowledgeDocument_tenantId_fkey"
 
 -- AddForeignKey
 ALTER TABLE "KnowledgeDocument" ADD CONSTRAINT "KnowledgeDocument_sourceId_fkey" FOREIGN KEY ("sourceId") REFERENCES "KnowledgeSource"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "KnowledgeAccess" ADD CONSTRAINT "KnowledgeAccess_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "KnowledgeAccess" ADD CONSTRAINT "KnowledgeAccess_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES "KnowledgeDocument"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "KnowledgeAccess" ADD CONSTRAINT "KnowledgeAccess_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "KnowledgeAccess" ADD CONSTRAINT "KnowledgeAccess_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "KnowledgeChunk" ADD CONSTRAINT "KnowledgeChunk_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;

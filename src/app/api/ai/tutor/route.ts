@@ -13,6 +13,8 @@ import { TUTOR_SYSTEM_PROMPT } from "@/lib/ai/prompts";
 import { incrementAiUsage } from "@/lib/ai/quota";
 import { searchSimilarLessons } from "@/lib/ai/search";
 import { db } from "@/lib/db";
+import type { KnowledgeAccessContext } from "@/lib/domain/knowledge/access";
+import { searchKnowledge } from "@/lib/domain/knowledge/retrieval";
 import { tutorRatelimit } from "@/lib/ratelimit";
 
 // Only the most recent turns are sent to the model; full history is persisted.
@@ -125,9 +127,41 @@ export async function POST(req: Request) {
   if (lessonId) {
     const query = lastUserMessageText(messages);
     if (query) {
+      const contextBlocks: string[] = [];
+
       const similar = await searchSimilarLessons(query, courseId, RAG_TOP_K);
       if (similar.length > 0) {
-        context = similar.map((l) => `## ${l.title}\n${l.textContent ?? ""}`.trim()).join("\n\n");
+        contextBlocks.push(...similar.map((l) => `## ${l.title}\n${l.textContent ?? ""}`.trim()));
+      }
+
+      // Additive Knowledge-layer retrieval (docs/V2_AI_ARCHITECTURE.md,
+      // "Retrieval"). Only runs for tenant users — a FREE-plan user.tenantId
+      // is null and searchKnowledge requires a tenant-scoped context, so
+      // those chats fall back to lesson-only context exactly as before this
+      // change. Failures here must never break the tutor: nothing is
+      // indexed in production yet, so this normally just returns [].
+      if (user.tenantId) {
+        try {
+          const knowledgeContext: KnowledgeAccessContext = {
+            userId: user.id,
+            clerkId: userId as string,
+            tenantId: user.tenantId,
+            role: user.role,
+          };
+          const knowledgeResults = await searchKnowledge(knowledgeContext, query, {
+            topK: RAG_TOP_K,
+          });
+          contextBlocks.push(
+            ...knowledgeResults.map((r) => `## ${r.citation.documentTitle}\n${r.content}`.trim())
+          );
+        } catch {
+          // Knowledge retrieval is additive — a failure here falls back to
+          // whatever lesson-search context was already gathered above.
+        }
+      }
+
+      if (contextBlocks.length > 0) {
+        context = contextBlocks.join("\n\n");
       }
     }
   }

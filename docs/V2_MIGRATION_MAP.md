@@ -36,7 +36,10 @@ The current package uses Next 16, React 19, Prisma 7, AI SDK 7, Clerk 7 and rela
 
 ### Refactor
 
-- `src/lib/ai/search.ts` → knowledge retrieval service with authorization-aware filters.
+- `src/lib/ai/search.ts` → knowledge retrieval service with authorization-aware filters. **Status:**
+  the new service (`src/lib/domain/knowledge/retrieval.ts`) exists and is authorization-aware, but
+  `search.ts` itself has NOT been refactored/replaced — it's untouched, and `/api/ai/tutor` calls
+  both additively (see Phase 3 status above).
 - `src/lib/ai/middleware.ts` → shared AI request/policy context.
 - AI route handlers → thin adapters around the shared runtime.
 - Role checks → permission checks where appropriate.
@@ -72,6 +75,13 @@ The current package uses Next 16, React 19, Prisma 7, AI SDK 7, Clerk 7 and rela
 
 ### Phase 2 — Course Builder
 
+**Not implemented.** Note: the conversational task that drove this session called its own work
+"Phase 2: Knowledge + Permission-Aware RAG Foundation" — that work actually corresponds to this
+document's **Phase 3 (Learner Intelligence)** bullet "Rebuild tutor on knowledge-layer retrieval"
+below (partially: retrieval + auth foundation done, tutor integration additive/partial — see
+Phase 3 status note), not to this "Phase 2 — Course Builder" section. Flagging the numbering
+mismatch here rather than silently renumbering either document.
+
 - Add AI course creation workspace.
 - Generate curriculum proposal from goals and source material.
 - Generate activities and assessments.
@@ -79,6 +89,12 @@ The current package uses Next 16, React 19, Prisma 7, AI SDK 7, Clerk 7 and rela
 - Require human review before publishing.
 
 ### Phase 3 — Learner Intelligence
+
+**Status (2026-09-10): partially implemented** — "Rebuild tutor on knowledge-layer retrieval"
+(first bullet below) has its foundation built: `src/lib/domain/knowledge/{access,ingestion,
+retrieval,chunking,lessonBridge}.ts`, `KnowledgeAccess` schema, `/api/ai/tutor` additively calls
+the new retrieval alongside the legacy lesson search. Skill profile/gap experience, AI learning
+coach, and broader learning-event emission (remaining bullets) are **not implemented**.
 
 - Rebuild tutor on knowledge-layer retrieval.
 - Add skill profile and skill-gap experience.

@@ -681,6 +681,40 @@ export type EnumKnowledgeStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumKnowledgeStatusFilter<$PrismaModel>
 }
 
+export type EnumKnowledgeVisibilityFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeVisibility | Prisma.EnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeVisibility[] | Prisma.ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeVisibility[] | Prisma.ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeVisibilityFilter<$PrismaModel> | $Enums.KnowledgeVisibility
+}
+
+export type EnumKnowledgeVisibilityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeVisibility | Prisma.EnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeVisibility[] | Prisma.ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeVisibility[] | Prisma.ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeVisibilityWithAggregatesFilter<$PrismaModel> | $Enums.KnowledgeVisibility
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumKnowledgeVisibilityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumKnowledgeVisibilityFilter<$PrismaModel>
+}
+
+export type EnumKnowledgeAccessScopeFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeAccessScope | Prisma.EnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeAccessScope[] | Prisma.ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeAccessScope[] | Prisma.ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeAccessScopeFilter<$PrismaModel> | $Enums.KnowledgeAccessScope
+}
+
+export type EnumKnowledgeAccessScopeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeAccessScope | Prisma.EnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeAccessScope[] | Prisma.ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeAccessScope[] | Prisma.ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeAccessScopeWithAggregatesFilter<$PrismaModel> | $Enums.KnowledgeAccessScope
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumKnowledgeAccessScopeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumKnowledgeAccessScopeFilter<$PrismaModel>
+}
+
 export type EnumAIConversationTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.AIConversationType | Prisma.EnumAIConversationTypeFieldRefInput<$PrismaModel>
   in?: $Enums.AIConversationType[] | Prisma.ListEnumAIConversationTypeFieldRefInput<$PrismaModel>
@@ -1334,6 +1368,40 @@ export type NestedEnumKnowledgeStatusWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumKnowledgeStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumKnowledgeStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumKnowledgeVisibilityFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeVisibility | Prisma.EnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeVisibility[] | Prisma.ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeVisibility[] | Prisma.ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeVisibilityFilter<$PrismaModel> | $Enums.KnowledgeVisibility
+}
+
+export type NestedEnumKnowledgeVisibilityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeVisibility | Prisma.EnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeVisibility[] | Prisma.ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeVisibility[] | Prisma.ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeVisibilityWithAggregatesFilter<$PrismaModel> | $Enums.KnowledgeVisibility
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumKnowledgeVisibilityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumKnowledgeVisibilityFilter<$PrismaModel>
+}
+
+export type NestedEnumKnowledgeAccessScopeFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeAccessScope | Prisma.EnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeAccessScope[] | Prisma.ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeAccessScope[] | Prisma.ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeAccessScopeFilter<$PrismaModel> | $Enums.KnowledgeAccessScope
+}
+
+export type NestedEnumKnowledgeAccessScopeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeAccessScope | Prisma.EnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeAccessScope[] | Prisma.ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeAccessScope[] | Prisma.ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeAccessScopeWithAggregatesFilter<$PrismaModel> | $Enums.KnowledgeAccessScope
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumKnowledgeAccessScopeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumKnowledgeAccessScopeFilter<$PrismaModel>
 }
 
 export type NestedEnumAIConversationTypeFilter<$PrismaModel = never> = {

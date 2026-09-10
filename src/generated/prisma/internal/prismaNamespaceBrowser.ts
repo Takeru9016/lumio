@@ -84,6 +84,7 @@ export const ModelName = {
   CourseSkill: 'CourseSkill',
   KnowledgeSource: 'KnowledgeSource',
   KnowledgeDocument: 'KnowledgeDocument',
+  KnowledgeAccess: 'KnowledgeAccess',
   KnowledgeChunk: 'KnowledgeChunk',
   AIConversation: 'AIConversation',
   AIMessage: 'AIMessage',
@@ -594,12 +595,27 @@ export const KnowledgeDocumentScalarFieldEnum = {
   url: 'url',
   textContent: 'textContent',
   status: 'status',
+  visibility: 'visibility',
   metadata: 'metadata',
+  activeVersion: 'activeVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type KnowledgeDocumentScalarFieldEnum = (typeof KnowledgeDocumentScalarFieldEnum)[keyof typeof KnowledgeDocumentScalarFieldEnum]
+
+
+export const KnowledgeAccessScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  documentId: 'documentId',
+  scope: 'scope',
+  teamId: 'teamId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type KnowledgeAccessScalarFieldEnum = (typeof KnowledgeAccessScalarFieldEnum)[keyof typeof KnowledgeAccessScalarFieldEnum]
 
 
 export const KnowledgeChunkScalarFieldEnum = {
@@ -610,6 +626,7 @@ export const KnowledgeChunkScalarFieldEnum = {
   chunkIndex: 'chunkIndex',
   tokenCount: 'tokenCount',
   metadata: 'metadata',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

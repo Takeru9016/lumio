@@ -150,6 +150,21 @@ enum KnowledgeStatus {
   ERROR
 }
 
+// TENANT (default): any authenticated member of the owning tenant can read
+// the document once it's READY — no KnowledgeAccess rows needed, matches the
+// common case. RESTRICTED: fail-closed — readable only via an explicit
+// KnowledgeAccess row (see KnowledgeAccessScope). Phase 2C, docs/V2_AI_ARCHITECTURE.md.
+enum KnowledgeVisibility {
+  TENANT
+  RESTRICTED
+}
+
+enum KnowledgeAccessScope {
+  TENANT
+  TEAM
+  USER
+}
+
 // ---- V2: AI ------------------------------------------------------
 
 enum AIConversationType {
@@ -240,11 +255,12 @@ model User {
   userSkills            UserSkill[]
   userJobRoles          UserJobRole[]
   skillEvidence         SkillEvidence[]
-  skillEvidenceVerified SkillEvidence[]  @relation("SkillEvidenceVerifier")
+  skillEvidenceVerified SkillEvidence[]   @relation("SkillEvidenceVerifier")
   aiConversations       AIConversation[]
   aiExecutions          AIExecution[]
   aiUsageEvents         AIUsageEvent[]
   learningEvents        LearningEvent[]
+  knowledgeAccess       KnowledgeAccess[]
 
   deletedAt DateTime?
 
@@ -300,6 +316,7 @@ model Tenant {
   knowledgeSources   KnowledgeSource[]
   knowledgeDocuments KnowledgeDocument[]
   knowledgeChunks    KnowledgeChunk[]
+  knowledgeAccess    KnowledgeAccess[]
   aiConversations    AIConversation[]
   aiExecutions       AIExecution[]
   aiUsageEvents      AIUsageEvent[]
@@ -319,6 +336,7 @@ model Team {
 
   members            TeamMember[]
   mandatoryTrainings MandatoryTraining[]
+  knowledgeAccess    KnowledgeAccess[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -963,10 +981,18 @@ model KnowledgeDocument {
   mimeType    String?
   url         String?
   textContent String?
-  status      KnowledgeStatus @default(PENDING)
+  status      KnowledgeStatus     @default(PENDING)
+  visibility  KnowledgeVisibility @default(TENANT)
   metadata    Json?
 
+  // The only chunk `version` retrieval is allowed to read (see KnowledgeChunk
+  // below). 0 = never successfully indexed — matches no chunk, so retrieval
+  // is empty rather than reading a half-written run. Advanced atomically by
+  // the ingestion service only after all of a run's chunks are persisted.
+  activeVersion Int @default(0)
+
   chunks  KnowledgeChunk[]
+  access  KnowledgeAccess[]
   lessons Lesson[]
 
   createdAt DateTime @default(now())
@@ -975,6 +1001,33 @@ model KnowledgeDocument {
   @@index([tenantId])
   @@index([sourceId])
   @@index([tenantId, status])
+}
+
+// Explicit allow-list for a RESTRICTED KnowledgeDocument (see
+// KnowledgeVisibility). A TENANT-visibility document needs no rows here.
+// One of teamId/userId is set depending on `scope`; a TENANT-scope row lets
+// a RESTRICTED document still opt back in to tenant-wide access alongside
+// narrower team/user rows, without changing `visibility` itself.
+model KnowledgeAccess {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  documentId String
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  scope  KnowledgeAccessScope
+  teamId String?
+  team   Team?                @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([documentId])
+  @@index([teamId])
+  @@index([userId])
 }
 
 model KnowledgeChunk {
@@ -989,6 +1042,14 @@ model KnowledgeChunk {
   tokenCount Int?
   metadata   Json?
 
+  // Which indexing run this chunk belongs to. Retrieval only ever reads
+  // chunks where version == the parent document's activeVersion — a new
+  // indexing run writes chunks at version = activeVersion + 1, invisible to
+  // retrieval until the ingestion service flips activeVersion in one atomic
+  // update after every chunk is persisted. An interrupted run just leaves
+  // activeVersion unchanged, so old chunks keep serving; nothing mixes.
+  version Int @default(1)
+
   // Same Unsupported(vector) approach as Lesson.embedding above — Prisma 7 +
   // pgvector don't have a native scalar type, so reads/writes for this column
   // go through raw SQL (see src/lib/ai/search.ts for the existing pattern).
@@ -999,9 +1060,9 @@ model KnowledgeChunk {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Prevents two chunks of the same document claiming the same position —
-  // without this, nothing stops corrupt/duplicate ordering on re-index.
-  @@unique([documentId, chunkIndex])
+  // Prevents two chunks of the same document+version claiming the same
+  // position — without this, nothing stops corrupt/duplicate ordering.
+  @@unique([documentId, version, chunkIndex])
   @@index([tenantId])
   @@index([documentId])
 }

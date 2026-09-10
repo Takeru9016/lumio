@@ -207,6 +207,11 @@ export type KnowledgeSource = Prisma.KnowledgeSourceModel
  */
 export type KnowledgeDocument = Prisma.KnowledgeDocumentModel
 /**
+ * Model KnowledgeAccess
+ * 
+ */
+export type KnowledgeAccess = Prisma.KnowledgeAccessModel
+/**
  * Model KnowledgeChunk
  * 
  */

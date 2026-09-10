@@ -1,7 +1,10 @@
-# V2 Database Migration — Phase 1 (Foundation)
+# V2 Database Migration — Phase 1 (Foundation) + Phase 2 (Knowledge/RAG)
 
-Status: **generated, not applied**. This document describes the migration in
-`prisma/migrations/20260909180000_add_v2_capability_knowledge_ai_foundation/migration.sql`.
+Status: **generated, not applied**. Both phases' schema changes are folded into ONE migration
+directory (regenerated from the same original baseline each time, not stacked) —
+`prisma/migrations/20260909180000_add_v2_capability_knowledge_ai_foundation/migration.sql`. §1-7
+below describe the migration as of Phase 1; §9 describes what Phase 2 added on top and why it was
+folded in rather than staged as a second migration.
 
 ## 1. Current schema (before this migration)
 
@@ -120,6 +123,77 @@ explicitly scoped to this phase):
 
 Full findings, including several Low-severity/informational items, are in the audit report
 delivered alongside this document.
+
+## 9. Phase 2 additions (Knowledge + permission-aware RAG foundation, 2026-09-10)
+
+Folded into the same migration directory as Phase 1 — regenerated fresh from the original
+pre-Phase-1 schema baseline via the same offline `prisma migrate diff --from-schema ... --to-schema
+prisma/schema.prisma --script -o migration.sql`, not stacked as a second migration file. Reason:
+the Phase 1 migration was never applied anywhere, so there is no independent history to preserve
+by stacking; folding keeps a reviewer looking at one file instead of two that touch the same new
+tables.
+
+**2 new enums**: `KnowledgeVisibility` (TENANT/RESTRICTED), `KnowledgeAccessScope`
+(TENANT/TEAM/USER). Total enum count: 9 → 11.
+
+**1 new table**: `KnowledgeAccess` (tenantId, documentId, scope, optional teamId/userId) — see
+`docs/V2_DOMAIN_MODEL.md`, "Knowledge ownership and authorization". Total table count: 18 → 19.
+
+**2 new columns**: `KnowledgeDocument.visibility` (`KnowledgeVisibility`, default `TENANT`),
+`KnowledgeDocument.activeVersion` (`Int`, default `0`).
+
+**1 new column + changed unique constraint** on `KnowledgeChunk`: `version` (`Int`, default `1`)
+added; `@@unique([documentId, chunkIndex])` (added during the Phase 1 audit, §8) replaced with
+`@@unique([documentId, version, chunkIndex])` — this table has never been applied to any real
+database (Phase 1's migration was never deployed), so there is no data-loss risk in changing it;
+this is a schema edit, not a migration-on-migration, because both are folded into the same
+unapplied file.
+
+**No changes to any Phase 1 table besides `KnowledgeChunk`/`KnowledgeDocument`.** `Lesson`,
+`User`, `Tenant`, `Course` are unchanged from Phase 1's version of this migration.
+
+**Final totals in the folded migration file** (verified by grep, not estimated): 19
+`CREATE TABLE`, 11 `CREATE TYPE`, 53 `CreateIndex` comments, 46 `ALTER TABLE` statements — all
+`ADD COLUMN`/`ADD CONSTRAINT`, zero `DROP`/`RENAME`/`TRUNCATE` (grepped, confirmed empty both
+before and after folding Phase 2 in).
+
+**Verified on a real database**: unlike Phase 1 (offline diff only), this migration was applied
+via `prisma migrate deploy` to a local, disposable Postgres 17 + pgvector instance (Homebrew;
+`lumio_test` database) — proving the full 11-migration history (V1's 10 migrations + this one)
+replays cleanly from an empty database, not just that the diff *looks* additive. **Neon was never
+connected to** — confirmed via `prisma migrate status` reporting `Datasource "db": PostgreSQL
+database "lumio_test" ... at "localhost:5432"` before any write command ran.
+
+## 10. Testing infrastructure added this phase
+
+Phase 2H (mandatory security tests) required exercising the actual retrieval SQL against a real
+Postgres + pgvector, not a mocked query layer — a mocked test cannot prove a `WHERE` clause is
+correct. The repository had zero test infrastructure beforehand (confirmed by grep in the Phase 1
+audit). Added, with the user's explicit sign-off on both the approach and the new dependencies:
+
+- **`vitest`** (devDependency) + `vitest.config.ts` — test runner, `@/*` alias resolved to match
+  `tsconfig.json`.
+- **`dotenv-cli`** (devDependency) — `pnpm test` runs via `.env.test.local`, never `.env.local`.
+- **`.env.test.local`** (gitignored, `.env*` already covered) — `DATABASE_URL` pointing at
+  `postgresql://<local-user>@localhost:5432/lumio_test`, a Homebrew-installed Postgres 17 +
+  pgvector instance, entirely separate from Neon.
+- **`@prisma/adapter-pg` + `pg`** (regular dependencies) + a change to `src/lib/db.ts`: the
+  existing Prisma client hardcoded `@prisma/adapter-neon`, whose serverless driver speaks a
+  Neon-specific WebSocket protocol and cannot reach plain Postgres at all (confirmed: it fails
+  with "Received network error or non-101 status code" against local Postgres). `db.ts` now picks
+  the adapter by checking whether `DATABASE_URL` contains `.neon.tech`: real Neon URLs (verified —
+  production `DATABASE_URL` in `.env.local` is `...aobbdm9m-pooler...ap-southeast-1.aws.neon.tech`)
+  still get `PrismaNeon`, exactly as before; anything else (local Postgres) gets `@prisma/adapter-pg`.
+  **This is a behavior-preserving change for every existing deployment** — the branch condition is
+  new, but production/preview never take the new branch.
+- Test DB setup is manual/local (Homebrew `postgresql@17` + `pgvector`, `createdb lumio_test`,
+  `CREATE EXTENSION vector`) — not scripted or documented as a repeatable command yet; a
+  `docker-compose.test.yml` would be the natural next step if this becomes a recurring need
+  (deferred — no Docker was available in this environment).
+
+19 tests added across 3 files (`access.test.ts`, `ingestion.test.ts`,
+`retrieval.security.test.ts`), all passing. Full list and results in the Phase 2 report delivered
+alongside this document.
 
 ---
 

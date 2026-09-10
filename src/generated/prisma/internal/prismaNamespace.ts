@@ -417,6 +417,7 @@ export const ModelName = {
   CourseSkill: 'CourseSkill',
   KnowledgeSource: 'KnowledgeSource',
   KnowledgeDocument: 'KnowledgeDocument',
+  KnowledgeAccess: 'KnowledgeAccess',
   KnowledgeChunk: 'KnowledgeChunk',
   AIConversation: 'AIConversation',
   AIMessage: 'AIMessage',
@@ -440,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "courseSkill" | "knowledgeSource" | "knowledgeDocument" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
+    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "courseSkill" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2886,6 +2887,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    KnowledgeAccess: {
+      payload: Prisma.$KnowledgeAccessPayload<ExtArgs>
+      fields: Prisma.KnowledgeAccessFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KnowledgeAccessFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KnowledgeAccessFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>
+        }
+        findFirst: {
+          args: Prisma.KnowledgeAccessFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KnowledgeAccessFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>
+        }
+        findMany: {
+          args: Prisma.KnowledgeAccessFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>[]
+        }
+        create: {
+          args: Prisma.KnowledgeAccessCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>
+        }
+        createMany: {
+          args: Prisma.KnowledgeAccessCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KnowledgeAccessCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>[]
+        }
+        delete: {
+          args: Prisma.KnowledgeAccessDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>
+        }
+        update: {
+          args: Prisma.KnowledgeAccessUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>
+        }
+        deleteMany: {
+          args: Prisma.KnowledgeAccessDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KnowledgeAccessUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KnowledgeAccessUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>[]
+        }
+        upsert: {
+          args: Prisma.KnowledgeAccessUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KnowledgeAccessPayload>
+        }
+        aggregate: {
+          args: Prisma.KnowledgeAccessAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKnowledgeAccess>
+        }
+        groupBy: {
+          args: Prisma.KnowledgeAccessGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KnowledgeAccessGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KnowledgeAccessCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KnowledgeAccessCountAggregateOutputType> | number
+        }
+      }
+    }
     KnowledgeChunk: {
       payload: Prisma.$KnowledgeChunkPayload<ExtArgs>
       fields: Prisma.KnowledgeChunkFieldRefs
@@ -4001,12 +4076,27 @@ export const KnowledgeDocumentScalarFieldEnum = {
   url: 'url',
   textContent: 'textContent',
   status: 'status',
+  visibility: 'visibility',
   metadata: 'metadata',
+  activeVersion: 'activeVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type KnowledgeDocumentScalarFieldEnum = (typeof KnowledgeDocumentScalarFieldEnum)[keyof typeof KnowledgeDocumentScalarFieldEnum]
+
+
+export const KnowledgeAccessScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  documentId: 'documentId',
+  scope: 'scope',
+  teamId: 'teamId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type KnowledgeAccessScalarFieldEnum = (typeof KnowledgeAccessScalarFieldEnum)[keyof typeof KnowledgeAccessScalarFieldEnum]
 
 
 export const KnowledgeChunkScalarFieldEnum = {
@@ -4017,6 +4107,7 @@ export const KnowledgeChunkScalarFieldEnum = {
   chunkIndex: 'chunkIndex',
   tokenCount: 'tokenCount',
   metadata: 'metadata',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4517,6 +4608,34 @@ export type ListEnumKnowledgeStatusFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'KnowledgeVisibility'
+ */
+export type EnumKnowledgeVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'KnowledgeVisibility'>
+    
+
+
+/**
+ * Reference to a field of type 'KnowledgeVisibility[]'
+ */
+export type ListEnumKnowledgeVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'KnowledgeVisibility[]'>
+    
+
+
+/**
+ * Reference to a field of type 'KnowledgeAccessScope'
+ */
+export type EnumKnowledgeAccessScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'KnowledgeAccessScope'>
+    
+
+
+/**
+ * Reference to a field of type 'KnowledgeAccessScope[]'
+ */
+export type ListEnumKnowledgeAccessScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'KnowledgeAccessScope[]'>
+    
+
+
+/**
  * Reference to a field of type 'AIConversationType'
  */
 export type EnumAIConversationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AIConversationType'>
@@ -4700,6 +4819,7 @@ export type GlobalOmitConfig = {
   courseSkill?: Prisma.CourseSkillOmit
   knowledgeSource?: Prisma.KnowledgeSourceOmit
   knowledgeDocument?: Prisma.KnowledgeDocumentOmit
+  knowledgeAccess?: Prisma.KnowledgeAccessOmit
   knowledgeChunk?: Prisma.KnowledgeChunkOmit
   aIConversation?: Prisma.AIConversationOmit
   aIMessage?: Prisma.AIMessageOmit

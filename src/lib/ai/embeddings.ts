@@ -2,7 +2,7 @@ import { embed } from "ai";
 import { openai } from "@/lib/ai/openai";
 import { db } from "@/lib/db";
 
-const EMBEDDING_MODEL = "text-embedding-3-small";
+export const EMBEDDING_MODEL = "text-embedding-3-small";
 const MAX_INPUT_CHARS = 8000;
 
 /**

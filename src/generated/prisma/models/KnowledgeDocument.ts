@@ -20,8 +20,18 @@ export type KnowledgeDocumentModel = runtime.Types.Result.DefaultSelection<Prism
 
 export type AggregateKnowledgeDocument = {
   _count: KnowledgeDocumentCountAggregateOutputType | null
+  _avg: KnowledgeDocumentAvgAggregateOutputType | null
+  _sum: KnowledgeDocumentSumAggregateOutputType | null
   _min: KnowledgeDocumentMinAggregateOutputType | null
   _max: KnowledgeDocumentMaxAggregateOutputType | null
+}
+
+export type KnowledgeDocumentAvgAggregateOutputType = {
+  activeVersion: number | null
+}
+
+export type KnowledgeDocumentSumAggregateOutputType = {
+  activeVersion: number | null
 }
 
 export type KnowledgeDocumentMinAggregateOutputType = {
@@ -33,6 +43,8 @@ export type KnowledgeDocumentMinAggregateOutputType = {
   url: string | null
   textContent: string | null
   status: $Enums.KnowledgeStatus | null
+  visibility: $Enums.KnowledgeVisibility | null
+  activeVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +58,8 @@ export type KnowledgeDocumentMaxAggregateOutputType = {
   url: string | null
   textContent: string | null
   status: $Enums.KnowledgeStatus | null
+  visibility: $Enums.KnowledgeVisibility | null
+  activeVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,12 +73,22 @@ export type KnowledgeDocumentCountAggregateOutputType = {
   url: number
   textContent: number
   status: number
+  visibility: number
   metadata: number
+  activeVersion: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type KnowledgeDocumentAvgAggregateInputType = {
+  activeVersion?: true
+}
+
+export type KnowledgeDocumentSumAggregateInputType = {
+  activeVersion?: true
+}
 
 export type KnowledgeDocumentMinAggregateInputType = {
   id?: true
@@ -75,6 +99,8 @@ export type KnowledgeDocumentMinAggregateInputType = {
   url?: true
   textContent?: true
   status?: true
+  visibility?: true
+  activeVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +114,8 @@ export type KnowledgeDocumentMaxAggregateInputType = {
   url?: true
   textContent?: true
   status?: true
+  visibility?: true
+  activeVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -101,7 +129,9 @@ export type KnowledgeDocumentCountAggregateInputType = {
   url?: true
   textContent?: true
   status?: true
+  visibility?: true
   metadata?: true
+  activeVersion?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -145,6 +175,18 @@ export type KnowledgeDocumentAggregateArgs<ExtArgs extends runtime.Types.Extensi
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: KnowledgeDocumentAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: KnowledgeDocumentSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: KnowledgeDocumentMinAggregateInputType
@@ -175,6 +217,8 @@ export type KnowledgeDocumentGroupByArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   _count?: KnowledgeDocumentCountAggregateInputType | true
+  _avg?: KnowledgeDocumentAvgAggregateInputType
+  _sum?: KnowledgeDocumentSumAggregateInputType
   _min?: KnowledgeDocumentMinAggregateInputType
   _max?: KnowledgeDocumentMaxAggregateInputType
 }
@@ -188,10 +232,14 @@ export type KnowledgeDocumentGroupByOutputType = {
   url: string | null
   textContent: string | null
   status: $Enums.KnowledgeStatus
+  visibility: $Enums.KnowledgeVisibility
   metadata: runtime.JsonValue | null
+  activeVersion: number
   createdAt: Date
   updatedAt: Date
   _count: KnowledgeDocumentCountAggregateOutputType | null
+  _avg: KnowledgeDocumentAvgAggregateOutputType | null
+  _sum: KnowledgeDocumentSumAggregateOutputType | null
   _min: KnowledgeDocumentMinAggregateOutputType | null
   _max: KnowledgeDocumentMaxAggregateOutputType | null
 }
@@ -223,12 +271,15 @@ export type KnowledgeDocumentWhereInput = {
   url?: Prisma.StringNullableFilter<"KnowledgeDocument"> | string | null
   textContent?: Prisma.StringNullableFilter<"KnowledgeDocument"> | string | null
   status?: Prisma.EnumKnowledgeStatusFilter<"KnowledgeDocument"> | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFilter<"KnowledgeDocument"> | $Enums.KnowledgeVisibility
   metadata?: Prisma.JsonNullableFilter<"KnowledgeDocument">
+  activeVersion?: Prisma.IntFilter<"KnowledgeDocument"> | number
   createdAt?: Prisma.DateTimeFilter<"KnowledgeDocument"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KnowledgeDocument"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   source?: Prisma.XOR<Prisma.KnowledgeSourceScalarRelationFilter, Prisma.KnowledgeSourceWhereInput>
   chunks?: Prisma.KnowledgeChunkListRelationFilter
+  access?: Prisma.KnowledgeAccessListRelationFilter
   lessons?: Prisma.LessonListRelationFilter
 }
 
@@ -241,12 +292,15 @@ export type KnowledgeDocumentOrderByWithRelationInput = {
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   textContent?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  activeVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   source?: Prisma.KnowledgeSourceOrderByWithRelationInput
   chunks?: Prisma.KnowledgeChunkOrderByRelationAggregateInput
+  access?: Prisma.KnowledgeAccessOrderByRelationAggregateInput
   lessons?: Prisma.LessonOrderByRelationAggregateInput
 }
 
@@ -262,12 +316,15 @@ export type KnowledgeDocumentWhereUniqueInput = Prisma.AtLeast<{
   url?: Prisma.StringNullableFilter<"KnowledgeDocument"> | string | null
   textContent?: Prisma.StringNullableFilter<"KnowledgeDocument"> | string | null
   status?: Prisma.EnumKnowledgeStatusFilter<"KnowledgeDocument"> | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFilter<"KnowledgeDocument"> | $Enums.KnowledgeVisibility
   metadata?: Prisma.JsonNullableFilter<"KnowledgeDocument">
+  activeVersion?: Prisma.IntFilter<"KnowledgeDocument"> | number
   createdAt?: Prisma.DateTimeFilter<"KnowledgeDocument"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KnowledgeDocument"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   source?: Prisma.XOR<Prisma.KnowledgeSourceScalarRelationFilter, Prisma.KnowledgeSourceWhereInput>
   chunks?: Prisma.KnowledgeChunkListRelationFilter
+  access?: Prisma.KnowledgeAccessListRelationFilter
   lessons?: Prisma.LessonListRelationFilter
 }, "id">
 
@@ -280,12 +337,16 @@ export type KnowledgeDocumentOrderByWithAggregationInput = {
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   textContent?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  activeVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.KnowledgeDocumentCountOrderByAggregateInput
+  _avg?: Prisma.KnowledgeDocumentAvgOrderByAggregateInput
   _max?: Prisma.KnowledgeDocumentMaxOrderByAggregateInput
   _min?: Prisma.KnowledgeDocumentMinOrderByAggregateInput
+  _sum?: Prisma.KnowledgeDocumentSumOrderByAggregateInput
 }
 
 export type KnowledgeDocumentScalarWhereWithAggregatesInput = {
@@ -300,7 +361,9 @@ export type KnowledgeDocumentScalarWhereWithAggregatesInput = {
   url?: Prisma.StringNullableWithAggregatesFilter<"KnowledgeDocument"> | string | null
   textContent?: Prisma.StringNullableWithAggregatesFilter<"KnowledgeDocument"> | string | null
   status?: Prisma.EnumKnowledgeStatusWithAggregatesFilter<"KnowledgeDocument"> | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityWithAggregatesFilter<"KnowledgeDocument"> | $Enums.KnowledgeVisibility
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"KnowledgeDocument">
+  activeVersion?: Prisma.IntWithAggregatesFilter<"KnowledgeDocument"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"KnowledgeDocument"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"KnowledgeDocument"> | Date | string
 }
@@ -312,12 +375,15 @@ export type KnowledgeDocumentCreateInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutKnowledgeDocumentsInput
   source: Prisma.KnowledgeSourceCreateNestedOneWithoutDocumentsInput
   chunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutDocumentInput
+  access?: Prisma.KnowledgeAccessCreateNestedManyWithoutDocumentInput
   lessons?: Prisma.LessonCreateNestedManyWithoutKnowledgeDocumentInput
 }
 
@@ -330,10 +396,13 @@ export type KnowledgeDocumentUncheckedCreateInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutDocumentInput
+  access?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutDocumentInput
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutKnowledgeDocumentInput
 }
 
@@ -344,12 +413,15 @@ export type KnowledgeDocumentUpdateInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutKnowledgeDocumentsNestedInput
   source?: Prisma.KnowledgeSourceUpdateOneRequiredWithoutDocumentsNestedInput
   chunks?: Prisma.KnowledgeChunkUpdateManyWithoutDocumentNestedInput
+  access?: Prisma.KnowledgeAccessUpdateManyWithoutDocumentNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutKnowledgeDocumentNestedInput
 }
 
@@ -362,10 +434,13 @@ export type KnowledgeDocumentUncheckedUpdateInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutDocumentNestedInput
+  access?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutDocumentNestedInput
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutKnowledgeDocumentNestedInput
 }
 
@@ -378,7 +453,9 @@ export type KnowledgeDocumentCreateManyInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -390,7 +467,9 @@ export type KnowledgeDocumentUpdateManyMutationInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -404,7 +483,9 @@ export type KnowledgeDocumentUncheckedUpdateManyInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -433,9 +514,15 @@ export type KnowledgeDocumentCountOrderByAggregateInput = {
   url?: Prisma.SortOrder
   textContent?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+  activeVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type KnowledgeDocumentAvgOrderByAggregateInput = {
+  activeVersion?: Prisma.SortOrder
 }
 
 export type KnowledgeDocumentMaxOrderByAggregateInput = {
@@ -447,6 +534,8 @@ export type KnowledgeDocumentMaxOrderByAggregateInput = {
   url?: Prisma.SortOrder
   textContent?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  activeVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -460,8 +549,14 @@ export type KnowledgeDocumentMinOrderByAggregateInput = {
   url?: Prisma.SortOrder
   textContent?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  activeVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type KnowledgeDocumentSumOrderByAggregateInput = {
+  activeVersion?: Prisma.SortOrder
 }
 
 export type KnowledgeDocumentScalarRelationFilter = {
@@ -569,6 +664,24 @@ export type KnowledgeDocumentUncheckedUpdateManyWithoutSourceNestedInput = {
   deleteMany?: Prisma.KnowledgeDocumentScalarWhereInput | Prisma.KnowledgeDocumentScalarWhereInput[]
 }
 
+export type EnumKnowledgeVisibilityFieldUpdateOperationsInput = {
+  set?: $Enums.KnowledgeVisibility
+}
+
+export type KnowledgeDocumentCreateNestedOneWithoutAccessInput = {
+  create?: Prisma.XOR<Prisma.KnowledgeDocumentCreateWithoutAccessInput, Prisma.KnowledgeDocumentUncheckedCreateWithoutAccessInput>
+  connectOrCreate?: Prisma.KnowledgeDocumentCreateOrConnectWithoutAccessInput
+  connect?: Prisma.KnowledgeDocumentWhereUniqueInput
+}
+
+export type KnowledgeDocumentUpdateOneRequiredWithoutAccessNestedInput = {
+  create?: Prisma.XOR<Prisma.KnowledgeDocumentCreateWithoutAccessInput, Prisma.KnowledgeDocumentUncheckedCreateWithoutAccessInput>
+  connectOrCreate?: Prisma.KnowledgeDocumentCreateOrConnectWithoutAccessInput
+  upsert?: Prisma.KnowledgeDocumentUpsertWithoutAccessInput
+  connect?: Prisma.KnowledgeDocumentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.KnowledgeDocumentUpdateToOneWithWhereWithoutAccessInput, Prisma.KnowledgeDocumentUpdateWithoutAccessInput>, Prisma.KnowledgeDocumentUncheckedUpdateWithoutAccessInput>
+}
+
 export type KnowledgeDocumentCreateNestedOneWithoutChunksInput = {
   create?: Prisma.XOR<Prisma.KnowledgeDocumentCreateWithoutChunksInput, Prisma.KnowledgeDocumentUncheckedCreateWithoutChunksInput>
   connectOrCreate?: Prisma.KnowledgeDocumentCreateOrConnectWithoutChunksInput
@@ -590,11 +703,14 @@ export type KnowledgeDocumentCreateWithoutTenantInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   source: Prisma.KnowledgeSourceCreateNestedOneWithoutDocumentsInput
   chunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutDocumentInput
+  access?: Prisma.KnowledgeAccessCreateNestedManyWithoutDocumentInput
   lessons?: Prisma.LessonCreateNestedManyWithoutKnowledgeDocumentInput
 }
 
@@ -606,10 +722,13 @@ export type KnowledgeDocumentUncheckedCreateWithoutTenantInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutDocumentInput
+  access?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutDocumentInput
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutKnowledgeDocumentInput
 }
 
@@ -651,7 +770,9 @@ export type KnowledgeDocumentScalarWhereInput = {
   url?: Prisma.StringNullableFilter<"KnowledgeDocument"> | string | null
   textContent?: Prisma.StringNullableFilter<"KnowledgeDocument"> | string | null
   status?: Prisma.EnumKnowledgeStatusFilter<"KnowledgeDocument"> | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFilter<"KnowledgeDocument"> | $Enums.KnowledgeVisibility
   metadata?: Prisma.JsonNullableFilter<"KnowledgeDocument">
+  activeVersion?: Prisma.IntFilter<"KnowledgeDocument"> | number
   createdAt?: Prisma.DateTimeFilter<"KnowledgeDocument"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KnowledgeDocument"> | Date | string
 }
@@ -663,12 +784,15 @@ export type KnowledgeDocumentCreateWithoutLessonsInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutKnowledgeDocumentsInput
   source: Prisma.KnowledgeSourceCreateNestedOneWithoutDocumentsInput
   chunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutDocumentInput
+  access?: Prisma.KnowledgeAccessCreateNestedManyWithoutDocumentInput
 }
 
 export type KnowledgeDocumentUncheckedCreateWithoutLessonsInput = {
@@ -680,10 +804,13 @@ export type KnowledgeDocumentUncheckedCreateWithoutLessonsInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutDocumentInput
+  access?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type KnowledgeDocumentCreateOrConnectWithoutLessonsInput = {
@@ -709,12 +836,15 @@ export type KnowledgeDocumentUpdateWithoutLessonsInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutKnowledgeDocumentsNestedInput
   source?: Prisma.KnowledgeSourceUpdateOneRequiredWithoutDocumentsNestedInput
   chunks?: Prisma.KnowledgeChunkUpdateManyWithoutDocumentNestedInput
+  access?: Prisma.KnowledgeAccessUpdateManyWithoutDocumentNestedInput
 }
 
 export type KnowledgeDocumentUncheckedUpdateWithoutLessonsInput = {
@@ -726,10 +856,13 @@ export type KnowledgeDocumentUncheckedUpdateWithoutLessonsInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutDocumentNestedInput
+  access?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type KnowledgeDocumentCreateWithoutSourceInput = {
@@ -739,11 +872,14 @@ export type KnowledgeDocumentCreateWithoutSourceInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutKnowledgeDocumentsInput
   chunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutDocumentInput
+  access?: Prisma.KnowledgeAccessCreateNestedManyWithoutDocumentInput
   lessons?: Prisma.LessonCreateNestedManyWithoutKnowledgeDocumentInput
 }
 
@@ -755,10 +891,13 @@ export type KnowledgeDocumentUncheckedCreateWithoutSourceInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutDocumentInput
+  access?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutDocumentInput
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutKnowledgeDocumentInput
 }
 
@@ -788,6 +927,94 @@ export type KnowledgeDocumentUpdateManyWithWhereWithoutSourceInput = {
   data: Prisma.XOR<Prisma.KnowledgeDocumentUpdateManyMutationInput, Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutSourceInput>
 }
 
+export type KnowledgeDocumentCreateWithoutAccessInput = {
+  id?: string
+  title: string
+  mimeType?: string | null
+  url?: string | null
+  textContent?: string | null
+  status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutKnowledgeDocumentsInput
+  source: Prisma.KnowledgeSourceCreateNestedOneWithoutDocumentsInput
+  chunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutDocumentInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutKnowledgeDocumentInput
+}
+
+export type KnowledgeDocumentUncheckedCreateWithoutAccessInput = {
+  id?: string
+  tenantId: string
+  sourceId: string
+  title: string
+  mimeType?: string | null
+  url?: string | null
+  textContent?: string | null
+  status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  chunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutDocumentInput
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutKnowledgeDocumentInput
+}
+
+export type KnowledgeDocumentCreateOrConnectWithoutAccessInput = {
+  where: Prisma.KnowledgeDocumentWhereUniqueInput
+  create: Prisma.XOR<Prisma.KnowledgeDocumentCreateWithoutAccessInput, Prisma.KnowledgeDocumentUncheckedCreateWithoutAccessInput>
+}
+
+export type KnowledgeDocumentUpsertWithoutAccessInput = {
+  update: Prisma.XOR<Prisma.KnowledgeDocumentUpdateWithoutAccessInput, Prisma.KnowledgeDocumentUncheckedUpdateWithoutAccessInput>
+  create: Prisma.XOR<Prisma.KnowledgeDocumentCreateWithoutAccessInput, Prisma.KnowledgeDocumentUncheckedCreateWithoutAccessInput>
+  where?: Prisma.KnowledgeDocumentWhereInput
+}
+
+export type KnowledgeDocumentUpdateToOneWithWhereWithoutAccessInput = {
+  where?: Prisma.KnowledgeDocumentWhereInput
+  data: Prisma.XOR<Prisma.KnowledgeDocumentUpdateWithoutAccessInput, Prisma.KnowledgeDocumentUncheckedUpdateWithoutAccessInput>
+}
+
+export type KnowledgeDocumentUpdateWithoutAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutKnowledgeDocumentsNestedInput
+  source?: Prisma.KnowledgeSourceUpdateOneRequiredWithoutDocumentsNestedInput
+  chunks?: Prisma.KnowledgeChunkUpdateManyWithoutDocumentNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutKnowledgeDocumentNestedInput
+}
+
+export type KnowledgeDocumentUncheckedUpdateWithoutAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutDocumentNestedInput
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutKnowledgeDocumentNestedInput
+}
+
 export type KnowledgeDocumentCreateWithoutChunksInput = {
   id?: string
   title: string
@@ -795,11 +1022,14 @@ export type KnowledgeDocumentCreateWithoutChunksInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutKnowledgeDocumentsInput
   source: Prisma.KnowledgeSourceCreateNestedOneWithoutDocumentsInput
+  access?: Prisma.KnowledgeAccessCreateNestedManyWithoutDocumentInput
   lessons?: Prisma.LessonCreateNestedManyWithoutKnowledgeDocumentInput
 }
 
@@ -812,9 +1042,12 @@ export type KnowledgeDocumentUncheckedCreateWithoutChunksInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  access?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutDocumentInput
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutKnowledgeDocumentInput
 }
 
@@ -841,11 +1074,14 @@ export type KnowledgeDocumentUpdateWithoutChunksInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutKnowledgeDocumentsNestedInput
   source?: Prisma.KnowledgeSourceUpdateOneRequiredWithoutDocumentsNestedInput
+  access?: Prisma.KnowledgeAccessUpdateManyWithoutDocumentNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutKnowledgeDocumentNestedInput
 }
 
@@ -858,9 +1094,12 @@ export type KnowledgeDocumentUncheckedUpdateWithoutChunksInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  access?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutDocumentNestedInput
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutKnowledgeDocumentNestedInput
 }
 
@@ -872,7 +1111,9 @@ export type KnowledgeDocumentCreateManyTenantInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -884,11 +1125,14 @@ export type KnowledgeDocumentUpdateWithoutTenantInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.KnowledgeSourceUpdateOneRequiredWithoutDocumentsNestedInput
   chunks?: Prisma.KnowledgeChunkUpdateManyWithoutDocumentNestedInput
+  access?: Prisma.KnowledgeAccessUpdateManyWithoutDocumentNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutKnowledgeDocumentNestedInput
 }
 
@@ -900,10 +1144,13 @@ export type KnowledgeDocumentUncheckedUpdateWithoutTenantInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutDocumentNestedInput
+  access?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutDocumentNestedInput
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutKnowledgeDocumentNestedInput
 }
 
@@ -915,7 +1162,9 @@ export type KnowledgeDocumentUncheckedUpdateManyWithoutTenantInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -928,7 +1177,9 @@ export type KnowledgeDocumentCreateManySourceInput = {
   url?: string | null
   textContent?: string | null
   status?: $Enums.KnowledgeStatus
+  visibility?: $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -940,11 +1191,14 @@ export type KnowledgeDocumentUpdateWithoutSourceInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutKnowledgeDocumentsNestedInput
   chunks?: Prisma.KnowledgeChunkUpdateManyWithoutDocumentNestedInput
+  access?: Prisma.KnowledgeAccessUpdateManyWithoutDocumentNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutKnowledgeDocumentNestedInput
 }
 
@@ -956,10 +1210,13 @@ export type KnowledgeDocumentUncheckedUpdateWithoutSourceInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutDocumentNestedInput
+  access?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutDocumentNestedInput
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutKnowledgeDocumentNestedInput
 }
 
@@ -971,7 +1228,9 @@ export type KnowledgeDocumentUncheckedUpdateManyWithoutSourceInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumKnowledgeStatusFieldUpdateOperationsInput | $Enums.KnowledgeStatus
+  visibility?: Prisma.EnumKnowledgeVisibilityFieldUpdateOperationsInput | $Enums.KnowledgeVisibility
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  activeVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -983,11 +1242,13 @@ export type KnowledgeDocumentUncheckedUpdateManyWithoutSourceInput = {
 
 export type KnowledgeDocumentCountOutputType = {
   chunks: number
+  access: number
   lessons: number
 }
 
 export type KnowledgeDocumentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chunks?: boolean | KnowledgeDocumentCountOutputTypeCountChunksArgs
+  access?: boolean | KnowledgeDocumentCountOutputTypeCountAccessArgs
   lessons?: boolean | KnowledgeDocumentCountOutputTypeCountLessonsArgs
 }
 
@@ -1011,6 +1272,13 @@ export type KnowledgeDocumentCountOutputTypeCountChunksArgs<ExtArgs extends runt
 /**
  * KnowledgeDocumentCountOutputType without action
  */
+export type KnowledgeDocumentCountOutputTypeCountAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeAccessWhereInput
+}
+
+/**
+ * KnowledgeDocumentCountOutputType without action
+ */
 export type KnowledgeDocumentCountOutputTypeCountLessonsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LessonWhereInput
 }
@@ -1025,12 +1293,15 @@ export type KnowledgeDocumentSelect<ExtArgs extends runtime.Types.Extensions.Int
   url?: boolean
   textContent?: boolean
   status?: boolean
+  visibility?: boolean
   metadata?: boolean
+  activeVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   source?: boolean | Prisma.KnowledgeSourceDefaultArgs<ExtArgs>
   chunks?: boolean | Prisma.KnowledgeDocument$chunksArgs<ExtArgs>
+  access?: boolean | Prisma.KnowledgeDocument$accessArgs<ExtArgs>
   lessons?: boolean | Prisma.KnowledgeDocument$lessonsArgs<ExtArgs>
   _count?: boolean | Prisma.KnowledgeDocumentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["knowledgeDocument"]>
@@ -1044,7 +1315,9 @@ export type KnowledgeDocumentSelectCreateManyAndReturn<ExtArgs extends runtime.T
   url?: boolean
   textContent?: boolean
   status?: boolean
+  visibility?: boolean
   metadata?: boolean
+  activeVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1060,7 +1333,9 @@ export type KnowledgeDocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   url?: boolean
   textContent?: boolean
   status?: boolean
+  visibility?: boolean
   metadata?: boolean
+  activeVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1076,16 +1351,19 @@ export type KnowledgeDocumentSelectScalar = {
   url?: boolean
   textContent?: boolean
   status?: boolean
+  visibility?: boolean
   metadata?: boolean
+  activeVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type KnowledgeDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "sourceId" | "title" | "mimeType" | "url" | "textContent" | "status" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["knowledgeDocument"]>
+export type KnowledgeDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "sourceId" | "title" | "mimeType" | "url" | "textContent" | "status" | "visibility" | "metadata" | "activeVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["knowledgeDocument"]>
 export type KnowledgeDocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   source?: boolean | Prisma.KnowledgeSourceDefaultArgs<ExtArgs>
   chunks?: boolean | Prisma.KnowledgeDocument$chunksArgs<ExtArgs>
+  access?: boolean | Prisma.KnowledgeDocument$accessArgs<ExtArgs>
   lessons?: boolean | Prisma.KnowledgeDocument$lessonsArgs<ExtArgs>
   _count?: boolean | Prisma.KnowledgeDocumentCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1104,6 +1382,7 @@ export type $KnowledgeDocumentPayload<ExtArgs extends runtime.Types.Extensions.I
     tenant: Prisma.$TenantPayload<ExtArgs>
     source: Prisma.$KnowledgeSourcePayload<ExtArgs>
     chunks: Prisma.$KnowledgeChunkPayload<ExtArgs>[]
+    access: Prisma.$KnowledgeAccessPayload<ExtArgs>[]
     lessons: Prisma.$LessonPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1115,7 +1394,9 @@ export type $KnowledgeDocumentPayload<ExtArgs extends runtime.Types.Extensions.I
     url: string | null
     textContent: string | null
     status: $Enums.KnowledgeStatus
+    visibility: $Enums.KnowledgeVisibility
     metadata: runtime.JsonValue | null
+    activeVersion: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["knowledgeDocument"]>
@@ -1515,6 +1796,7 @@ export interface Prisma__KnowledgeDocumentClient<T, Null = never, ExtArgs extend
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   source<T extends Prisma.KnowledgeSourceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KnowledgeSourceDefaultArgs<ExtArgs>>): Prisma.Prisma__KnowledgeSourceClient<runtime.Types.Result.GetResult<Prisma.$KnowledgeSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   chunks<T extends Prisma.KnowledgeDocument$chunksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KnowledgeDocument$chunksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  access<T extends Prisma.KnowledgeDocument$accessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KnowledgeDocument$accessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lessons<T extends Prisma.KnowledgeDocument$lessonsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KnowledgeDocument$lessonsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1553,7 +1835,9 @@ export interface KnowledgeDocumentFieldRefs {
   readonly url: Prisma.FieldRef<"KnowledgeDocument", 'String'>
   readonly textContent: Prisma.FieldRef<"KnowledgeDocument", 'String'>
   readonly status: Prisma.FieldRef<"KnowledgeDocument", 'KnowledgeStatus'>
+  readonly visibility: Prisma.FieldRef<"KnowledgeDocument", 'KnowledgeVisibility'>
   readonly metadata: Prisma.FieldRef<"KnowledgeDocument", 'Json'>
+  readonly activeVersion: Prisma.FieldRef<"KnowledgeDocument", 'Int'>
   readonly createdAt: Prisma.FieldRef<"KnowledgeDocument", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"KnowledgeDocument", 'DateTime'>
 }
@@ -1978,6 +2262,30 @@ export type KnowledgeDocument$chunksArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.KnowledgeChunkScalarFieldEnum | Prisma.KnowledgeChunkScalarFieldEnum[]
+}
+
+/**
+ * KnowledgeDocument.access
+ */
+export type KnowledgeDocument$accessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeAccess
+   */
+  select?: Prisma.KnowledgeAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeAccess
+   */
+  omit?: Prisma.KnowledgeAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeAccessInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeAccessWhereInput
+  orderBy?: Prisma.KnowledgeAccessOrderByWithRelationInput | Prisma.KnowledgeAccessOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeAccessScalarFieldEnum | Prisma.KnowledgeAccessScalarFieldEnum[]
 }
 
 /**

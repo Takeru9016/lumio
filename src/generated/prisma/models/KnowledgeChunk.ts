@@ -29,11 +29,13 @@ export type AggregateKnowledgeChunk = {
 export type KnowledgeChunkAvgAggregateOutputType = {
   chunkIndex: number | null
   tokenCount: number | null
+  version: number | null
 }
 
 export type KnowledgeChunkSumAggregateOutputType = {
   chunkIndex: number | null
   tokenCount: number | null
+  version: number | null
 }
 
 export type KnowledgeChunkMinAggregateOutputType = {
@@ -43,6 +45,7 @@ export type KnowledgeChunkMinAggregateOutputType = {
   content: string | null
   chunkIndex: number | null
   tokenCount: number | null
+  version: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +57,7 @@ export type KnowledgeChunkMaxAggregateOutputType = {
   content: string | null
   chunkIndex: number | null
   tokenCount: number | null
+  version: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +70,7 @@ export type KnowledgeChunkCountAggregateOutputType = {
   chunkIndex: number
   tokenCount: number
   metadata: number
+  version: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -75,11 +80,13 @@ export type KnowledgeChunkCountAggregateOutputType = {
 export type KnowledgeChunkAvgAggregateInputType = {
   chunkIndex?: true
   tokenCount?: true
+  version?: true
 }
 
 export type KnowledgeChunkSumAggregateInputType = {
   chunkIndex?: true
   tokenCount?: true
+  version?: true
 }
 
 export type KnowledgeChunkMinAggregateInputType = {
@@ -89,6 +96,7 @@ export type KnowledgeChunkMinAggregateInputType = {
   content?: true
   chunkIndex?: true
   tokenCount?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +108,7 @@ export type KnowledgeChunkMaxAggregateInputType = {
   content?: true
   chunkIndex?: true
   tokenCount?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +121,7 @@ export type KnowledgeChunkCountAggregateInputType = {
   chunkIndex?: true
   tokenCount?: true
   metadata?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -211,6 +221,7 @@ export type KnowledgeChunkGroupByOutputType = {
   chunkIndex: number
   tokenCount: number | null
   metadata: runtime.JsonValue | null
+  version: number
   createdAt: Date
   updatedAt: Date
   _count: KnowledgeChunkCountAggregateOutputType | null
@@ -246,6 +257,7 @@ export type KnowledgeChunkWhereInput = {
   chunkIndex?: Prisma.IntFilter<"KnowledgeChunk"> | number
   tokenCount?: Prisma.IntNullableFilter<"KnowledgeChunk"> | number | null
   metadata?: Prisma.JsonNullableFilter<"KnowledgeChunk">
+  version?: Prisma.IntFilter<"KnowledgeChunk"> | number
   createdAt?: Prisma.DateTimeFilter<"KnowledgeChunk"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KnowledgeChunk"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -261,6 +273,7 @@ export type KnowledgeChunkOrderByWithRelationInput = {
   chunkIndex?: Prisma.SortOrder
   tokenCount?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -270,7 +283,7 @@ export type KnowledgeChunkOrderByWithRelationInput = {
 
 export type KnowledgeChunkWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  documentId_chunkIndex?: Prisma.KnowledgeChunkDocumentIdChunkIndexCompoundUniqueInput
+  documentId_version_chunkIndex?: Prisma.KnowledgeChunkDocumentIdVersionChunkIndexCompoundUniqueInput
   AND?: Prisma.KnowledgeChunkWhereInput | Prisma.KnowledgeChunkWhereInput[]
   OR?: Prisma.KnowledgeChunkWhereInput[]
   NOT?: Prisma.KnowledgeChunkWhereInput | Prisma.KnowledgeChunkWhereInput[]
@@ -280,12 +293,13 @@ export type KnowledgeChunkWhereUniqueInput = Prisma.AtLeast<{
   chunkIndex?: Prisma.IntFilter<"KnowledgeChunk"> | number
   tokenCount?: Prisma.IntNullableFilter<"KnowledgeChunk"> | number | null
   metadata?: Prisma.JsonNullableFilter<"KnowledgeChunk">
+  version?: Prisma.IntFilter<"KnowledgeChunk"> | number
   createdAt?: Prisma.DateTimeFilter<"KnowledgeChunk"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KnowledgeChunk"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   document?: Prisma.XOR<Prisma.KnowledgeDocumentScalarRelationFilter, Prisma.KnowledgeDocumentWhereInput>
   citations?: Prisma.AISourceCitationListRelationFilter
-}, "id" | "documentId_chunkIndex">
+}, "id" | "documentId_version_chunkIndex">
 
 export type KnowledgeChunkOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -295,6 +309,7 @@ export type KnowledgeChunkOrderByWithAggregationInput = {
   chunkIndex?: Prisma.SortOrder
   tokenCount?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.KnowledgeChunkCountOrderByAggregateInput
@@ -315,6 +330,7 @@ export type KnowledgeChunkScalarWhereWithAggregatesInput = {
   chunkIndex?: Prisma.IntWithAggregatesFilter<"KnowledgeChunk"> | number
   tokenCount?: Prisma.IntNullableWithAggregatesFilter<"KnowledgeChunk"> | number | null
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"KnowledgeChunk">
+  version?: Prisma.IntWithAggregatesFilter<"KnowledgeChunk"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"KnowledgeChunk"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"KnowledgeChunk"> | Date | string
 }
@@ -325,6 +341,7 @@ export type KnowledgeChunkCreateInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutKnowledgeChunksInput
@@ -340,6 +357,7 @@ export type KnowledgeChunkUncheckedCreateInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   citations?: Prisma.AISourceCitationUncheckedCreateNestedManyWithoutKnowledgeChunkInput
@@ -351,6 +369,7 @@ export type KnowledgeChunkUpdateInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutKnowledgeChunksNestedInput
@@ -366,6 +385,7 @@ export type KnowledgeChunkUncheckedUpdateInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   citations?: Prisma.AISourceCitationUncheckedUpdateManyWithoutKnowledgeChunkNestedInput
@@ -379,6 +399,7 @@ export type KnowledgeChunkCreateManyInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -389,6 +410,7 @@ export type KnowledgeChunkUpdateManyMutationInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -401,6 +423,7 @@ export type KnowledgeChunkUncheckedUpdateManyInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -415,8 +438,9 @@ export type KnowledgeChunkOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type KnowledgeChunkDocumentIdChunkIndexCompoundUniqueInput = {
+export type KnowledgeChunkDocumentIdVersionChunkIndexCompoundUniqueInput = {
   documentId: string
+  version: number
   chunkIndex: number
 }
 
@@ -428,6 +452,7 @@ export type KnowledgeChunkCountOrderByAggregateInput = {
   chunkIndex?: Prisma.SortOrder
   tokenCount?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -435,6 +460,7 @@ export type KnowledgeChunkCountOrderByAggregateInput = {
 export type KnowledgeChunkAvgOrderByAggregateInput = {
   chunkIndex?: Prisma.SortOrder
   tokenCount?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type KnowledgeChunkMaxOrderByAggregateInput = {
@@ -444,6 +470,7 @@ export type KnowledgeChunkMaxOrderByAggregateInput = {
   content?: Prisma.SortOrder
   chunkIndex?: Prisma.SortOrder
   tokenCount?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -455,6 +482,7 @@ export type KnowledgeChunkMinOrderByAggregateInput = {
   content?: Prisma.SortOrder
   chunkIndex?: Prisma.SortOrder
   tokenCount?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -462,6 +490,7 @@ export type KnowledgeChunkMinOrderByAggregateInput = {
 export type KnowledgeChunkSumOrderByAggregateInput = {
   chunkIndex?: Prisma.SortOrder
   tokenCount?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type KnowledgeChunkNullableScalarRelationFilter = {
@@ -575,6 +604,7 @@ export type KnowledgeChunkCreateWithoutTenantInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   document: Prisma.KnowledgeDocumentCreateNestedOneWithoutChunksInput
@@ -588,6 +618,7 @@ export type KnowledgeChunkUncheckedCreateWithoutTenantInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   citations?: Prisma.AISourceCitationUncheckedCreateNestedManyWithoutKnowledgeChunkInput
@@ -630,6 +661,7 @@ export type KnowledgeChunkScalarWhereInput = {
   chunkIndex?: Prisma.IntFilter<"KnowledgeChunk"> | number
   tokenCount?: Prisma.IntNullableFilter<"KnowledgeChunk"> | number | null
   metadata?: Prisma.JsonNullableFilter<"KnowledgeChunk">
+  version?: Prisma.IntFilter<"KnowledgeChunk"> | number
   createdAt?: Prisma.DateTimeFilter<"KnowledgeChunk"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KnowledgeChunk"> | Date | string
 }
@@ -640,6 +672,7 @@ export type KnowledgeChunkCreateWithoutDocumentInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutKnowledgeChunksInput
@@ -653,6 +686,7 @@ export type KnowledgeChunkUncheckedCreateWithoutDocumentInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   citations?: Prisma.AISourceCitationUncheckedCreateNestedManyWithoutKnowledgeChunkInput
@@ -690,6 +724,7 @@ export type KnowledgeChunkCreateWithoutCitationsInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutKnowledgeChunksInput
@@ -704,6 +739,7 @@ export type KnowledgeChunkUncheckedCreateWithoutCitationsInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -730,6 +766,7 @@ export type KnowledgeChunkUpdateWithoutCitationsInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutKnowledgeChunksNestedInput
@@ -744,6 +781,7 @@ export type KnowledgeChunkUncheckedUpdateWithoutCitationsInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -755,6 +793,7 @@ export type KnowledgeChunkCreateManyTenantInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -765,6 +804,7 @@ export type KnowledgeChunkUpdateWithoutTenantInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   document?: Prisma.KnowledgeDocumentUpdateOneRequiredWithoutChunksNestedInput
@@ -778,6 +818,7 @@ export type KnowledgeChunkUncheckedUpdateWithoutTenantInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   citations?: Prisma.AISourceCitationUncheckedUpdateManyWithoutKnowledgeChunkNestedInput
@@ -790,6 +831,7 @@ export type KnowledgeChunkUncheckedUpdateManyWithoutTenantInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -801,6 +843,7 @@ export type KnowledgeChunkCreateManyDocumentInput = {
   chunkIndex: number
   tokenCount?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -811,6 +854,7 @@ export type KnowledgeChunkUpdateWithoutDocumentInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutKnowledgeChunksNestedInput
@@ -824,6 +868,7 @@ export type KnowledgeChunkUncheckedUpdateWithoutDocumentInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   citations?: Prisma.AISourceCitationUncheckedUpdateManyWithoutKnowledgeChunkNestedInput
@@ -836,6 +881,7 @@ export type KnowledgeChunkUncheckedUpdateManyWithoutDocumentInput = {
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   tokenCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -879,6 +925,7 @@ export type KnowledgeChunkSelect<ExtArgs extends runtime.Types.Extensions.Intern
   chunkIndex?: boolean
   tokenCount?: boolean
   metadata?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -895,6 +942,7 @@ export type KnowledgeChunkSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   chunkIndex?: boolean
   tokenCount?: boolean
   metadata?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -909,6 +957,7 @@ export type KnowledgeChunkSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   chunkIndex?: boolean
   tokenCount?: boolean
   metadata?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -923,11 +972,12 @@ export type KnowledgeChunkSelectScalar = {
   chunkIndex?: boolean
   tokenCount?: boolean
   metadata?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type KnowledgeChunkOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "documentId" | "content" | "chunkIndex" | "tokenCount" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["knowledgeChunk"]>
+export type KnowledgeChunkOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "documentId" | "content" | "chunkIndex" | "tokenCount" | "metadata" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["knowledgeChunk"]>
 export type KnowledgeChunkInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   document?: boolean | Prisma.KnowledgeDocumentDefaultArgs<ExtArgs>
@@ -958,6 +1008,7 @@ export type $KnowledgeChunkPayload<ExtArgs extends runtime.Types.Extensions.Inte
     chunkIndex: number
     tokenCount: number | null
     metadata: runtime.JsonValue | null
+    version: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["knowledgeChunk"]>
@@ -1393,6 +1444,7 @@ export interface KnowledgeChunkFieldRefs {
   readonly chunkIndex: Prisma.FieldRef<"KnowledgeChunk", 'Int'>
   readonly tokenCount: Prisma.FieldRef<"KnowledgeChunk", 'Int'>
   readonly metadata: Prisma.FieldRef<"KnowledgeChunk", 'Json'>
+  readonly version: Prisma.FieldRef<"KnowledgeChunk", 'Int'>
   readonly createdAt: Prisma.FieldRef<"KnowledgeChunk", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"KnowledgeChunk", 'DateTime'>
 }

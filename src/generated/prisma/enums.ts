@@ -193,6 +193,23 @@ export const KnowledgeStatus = {
 export type KnowledgeStatus = (typeof KnowledgeStatus)[keyof typeof KnowledgeStatus]
 
 
+export const KnowledgeVisibility = {
+  TENANT: 'TENANT',
+  RESTRICTED: 'RESTRICTED'
+} as const
+
+export type KnowledgeVisibility = (typeof KnowledgeVisibility)[keyof typeof KnowledgeVisibility]
+
+
+export const KnowledgeAccessScope = {
+  TENANT: 'TENANT',
+  TEAM: 'TEAM',
+  USER: 'USER'
+} as const
+
+export type KnowledgeAccessScope = (typeof KnowledgeAccessScope)[keyof typeof KnowledgeAccessScope]
+
+
 export const AIConversationType = {
   TUTOR: 'TUTOR',
   COURSE_BUILDER: 'COURSE_BUILDER',
