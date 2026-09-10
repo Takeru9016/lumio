@@ -93,55 +93,158 @@ enum OrgRequestStatus {
   DENIED
 }
 
+// ---- V2: Capability -----------------------------------------
+
+enum SkillProficiency {
+  NONE
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum SkillStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum EvidenceType {
+  COURSE_COMPLETION
+  QUIZ_SCORE
+  ASSIGNMENT
+  ASSESSMENT
+  PROJECT
+  MANAGER_ASSESSMENT
+  CERTIFICATION
+  AI_EVALUATION
+  MANUAL
+}
+
+enum EvidenceVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+// ---- V2: Knowledge ---------------------------------------------
+
+enum KnowledgeSourceType {
+  COURSE
+  LESSON
+  DOCUMENT
+  POLICY
+  TRANSCRIPT
+  EXTERNAL
+  WEBPAGE
+  MANUAL
+}
+
+// Shared lifecycle status for both KnowledgeSource and KnowledgeDocument —
+// deliberately one enum, not two, since both go through the same
+// pending -> processing -> ready/error pipeline.
+enum KnowledgeStatus {
+  PENDING
+  PROCESSING
+  READY
+  ERROR
+}
+
+// ---- V2: AI ------------------------------------------------------
+
+enum AIConversationType {
+  TUTOR
+  COURSE_BUILDER
+  ANALYTICS
+  COACH
+  GENERAL
+}
+
+enum AIExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+// ---- V2: Events ----------------------------------------------------
+
+enum LearningEventType {
+  COURSE_ENROLLED
+  COURSE_COMPLETED
+  LESSON_STARTED
+  LESSON_COMPLETED
+  QUIZ_STARTED
+  QUIZ_COMPLETED
+  ASSIGNMENT_SUBMITTED
+  ASSIGNMENT_GRADED
+  SKILL_ASSESSED
+  SKILL_EVIDENCE_CREATED
+  CERTIFICATE_ISSUED
+  AI_TUTOR_USED
+  RECOMMENDATION_ACCEPTED
+  LEARNING_PATH_COMPLETED
+}
+
 // ============================================================
 // USER & AUTH
 // ============================================================
 
 model User {
-  id          String   @id @default(cuid())
-  clerkId     String   @unique
-  email       String   @unique
-  name        String?
-  avatarUrl   String?
-  role        Role     @default(STUDENT)
-  plan        Plan     @default(FREE)
+  id        String  @id @default(cuid())
+  clerkId   String  @unique
+  email     String  @unique
+  name      String?
+  avatarUrl String?
+  role      Role    @default(STUDENT)
+  plan      Plan    @default(FREE)
 
   // AI quota (resets monthly via cron)
   aiCallsUsed    Int      @default(0)
   aiQuotaResetAt DateTime @default(now())
 
   // Gamification
-  xpTotal        Int      @default(0)
-  currentStreak  Int      @default(0)
-  longestStreak  Int      @default(0)
+  xpTotal        Int       @default(0)
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
   lastActiveDate DateTime?
 
   // Billing (Razorpay)
   razorpayCustomerId   String?
   razorpaySubId        String?
   subscriptionStatus   SubscriptionStatus?
-  cancelAtPeriodEnd    Boolean @default(false)
+  cancelAtPeriodEnd    Boolean             @default(false)
   currentPeriodEnd     DateTime?
   // Set on subscription.cancelled — a cron flips plan to FREE once this passes
   scheduledDowngradeAt DateTime?
 
   // Relations
-  tenantId     String?
-  tenant       Tenant?       @relation(fields: [tenantId], references: [id])
-  enrollments  Enrollment[]
-  courses      Course[]      @relation("InstructorCourses")
-  lessonProgress LessonProgress[]
-  quizAttempts   QuizAttempt[]
-  submissions    AssignmentSubmission[]
-  certificates   Certificate[]
-  aiChats        AIChat[]
-  teamMembers    TeamMember[]
-  xpTransactions XPTransaction[]
-  adminAuditLogs AdminAuditLog[] @relation("AdminAuditLogActor")
-  invitationsSent Invitation[]
-  notifications   Notification[]
-  orgRequestsMade     OrgRequest[] @relation("OrgRequestRequester")
-  orgRequestsResolved OrgRequest[] @relation("OrgRequestResolver")
+  tenantId            String?
+  tenant              Tenant?                @relation(fields: [tenantId], references: [id])
+  enrollments         Enrollment[]
+  courses             Course[]               @relation("InstructorCourses")
+  lessonProgress      LessonProgress[]
+  quizAttempts        QuizAttempt[]
+  submissions         AssignmentSubmission[]
+  certificates        Certificate[]
+  aiChats             AIChat[]
+  teamMembers         TeamMember[]
+  xpTransactions      XPTransaction[]
+  adminAuditLogs      AdminAuditLog[]        @relation("AdminAuditLogActor")
+  invitationsSent     Invitation[]
+  notifications       Notification[]
+  orgRequestsMade     OrgRequest[]           @relation("OrgRequestRequester")
+  orgRequestsResolved OrgRequest[]           @relation("OrgRequestResolver")
+
+  // V2 — additive, no existing record requires these
+  userSkills            UserSkill[]
+  userJobRoles          UserJobRole[]
+  skillEvidence         SkillEvidence[]
+  skillEvidenceVerified SkillEvidence[]  @relation("SkillEvidenceVerifier")
+  aiConversations       AIConversation[]
+  aiExecutions          AIExecution[]
+  aiUsageEvents         AIUsageEvent[]
+  learningEvents        LearningEvent[]
 
   deletedAt DateTime?
 
@@ -158,11 +261,11 @@ model User {
 // ============================================================
 
 model Tenant {
-  id          String  @id @default(cuid())
-  name        String
-  slug        String  @unique
-  logoUrl     String?
-  brandColor  String?
+  id           String  @id @default(cuid())
+  name         String
+  slug         String  @unique
+  logoUrl      String?
+  brandColor   String?
   customDomain String? @unique
 
   // Plan & billing
@@ -179,13 +282,28 @@ model Tenant {
   suspendedAt DateTime?
 
   // Relations
-  users     User[]
-  teams     Team[]
-  courses   Course[]
+  users              User[]
+  teams              Team[]
+  courses            Course[]
   mandatoryTrainings MandatoryTraining[]
   invitations        Invitation[]
   notifications      Notification[]
   orgRequests        OrgRequest[]
+
+  // V2 — additive, no existing record requires these
+  skillCategories    SkillCategory[]
+  skills             Skill[]
+  jobRoles           JobRole[]
+  userJobRoles       UserJobRole[]
+  userSkills         UserSkill[]
+  skillEvidence      SkillEvidence[]
+  knowledgeSources   KnowledgeSource[]
+  knowledgeDocuments KnowledgeDocument[]
+  knowledgeChunks    KnowledgeChunk[]
+  aiConversations    AIConversation[]
+  aiExecutions       AIExecution[]
+  aiUsageEvents      AIUsageEvent[]
+  learningEvents     LearningEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -194,12 +312,12 @@ model Tenant {
 }
 
 model Team {
-  id       String  @id @default(cuid())
+  id       String @id @default(cuid())
   name     String
   tenantId String
-  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  members  TeamMember[]
+  members            TeamMember[]
   mandatoryTrainings MandatoryTraining[]
 
   createdAt DateTime @default(now())
@@ -225,14 +343,14 @@ model TeamMember {
 // Authoritative source of tenantId+role for that email on the Clerk `user.created`
 // webhook — not Clerk's publicMetadata propagation, which is a timing assumption.
 model Invitation {
-  id                String            @id @default(cuid())
+  id                String           @id @default(cuid())
   email             String
   role              Role
-  status            InvitationStatus  @default(PENDING)
-  clerkInvitationId String            @unique
+  status            InvitationStatus @default(PENDING)
+  clerkInvitationId String           @unique
 
-  tenantId   String
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   invitedById String
   invitedBy   User   @relation(fields: [invitedById], references: [id])
 
@@ -304,19 +422,22 @@ model Course {
   level        String?
 
   instructorId String
-  instructor   User         @relation("InstructorCourses", fields: [instructorId], references: [id])
+  instructor   User   @relation("InstructorCourses", fields: [instructorId], references: [id])
 
-  tenantId     String?
-  tenant       Tenant?      @relation(fields: [tenantId], references: [id])
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
 
-  sections     Section[]
-  enrollments  Enrollment[]
+  sections           Section[]
+  enrollments        Enrollment[]
   mandatoryTrainings MandatoryTraining[]
-  certificates Certificate[]
+  certificates       Certificate[]
 
-  publishedAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  // V2 — additive; existing courses are valid with zero skills mapped
+  skills CourseSkill[]
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([instructorId])
   @@index([tenantId])
@@ -325,13 +446,13 @@ model Course {
 }
 
 model Section {
-  id       String   @id @default(cuid())
+  id       String @id @default(cuid())
   title    String
   order    Int
   courseId String
-  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  lessons  Lesson[]
+  lessons Lesson[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -356,31 +477,39 @@ model Lesson {
   videoDuration Int?
 
   // Text content
-  textContent   String?
+  textContent String?
 
   // Archive flag — hides from students without deleting content
-  isArchived    Boolean @default(false)
+  isArchived Boolean @default(false)
 
   // AI embeddings for RAG (pgvector)
-  embedding     Unsupported("vector(1536)")?
+  embedding Unsupported("vector(1536)")?
 
   sectionId String
   section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
-  progress     LessonProgress[]
-  quiz         Quiz?
-  assignment   Assignment?
-  aiChats      AIChat[]
-  aiSummary    String?
+  progress   LessonProgress[]
+  quiz       Quiz?
+  assignment Assignment?
+  aiChats    AIChat[]
+  aiSummary  String?
+
+  // V2 — optional link to a re-indexed KnowledgeDocument for this lesson's
+  // content. Nullable: existing lessons are not required to have one, and
+  // Lesson.embedding above remains the legacy retrieval path until V2
+  // knowledge retrieval (docs/V2_AI_ARCHITECTURE.md) replaces it.
+  knowledgeDocumentId String?
+  knowledgeDocument   KnowledgeDocument? @relation(fields: [knowledgeDocumentId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([sectionId])
   // Slug is generated unique across the whole course, not just this section —
   // the DB constraint only covers same-section collisions as a safety net.
   @@unique([sectionId, slug])
+  @@index([sectionId])
   @@index([slug])
+  @@index([knowledgeDocumentId])
 }
 
 // ============================================================
@@ -430,13 +559,13 @@ model LessonProgress {
 // ============================================================
 
 model Quiz {
-  id              String  @id @default(cuid())
-  title           String
-  passingScore    Int     @default(70)
-  isAiGenerated   Boolean @default(false)
+  id            String  @id @default(cuid())
+  title         String
+  passingScore  Int     @default(70)
+  isAiGenerated Boolean @default(false)
 
-  lessonId String  @unique
-  lesson   Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String @unique
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   questions QuizQuestion[]
   attempts  QuizAttempt[]
@@ -446,31 +575,31 @@ model Quiz {
 }
 
 model QuizQuestion {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   question      String
-  type          String   @default("MCQ")
+  type          String  @default("MCQ")
   options       Json?
   correctAnswer String
   explanation   String?
   order         Int
 
   quizId  String
-  quiz    Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
   answers QuizAnswer[]
 
   @@index([quizId])
 }
 
 model QuizAttempt {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   score    Int
   isPassed Boolean
   userId   String
   quizId   String
-  user     User   @relation(fields: [userId], references: [id])
-  quiz     Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id])
+  quiz     Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-  answers  QuizAnswer[]
+  answers QuizAnswer[]
 
   completedAt DateTime @default(now())
 
@@ -479,9 +608,9 @@ model QuizAttempt {
 }
 
 model QuizAnswer {
-  id         String @id @default(cuid())
-  answer     String
-  isCorrect  Boolean
+  id        String  @id @default(cuid())
+  answer    String
+  isCorrect Boolean
 
   attemptId  String
   questionId String
@@ -496,14 +625,14 @@ model QuizAnswer {
 // ============================================================
 
 model Assignment {
-  id          String  @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   description String
   dueDate     DateTime?
-  maxScore    Int      @default(100)
+  maxScore    Int       @default(100)
 
-  lessonId String     @unique
-  lesson   Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String @unique
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   submissions AssignmentSubmission[]
 
@@ -512,20 +641,20 @@ model Assignment {
 }
 
 model AssignmentSubmission {
-  id           String           @id @default(cuid())
-  status       SubmissionStatus @default(SUBMITTED)
-  textContent  String?
-  fileUrl      String?
-  score        Int?
-  feedback     String?
+  id          String           @id @default(cuid())
+  status      SubmissionStatus @default(SUBMITTED)
+  textContent String?
+  fileUrl     String?
+  score       Int?
+  feedback    String?
 
   userId       String
   assignmentId String
-  user         User             @relation(fields: [userId], references: [id])
-  assignment   Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id])
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
-  submittedAt  DateTime @default(now())
-  gradedAt     DateTime?
+  submittedAt DateTime  @default(now())
+  gradedAt    DateTime?
 
   @@unique([userId, assignmentId])
   @@index([assignmentId])
@@ -594,9 +723,9 @@ model MandatoryTraining {
   courseId String
   teamId   String
   tenantId String
-  course   Course  @relation(fields: [courseId], references: [id])
-  team     Team    @relation(fields: [teamId], references: [id])
-  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+  course   Course @relation(fields: [courseId], references: [id])
+  team     Team   @relation(fields: [teamId], references: [id])
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -610,7 +739,7 @@ model MandatoryTraining {
 // ============================================================
 
 model AdminAuditLog {
-  id     String @id @default(cuid())
+  id      String @id @default(cuid())
   actorId String
   actor   User   @relation("AdminAuditLogActor", fields: [actorId], references: [id])
 
@@ -623,4 +752,431 @@ model AdminAuditLog {
 
   @@index([targetType, targetId])
   @@index([actorId])
+}
+
+// ============================================================
+// V2 — CAPABILITY (docs/V2_DOMAIN_MODEL.md, Phase 1)
+// ============================================================
+
+model SkillCategory {
+  id          String  @id @default(cuid())
+  tenantId    String
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String
+  description String?
+
+  skills Skill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+model Skill {
+  id          String      @id @default(cuid())
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String
+  description String?
+  status      SkillStatus @default(ACTIVE)
+
+  categoryId String?
+  category   SkillCategory? @relation(fields: [categoryId], references: [id])
+
+  roleSkills RoleSkill[]
+  userSkills UserSkill[]
+  evidence   SkillEvidence[]
+  courses    CourseSkill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([categoryId])
+}
+
+model JobRole {
+  id          String  @id @default(cuid())
+  tenantId    String
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String
+  description String?
+
+  roleSkills   RoleSkill[]
+  userJobRoles UserJobRole[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+// Skills required by a job role. Tenant scope is inherited through `role`
+// (JobRole is already tenant-owned) — no direct tenantId here to avoid a
+// redundant column that could drift from the parent.
+model RoleSkill {
+  id      String  @id @default(cuid())
+  roleId  String
+  skillId String
+  role    JobRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  requiredProficiency SkillProficiency @default(BEGINNER)
+  isRequired          Boolean          @default(true)
+
+  @@unique([roleId, skillId])
+  @@index([skillId])
+}
+
+model UserJobRole {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId   String
+  role     JobRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  isPrimary  Boolean  @default(true)
+  assignedAt DateTime @default(now())
+
+  @@unique([userId, roleId])
+  @@index([tenantId])
+  @@index([roleId])
+}
+
+model UserSkill {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillId  String
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  proficiency       SkillProficiency  @default(NONE)
+  targetProficiency SkillProficiency?
+  confidence        Int?
+  status            SkillStatus       @default(ACTIVE)
+  lastAssessedAt    DateTime?
+
+  evidence SkillEvidence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, skillId])
+  @@index([tenantId])
+  @@index([skillId])
+}
+
+// Evidence source is deliberately a free-form (sourceType, sourceId) pair
+// rather than a hard FK to one model — evidence can come from a course
+// completion, a quiz, a manual manager assessment, a future assessment
+// activity, etc. See docs/V2_DOMAIN_MODEL.md "Capability".
+model SkillEvidence {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillId  String
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  userSkillId String?
+  userSkill   UserSkill? @relation(fields: [userSkillId], references: [id])
+
+  type        EvidenceType
+  sourceType  String
+  sourceId    String?
+  proficiency SkillProficiency?
+  score       Float?
+  metadata    Json?
+
+  verificationStatus EvidenceVerificationStatus @default(UNVERIFIED)
+  verifiedById       String?
+  verifiedBy         User?                      @relation("SkillEvidenceVerifier", fields: [verifiedById], references: [id])
+  verifiedAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([skillId])
+  @@index([sourceType, sourceId])
+}
+
+// Skills developed by a course. Tenant scope is inherited through `course`.
+model CourseSkill {
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  skillId  String
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([courseId, skillId])
+  @@index([skillId])
+}
+
+// ============================================================
+// V2 — KNOWLEDGE (docs/V2_DOMAIN_MODEL.md, Phase 1)
+// ============================================================
+
+model KnowledgeSource {
+  id          String              @id @default(cuid())
+  tenantId    String
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type        KnowledgeSourceType
+  name        String
+  description String?
+  externalId  String?
+  metadata    Json?
+  status      KnowledgeStatus     @default(READY)
+
+  documents KnowledgeDocument[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, type])
+}
+
+model KnowledgeDocument {
+  id       String          @id @default(cuid())
+  tenantId String
+  tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sourceId String
+  source   KnowledgeSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  title       String
+  mimeType    String?
+  url         String?
+  textContent String?
+  status      KnowledgeStatus @default(PENDING)
+  metadata    Json?
+
+  chunks  KnowledgeChunk[]
+  lessons Lesson[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([sourceId])
+  @@index([tenantId, status])
+}
+
+model KnowledgeChunk {
+  id         String            @id @default(cuid())
+  tenantId   String
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  documentId String
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  content    String
+  chunkIndex Int
+  tokenCount Int?
+  metadata   Json?
+
+  // Same Unsupported(vector) approach as Lesson.embedding above — Prisma 7 +
+  // pgvector don't have a native scalar type, so reads/writes for this column
+  // go through raw SQL (see src/lib/ai/search.ts for the existing pattern).
+  embedding Unsupported("vector(1536)")?
+
+  citations AISourceCitation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Prevents two chunks of the same document claiming the same position —
+  // without this, nothing stops corrupt/duplicate ordering on re-index.
+  @@unique([documentId, chunkIndex])
+  @@index([tenantId])
+  @@index([documentId])
+}
+
+// ============================================================
+// V2 — AI (docs/V2_AI_ARCHITECTURE.md, Phase 1)
+// ============================================================
+
+model AIConversation {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title           String?
+  type            AIConversationType @default(GENERAL)
+  contextMetadata Json?
+
+  messages   AIMessage[]
+  toolCalls  AIToolCall[]
+  citations  AISourceCitation[]
+  executions AIExecution[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([userId])
+}
+
+model AIMessage {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  // "user" | "assistant" | "system" | "tool" — kept as String to match the
+  // AI SDK v7 UIMessage/ModelMessage role union rather than duplicating it
+  // as a Prisma enum that would drift from the SDK's own type.
+  role     String
+  content  String
+  metadata Json?
+
+  toolCalls AIToolCall[]
+  citations AISourceCitation[]
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+}
+
+model AIToolCall {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  messageId      String?
+  message        AIMessage?     @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  toolName String
+  input    Json?
+  output   Json?
+  status   AIExecutionStatus @default(PENDING)
+  error    String?
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([conversationId])
+  @@index([messageId])
+}
+
+model AISourceCitation {
+  id             String          @id @default(cuid())
+  conversationId String?
+  conversation   AIConversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  messageId      String?
+  message        AIMessage?      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  knowledgeChunkId String?
+  knowledgeChunk   KnowledgeChunk? @relation(fields: [knowledgeChunkId], references: [id])
+
+  metadata  Json?
+  relevance Float?
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([messageId])
+  @@index([knowledgeChunkId])
+}
+
+model AIExecution {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  conversationId String?
+  conversation   AIConversation? @relation(fields: [conversationId], references: [id])
+
+  model     String
+  provider  String
+  operation String
+  status    AIExecutionStatus @default(PENDING)
+
+  latencyMs     Int?
+  inputTokens   Int?
+  outputTokens  Int?
+  estimatedCost Float?
+  error         String?
+  metadata      Json?
+
+  usageEvents AIUsageEvent[]
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([conversationId])
+  @@index([tenantId, createdAt])
+}
+
+// Append-only usage ledger. Does NOT replace User.aiCallsUsed yet — that
+// counter stays as the live quota-check field (src/lib/ai/quota.ts) until
+// V2 quota derivation is built on top of this table. See "AI usage" in
+// docs/V2_AI_ARCHITECTURE.md.
+model AIUsageEvent {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  executionId String?
+  execution   AIExecution? @relation(fields: [executionId], references: [id])
+
+  operation     String
+  provider      String
+  model         String
+  inputTokens   Int?
+  outputTokens  Int?
+  estimatedCost Float?
+  metadata      Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([tenantId, createdAt])
+}
+
+// ============================================================
+// V2 — EVENTS (docs/V2_DOMAIN_MODEL.md, "Analytics and evidence")
+// ============================================================
+
+// Append-only behavioral history, independent of operational state tables
+// like LessonProgress/Enrollment (which remain the source of *current*
+// state). Corrections should be represented as new events, not mutations.
+model LearningEvent {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  eventType  LearningEventType
+  entityType String
+  entityId   String
+  occurredAt DateTime          @default(now())
+  metadata   Json?
+
+  @@index([tenantId, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([eventType, occurredAt])
+  @@index([entityType, entityId])
 }

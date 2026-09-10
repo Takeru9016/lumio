@@ -73,7 +73,25 @@ export const ModelName = {
   Certificate: 'Certificate',
   AIChat: 'AIChat',
   MandatoryTraining: 'MandatoryTraining',
-  AdminAuditLog: 'AdminAuditLog'
+  AdminAuditLog: 'AdminAuditLog',
+  SkillCategory: 'SkillCategory',
+  Skill: 'Skill',
+  JobRole: 'JobRole',
+  RoleSkill: 'RoleSkill',
+  UserJobRole: 'UserJobRole',
+  UserSkill: 'UserSkill',
+  SkillEvidence: 'SkillEvidence',
+  CourseSkill: 'CourseSkill',
+  KnowledgeSource: 'KnowledgeSource',
+  KnowledgeDocument: 'KnowledgeDocument',
+  KnowledgeChunk: 'KnowledgeChunk',
+  AIConversation: 'AIConversation',
+  AIMessage: 'AIMessage',
+  AIToolCall: 'AIToolCall',
+  AISourceCitation: 'AISourceCitation',
+  AIExecution: 'AIExecution',
+  AIUsageEvent: 'AIUsageEvent',
+  LearningEvent: 'LearningEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -261,6 +279,7 @@ export const LessonScalarFieldEnum = {
   isArchived: 'isArchived',
   sectionId: 'sectionId',
   aiSummary: 'aiSummary',
+  knowledgeDocumentId: 'knowledgeDocumentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -435,6 +454,276 @@ export const AdminAuditLogScalarFieldEnum = {
 } as const
 
 export type AdminAuditLogScalarFieldEnum = (typeof AdminAuditLogScalarFieldEnum)[keyof typeof AdminAuditLogScalarFieldEnum]
+
+
+export const SkillCategoryScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SkillCategoryScalarFieldEnum = (typeof SkillCategoryScalarFieldEnum)[keyof typeof SkillCategoryScalarFieldEnum]
+
+
+export const SkillScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  status: 'status',
+  categoryId: 'categoryId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SkillScalarFieldEnum = (typeof SkillScalarFieldEnum)[keyof typeof SkillScalarFieldEnum]
+
+
+export const JobRoleScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobRoleScalarFieldEnum = (typeof JobRoleScalarFieldEnum)[keyof typeof JobRoleScalarFieldEnum]
+
+
+export const RoleSkillScalarFieldEnum = {
+  id: 'id',
+  roleId: 'roleId',
+  skillId: 'skillId',
+  requiredProficiency: 'requiredProficiency',
+  isRequired: 'isRequired'
+} as const
+
+export type RoleSkillScalarFieldEnum = (typeof RoleSkillScalarFieldEnum)[keyof typeof RoleSkillScalarFieldEnum]
+
+
+export const UserJobRoleScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  roleId: 'roleId',
+  isPrimary: 'isPrimary',
+  assignedAt: 'assignedAt'
+} as const
+
+export type UserJobRoleScalarFieldEnum = (typeof UserJobRoleScalarFieldEnum)[keyof typeof UserJobRoleScalarFieldEnum]
+
+
+export const UserSkillScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  skillId: 'skillId',
+  proficiency: 'proficiency',
+  targetProficiency: 'targetProficiency',
+  confidence: 'confidence',
+  status: 'status',
+  lastAssessedAt: 'lastAssessedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserSkillScalarFieldEnum = (typeof UserSkillScalarFieldEnum)[keyof typeof UserSkillScalarFieldEnum]
+
+
+export const SkillEvidenceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  skillId: 'skillId',
+  userSkillId: 'userSkillId',
+  type: 'type',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  proficiency: 'proficiency',
+  score: 'score',
+  metadata: 'metadata',
+  verificationStatus: 'verificationStatus',
+  verifiedById: 'verifiedById',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SkillEvidenceScalarFieldEnum = (typeof SkillEvidenceScalarFieldEnum)[keyof typeof SkillEvidenceScalarFieldEnum]
+
+
+export const CourseSkillScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  skillId: 'skillId',
+  createdAt: 'createdAt'
+} as const
+
+export type CourseSkillScalarFieldEnum = (typeof CourseSkillScalarFieldEnum)[keyof typeof CourseSkillScalarFieldEnum]
+
+
+export const KnowledgeSourceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  type: 'type',
+  name: 'name',
+  description: 'description',
+  externalId: 'externalId',
+  metadata: 'metadata',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeSourceScalarFieldEnum = (typeof KnowledgeSourceScalarFieldEnum)[keyof typeof KnowledgeSourceScalarFieldEnum]
+
+
+export const KnowledgeDocumentScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  sourceId: 'sourceId',
+  title: 'title',
+  mimeType: 'mimeType',
+  url: 'url',
+  textContent: 'textContent',
+  status: 'status',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeDocumentScalarFieldEnum = (typeof KnowledgeDocumentScalarFieldEnum)[keyof typeof KnowledgeDocumentScalarFieldEnum]
+
+
+export const KnowledgeChunkScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  documentId: 'documentId',
+  content: 'content',
+  chunkIndex: 'chunkIndex',
+  tokenCount: 'tokenCount',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeChunkScalarFieldEnum = (typeof KnowledgeChunkScalarFieldEnum)[keyof typeof KnowledgeChunkScalarFieldEnum]
+
+
+export const AIConversationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  title: 'title',
+  type: 'type',
+  contextMetadata: 'contextMetadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIConversationScalarFieldEnum = (typeof AIConversationScalarFieldEnum)[keyof typeof AIConversationScalarFieldEnum]
+
+
+export const AIMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  role: 'role',
+  content: 'content',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AIMessageScalarFieldEnum = (typeof AIMessageScalarFieldEnum)[keyof typeof AIMessageScalarFieldEnum]
+
+
+export const AIToolCallScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  messageId: 'messageId',
+  toolName: 'toolName',
+  input: 'input',
+  output: 'output',
+  status: 'status',
+  error: 'error',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type AIToolCallScalarFieldEnum = (typeof AIToolCallScalarFieldEnum)[keyof typeof AIToolCallScalarFieldEnum]
+
+
+export const AISourceCitationScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  messageId: 'messageId',
+  knowledgeChunkId: 'knowledgeChunkId',
+  metadata: 'metadata',
+  relevance: 'relevance',
+  createdAt: 'createdAt'
+} as const
+
+export type AISourceCitationScalarFieldEnum = (typeof AISourceCitationScalarFieldEnum)[keyof typeof AISourceCitationScalarFieldEnum]
+
+
+export const AIExecutionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  conversationId: 'conversationId',
+  model: 'model',
+  provider: 'provider',
+  operation: 'operation',
+  status: 'status',
+  latencyMs: 'latencyMs',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  estimatedCost: 'estimatedCost',
+  error: 'error',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt'
+} as const
+
+export type AIExecutionScalarFieldEnum = (typeof AIExecutionScalarFieldEnum)[keyof typeof AIExecutionScalarFieldEnum]
+
+
+export const AIUsageEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  executionId: 'executionId',
+  operation: 'operation',
+  provider: 'provider',
+  model: 'model',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  estimatedCost: 'estimatedCost',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AIUsageEventScalarFieldEnum = (typeof AIUsageEventScalarFieldEnum)[keyof typeof AIUsageEventScalarFieldEnum]
+
+
+export const LearningEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  eventType: 'eventType',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  occurredAt: 'occurredAt',
+  metadata: 'metadata'
+} as const
+
+export type LearningEventScalarFieldEnum = (typeof LearningEventScalarFieldEnum)[keyof typeof LearningEventScalarFieldEnum]
 
 
 export const SortOrder = {

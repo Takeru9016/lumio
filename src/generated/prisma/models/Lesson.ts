@@ -53,6 +53,7 @@ export type LessonMinAggregateOutputType = {
   isArchived: boolean | null
   sectionId: string | null
   aiSummary: string | null
+  knowledgeDocumentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -74,6 +75,7 @@ export type LessonMaxAggregateOutputType = {
   isArchived: boolean | null
   sectionId: string | null
   aiSummary: string | null
+  knowledgeDocumentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -95,6 +97,7 @@ export type LessonCountAggregateOutputType = {
   isArchived: number
   sectionId: number
   aiSummary: number
+  knowledgeDocumentId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -128,6 +131,7 @@ export type LessonMinAggregateInputType = {
   isArchived?: true
   sectionId?: true
   aiSummary?: true
+  knowledgeDocumentId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -149,6 +153,7 @@ export type LessonMaxAggregateInputType = {
   isArchived?: true
   sectionId?: true
   aiSummary?: true
+  knowledgeDocumentId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -170,6 +175,7 @@ export type LessonCountAggregateInputType = {
   isArchived?: true
   sectionId?: true
   aiSummary?: true
+  knowledgeDocumentId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -278,6 +284,7 @@ export type LessonGroupByOutputType = {
   isArchived: boolean
   sectionId: string
   aiSummary: string | null
+  knowledgeDocumentId: string | null
   createdAt: Date
   updatedAt: Date
   _count: LessonCountAggregateOutputType | null
@@ -322,6 +329,7 @@ export type LessonWhereInput = {
   isArchived?: Prisma.BoolFilter<"Lesson"> | boolean
   sectionId?: Prisma.StringFilter<"Lesson"> | string
   aiSummary?: Prisma.StringNullableFilter<"Lesson"> | string | null
+  knowledgeDocumentId?: Prisma.StringNullableFilter<"Lesson"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   section?: Prisma.XOR<Prisma.SectionScalarRelationFilter, Prisma.SectionWhereInput>
@@ -329,6 +337,7 @@ export type LessonWhereInput = {
   quiz?: Prisma.XOR<Prisma.QuizNullableScalarRelationFilter, Prisma.QuizWhereInput> | null
   assignment?: Prisma.XOR<Prisma.AssignmentNullableScalarRelationFilter, Prisma.AssignmentWhereInput> | null
   aiChats?: Prisma.AIChatListRelationFilter
+  knowledgeDocument?: Prisma.XOR<Prisma.KnowledgeDocumentNullableScalarRelationFilter, Prisma.KnowledgeDocumentWhereInput> | null
 }
 
 export type LessonOrderByWithRelationInput = {
@@ -348,6 +357,7 @@ export type LessonOrderByWithRelationInput = {
   isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrderInput | Prisma.SortOrder
+  knowledgeDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   section?: Prisma.SectionOrderByWithRelationInput
@@ -355,6 +365,7 @@ export type LessonOrderByWithRelationInput = {
   quiz?: Prisma.QuizOrderByWithRelationInput
   assignment?: Prisma.AssignmentOrderByWithRelationInput
   aiChats?: Prisma.AIChatOrderByRelationAggregateInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentOrderByWithRelationInput
 }
 
 export type LessonWhereUniqueInput = Prisma.AtLeast<{
@@ -378,6 +389,7 @@ export type LessonWhereUniqueInput = Prisma.AtLeast<{
   isArchived?: Prisma.BoolFilter<"Lesson"> | boolean
   sectionId?: Prisma.StringFilter<"Lesson"> | string
   aiSummary?: Prisma.StringNullableFilter<"Lesson"> | string | null
+  knowledgeDocumentId?: Prisma.StringNullableFilter<"Lesson"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   section?: Prisma.XOR<Prisma.SectionScalarRelationFilter, Prisma.SectionWhereInput>
@@ -385,6 +397,7 @@ export type LessonWhereUniqueInput = Prisma.AtLeast<{
   quiz?: Prisma.XOR<Prisma.QuizNullableScalarRelationFilter, Prisma.QuizWhereInput> | null
   assignment?: Prisma.XOR<Prisma.AssignmentNullableScalarRelationFilter, Prisma.AssignmentWhereInput> | null
   aiChats?: Prisma.AIChatListRelationFilter
+  knowledgeDocument?: Prisma.XOR<Prisma.KnowledgeDocumentNullableScalarRelationFilter, Prisma.KnowledgeDocumentWhereInput> | null
 }, "id" | "sectionId_slug">
 
 export type LessonOrderByWithAggregationInput = {
@@ -404,6 +417,7 @@ export type LessonOrderByWithAggregationInput = {
   isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrderInput | Prisma.SortOrder
+  knowledgeDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.LessonCountOrderByAggregateInput
@@ -433,6 +447,7 @@ export type LessonScalarWhereWithAggregatesInput = {
   isArchived?: Prisma.BoolWithAggregatesFilter<"Lesson"> | boolean
   sectionId?: Prisma.StringWithAggregatesFilter<"Lesson"> | string
   aiSummary?: Prisma.StringNullableWithAggregatesFilter<"Lesson"> | string | null
+  knowledgeDocumentId?: Prisma.StringNullableWithAggregatesFilter<"Lesson"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Lesson"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Lesson"> | Date | string
 }
@@ -460,6 +475,7 @@ export type LessonCreateInput = {
   quiz?: Prisma.QuizCreateNestedOneWithoutLessonInput
   assignment?: Prisma.AssignmentCreateNestedOneWithoutLessonInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutLessonInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentCreateNestedOneWithoutLessonsInput
 }
 
 export type LessonUncheckedCreateInput = {
@@ -479,6 +495,7 @@ export type LessonUncheckedCreateInput = {
   isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
+  knowledgeDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutLessonInput
@@ -510,6 +527,7 @@ export type LessonUpdateInput = {
   quiz?: Prisma.QuizUpdateOneWithoutLessonNestedInput
   assignment?: Prisma.AssignmentUpdateOneWithoutLessonNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutLessonNestedInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentUpdateOneWithoutLessonsNestedInput
 }
 
 export type LessonUncheckedUpdateInput = {
@@ -529,6 +547,7 @@ export type LessonUncheckedUpdateInput = {
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutLessonNestedInput
@@ -554,6 +573,7 @@ export type LessonCreateManyInput = {
   isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
+  knowledgeDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -595,6 +615,7 @@ export type LessonUncheckedUpdateManyInput = {
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -631,6 +652,7 @@ export type LessonCountOrderByAggregateInput = {
   isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrder
+  knowledgeDocumentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -657,6 +679,7 @@ export type LessonMaxOrderByAggregateInput = {
   isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrder
+  knowledgeDocumentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -678,6 +701,7 @@ export type LessonMinOrderByAggregateInput = {
   isArchived?: Prisma.SortOrder
   sectionId?: Prisma.SortOrder
   aiSummary?: Prisma.SortOrder
+  knowledgeDocumentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -813,6 +837,48 @@ export type LessonUpdateOneWithoutAiChatsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LessonUpdateToOneWithWhereWithoutAiChatsInput, Prisma.LessonUpdateWithoutAiChatsInput>, Prisma.LessonUncheckedUpdateWithoutAiChatsInput>
 }
 
+export type LessonCreateNestedManyWithoutKnowledgeDocumentInput = {
+  create?: Prisma.XOR<Prisma.LessonCreateWithoutKnowledgeDocumentInput, Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput> | Prisma.LessonCreateWithoutKnowledgeDocumentInput[] | Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput[]
+  connectOrCreate?: Prisma.LessonCreateOrConnectWithoutKnowledgeDocumentInput | Prisma.LessonCreateOrConnectWithoutKnowledgeDocumentInput[]
+  createMany?: Prisma.LessonCreateManyKnowledgeDocumentInputEnvelope
+  connect?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+}
+
+export type LessonUncheckedCreateNestedManyWithoutKnowledgeDocumentInput = {
+  create?: Prisma.XOR<Prisma.LessonCreateWithoutKnowledgeDocumentInput, Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput> | Prisma.LessonCreateWithoutKnowledgeDocumentInput[] | Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput[]
+  connectOrCreate?: Prisma.LessonCreateOrConnectWithoutKnowledgeDocumentInput | Prisma.LessonCreateOrConnectWithoutKnowledgeDocumentInput[]
+  createMany?: Prisma.LessonCreateManyKnowledgeDocumentInputEnvelope
+  connect?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+}
+
+export type LessonUpdateManyWithoutKnowledgeDocumentNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonCreateWithoutKnowledgeDocumentInput, Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput> | Prisma.LessonCreateWithoutKnowledgeDocumentInput[] | Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput[]
+  connectOrCreate?: Prisma.LessonCreateOrConnectWithoutKnowledgeDocumentInput | Prisma.LessonCreateOrConnectWithoutKnowledgeDocumentInput[]
+  upsert?: Prisma.LessonUpsertWithWhereUniqueWithoutKnowledgeDocumentInput | Prisma.LessonUpsertWithWhereUniqueWithoutKnowledgeDocumentInput[]
+  createMany?: Prisma.LessonCreateManyKnowledgeDocumentInputEnvelope
+  set?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+  disconnect?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+  delete?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+  connect?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+  update?: Prisma.LessonUpdateWithWhereUniqueWithoutKnowledgeDocumentInput | Prisma.LessonUpdateWithWhereUniqueWithoutKnowledgeDocumentInput[]
+  updateMany?: Prisma.LessonUpdateManyWithWhereWithoutKnowledgeDocumentInput | Prisma.LessonUpdateManyWithWhereWithoutKnowledgeDocumentInput[]
+  deleteMany?: Prisma.LessonScalarWhereInput | Prisma.LessonScalarWhereInput[]
+}
+
+export type LessonUncheckedUpdateManyWithoutKnowledgeDocumentNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonCreateWithoutKnowledgeDocumentInput, Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput> | Prisma.LessonCreateWithoutKnowledgeDocumentInput[] | Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput[]
+  connectOrCreate?: Prisma.LessonCreateOrConnectWithoutKnowledgeDocumentInput | Prisma.LessonCreateOrConnectWithoutKnowledgeDocumentInput[]
+  upsert?: Prisma.LessonUpsertWithWhereUniqueWithoutKnowledgeDocumentInput | Prisma.LessonUpsertWithWhereUniqueWithoutKnowledgeDocumentInput[]
+  createMany?: Prisma.LessonCreateManyKnowledgeDocumentInputEnvelope
+  set?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+  disconnect?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+  delete?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+  connect?: Prisma.LessonWhereUniqueInput | Prisma.LessonWhereUniqueInput[]
+  update?: Prisma.LessonUpdateWithWhereUniqueWithoutKnowledgeDocumentInput | Prisma.LessonUpdateWithWhereUniqueWithoutKnowledgeDocumentInput[]
+  updateMany?: Prisma.LessonUpdateManyWithWhereWithoutKnowledgeDocumentInput | Prisma.LessonUpdateManyWithWhereWithoutKnowledgeDocumentInput[]
+  deleteMany?: Prisma.LessonScalarWhereInput | Prisma.LessonScalarWhereInput[]
+}
+
 export type LessonCreateWithoutSectionInput = {
   id?: string
   slug: string
@@ -835,6 +901,7 @@ export type LessonCreateWithoutSectionInput = {
   quiz?: Prisma.QuizCreateNestedOneWithoutLessonInput
   assignment?: Prisma.AssignmentCreateNestedOneWithoutLessonInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutLessonInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentCreateNestedOneWithoutLessonsInput
 }
 
 export type LessonUncheckedCreateWithoutSectionInput = {
@@ -853,6 +920,7 @@ export type LessonUncheckedCreateWithoutSectionInput = {
   textContent?: string | null
   isArchived?: boolean
   aiSummary?: string | null
+  knowledgeDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutLessonInput
@@ -907,6 +975,7 @@ export type LessonScalarWhereInput = {
   isArchived?: Prisma.BoolFilter<"Lesson"> | boolean
   sectionId?: Prisma.StringFilter<"Lesson"> | string
   aiSummary?: Prisma.StringNullableFilter<"Lesson"> | string | null
+  knowledgeDocumentId?: Prisma.StringNullableFilter<"Lesson"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
 }
@@ -933,6 +1002,7 @@ export type LessonCreateWithoutProgressInput = {
   quiz?: Prisma.QuizCreateNestedOneWithoutLessonInput
   assignment?: Prisma.AssignmentCreateNestedOneWithoutLessonInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutLessonInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentCreateNestedOneWithoutLessonsInput
 }
 
 export type LessonUncheckedCreateWithoutProgressInput = {
@@ -952,6 +1022,7 @@ export type LessonUncheckedCreateWithoutProgressInput = {
   isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
+  knowledgeDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   quiz?: Prisma.QuizUncheckedCreateNestedOneWithoutLessonInput
@@ -997,6 +1068,7 @@ export type LessonUpdateWithoutProgressInput = {
   quiz?: Prisma.QuizUpdateOneWithoutLessonNestedInput
   assignment?: Prisma.AssignmentUpdateOneWithoutLessonNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutLessonNestedInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentUpdateOneWithoutLessonsNestedInput
 }
 
 export type LessonUncheckedUpdateWithoutProgressInput = {
@@ -1016,6 +1088,7 @@ export type LessonUncheckedUpdateWithoutProgressInput = {
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   quiz?: Prisma.QuizUncheckedUpdateOneWithoutLessonNestedInput
@@ -1045,6 +1118,7 @@ export type LessonCreateWithoutQuizInput = {
   progress?: Prisma.LessonProgressCreateNestedManyWithoutLessonInput
   assignment?: Prisma.AssignmentCreateNestedOneWithoutLessonInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutLessonInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentCreateNestedOneWithoutLessonsInput
 }
 
 export type LessonUncheckedCreateWithoutQuizInput = {
@@ -1064,6 +1138,7 @@ export type LessonUncheckedCreateWithoutQuizInput = {
   isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
+  knowledgeDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutLessonInput
@@ -1109,6 +1184,7 @@ export type LessonUpdateWithoutQuizInput = {
   progress?: Prisma.LessonProgressUpdateManyWithoutLessonNestedInput
   assignment?: Prisma.AssignmentUpdateOneWithoutLessonNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutLessonNestedInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentUpdateOneWithoutLessonsNestedInput
 }
 
 export type LessonUncheckedUpdateWithoutQuizInput = {
@@ -1128,6 +1204,7 @@ export type LessonUncheckedUpdateWithoutQuizInput = {
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutLessonNestedInput
@@ -1157,6 +1234,7 @@ export type LessonCreateWithoutAssignmentInput = {
   progress?: Prisma.LessonProgressCreateNestedManyWithoutLessonInput
   quiz?: Prisma.QuizCreateNestedOneWithoutLessonInput
   aiChats?: Prisma.AIChatCreateNestedManyWithoutLessonInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentCreateNestedOneWithoutLessonsInput
 }
 
 export type LessonUncheckedCreateWithoutAssignmentInput = {
@@ -1176,6 +1254,7 @@ export type LessonUncheckedCreateWithoutAssignmentInput = {
   isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
+  knowledgeDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutLessonInput
@@ -1221,6 +1300,7 @@ export type LessonUpdateWithoutAssignmentInput = {
   progress?: Prisma.LessonProgressUpdateManyWithoutLessonNestedInput
   quiz?: Prisma.QuizUpdateOneWithoutLessonNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutLessonNestedInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentUpdateOneWithoutLessonsNestedInput
 }
 
 export type LessonUncheckedUpdateWithoutAssignmentInput = {
@@ -1240,6 +1320,7 @@ export type LessonUncheckedUpdateWithoutAssignmentInput = {
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutLessonNestedInput
@@ -1269,6 +1350,7 @@ export type LessonCreateWithoutAiChatsInput = {
   progress?: Prisma.LessonProgressCreateNestedManyWithoutLessonInput
   quiz?: Prisma.QuizCreateNestedOneWithoutLessonInput
   assignment?: Prisma.AssignmentCreateNestedOneWithoutLessonInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentCreateNestedOneWithoutLessonsInput
 }
 
 export type LessonUncheckedCreateWithoutAiChatsInput = {
@@ -1288,6 +1370,7 @@ export type LessonUncheckedCreateWithoutAiChatsInput = {
   isArchived?: boolean
   sectionId: string
   aiSummary?: string | null
+  knowledgeDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutLessonInput
@@ -1333,6 +1416,7 @@ export type LessonUpdateWithoutAiChatsInput = {
   progress?: Prisma.LessonProgressUpdateManyWithoutLessonNestedInput
   quiz?: Prisma.QuizUpdateOneWithoutLessonNestedInput
   assignment?: Prisma.AssignmentUpdateOneWithoutLessonNestedInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentUpdateOneWithoutLessonsNestedInput
 }
 
 export type LessonUncheckedUpdateWithoutAiChatsInput = {
@@ -1352,11 +1436,88 @@ export type LessonUncheckedUpdateWithoutAiChatsInput = {
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutLessonNestedInput
   quiz?: Prisma.QuizUncheckedUpdateOneWithoutLessonNestedInput
   assignment?: Prisma.AssignmentUncheckedUpdateOneWithoutLessonNestedInput
+}
+
+export type LessonCreateWithoutKnowledgeDocumentInput = {
+  id?: string
+  slug: string
+  title: string
+  description?: string | null
+  type?: $Enums.LessonType
+  order: number
+  isPublished?: boolean
+  isFree?: boolean
+  muxAssetId?: string | null
+  muxPlaybackId?: string | null
+  videoStatus?: $Enums.VideoStatus
+  videoDuration?: number | null
+  textContent?: string | null
+  isArchived?: boolean
+  aiSummary?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  section: Prisma.SectionCreateNestedOneWithoutLessonsInput
+  progress?: Prisma.LessonProgressCreateNestedManyWithoutLessonInput
+  quiz?: Prisma.QuizCreateNestedOneWithoutLessonInput
+  assignment?: Prisma.AssignmentCreateNestedOneWithoutLessonInput
+  aiChats?: Prisma.AIChatCreateNestedManyWithoutLessonInput
+}
+
+export type LessonUncheckedCreateWithoutKnowledgeDocumentInput = {
+  id?: string
+  slug: string
+  title: string
+  description?: string | null
+  type?: $Enums.LessonType
+  order: number
+  isPublished?: boolean
+  isFree?: boolean
+  muxAssetId?: string | null
+  muxPlaybackId?: string | null
+  videoStatus?: $Enums.VideoStatus
+  videoDuration?: number | null
+  textContent?: string | null
+  isArchived?: boolean
+  sectionId: string
+  aiSummary?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutLessonInput
+  quiz?: Prisma.QuizUncheckedCreateNestedOneWithoutLessonInput
+  assignment?: Prisma.AssignmentUncheckedCreateNestedOneWithoutLessonInput
+  aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutLessonInput
+}
+
+export type LessonCreateOrConnectWithoutKnowledgeDocumentInput = {
+  where: Prisma.LessonWhereUniqueInput
+  create: Prisma.XOR<Prisma.LessonCreateWithoutKnowledgeDocumentInput, Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput>
+}
+
+export type LessonCreateManyKnowledgeDocumentInputEnvelope = {
+  data: Prisma.LessonCreateManyKnowledgeDocumentInput | Prisma.LessonCreateManyKnowledgeDocumentInput[]
+  skipDuplicates?: boolean
+}
+
+export type LessonUpsertWithWhereUniqueWithoutKnowledgeDocumentInput = {
+  where: Prisma.LessonWhereUniqueInput
+  update: Prisma.XOR<Prisma.LessonUpdateWithoutKnowledgeDocumentInput, Prisma.LessonUncheckedUpdateWithoutKnowledgeDocumentInput>
+  create: Prisma.XOR<Prisma.LessonCreateWithoutKnowledgeDocumentInput, Prisma.LessonUncheckedCreateWithoutKnowledgeDocumentInput>
+}
+
+export type LessonUpdateWithWhereUniqueWithoutKnowledgeDocumentInput = {
+  where: Prisma.LessonWhereUniqueInput
+  data: Prisma.XOR<Prisma.LessonUpdateWithoutKnowledgeDocumentInput, Prisma.LessonUncheckedUpdateWithoutKnowledgeDocumentInput>
+}
+
+export type LessonUpdateManyWithWhereWithoutKnowledgeDocumentInput = {
+  where: Prisma.LessonScalarWhereInput
+  data: Prisma.XOR<Prisma.LessonUpdateManyMutationInput, Prisma.LessonUncheckedUpdateManyWithoutKnowledgeDocumentInput>
 }
 
 export type LessonCreateManySectionInput = {
@@ -1375,6 +1536,7 @@ export type LessonCreateManySectionInput = {
   textContent?: string | null
   isArchived?: boolean
   aiSummary?: string | null
+  knowledgeDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1401,6 +1563,7 @@ export type LessonUpdateWithoutSectionInput = {
   quiz?: Prisma.QuizUpdateOneWithoutLessonNestedInput
   assignment?: Prisma.AssignmentUpdateOneWithoutLessonNestedInput
   aiChats?: Prisma.AIChatUpdateManyWithoutLessonNestedInput
+  knowledgeDocument?: Prisma.KnowledgeDocumentUpdateOneWithoutLessonsNestedInput
 }
 
 export type LessonUncheckedUpdateWithoutSectionInput = {
@@ -1419,6 +1582,7 @@ export type LessonUncheckedUpdateWithoutSectionInput = {
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutLessonNestedInput
@@ -1442,6 +1606,99 @@ export type LessonUncheckedUpdateManyWithoutSectionInput = {
   videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonCreateManyKnowledgeDocumentInput = {
+  id?: string
+  slug: string
+  title: string
+  description?: string | null
+  type?: $Enums.LessonType
+  order: number
+  isPublished?: boolean
+  isFree?: boolean
+  muxAssetId?: string | null
+  muxPlaybackId?: string | null
+  videoStatus?: $Enums.VideoStatus
+  videoDuration?: number | null
+  textContent?: string | null
+  isArchived?: boolean
+  sectionId: string
+  aiSummary?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type LessonUpdateWithoutKnowledgeDocumentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isFree?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  muxAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  muxPlaybackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
+  videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  section?: Prisma.SectionUpdateOneRequiredWithoutLessonsNestedInput
+  progress?: Prisma.LessonProgressUpdateManyWithoutLessonNestedInput
+  quiz?: Prisma.QuizUpdateOneWithoutLessonNestedInput
+  assignment?: Prisma.AssignmentUpdateOneWithoutLessonNestedInput
+  aiChats?: Prisma.AIChatUpdateManyWithoutLessonNestedInput
+}
+
+export type LessonUncheckedUpdateWithoutKnowledgeDocumentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isFree?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  muxAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  muxPlaybackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
+  videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutLessonNestedInput
+  quiz?: Prisma.QuizUncheckedUpdateOneWithoutLessonNestedInput
+  assignment?: Prisma.AssignmentUncheckedUpdateOneWithoutLessonNestedInput
+  aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutLessonNestedInput
+}
+
+export type LessonUncheckedUpdateManyWithoutKnowledgeDocumentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumLessonTypeFieldUpdateOperationsInput | $Enums.LessonType
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isFree?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  muxAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  muxPlaybackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoStatus?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
+  videoDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  textContent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sectionId?: Prisma.StringFieldUpdateOperationsInput | string
   aiSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1504,6 +1761,7 @@ export type LessonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   isArchived?: boolean
   sectionId?: boolean
   aiSummary?: boolean
+  knowledgeDocumentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   section?: boolean | Prisma.SectionDefaultArgs<ExtArgs>
@@ -1511,6 +1769,7 @@ export type LessonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   quiz?: boolean | Prisma.Lesson$quizArgs<ExtArgs>
   assignment?: boolean | Prisma.Lesson$assignmentArgs<ExtArgs>
   aiChats?: boolean | Prisma.Lesson$aiChatsArgs<ExtArgs>
+  knowledgeDocument?: boolean | Prisma.Lesson$knowledgeDocumentArgs<ExtArgs>
   _count?: boolean | Prisma.LessonCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lesson"]>
 
@@ -1531,9 +1790,11 @@ export type LessonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isArchived?: boolean
   sectionId?: boolean
   aiSummary?: boolean
+  knowledgeDocumentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   section?: boolean | Prisma.SectionDefaultArgs<ExtArgs>
+  knowledgeDocument?: boolean | Prisma.Lesson$knowledgeDocumentArgs<ExtArgs>
 }, ExtArgs["result"]["lesson"]>
 
 export type LessonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1553,9 +1814,11 @@ export type LessonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isArchived?: boolean
   sectionId?: boolean
   aiSummary?: boolean
+  knowledgeDocumentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   section?: boolean | Prisma.SectionDefaultArgs<ExtArgs>
+  knowledgeDocument?: boolean | Prisma.Lesson$knowledgeDocumentArgs<ExtArgs>
 }, ExtArgs["result"]["lesson"]>
 
 export type LessonSelectScalar = {
@@ -1575,24 +1838,28 @@ export type LessonSelectScalar = {
   isArchived?: boolean
   sectionId?: boolean
   aiSummary?: boolean
+  knowledgeDocumentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "description" | "type" | "order" | "isPublished" | "isFree" | "muxAssetId" | "muxPlaybackId" | "videoStatus" | "videoDuration" | "textContent" | "isArchived" | "sectionId" | "aiSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>
+export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "description" | "type" | "order" | "isPublished" | "isFree" | "muxAssetId" | "muxPlaybackId" | "videoStatus" | "videoDuration" | "textContent" | "isArchived" | "sectionId" | "aiSummary" | "knowledgeDocumentId" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>
 export type LessonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   section?: boolean | Prisma.SectionDefaultArgs<ExtArgs>
   progress?: boolean | Prisma.Lesson$progressArgs<ExtArgs>
   quiz?: boolean | Prisma.Lesson$quizArgs<ExtArgs>
   assignment?: boolean | Prisma.Lesson$assignmentArgs<ExtArgs>
   aiChats?: boolean | Prisma.Lesson$aiChatsArgs<ExtArgs>
+  knowledgeDocument?: boolean | Prisma.Lesson$knowledgeDocumentArgs<ExtArgs>
   _count?: boolean | Prisma.LessonCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LessonIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   section?: boolean | Prisma.SectionDefaultArgs<ExtArgs>
+  knowledgeDocument?: boolean | Prisma.Lesson$knowledgeDocumentArgs<ExtArgs>
 }
 export type LessonIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   section?: boolean | Prisma.SectionDefaultArgs<ExtArgs>
+  knowledgeDocument?: boolean | Prisma.Lesson$knowledgeDocumentArgs<ExtArgs>
 }
 
 export type $LessonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1603,6 +1870,7 @@ export type $LessonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     quiz: Prisma.$QuizPayload<ExtArgs> | null
     assignment: Prisma.$AssignmentPayload<ExtArgs> | null
     aiChats: Prisma.$AIChatPayload<ExtArgs>[]
+    knowledgeDocument: Prisma.$KnowledgeDocumentPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1621,6 +1889,7 @@ export type $LessonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     isArchived: boolean
     sectionId: string
     aiSummary: string | null
+    knowledgeDocumentId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["lesson"]>
@@ -2022,6 +2291,7 @@ export interface Prisma__LessonClient<T, Null = never, ExtArgs extends runtime.T
   quiz<T extends Prisma.Lesson$quizArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lesson$quizArgs<ExtArgs>>): Prisma.Prisma__QuizClient<runtime.Types.Result.GetResult<Prisma.$QuizPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assignment<T extends Prisma.Lesson$assignmentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lesson$assignmentArgs<ExtArgs>>): Prisma.Prisma__AssignmentClient<runtime.Types.Result.GetResult<Prisma.$AssignmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   aiChats<T extends Prisma.Lesson$aiChatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lesson$aiChatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeDocument<T extends Prisma.Lesson$knowledgeDocumentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lesson$knowledgeDocumentArgs<ExtArgs>>): Prisma.Prisma__KnowledgeDocumentClient<runtime.Types.Result.GetResult<Prisma.$KnowledgeDocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2067,6 +2337,7 @@ export interface LessonFieldRefs {
   readonly isArchived: Prisma.FieldRef<"Lesson", 'Boolean'>
   readonly sectionId: Prisma.FieldRef<"Lesson", 'String'>
   readonly aiSummary: Prisma.FieldRef<"Lesson", 'String'>
+  readonly knowledgeDocumentId: Prisma.FieldRef<"Lesson", 'String'>
   readonly createdAt: Prisma.FieldRef<"Lesson", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Lesson", 'DateTime'>
 }
@@ -2553,6 +2824,25 @@ export type Lesson$aiChatsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AIChatScalarFieldEnum | Prisma.AIChatScalarFieldEnum[]
+}
+
+/**
+ * Lesson.knowledgeDocument
+ */
+export type Lesson$knowledgeDocumentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeDocument
+   */
+  select?: Prisma.KnowledgeDocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeDocument
+   */
+  omit?: Prisma.KnowledgeDocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeDocumentInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeDocumentWhereInput
 }
 
 /**

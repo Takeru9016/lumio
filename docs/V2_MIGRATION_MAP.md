@@ -60,11 +60,15 @@ The current package uses Next 16, React 19, Prisma 7, AI SDK 7, Clerk 7 and rela
 
 ### Phase 1 — Foundation
 
-- Add Skill, SkillCategory, JobRole, RoleSkill, UserSkill, UserJobRole, SkillEvidence and SkillGap.
-- Add KnowledgeSource, KnowledgeDocument and KnowledgeChunk.
-- Add AIExecution, AIMessage, AIToolCall, AISourceCitation and AIUsageEvent.
-- Add LearningEvent.
-- Add tenant-aware authorization helpers.
+**Status: schema + auth foundation implemented (2026-09-09). Migration generated, not applied. No routes/UI migrated.**
+
+- Added Skill, SkillCategory, JobRole, RoleSkill, UserSkill, UserJobRole, SkillEvidence, CourseSkill. **Not added: SkillGap** — deferred, computable from UserSkill.proficiency vs RoleSkill.requiredProficiency without a stored table; revisit once a real read pattern needs it.
+- Added KnowledgeSource, KnowledgeDocument, KnowledgeChunk. Embedding lives directly on `KnowledgeChunk` via the same `Unsupported("vector(1536)")` approach as `Lesson.embedding` — no separate `Embedding` model.
+- Added AIConversation, AIMessage, AIToolCall, AISourceCitation, AIExecution, AIUsageEvent. **Not added: AIAgentRun** — deferred to Phase 5 (Automation), no agents exist yet to run.
+- Added LearningEvent.
+- Added `src/lib/auth/context.ts` (`AuthContext`/`getAuthContext`/`requireAuthContext`/`requireTenant`/`requireRole`) as the reusable tenant-scoped identity foundation. Existing routes still use their own inline `auth() -> db.user.findUnique -> manual check` pattern (e.g. `src/app/api/org/branding/route.ts`) — none were rewritten this phase.
+- Added type-only domain folders: `src/lib/domain/{capability,knowledge,learning}/types.ts`, `src/lib/analytics/types.ts`. No service layer — re-exports of Prisma types plus a couple of composite types, per the "no speculative business logic" rule for this phase.
+- Migration `prisma/migrations/20260909180000_add_v2_capability_knowledge_ai_foundation/` generated via offline schema-diff (see `docs/V2_DATABASE_MIGRATION.md`). **Not applied to the Neon database.**
 
 ### Phase 2 — Course Builder
 

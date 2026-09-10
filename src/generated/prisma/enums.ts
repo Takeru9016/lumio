@@ -123,3 +123,112 @@ export const OrgRequestStatus = {
 } as const
 
 export type OrgRequestStatus = (typeof OrgRequestStatus)[keyof typeof OrgRequestStatus]
+
+
+export const SkillProficiency = {
+  NONE: 'NONE',
+  BEGINNER: 'BEGINNER',
+  INTERMEDIATE: 'INTERMEDIATE',
+  ADVANCED: 'ADVANCED',
+  EXPERT: 'EXPERT'
+} as const
+
+export type SkillProficiency = (typeof SkillProficiency)[keyof typeof SkillProficiency]
+
+
+export const SkillStatus = {
+  ACTIVE: 'ACTIVE',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type SkillStatus = (typeof SkillStatus)[keyof typeof SkillStatus]
+
+
+export const EvidenceType = {
+  COURSE_COMPLETION: 'COURSE_COMPLETION',
+  QUIZ_SCORE: 'QUIZ_SCORE',
+  ASSIGNMENT: 'ASSIGNMENT',
+  ASSESSMENT: 'ASSESSMENT',
+  PROJECT: 'PROJECT',
+  MANAGER_ASSESSMENT: 'MANAGER_ASSESSMENT',
+  CERTIFICATION: 'CERTIFICATION',
+  AI_EVALUATION: 'AI_EVALUATION',
+  MANUAL: 'MANUAL'
+} as const
+
+export type EvidenceType = (typeof EvidenceType)[keyof typeof EvidenceType]
+
+
+export const EvidenceVerificationStatus = {
+  UNVERIFIED: 'UNVERIFIED',
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type EvidenceVerificationStatus = (typeof EvidenceVerificationStatus)[keyof typeof EvidenceVerificationStatus]
+
+
+export const KnowledgeSourceType = {
+  COURSE: 'COURSE',
+  LESSON: 'LESSON',
+  DOCUMENT: 'DOCUMENT',
+  POLICY: 'POLICY',
+  TRANSCRIPT: 'TRANSCRIPT',
+  EXTERNAL: 'EXTERNAL',
+  WEBPAGE: 'WEBPAGE',
+  MANUAL: 'MANUAL'
+} as const
+
+export type KnowledgeSourceType = (typeof KnowledgeSourceType)[keyof typeof KnowledgeSourceType]
+
+
+export const KnowledgeStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  READY: 'READY',
+  ERROR: 'ERROR'
+} as const
+
+export type KnowledgeStatus = (typeof KnowledgeStatus)[keyof typeof KnowledgeStatus]
+
+
+export const AIConversationType = {
+  TUTOR: 'TUTOR',
+  COURSE_BUILDER: 'COURSE_BUILDER',
+  ANALYTICS: 'ANALYTICS',
+  COACH: 'COACH',
+  GENERAL: 'GENERAL'
+} as const
+
+export type AIConversationType = (typeof AIConversationType)[keyof typeof AIConversationType]
+
+
+export const AIExecutionStatus = {
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type AIExecutionStatus = (typeof AIExecutionStatus)[keyof typeof AIExecutionStatus]
+
+
+export const LearningEventType = {
+  COURSE_ENROLLED: 'COURSE_ENROLLED',
+  COURSE_COMPLETED: 'COURSE_COMPLETED',
+  LESSON_STARTED: 'LESSON_STARTED',
+  LESSON_COMPLETED: 'LESSON_COMPLETED',
+  QUIZ_STARTED: 'QUIZ_STARTED',
+  QUIZ_COMPLETED: 'QUIZ_COMPLETED',
+  ASSIGNMENT_SUBMITTED: 'ASSIGNMENT_SUBMITTED',
+  ASSIGNMENT_GRADED: 'ASSIGNMENT_GRADED',
+  SKILL_ASSESSED: 'SKILL_ASSESSED',
+  SKILL_EVIDENCE_CREATED: 'SKILL_EVIDENCE_CREATED',
+  CERTIFICATE_ISSUED: 'CERTIFICATE_ISSUED',
+  AI_TUTOR_USED: 'AI_TUTOR_USED',
+  RECOMMENDATION_ACCEPTED: 'RECOMMENDATION_ACCEPTED',
+  LEARNING_PATH_COMPLETED: 'LEARNING_PATH_COMPLETED'
+} as const
+
+export type LearningEventType = (typeof LearningEventType)[keyof typeof LearningEventType]

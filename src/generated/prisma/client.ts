@@ -156,3 +156,93 @@ export type MandatoryTraining = Prisma.MandatoryTrainingModel
  * 
  */
 export type AdminAuditLog = Prisma.AdminAuditLogModel
+/**
+ * Model SkillCategory
+ * 
+ */
+export type SkillCategory = Prisma.SkillCategoryModel
+/**
+ * Model Skill
+ * 
+ */
+export type Skill = Prisma.SkillModel
+/**
+ * Model JobRole
+ * 
+ */
+export type JobRole = Prisma.JobRoleModel
+/**
+ * Model RoleSkill
+ * 
+ */
+export type RoleSkill = Prisma.RoleSkillModel
+/**
+ * Model UserJobRole
+ * 
+ */
+export type UserJobRole = Prisma.UserJobRoleModel
+/**
+ * Model UserSkill
+ * 
+ */
+export type UserSkill = Prisma.UserSkillModel
+/**
+ * Model SkillEvidence
+ * 
+ */
+export type SkillEvidence = Prisma.SkillEvidenceModel
+/**
+ * Model CourseSkill
+ * 
+ */
+export type CourseSkill = Prisma.CourseSkillModel
+/**
+ * Model KnowledgeSource
+ * 
+ */
+export type KnowledgeSource = Prisma.KnowledgeSourceModel
+/**
+ * Model KnowledgeDocument
+ * 
+ */
+export type KnowledgeDocument = Prisma.KnowledgeDocumentModel
+/**
+ * Model KnowledgeChunk
+ * 
+ */
+export type KnowledgeChunk = Prisma.KnowledgeChunkModel
+/**
+ * Model AIConversation
+ * 
+ */
+export type AIConversation = Prisma.AIConversationModel
+/**
+ * Model AIMessage
+ * 
+ */
+export type AIMessage = Prisma.AIMessageModel
+/**
+ * Model AIToolCall
+ * 
+ */
+export type AIToolCall = Prisma.AIToolCallModel
+/**
+ * Model AISourceCitation
+ * 
+ */
+export type AISourceCitation = Prisma.AISourceCitationModel
+/**
+ * Model AIExecution
+ * 
+ */
+export type AIExecution = Prisma.AIExecutionModel
+/**
+ * Model AIUsageEvent
+ * 
+ */
+export type AIUsageEvent = Prisma.AIUsageEventModel
+/**
+ * Model LearningEvent
+ * 
+ */
+export type LearningEvent = Prisma.LearningEventModel

@@ -1,5 +1,17 @@
 # Lumio V2 Domain Model
 
+## Implementation status (2026-09-09)
+
+Phase 1 (Foundation, per `V2_MIGRATION_MAP.md`) is implemented in `prisma/schema.prisma`:
+Skill, SkillCategory, JobRole, RoleSkill, UserJobRole, UserSkill, SkillEvidence, CourseSkill,
+KnowledgeSource, KnowledgeDocument, KnowledgeChunk, AIConversation, AIMessage, AIToolCall,
+AISourceCitation, AIExecution, AIUsageEvent, LearningEvent — plus 9 new enums. All additive;
+see `docs/V2_DATABASE_MIGRATION.md` for the exact migration contents. **Not yet implemented**
+from this document: `OrganizationMembership`, `Permission`, `RolePermission`, `LearningProgram`,
+`LearningProgramItem`, `Activity`, `Assessment`, `AssessmentItem`, `LearningGoal`, `SkillLevel`,
+`SkillGap`, `KnowledgeAccess`, `KnowledgeCitation` (superseded by `AISourceCitation`),
+`AIAgentRun`, `EvidenceEvent`. Those remain design intent below, not code.
+
 ## Goal
 Move from a primarily `User → Course → Section → Lesson` model toward a capability-aware learning platform while retaining backward compatibility.
 
