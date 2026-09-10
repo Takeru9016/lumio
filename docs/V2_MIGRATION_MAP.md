@@ -91,10 +91,17 @@ mismatch here rather than silently renumbering either document.
 ### Phase 3 — Learner Intelligence
 
 **Status (2026-09-10): partially implemented** — "Rebuild tutor on knowledge-layer retrieval"
-(first bullet below) has its foundation built: `src/lib/domain/knowledge/{access,ingestion,
-retrieval,chunking,lessonBridge}.ts`, `KnowledgeAccess` schema, `/api/ai/tutor` additively calls
-the new retrieval alongside the legacy lesson search. Skill profile/gap experience, AI learning
-coach, and broader learning-event emission (remaining bullets) are **not implemented**.
+(first bullet below) now has both its Knowledge foundation (`src/lib/domain/knowledge/{access,
+ingestion,retrieval,chunking,lessonBridge}.ts`, `KnowledgeAccess` schema) AND a shared AI runtime
+sitting in front of it (`src/lib/ai/runtime/{types,policy,provider,context,persistence}.ts` — this
+is the conversational task's own "Phase 2: Knowledge + Permission-Aware RAG Foundation" and "Phase
+3: AI Runtime + AI Context Foundation", folded into this document's pre-existing Phase 3 bullet —
+see the Phase 2 status note above for why the numbering differs). `/api/ai/tutor` is refactored
+onto the runtime: `AIRequestContext` → policy check → `buildAIContext` → model → V2 persistence,
+alongside the still-unchanged legacy `AIChat`/`aiCallsUsed` path. Skill profile/gap experience, AI
+learning coach, and broader learning-event emission (remaining bullets) are **not implemented**.
+Tool calls, WRITE/EXECUTE actions, and any AI Course Builder UI are **not implemented** — see
+`docs/V2_AI_ARCHITECTURE.md`, "AI capability classes".
 
 - Rebuild tutor on knowledge-layer retrieval.
 - Add skill profile and skill-gap experience.

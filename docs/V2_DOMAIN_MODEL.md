@@ -1,5 +1,16 @@
 # Lumio V2 Domain Model
 
+## Implementation status (2026-09-10, Phase 3)
+
+Phase 3 (AI runtime + AI context foundation) required **zero schema changes** — verified by test
+(`src/lib/ai/runtime/persistence.test.ts`, "the correlation chain closes end-to-end"), not assumed:
+`AIExecution.id` already serves as the correlation identifier this phase needed, reached via
+`AIConversation.id` (conversation → message/citation/execution) and `AIUsageEvent.executionId`
+(execution → usage event) — all added in Phase 1. `AIToolCall.executionId`, floated as a
+possibility in Phase 1's deferral note, was deliberately NOT added — no tool calls exist yet to
+correlate (see `docs/V2_AI_ARCHITECTURE.md`, "Tool registry"). See `docs/V2_AI_ARCHITECTURE.md`,
+"AI runtime" for the new `src/lib/ai/runtime/` service layer built on top of this existing schema.
+
 ## Implementation status (2026-09-10, Phase 2)
 
 Phase 1 (Foundation) schema is implemented in `prisma/schema.prisma`: Skill, SkillCategory,

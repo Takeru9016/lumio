@@ -3,6 +3,18 @@
 ## Status
 Proposed architecture baseline for the AI-native LMS / Learning & Capability Platform.
 
+## Implementation status (2026-09-10)
+
+Phase 1 (capability/knowledge/AI schema foundation) and Phase 2 (Knowledge + permission-aware RAG)
+are implemented — see `docs/V2_DOMAIN_MODEL.md` and `docs/V2_DATABASE_MIGRATION.md`. Phase 3 (AI
+runtime + AI context foundation) is implemented as of this update: a shared runtime at
+`src/lib/ai/runtime/` (`types.ts`, `policy.ts`, `provider.ts`, `context.ts`, `persistence.ts`) now
+sits between every AI-invoking route and the model/Knowledge layers, and `/api/ai/tutor` has been
+refactored (not rewritten) to go through it. See `docs/V2_AI_ARCHITECTURE.md`, "AI runtime
+(implemented, Phase 3)" for the full flow. No schema changes were required for Phase 3 — the
+existing `AIExecution.id`/`AIConversation.id` correlation chain from Phase 1 was sufficient
+(verified by test, not assumed).
+
 ## Product thesis
 Lumio should evolve from a course-centric LMS into an AI-native learning and capability platform that connects:
 
