@@ -60,10 +60,9 @@ Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
 **one squashed commit** (`31333e3` — there is no separate "Phase 3.1" commit; it's presented here
 as a distinct row because the user's own task framing and `docs/V2_AI_ARCHITECTURE.md` treat it as
-a distinct unit of work with its own verification), and Phase 4 is `0a51fe8`. **Phase 5 has not
-yet been committed** as of this roadmap update — implementation, tests, and final contract audit
-are complete and verified directly against the working tree (149/149 tests passing, `tsc`/Biome/
-Prisma clean), but no commit hash exists for it yet.
+a distinct unit of work with its own verification), and Phase 4 is `0a51fe8`. Phase 5 is `5e81c0b` (`feat: implement phase 5 capability loop`), with
+its final-contract-audit fixes (atomic enrollment transition, evidence-verification authorization)
+folded into a follow-up commit `bb430e5`.
 
 ### Phase 1 — Domain Foundation
 
@@ -675,7 +674,5 @@ Discovered during this audit, not silently resolved:
   (`31333e3`). Presented as its own row/section because the conversational task and
   `docs/V2_AI_ARCHITECTURE.md` both treat it as a distinct, separately-verified unit of work (own
   test file, own "Updated" note in the error-handling table).
-- **Phase 5 has no commit yet.** Unlike every prior phase in §2, Phase 5's COMPLETE status is
-  verified against the working tree directly (tests, `tsc`, Biome, `prisma validate`), not against
-  a `git log` entry — there isn't one at the time of this roadmap update. Update this note once
-  Phase 5 is committed.
+- **Phase 5 is `5e81c0b`**, with final-contract-audit fixes in follow-up commit `bb430e5`. (This
+  roadmap previously stated Phase 5 had no commit hash yet — corrected once the commit existed.)

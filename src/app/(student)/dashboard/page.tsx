@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
+import { getRecommendedLearning } from "@/lib/domain/capability/recommendations";
 import { DashboardClient } from "./DashboardClient";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -28,7 +29,7 @@ export default async function DashboardPage() {
 
   const dbUser = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true, name: true, currentStreak: true },
+    select: { id: true, name: true, currentStreak: true, tenantId: true, role: true },
   });
   if (!dbUser) redirect("/onboarding");
 
@@ -88,6 +89,19 @@ export default async function DashboardPage() {
   const hour = new Date().getHours();
   const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
 
+  // Phase 6 capability recommendations — additive, best-effort, tenant-
+  // gated like every other V2 capability read (a FREE-plan user with no
+  // tenant has no JobRole/UserSkill state to compute gaps from). A failure
+  // here must never break the dashboard — omit the section, not the page.
+  const recommended = dbUser.tenantId
+    ? await getRecommendedLearning({
+        userId: dbUser.id,
+        clerkId: userId,
+        tenantId: dbUser.tenantId,
+        role: dbUser.role,
+      }).catch(() => ({ recommendations: [] }))
+    : { recommendations: [] };
+
   return (
     <DashboardClient
       firstName={dbUser.name?.split(" ")[0] ?? "there"}
@@ -98,6 +112,7 @@ export default async function DashboardPage() {
       xpThisWeek={xpAgg._sum.amount ?? 0}
       continueLearning={enrollmentsWithProgress}
       completedCourses={completedWithProgress}
+      recommendations={recommended.recommendations}
     />
   );
 }

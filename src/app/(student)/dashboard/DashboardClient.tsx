@@ -15,6 +15,18 @@ interface ContinueLearningItem {
   progress: number;
 }
 
+interface RecommendationCardItem {
+  courseId: string;
+  courseTitle: string;
+  courseSlug: string;
+  reasonSkills: Array<{
+    skillId: string;
+    skillName: string;
+    requiredProficiency: string;
+    currentProficiency: string;
+  }>;
+}
+
 interface DashboardClientProps {
   firstName: string;
   timeOfDay: "morning" | "afternoon" | "evening";
@@ -24,6 +36,7 @@ interface DashboardClientProps {
   xpThisWeek: number;
   continueLearning: ContinueLearningItem[];
   completedCourses: ContinueLearningItem[];
+  recommendations: RecommendationCardItem[];
 }
 
 const containerVariants = {
@@ -45,6 +58,7 @@ export function DashboardClient({
   xpThisWeek,
   continueLearning,
   completedCourses,
+  recommendations,
 }: DashboardClientProps) {
   const [showCompleted, setShowCompleted] = useState(false);
 
@@ -147,6 +161,36 @@ export function DashboardClient({
           ))
         )}
       </div>
+
+      {recommendations.length > 0 && (
+        <motion.div variants={itemVariants} className="space-y-3">
+          <h2 className="text-sm font-semibold text-text-primary">Recommended for you</h2>
+          <div className="space-y-3">
+            {recommendations.map((rec) => (
+              <Link
+                key={rec.courseId}
+                href={`/courses/${rec.courseSlug}`}
+                className="block bg-surface-1 border border-border rounded-lg p-4 shadow-sm hover:border-border-strong transition-colors"
+              >
+                <p className="text-sm font-semibold text-text-primary truncate">
+                  {rec.courseTitle}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {rec.reasonSkills.map((skill) => (
+                    <span
+                      key={skill.skillId}
+                      className="text-xs text-text-muted bg-surface-3 rounded-full px-2 py-0.5"
+                    >
+                      {skill.skillName}: {skill.currentProficiency.toLowerCase()} →{" "}
+                      {skill.requiredProficiency.toLowerCase()}
+                    </span>
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {completedCourses.length > 0 && (
         <motion.div variants={itemVariants} className="space-y-3">
