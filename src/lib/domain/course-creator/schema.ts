@@ -13,6 +13,7 @@ export const MAX_KNOWLEDGE_DOCUMENT_IDS = 5;
 export const MAX_TARGET_SKILL_IDS = 10;
 export const MAX_ASSESSMENT_QUESTIONS = 10;
 export const MIN_ASSESSMENT_QUESTIONS = 3;
+export const MAX_LESSON_TEXT_CONTENT_CHARS = 20000;
 
 export const courseCreatorInputSchema = z
   .object({
@@ -136,6 +137,30 @@ export const assessmentProposalSchema = buildAssessmentProposalSchema(MIN_ASSESS
  * a silently-ignored write. See saveDraft.ts for how the accepted fields are
  * still re-verified against the database rather than trusted as-is.
  */
+const saveDraftAssessmentQuestionSchema = z
+  .object({
+    question: z.string().min(1).max(500),
+    options: z
+      .array(z.object({ id: z.string().min(1).max(10), text: z.string().min(1).max(300) }))
+      .min(2)
+      .max(6),
+    correctAnswer: z.string().min(1).max(10),
+    explanation: z.string().max(500).optional(),
+  })
+  .refine((q) => q.options.some((o) => o.id === q.correctAnswer), {
+    message: "correctAnswer must be the id of one of the provided options",
+    path: ["correctAnswer"],
+  });
+
+const saveDraftAssessmentSchema = z.object({
+  title: z.string().min(1).max(150).default("Quiz"),
+  passingScore: z.number().int().min(0).max(100).default(70),
+  questions: z
+    .array(saveDraftAssessmentQuestionSchema)
+    .min(MIN_ASSESSMENT_QUESTIONS)
+    .max(MAX_ASSESSMENT_QUESTIONS),
+});
+
 export const saveDraftInputSchema = z
   .object({
     title: z.string().min(1).max(200),
@@ -159,6 +184,9 @@ export const saveDraftInputSchema = z
                 title: z.string().min(1).max(150),
                 objective: z.string().max(300).optional(),
                 contentType: z.enum(["VIDEO", "TEXT", "QUIZ", "ASSIGNMENT"]),
+                textContent: z.string().max(MAX_LESSON_TEXT_CONTENT_CHARS).optional(),
+                knowledgeDocumentId: z.string().min(1).optional(),
+                assessment: saveDraftAssessmentSchema.optional(),
               })
             )
             .min(1)

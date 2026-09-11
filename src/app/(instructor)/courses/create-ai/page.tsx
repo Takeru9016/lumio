@@ -3,7 +3,7 @@
 import { toast } from "gooey-toast";
 import { Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Difficulty = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 
@@ -38,11 +38,51 @@ type KnowledgeItem = {
   citation: { documentTitle: string; sourceId: string };
 };
 
+type KnowledgeDocumentOption = {
+  id: string;
+  title: string;
+  sourceId: string;
+  sourceName: string;
+};
+
+type SkillOption = {
+  id: string;
+  name: string;
+  categoryId: string | null;
+  categoryName: string | null;
+};
+
+type QuizQuestionState = {
+  uiId: string;
+  question: string;
+  options: Array<{ id: string; text: string }>;
+  correctAnswer: string;
+  explanation?: string;
+};
+
+type LessonReviewState = {
+  textContent?: string;
+  knowledgeDocumentId?: string;
+  assessment?: { title: string; passingScore: number; questions: QuizQuestionState[] };
+  contentStatus: "idle" | "loading" | "error";
+  contentError?: string;
+  quizStatus: "idle" | "loading" | "error";
+  quizError?: string;
+};
+
+// keyed by `${sectionIndex}-${lessonIndex}` — stable for the lifetime of one
+// review session since section/lesson arrays are only ever filtered, never reordered.
+type ReviewState = Record<string, LessonReviewState>;
+
 type Step = "define" | "review";
 
 const inputClass =
   "w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm text-(--color-text-primary) placeholder:text-(--color-text-disabled) focus:outline-none focus:ring-2 focus:ring-(--color-ai) focus:border-transparent transition-all";
 const labelClass = "block text-sm font-medium text-(--color-text-primary) mb-1.5";
+
+function lessonKey(sectionIndex: number, lessonIndex: number): string {
+  return `${sectionIndex}-${lessonIndex}`;
+}
 
 export default function CreateAiCoursePage() {
   const router = useRouter();
@@ -53,10 +93,39 @@ export default function CreateAiCoursePage() {
   const [difficulty, setDifficulty] = useState<Difficulty | "">("");
   const [durationHours, setDurationHours] = useState<number | "">("");
 
+  const [knowledgeOptions, setKnowledgeOptions] = useState<KnowledgeDocumentOption[]>([]);
+  const [skillOptions, setSkillOptions] = useState<SkillOption[]>([]);
+  const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<string[]>([]);
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [proposal, setProposal] = useState<CourseProposal | null>(null);
   const [knowledge, setKnowledge] = useState<KnowledgeItem[]>([]);
+  const [review, setReview] = useState<ReviewState>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/knowledge/documents")
+      .then((res) => (res.ok ? res.json() : { documents: [] }))
+      .then((data) => setKnowledgeOptions(data.documents ?? []))
+      .catch(() => setKnowledgeOptions([]));
+    fetch("/api/skills")
+      .then((res) => (res.ok ? res.json() : { skills: [] }))
+      .then((data) => setSkillOptions(data.skills ?? []))
+      .catch(() => setSkillOptions([]));
+  }, []);
+
+  function toggleKnowledgeId(id: string) {
+    setSelectedKnowledgeIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function toggleSkillId(id: string) {
+    setSelectedSkillIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
 
   async function handleGenerate() {
     if (goal.trim().length < 10) {
@@ -74,6 +143,8 @@ export default function CreateAiCoursePage() {
           difficulty: difficulty || undefined,
           durationHours: durationHours || undefined,
           assessmentStyle: "MCQ",
+          knowledgeDocumentIds: selectedKnowledgeIds.length > 0 ? selectedKnowledgeIds : undefined,
+          targetSkillIds: selectedSkillIds.length > 0 ? selectedSkillIds : undefined,
         }),
       });
       if (!res.ok) {
@@ -83,6 +154,7 @@ export default function CreateAiCoursePage() {
       const data = await res.json();
       setProposal(data.proposal);
       setKnowledge(data.knowledge ?? []);
+      setReview({});
       setStep("review");
     } catch (e) {
       toast.error({
@@ -98,6 +170,13 @@ export default function CreateAiCoursePage() {
     setProposal((prev) => (prev ? updater(prev) : prev));
   }
 
+  function updateLessonReview(key: string, patch: Partial<LessonReviewState>) {
+    setReview((prev) => {
+      const base: LessonReviewState = prev[key] ?? { contentStatus: "idle", quizStatus: "idle" };
+      return { ...prev, [key]: { ...base, ...patch } };
+    });
+  }
+
   function removeLesson(sectionIndex: number, lessonIndex: number) {
     updateProposal((p) => ({
       ...p,
@@ -105,6 +184,135 @@ export default function CreateAiCoursePage() {
         si !== sectionIndex ? s : { ...s, lessons: s.lessons.filter((_, li) => li !== lessonIndex) }
       ),
     }));
+    setReview((prev) => {
+      const next = { ...prev };
+      delete next[lessonKey(sectionIndex, lessonIndex)];
+      return next;
+    });
+  }
+
+  async function generateLessonContent(sectionIndex: number, lessonIndex: number) {
+    if (!proposal) return;
+    const lesson = proposal.sections[sectionIndex].lessons[lessonIndex];
+    const key = lessonKey(sectionIndex, lessonIndex);
+    updateLessonReview(key, { contentStatus: "loading", contentError: undefined });
+    try {
+      const res = await fetch("/api/ai/course-creator/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseGoal: proposal.title,
+          lessonTitle: lesson.title,
+          lessonObjective: lesson.objective,
+          knowledgeDocumentIds: selectedKnowledgeIds.length > 0 ? selectedKnowledgeIds : undefined,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error?.toString?.() ?? "Failed to generate content");
+      }
+      const data = await res.json();
+      updateLessonReview(key, {
+        contentStatus: "idle",
+        textContent: data.html ?? "",
+      });
+    } catch (e) {
+      updateLessonReview(key, {
+        contentStatus: "error",
+        contentError: e instanceof Error ? e.message : "Failed to generate content",
+      });
+    }
+  }
+
+  async function generateLessonQuiz(sectionIndex: number, lessonIndex: number) {
+    if (!proposal) return;
+    const lesson = proposal.sections[sectionIndex].lessons[lessonIndex];
+    const key = lessonKey(sectionIndex, lessonIndex);
+    updateLessonReview(key, { quizStatus: "loading", quizError: undefined });
+    try {
+      const res = await fetch("/api/ai/course-creator/assessment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lessonTitle: lesson.title,
+          lessonContext: lesson.objective,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error?.toString?.() ?? "Failed to generate quiz");
+      }
+      const data = await res.json();
+      const questions: QuizQuestionState[] = (data.questions ?? []).map(
+        (q: Omit<QuizQuestionState, "uiId">, i: number) => ({
+          ...q,
+          uiId: `${key}-${i}-${crypto.randomUUID()}`,
+        })
+      );
+      updateLessonReview(key, {
+        quizStatus: "idle",
+        assessment: { title: "Quiz", passingScore: 70, questions },
+      });
+    } catch (e) {
+      updateLessonReview(key, {
+        quizStatus: "error",
+        quizError: e instanceof Error ? e.message : "Failed to generate quiz",
+      });
+    }
+  }
+
+  function updateQuestionText(
+    sectionIndex: number,
+    lessonIndex: number,
+    qIndex: number,
+    text: string
+  ) {
+    const key = lessonKey(sectionIndex, lessonIndex);
+    setReview((prev) => {
+      const current = prev[key];
+      if (!current?.assessment) return prev;
+      const questions = current.assessment.questions.map((q, i) =>
+        i === qIndex ? { ...q, question: text } : q
+      );
+      return { ...prev, [key]: { ...current, assessment: { ...current.assessment, questions } } };
+    });
+  }
+
+  function updateOptionText(
+    sectionIndex: number,
+    lessonIndex: number,
+    qIndex: number,
+    optionIndex: number,
+    text: string
+  ) {
+    const key = lessonKey(sectionIndex, lessonIndex);
+    setReview((prev) => {
+      const current = prev[key];
+      if (!current?.assessment) return prev;
+      const questions = current.assessment.questions.map((q, i) => {
+        if (i !== qIndex) return q;
+        const options = q.options.map((o, oi) => (oi === optionIndex ? { ...o, text } : o));
+        return { ...q, options };
+      });
+      return { ...prev, [key]: { ...current, assessment: { ...current.assessment, questions } } };
+    });
+  }
+
+  function updateCorrectAnswer(
+    sectionIndex: number,
+    lessonIndex: number,
+    qIndex: number,
+    optionId: string
+  ) {
+    const key = lessonKey(sectionIndex, lessonIndex);
+    setReview((prev) => {
+      const current = prev[key];
+      if (!current?.assessment) return prev;
+      const questions = current.assessment.questions.map((q, i) =>
+        i === qIndex ? { ...q, correctAnswer: optionId } : q
+      );
+      return { ...prev, [key]: { ...current, assessment: { ...current.assessment, questions } } };
+    });
   }
 
   async function handleCreateDraft() {
@@ -118,17 +326,34 @@ export default function CreateAiCoursePage() {
           title: proposal.title,
           description: proposal.description,
           learningObjectives: proposal.learningObjectives,
-          targetSkillIds: [],
+          targetSkillIds: selectedSkillIds,
           sections: proposal.sections
             .filter((s) => s.lessons.length > 0)
-            .map((s) => ({
+            .map((s, si) => ({
               title: s.title,
               description: s.description,
-              lessons: s.lessons.map((l) => ({
-                title: l.title,
-                objective: l.objective,
-                contentType: l.contentType,
-              })),
+              lessons: s.lessons.map((l, li) => {
+                const lessonState = review[lessonKey(si, li)];
+                return {
+                  title: l.title,
+                  objective: l.objective,
+                  contentType: l.contentType,
+                  ...(lessonState?.textContent ? { textContent: lessonState.textContent } : {}),
+                  ...(lessonState?.knowledgeDocumentId
+                    ? { knowledgeDocumentId: lessonState.knowledgeDocumentId }
+                    : {}),
+                  ...(lessonState?.assessment && lessonState.assessment.questions.length > 0
+                    ? {
+                        assessment: {
+                          ...lessonState.assessment,
+                          questions: lessonState.assessment.questions.map(
+                            ({ uiId: _uiId, ...q }) => q
+                          ),
+                        },
+                      }
+                    : {}),
+                };
+              }),
             })),
         }),
       });
@@ -217,6 +442,68 @@ export default function CreateAiCoursePage() {
             </div>
           </div>
 
+          <div>
+            <label className={labelClass}>Knowledge documents (optional)</label>
+            <p className="text-xs text-text-muted mb-2">
+              Ground the curriculum in your organization's existing knowledge.
+            </p>
+            {knowledgeOptions.length === 0 ? (
+              <p className="text-xs text-text-muted">No knowledge documents available yet.</p>
+            ) : (
+              <div className="border border-border rounded-md divide-y divide-border max-h-48 overflow-y-auto">
+                {knowledgeOptions.map((doc) => (
+                  <label
+                    key={doc.id}
+                    className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-surface-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedKnowledgeIds.includes(doc.id)}
+                      onChange={() => toggleKnowledgeId(doc.id)}
+                    />
+                    <span className="truncate">{doc.title}</span>
+                    <span className="text-xs text-text-muted shrink-0 ml-auto">
+                      {doc.sourceName}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className={labelClass}>Target skills (optional)</label>
+            <p className="text-xs text-text-muted mb-2">
+              Selected skills are linked to the saved course and steer the curriculum.
+            </p>
+            {skillOptions.length === 0 ? (
+              <p className="text-xs text-text-muted">No skills configured yet.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {skillOptions.map((skill) => {
+                  const selected = selectedSkillIds.includes(skill.id);
+                  return (
+                    <button
+                      key={skill.id}
+                      type="button"
+                      onClick={() => toggleSkillId(skill.id)}
+                      className={`text-xs rounded-full px-2.5 py-1 border transition-colors ${
+                        selected
+                          ? "bg-ai text-white border-ai"
+                          : "bg-surface-2 text-text-muted border-border hover:border-border-strong"
+                      }`}
+                    >
+                      {skill.name}
+                      {skill.categoryName && (
+                        <span className="opacity-70"> · {skill.categoryName}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <div className="pt-2 flex justify-end">
             <button
               type="button"
@@ -274,6 +561,32 @@ export default function CreateAiCoursePage() {
                 </p>
               </div>
             )}
+            <div>
+              <p className={labelClass}>Target skills for this course</p>
+              {skillOptions.length === 0 ? (
+                <p className="text-xs text-text-muted">No skills configured yet.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {skillOptions.map((skill) => {
+                    const selected = selectedSkillIds.includes(skill.id);
+                    return (
+                      <button
+                        key={skill.id}
+                        type="button"
+                        onClick={() => toggleSkillId(skill.id)}
+                        className={`text-xs rounded-full px-2.5 py-1 border transition-colors ${
+                          selected
+                            ? "bg-ai text-white border-ai"
+                            : "bg-surface-2 text-text-muted border-border hover:border-border-strong"
+                        }`}
+                      >
+                        {skill.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -294,38 +607,160 @@ export default function CreateAiCoursePage() {
                   }
                   className="w-full text-sm font-semibold bg-transparent focus:outline-none mb-3"
                 />
-                <div className="space-y-2">
-                  {section.lessons.map((lesson, li) => (
-                    <div
-                      key={`${lesson.title}-${li}`}
-                      className="flex items-start justify-between gap-3 rounded-md bg-surface-2 px-3 py-2"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{lesson.title}</p>
-                        <p className="text-xs text-text-muted">
-                          {lesson.contentType} · {lesson.estimatedMinutes} min
-                          {lesson.citationIndices.length > 0 && (
-                            <>
-                              {" "}
-                              · grounded in{" "}
-                              {lesson.citationIndices
-                                .map((i) => knowledge[i]?.citation.documentTitle)
-                                .filter(Boolean)
-                                .join(", ")}
-                            </>
-                          )}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeLesson(si, li)}
-                        className="shrink-0 text-text-muted hover:text-danger transition-colors"
-                        aria-label={`Remove lesson ${lesson.title}`}
+                <div className="space-y-3">
+                  {section.lessons.map((lesson, li) => {
+                    const key = lessonKey(si, li);
+                    const lessonState = review[key];
+                    return (
+                      <div
+                        key={`${lesson.title}-${li}`}
+                        className="rounded-md bg-surface-2 px-3 py-2.5 space-y-2"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{lesson.title}</p>
+                            <p className="text-xs text-text-muted">
+                              {lesson.contentType} · {lesson.estimatedMinutes} min
+                              {lesson.citationIndices.length > 0 && (
+                                <>
+                                  {" "}
+                                  · grounded in{" "}
+                                  {lesson.citationIndices
+                                    .map((i) => knowledge[i]?.citation.documentTitle)
+                                    .filter(Boolean)
+                                    .join(", ")}
+                                </>
+                              )}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeLesson(si, li)}
+                            className="shrink-0 text-text-muted hover:text-danger transition-colors"
+                            aria-label={`Remove lesson ${lesson.title}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        {knowledgeOptions.length > 0 && (
+                          <select
+                            value={lessonState?.knowledgeDocumentId ?? ""}
+                            onChange={(e) =>
+                              updateLessonReview(key, {
+                                knowledgeDocumentId: e.target.value || undefined,
+                              })
+                            }
+                            className="text-xs rounded-md border border-border bg-white px-2 py-1"
+                          >
+                            <option value="">No knowledge document</option>
+                            {knowledgeOptions.map((doc) => (
+                              <option key={doc.id} value={doc.id}>
+                                {doc.title}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+
+                        {lesson.contentType !== "QUIZ" ? (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={lessonState?.contentStatus === "loading"}
+                                onClick={() => generateLessonContent(si, li)}
+                                className="flex items-center gap-1.5 text-xs font-medium text-ai bg-ai-bg rounded-md px-2.5 py-1 hover:opacity-90 transition-opacity disabled:opacity-60"
+                              >
+                                <Wand2 className="h-3 w-3" />
+                                {lessonState?.contentStatus === "loading"
+                                  ? "Generating content…"
+                                  : lessonState?.textContent
+                                    ? "Regenerate content"
+                                    : "Generate content"}
+                              </button>
+                              {lessonState?.contentStatus === "error" && (
+                                <span className="text-xs text-danger">
+                                  {lessonState.contentError}
+                                </span>
+                              )}
+                            </div>
+                            {lessonState?.textContent !== undefined && (
+                              <textarea
+                                value={lessonState.textContent}
+                                onChange={(e) =>
+                                  updateLessonReview(key, { textContent: e.target.value })
+                                }
+                                rows={5}
+                                className={`${inputClass} font-mono text-xs`}
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={lessonState?.quizStatus === "loading"}
+                                onClick={() => generateLessonQuiz(si, li)}
+                                className="flex items-center gap-1.5 text-xs font-medium text-ai bg-ai-bg rounded-md px-2.5 py-1 hover:opacity-90 transition-opacity disabled:opacity-60"
+                              >
+                                <Wand2 className="h-3 w-3" />
+                                {lessonState?.quizStatus === "loading"
+                                  ? "Generating quiz…"
+                                  : lessonState?.assessment
+                                    ? "Regenerate quiz"
+                                    : "Generate quiz"}
+                              </button>
+                              {lessonState?.quizStatus === "error" && (
+                                <span className="text-xs text-danger">{lessonState.quizError}</span>
+                              )}
+                            </div>
+
+                            {lessonState?.assessment && (
+                              <div className="space-y-3">
+                                {lessonState.assessment.questions.map((q, qi) => (
+                                  <div
+                                    key={q.uiId}
+                                    className="rounded-md border border-border bg-white p-2.5 space-y-1.5"
+                                  >
+                                    <input
+                                      value={q.question}
+                                      onChange={(e) =>
+                                        updateQuestionText(si, li, qi, e.target.value)
+                                      }
+                                      className="w-full text-xs font-medium bg-transparent focus:outline-none"
+                                    />
+                                    <div className="space-y-1">
+                                      {q.options.map((opt, oi) => (
+                                        <label
+                                          key={opt.id}
+                                          className="flex items-center gap-2 text-xs"
+                                        >
+                                          <input
+                                            type="radio"
+                                            name={`${key}-q-${qi}-correct`}
+                                            checked={q.correctAnswer === opt.id}
+                                            onChange={() => updateCorrectAnswer(si, li, qi, opt.id)}
+                                          />
+                                          <input
+                                            value={opt.text}
+                                            onChange={(e) =>
+                                              updateOptionText(si, li, qi, oi, e.target.value)
+                                            }
+                                            className="flex-1 rounded border border-border px-1.5 py-0.5"
+                                          />
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}

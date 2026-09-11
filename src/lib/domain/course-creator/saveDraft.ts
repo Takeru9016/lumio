@@ -3,6 +3,7 @@ import { requireTenant } from "@/lib/auth/context";
 import { db } from "@/lib/db";
 import { assertCanCreateCourse } from "@/lib/domain/course/authorization";
 import { saveDraftInputSchema } from "@/lib/domain/course-creator/schema";
+import { canReadKnowledgeDocument, getUserTeamIds } from "@/lib/domain/knowledge/access";
 import { generateUniqueCourseSlug, slugify } from "@/lib/slug";
 
 /**
@@ -54,6 +55,47 @@ export async function saveCourseDraft(authCtx: AuthContext, rawInput: unknown) {
     verifiedSkillIds = skills.map((s) => s.id);
   }
 
+  // Every lesson-level knowledgeDocumentId is re-verified with the same
+  // canReadKnowledgeDocument() predicate retrieval.ts uses — a flat tenant
+  // filter isn't enough because RESTRICTED documents also need a matching
+  // KnowledgeAccess row. A client-supplied id the caller can't actually read
+  // is silently dropped (mapped to null), never trusted, same posture as
+  // verifiedSkillIds above.
+  const requestedDocumentIds = [
+    ...new Set(
+      input.sections.flatMap((s) =>
+        s.lessons.map((l) => l.knowledgeDocumentId).filter((id): id is string => !!id)
+      )
+    ),
+  ];
+  const verifiedDocumentIds = new Set<string>();
+  if (requestedDocumentIds.length > 0) {
+    const knowledgeCtx = { ...authCtx, tenantId: authCtx.tenantId };
+    const [documents, accessRows, userTeamIds] = await Promise.all([
+      db.knowledgeDocument.findMany({
+        where: { id: { in: requestedDocumentIds } },
+        select: { id: true, tenantId: true, status: true, visibility: true },
+      }),
+      db.knowledgeAccess.findMany({
+        where: { documentId: { in: requestedDocumentIds }, tenantId: authCtx.tenantId },
+        select: { documentId: true, scope: true, teamId: true, userId: true },
+      }),
+      getUserTeamIds(knowledgeCtx),
+    ]);
+    const accessRowsByDocument = new Map<string, typeof accessRows>();
+    for (const row of accessRows) {
+      const existing = accessRowsByDocument.get(row.documentId);
+      if (existing) existing.push(row);
+      else accessRowsByDocument.set(row.documentId, [row]);
+    }
+    for (const document of documents) {
+      const rows = accessRowsByDocument.get(document.id) ?? [];
+      if (canReadKnowledgeDocument(knowledgeCtx, document, rows, userTeamIds)) {
+        verifiedDocumentIds.add(document.id);
+      }
+    }
+  }
+
   const slug = await generateUniqueCourseSlug(input.title);
   const usedLessonSlugs = new Set<string>();
 
@@ -80,7 +122,7 @@ export async function saveCourseDraft(authCtx: AuthContext, rawInput: unknown) {
       });
 
       for (const [lessonIndex, lesson] of section.lessons.entries()) {
-        await tx.lesson.create({
+        const createdLesson = await tx.lesson.create({
           data: {
             title: lesson.title,
             slug: uniqueSlugWithin(lesson.title, usedLessonSlugs),
@@ -90,8 +132,35 @@ export async function saveCourseDraft(authCtx: AuthContext, rawInput: unknown) {
             isPublished: false,
             isFree: false,
             sectionId: createdSection.id,
+            textContent: lesson.textContent ?? null,
+            knowledgeDocumentId:
+              lesson.knowledgeDocumentId && verifiedDocumentIds.has(lesson.knowledgeDocumentId)
+                ? lesson.knowledgeDocumentId
+                : null,
           },
         });
+
+        if (lesson.contentType === "QUIZ" && lesson.assessment) {
+          const quiz = await tx.quiz.create({
+            data: {
+              title: lesson.assessment.title,
+              passingScore: lesson.assessment.passingScore,
+              isAiGenerated: true,
+              lessonId: createdLesson.id,
+            },
+          });
+          await tx.quizQuestion.createMany({
+            data: lesson.assessment.questions.map((q, questionIndex) => ({
+              quizId: quiz.id,
+              question: q.question,
+              type: "MCQ",
+              options: q.options,
+              correctAnswer: q.correctAnswer,
+              explanation: q.explanation ?? null,
+              order: questionIndex,
+            })),
+          });
+        }
       }
     }
 

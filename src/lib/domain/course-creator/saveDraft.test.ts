@@ -3,7 +3,11 @@ import { AuthContextError } from "@/lib/auth/context";
 import { db } from "@/lib/db";
 import { CourseAuthorizationError } from "@/lib/domain/course/authorization";
 import { saveCourseDraft } from "@/lib/domain/course-creator/saveDraft";
-import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
+import {
+  createIndexedDocument,
+  createTenantUser,
+  fakeEmbedding,
+} from "@/lib/domain/knowledge/__test__/fixtures";
 
 afterAll(async () => {
   await db.$disconnect();
@@ -124,6 +128,268 @@ describe("saveCourseDraft — the human/application save boundary", () => {
     const before = await db.course.count({ where: { instructorId: ctx.userId } });
 
     await expect(saveCourseDraft(ctx, { title: "" })).rejects.toThrow();
+
+    const after = await db.course.count({ where: { instructorId: ctx.userId } });
+    expect(after).toBe(before);
+  });
+});
+
+const validAssessment = {
+  title: "Check your understanding",
+  passingScore: 70,
+  questions: [
+    {
+      question: "What is a qualified lead?",
+      options: [
+        { id: "a", text: "Any prospect" },
+        { id: "b", text: "A prospect matching ICP criteria" },
+      ],
+      correctAnswer: "b",
+      explanation: "ICP fit is what qualifies a lead.",
+    },
+    {
+      question: "Which stage comes first?",
+      options: [
+        { id: "a", text: "Discovery" },
+        { id: "b", text: "Close" },
+      ],
+      correctAnswer: "a",
+    },
+    {
+      question: "What signals buying intent?",
+      options: [
+        { id: "a", text: "Budget confirmed" },
+        { id: "b", text: "Website visit" },
+      ],
+      correctAnswer: "a",
+    },
+  ],
+};
+
+describe("saveCourseDraft — lesson content, knowledge, and quiz persistence", () => {
+  it("persists lesson.textContent verbatim", async () => {
+    const { ctx } = await createTenantUser("INSTRUCTOR");
+    const course = await saveCourseDraft(ctx, {
+      ...validInput,
+      sections: [
+        {
+          title: "Section A",
+          lessons: [
+            {
+              title: "Intro",
+              contentType: "TEXT" as const,
+              textContent: "<p>Hello world</p>",
+            },
+          ],
+        },
+      ],
+    });
+
+    const lesson = await db.lesson.findFirst({ where: { section: { courseId: course.id } } });
+    expect(lesson?.textContent).toBe("<p>Hello world</p>");
+  });
+
+  it("persists an accessible knowledgeDocumentId", async () => {
+    const { tenant, ctx } = await createTenantUser("INSTRUCTOR");
+    const { document } = await createIndexedDocument({
+      tenantId: tenant.id,
+      title: "Doc",
+      content: "content",
+      embedding: fakeEmbedding(10),
+    });
+
+    const course = await saveCourseDraft(ctx, {
+      ...validInput,
+      sections: [
+        {
+          title: "Section A",
+          lessons: [
+            { title: "Intro", contentType: "TEXT" as const, knowledgeDocumentId: document.id },
+          ],
+        },
+      ],
+    });
+
+    const lesson = await db.lesson.findFirst({ where: { section: { courseId: course.id } } });
+    expect(lesson?.knowledgeDocumentId).toBe(document.id);
+  });
+
+  it("silently drops an inaccessible (RESTRICTED, no access row) knowledgeDocumentId", async () => {
+    const { tenant, ctx } = await createTenantUser("INSTRUCTOR");
+    const { document } = await createIndexedDocument({
+      tenantId: tenant.id,
+      title: "Restricted doc",
+      content: "content",
+      embedding: fakeEmbedding(11),
+      visibility: "RESTRICTED",
+    });
+
+    const course = await saveCourseDraft(ctx, {
+      ...validInput,
+      sections: [
+        {
+          title: "Section A",
+          lessons: [
+            { title: "Intro", contentType: "TEXT" as const, knowledgeDocumentId: document.id },
+          ],
+        },
+      ],
+    });
+
+    const lesson = await db.lesson.findFirst({ where: { section: { courseId: course.id } } });
+    expect(lesson?.knowledgeDocumentId).toBeNull();
+  });
+
+  it("cannot persist a cross-tenant knowledgeDocumentId", async () => {
+    const { ctx } = await createTenantUser("INSTRUCTOR");
+    const { tenant: otherTenant } = await createTenantUser("INSTRUCTOR");
+    const { document } = await createIndexedDocument({
+      tenantId: otherTenant.id,
+      title: "Other tenant doc",
+      content: "content",
+      embedding: fakeEmbedding(12),
+    });
+
+    const course = await saveCourseDraft(ctx, {
+      ...validInput,
+      sections: [
+        {
+          title: "Section A",
+          lessons: [
+            { title: "Intro", contentType: "TEXT" as const, knowledgeDocumentId: document.id },
+          ],
+        },
+      ],
+    });
+
+    const lesson = await db.lesson.findFirst({ where: { section: { courseId: course.id } } });
+    expect(lesson?.knowledgeDocumentId).toBeNull();
+  });
+
+  it("creates exactly one Quiz with its QuizQuestions for a QUIZ lesson with an assessment", async () => {
+    const { ctx } = await createTenantUser("INSTRUCTOR");
+    const course = await saveCourseDraft(ctx, {
+      ...validInput,
+      sections: [
+        {
+          title: "Section A",
+          lessons: [
+            {
+              title: "Quiz lesson",
+              contentType: "QUIZ" as const,
+              assessment: validAssessment,
+            },
+          ],
+        },
+      ],
+    });
+
+    const lesson = await db.lesson.findFirst({ where: { section: { courseId: course.id } } });
+    const quizzes = await db.quiz.findMany({ where: { lessonId: lesson?.id } });
+    expect(quizzes).toHaveLength(1);
+
+    const questions = await db.quizQuestion.findMany({
+      where: { quizId: quizzes[0].id },
+      orderBy: { order: "asc" },
+    });
+    expect(questions).toHaveLength(3);
+    expect(questions.map((q) => q.order)).toEqual([0, 1, 2]);
+    expect(questions.map((q) => q.correctAnswer)).toEqual(["b", "a", "a"]);
+    expect(questions.every((q) => q.type === "MCQ")).toBe(true);
+    expect(questions[0].options).toEqual(validAssessment.questions[0].options);
+  });
+
+  it("rejects a malformed correctAnswer that isn't one of the question's own option ids", async () => {
+    const { ctx } = await createTenantUser("INSTRUCTOR");
+    const malformed = {
+      ...validAssessment,
+      questions: [
+        {
+          question: "Bad question",
+          options: [
+            { id: "a", text: "Option A" },
+            { id: "b", text: "Option B" },
+          ],
+          correctAnswer: "z",
+        },
+        ...validAssessment.questions.slice(1),
+      ],
+    };
+
+    await expect(
+      saveCourseDraft(ctx, {
+        ...validInput,
+        sections: [
+          {
+            title: "Section A",
+            lessons: [
+              { title: "Quiz lesson", contentType: "QUIZ" as const, assessment: malformed },
+            ],
+          },
+        ],
+      })
+    ).rejects.toThrow();
+  });
+
+  it("does not create a Quiz for a QUIZ lesson with no generated assessment", async () => {
+    const { ctx } = await createTenantUser("INSTRUCTOR");
+    const course = await saveCourseDraft(ctx, {
+      ...validInput,
+      sections: [
+        {
+          title: "Section A",
+          lessons: [{ title: "Quiz lesson", contentType: "QUIZ" as const }],
+        },
+      ],
+    });
+
+    const lesson = await db.lesson.findFirst({ where: { section: { courseId: course.id } } });
+    const quizzes = await db.quiz.findMany({ where: { lessonId: lesson?.id } });
+    expect(quizzes).toHaveLength(0);
+  });
+
+  it("a lesson removed from the payload before save creates no Lesson or Quiz", async () => {
+    const { ctx } = await createTenantUser("INSTRUCTOR");
+    const course = await saveCourseDraft(ctx, {
+      ...validInput,
+      sections: [
+        {
+          title: "Section A",
+          lessons: [{ title: "Kept lesson", contentType: "TEXT" as const }],
+        },
+      ],
+    });
+
+    const lessons = await db.lesson.findMany({ where: { section: { courseId: course.id } } });
+    expect(lessons).toHaveLength(1);
+    expect(lessons[0].title).toBe("Kept lesson");
+  });
+
+  it("rolls back with no partial Course/Section/Lesson state on a mid-transaction failure", async () => {
+    const { ctx } = await createTenantUser("INSTRUCTOR");
+    const before = await db.course.count({ where: { instructorId: ctx.userId } });
+
+    // An empty questions array fails saveDraftInputSchema's
+    // min(MIN_ASSESSMENT_QUESTIONS) bound before the transaction opens —
+    // asserts the Quiz-bearing path specifically leaves nothing behind on a
+    // pre-transaction validation rejection.
+    await expect(
+      saveCourseDraft(ctx, {
+        ...validInput,
+        sections: [
+          {
+            title: "Section A",
+            lessons: [
+              {
+                title: "Quiz lesson",
+                contentType: "QUIZ" as const,
+                assessment: { ...validAssessment, questions: [] },
+              },
+            ],
+          },
+        ],
+      })
+    ).rejects.toThrow();
 
     const after = await db.course.count({ where: { instructorId: ctx.userId } });
     expect(after).toBe(before);

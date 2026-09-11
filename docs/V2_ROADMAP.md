@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-11 (end of Phase 7). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-11 (end of Phase 8). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -41,9 +41,11 @@ Tutor, refactored onto the shared runtime in Phase 3) were already implemented. 
 the capability loop (Learning → Evidence → Capability) — was implemented in Phase 5. Phase 6 closed
 the loop's first consumer (`Capability Gap → Recommended Course`, deterministic, no AI). Phase 7
 made the resulting capability state visible to the learner for the first time (`/capability`:
-role, required skills, proficiency, gap status, evidence). What remains open is an
-analytics/manager-facing layer and an AI explanation layer on top of what now exists — both
-deferred (see §4).
+role, required skills, proficiency, gap status, evidence). Phase 8 completed the separate,
+already-shipped AI Course Creation leg — generated content, quizzes, knowledge grounding, and
+instructor-selected skills now persist into the saved course instead of being discarded. What
+remains open is an analytics/manager-facing layer and an AI explanation layer on top of the
+capability state that now exists — both deferred (see §4).
 
 ---
 
@@ -59,6 +61,7 @@ deferred (see §4).
 | Phase 5 — Capability & Skill Evidence Foundation / Capability Loop | COMPLETE | Learning-outcome → SkillEvidence → UserSkill projection, instructor/SUPER_ADMIN verification, dynamic capability gaps, `LearningEvent` emission with course-completion concurrency protection |
 | Phase 6 — Capability Recommendations | COMPLETE | Deterministic `Capability Gap → Recommended Course` engine (`getRecommendedLearning()`), read-only API, dashboard "Recommended for you" card |
 | Phase 7 — Capability Progress / Skill Development View | COMPLETE | Learner-facing `/capability` profile: primary role, required skills, current vs. required proficiency, gap status, evidence visibility |
+| Phase 8 — Course Creator UX Completion | COMPLETE | AI-generated lesson content, quizzes, knowledge grounding, and instructor-selected skills now persist into the saved draft course; Knowledge-document and Skill picker UIs; `GET /api/knowledge/documents`, `GET /api/skills` |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
@@ -69,11 +72,12 @@ its final-contract-audit fixes (atomic enrollment transition, evidence-verificat
 folded into a follow-up commit `bb430e5`. Phase 6 is `a7e68fe` (`feat: implement capability
 recommendations engine and integrate into student dashboard`) — its own final-contract-audit
 hardening (route-level tests, `GET` signature correction) was folded into the same working tree
-before that commit landed, so it carries no separate hash. **Phase 7 has not yet been committed**
-as of this roadmap update — implementation, tests, and this documentation update are complete and
-verified directly against the working tree (189/189 tests passing, `tsc`/Biome/Prisma clean), but
-this file is written and saved immediately before the finalize commit is created, so no hash exists
-for it yet at the moment this text is written.
+before that commit landed, so it carries no separate hash. Phase 7 is `77b9f8f` (`feat: add learner
+capability profile (Phase 7)`). **Phase 8 has not yet been committed** as of this roadmap update —
+implementation, tests, and this documentation update are complete and verified directly against the
+working tree (222/222 tests passing, `tsc`/Biome/Prisma clean), but this file is written and saved
+immediately before the finalize commit is created, so no hash exists for it yet at the moment this
+text is written.
 
 ### Phase 1 — Domain Foundation
 
@@ -286,6 +290,56 @@ Implements the first learner-facing surface for Phase 5/6's capability state:
   any persisted goal, AI capability copilot/explanations, recommendation persistence/history,
   advanced analytics, `SkillGap` persistence, workflows/agents.
 
+### Phase 8 — Course Creator UX Completion
+
+Closes the gap identified in Phase 7 discovery/Phase 8 architecture discovery: `content.ts` and
+`assessment.ts` were implemented and tested since Phase 4, but `create-ai/page.tsx` never called
+them and hardcoded `targetSkillIds: []` — every AI-generated course was saved as empty lesson
+shells with no quiz, no knowledge grounding, and no skill linkage. Phase 8 wires the existing,
+already-tested generation routes into the review step and completes the save path.
+
+- **Lazy, explicit per-lesson generation** — Review adds a "Generate content" button per non-QUIZ
+  lesson and a "Generate quiz" button per QUIZ lesson, each independently loading/erroring/
+  retryable. Curriculum generation (`generate.ts`) is unchanged and unbundled from content/
+  assessment generation, per the locked Phase 8 contract (P1).
+- **Knowledge-document and Skill pickers, in the Define step** — new `GET /api/knowledge/documents`
+  (`src/lib/domain/knowledge/listing.ts`) and `GET /api/skills`
+  (`src/lib/domain/capability/skillListing.ts`), both tenant-scoped, read-only, bounded (100/200
+  results), no pagination or search. The knowledge route reuses `canReadKnowledgeDocument()` —
+  not a flat tenant filter — so a RESTRICTED document without a matching `KnowledgeAccess` row is
+  excluded exactly as it would be from retrieval. Selections feed `knowledgeDocumentIds`/
+  `targetSkillIds` into curriculum generation; the skill selection remains adjustable in Review
+  before save.
+- **`saveDraftInputSchema` extended** (`schema.ts`) — each lesson may now carry `textContent`
+  (max 20,000 chars), `knowledgeDocumentId`, and an `assessment` (title, passing score, 3–10 MCQ
+  questions with options/correctAnswer/explanation, reusing `MIN_ASSESSMENT_QUESTIONS`/
+  `MAX_ASSESSMENT_QUESTIONS`).
+- **`saveCourseDraft` extended** (`saveDraft.ts`) — every `knowledgeDocumentId` is re-verified with
+  `canReadKnowledgeDocument()` before the transaction opens (batched, not per-document); an
+  inaccessible or cross-tenant id is silently dropped, never trusted, same posture as the existing
+  `verifiedSkillIds` pattern. A QUIZ lesson with a generated `assessment` gets exactly one `Quiz`
+  row (`Quiz.lessonId` is `@unique`) and its `QuizQuestion` rows (`type: "MCQ"`, `options` as
+  `[{id, text}]`, `correctAnswer` as an option id, `order` from array index) created inside the
+  same transaction as Course/Section/Lesson. A QUIZ lesson with no generated assessment saves as a
+  plain lesson shell, unchanged from before.
+- **No new AI surface, no `policy.ts`/runtime change** — `content.ts`/`assessment.ts` and their
+  routes are consumed as-is; `saveCourseDraft` remains application logic, never calls the AI
+  runtime.
+- **No new authorization primitive** — knowledge access reuses `canReadKnowledgeDocument()`/
+  `getUserTeamIds()` (Phase 2); skill/tenant verification reuses the existing pattern; instructor
+  role + plan-limit gate (`assertCanCreateCourse`) is unchanged.
+- **Validation** — 222/222 tests passing (189 at end of Phase 7 + 33 new: `saveDraft.test.ts`
+  content/knowledge/quiz cases, `listing.test.ts`/`skillListing.test.ts` security/tenant-matrix
+  cases, and route tests for the two new `GET` endpoints).
+- **Zero schema changes** — every persisted field (`Lesson.textContent`,
+  `Lesson.knowledgeDocumentId`, `Quiz`, `QuizQuestion`) already existed in the schema; Phase 8 is
+  purely a persistence-completion and UI-wiring phase.
+- **Deliberately not built this phase**: question-bank/add-remove-question authoring, lesson-type
+  switching in Review, drag-reorder, search/pagination on either new picker, automatic AI
+  skill-name → Skill linking (target skills remain instructor-selected IDs; AI-suggested
+  `targetSkillNames` stay display-only), persistent course draft/version model, any manager/
+  org-admin capability view, any AI-runtime change.
+
 ---
 
 ## 3. Current Architecture
@@ -375,11 +429,11 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 
 | Item | Status | Intended Phase | Priority | Dependencies | Notes |
 |---|---|---|---|---|---|
-| Knowledge-document picker UI | DEFERRED | Future Phase | TBD | none | Domain layer already accepts `knowledgeDocumentIds`; no browsing UI exists |
-| Skill picker UI | DEFERRED | Future Phase | TBD | none | Domain layer already accepts `targetSkillIds`; no browsing UI exists for Skills anywhere in the app |
-| Lesson-content generation UI integration | DEFERRED | Future Phase | TBD | none | `content.ts` + its route are implemented and tested; only the review page doesn't call them yet |
-| Assessment-generation UI integration | DEFERRED | Future Phase | TBD | none | Same situation as lesson-content |
-| Automatic AI skill-name → Skill linking | DEFERRED | Future Phase | TBD | Skill picker UI | Explicitly ruled out this phase — "AI suggestions must be suggestions" |
+| Knowledge-document picker UI | **COMPLETE (Phase 8)** | — | — | — | `GET /api/knowledge/documents`, Define-step multi-select — see §2's Phase 8 section |
+| Skill picker UI | **COMPLETE (Phase 8)** | — | — | — | `GET /api/skills`, Define + Review-step multi-select — see §2's Phase 8 section |
+| Lesson-content generation UI integration | **COMPLETE (Phase 8)** | — | — | — | Review step calls `content.ts`'s route explicitly per lesson, editable before save |
+| Assessment-generation UI integration | **COMPLETE (Phase 8)** | — | — | — | Review step calls `assessment.ts`'s route explicitly per QUIZ lesson, editable before save |
+| Automatic AI skill-name → Skill linking | DEFERRED | Future Phase | TBD | none | Still explicitly ruled out — target skills remain instructor-selected IDs; `targetSkillNames` stays display-only |
 | Lesson-level skill persistence / `LessonSkill` | DESIGN DECISION REQUIRED | Future Phase | TBD | none | No such table exists; would be a genuinely new schema addition, not an extension of Phase 1's `CourseSkill` |
 | Richer course-authoring workflow (reorder sections, inline regenerate, etc.) | DEFERRED | Future Phase | TBD | none | Phase 4 spec explicitly said "focused workflow, not a complete replacement" |
 | Persistent course draft/version model | DESIGN DECISION REQUIRED | Future Phase | TBD | none | Phase 4 deliberately kept the proposal as client/in-memory state, not a stored draft table — revisit only if a real need for persisted-before-save drafts emerges |
@@ -422,7 +476,7 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 | AI Copilot | PLANNED | Future Phase | TBD | none | `AISurface.COPILOT` exists in policy table, no route |
 | AI Recommendations | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5) | Listed as a future AI workflow ("AI Learning Coach"), not started |
 | Additional AI Tutor capabilities (standalone, not lesson-scoped) | DEFERRED | Future Phase | TBD | none | Tutor still requires `lessonId` to trigger; not yet "ask anything the tenant has indexed" |
-| Course Creator production hardening | NEXT | Future Phase | TBD | none | See §7's "Recommended next" |
+| Course Creator production hardening | **COMPLETE (Phase 8)** | — | — | — | Picker UIs + content/assessment UI wiring — see §2's Phase 8 section |
 
 ### Agents / Action System
 
@@ -577,8 +631,8 @@ Only issues actually identified during Phases 1–4.
 | Route-level AI integration tests are limited | Medium for confidence in full request/response wiring — domain-layer tests are thorough (95 tests), but no route-level Clerk-mocked test exists for any `/api/ai/*` route | No | Deliberate: "Do NOT add route-level Clerk mocks merely for this test" was a repeated, explicit constraint — not an oversight |
 | Test database setup is manual/local, not scripted | Low — reproducible by a documented sequence (`docs/V2_DATABASE_MIGRATION.md` §10), but not a single command | No | A `docker-compose.test.yml` was named as the natural next step if this becomes recurring friction — not done |
 | `COURSE_CREATOR` (runtime `AISurface`) vs `COURSE_BUILDER` (schema `AIConversationType`) naming mismatch | Low — deliberate and documented (`persistence.ts`'s `surfaceToConversationType`), not a bug | No | Revisit only if/when `SEARCH`/`COPILOT` ship real routes and need their own schema value |
-| Lesson-content/assessment generation routes exist but aren't wired into the Course Creator UI | Medium for product completeness of the Phase 4 vertical | No (routes are independently tested and functional) | Recommended next — see §9 |
-| Knowledge-document/Skill picker UI don't exist | Medium — Course Creator's Knowledge-aware and Skill-suggestion generation can't be fully exercised through the UI yet, only via direct API calls | No | Recommended next — see §9 |
+| ~~Lesson-content/assessment generation routes exist but aren't wired into the Course Creator UI~~ | — | — | **Resolved in Phase 8** — see §2's Phase 8 section |
+| ~~Knowledge-document/Skill picker UI don't exist~~ | — | — | **Resolved in Phase 8** — see §2's Phase 8 section |
 | `LearningEvent` has no DB-level uniqueness constraint | Low — `SkillEvidence`/`UserSkill` (the actual capability state) are unaffected; only the `LearningEvent` audit/analytics stream could theoretically double-write under concurrency, and nothing currently consumes `LearningEvent` | No | Course-completion duplication is already closed by the atomic enrollment-transition gate (Phase 5). Quiz events don't need dedup by design — each `QuizAttempt` legitimately emits its own event. A DB-level constraint remains a candidate if a future analytics consumer needs it, not applied speculatively |
 
 ---
@@ -621,6 +675,11 @@ Phase 6:
 
 Phase 7:
   Schema changes: NO (verified by git diff — pure read-only capability profile view)
+
+Phase 8:
+  Schema changes: NO (verified by `npx prisma validate` and `git diff prisma/schema.prisma` —
+    every persisted field, Lesson.textContent/knowledgeDocumentId, Quiz, QuizQuestion, already
+    existed; Phase 8 only extends application-layer persistence into them)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -663,15 +722,16 @@ Phase 6 (Capability Recommendations) — COMPLETE
   ↓
 Phase 7 (Capability Progress / Skill Development View) — COMPLETE
   ↓
-Course Creator Enhancements (picker UIs, content/assessment UI wiring)
+Phase 8 (Course Creator UX Completion) — COMPLETE
+  ↓
+Manager / instructor / org-admin capability view (de-risked by the existing
+  ORG_ADMIN + reports.ts pattern — still not started; runner-up in Phase 8's
+  architecture discovery)
        +
 AI Search
        +
 AI Copilot / capability-explanation layer (now has a deterministic UI to explain,
   as of Phase 7 — still not started)
-       +
-Manager / instructor / org-admin capability view (de-risked by the existing
-  ORG_ADMIN + reports.ts pattern — still not started)
        +
 Capability analytics / dashboards
        ↓
@@ -680,7 +740,7 @@ Action / Workflow Layer  (needs AI WRITE/EXECUTE — currently blocked by design
 Agents
 ```
 
-All items after Phase 7 are `Future Phase` — no exact phase numbers have been decided.
+All items after Phase 8 are `Future Phase` — no exact phase numbers have been decided.
 
 ---
 
@@ -688,11 +748,9 @@ All items after Phase 7 are `Future Phase` — no exact phase numbers have been 
 
 Not approved — evaluated candidates only, per the actual completed architecture.
 
-1. **Course Creator UX completion (RECOMMENDED NEXT)** — wire the already-implemented,
-   already-tested `content.ts`/`assessment.ts` routes into `create-ai/page.tsx`, and build the
-   Knowledge-document/Skill picker UIs. Lowest risk: zero new domain/security surface, the hard
-   authorization work is already done and tested. Directly completes the Phase 4 vertical instead
-   of opening a new one.
+1. ~~**Course Creator UX completion**~~ — **COMPLETE as of Phase 8** (`content.ts`/`assessment.ts`
+   wired into `create-ai/page.tsx`; Knowledge-document/Skill picker UIs; textContent/Quiz/
+   QuizQuestion/CourseSkill/knowledgeDocumentId all now persist — see §2's Phase 8 section).
 2. **AI Search** — `AISurface.SEARCH` already exists in the policy table (READ-only); would be a
    thin route over `searchKnowledge()`, similar shape to Course Creator's Knowledge integration.
    Low-medium effort, no schema changes expected.
@@ -712,8 +770,10 @@ Not approved — evaluated candidates only, per the actual completed architectur
    `Capability Gap → Recommended Course` engine + dashboard card).
 7. ~~**Capability surfacing (learner profile view)**~~ — **COMPLETE as of Phase 7** (`/capability`
    page: role, required skills, proficiency, gap status, evidence).
-8. **Manager / instructor / org-admin capability view (RECOMMENDED NEXT for the capability
-   vertical)** — a Phase 7 discovery pass confirmed this is lower-risk than it first appears:
+8. **Manager / instructor / org-admin capability view (RECOMMENDED NEXT)** — the Phase 8
+   architecture discovery's evaluated-but-not-chosen candidate, still the leading next step now
+   that Course Creator UX completion is done. A Phase 7 discovery pass confirmed this is
+   lower-risk than it first appears:
    `src/lib/reports.ts`'s existing `getCompletionReport(tenantId, filters)` + the `ORG_ADMIN`-gated
    `/reports` page is a directly reusable authorization/aggregation pattern — no new role, no new
    permission primitive needed if scoped to `ORG_ADMIN`. Would require new aggregate domain code
@@ -727,12 +787,12 @@ Not approved — evaluated candidates only, per the actual completed architectur
     during Phase 7 discovery; no product signal yet justifies persisting a goal separate from the
     live-computed gap. Revisit only if a real need for tracked/dismissable goals emerges.
 
-**Tradeoff summary**: (1) and (2) are extensions of already-proven, already-tested infrastructure
-with no new security surface — lowest risk, fastest to ship. (3), (6), and (7) are done. (4)/(9)
-need product definition first, and (9) additionally needs (7) as a precondition (now satisfied).
-(5) is gated by an explicit guardrail and should come last. (8) is the natural next step in the
-capability vertical — its authorization risk is now known to be low, reusing an existing pattern,
-but it is still new aggregate domain code, not merely a UI layer over existing self-scoped
+**Tradeoff summary**: (1), (3), (6), and (7) are done. (2) is an extension of already-proven,
+already-tested infrastructure with no new security surface — low risk, fast to ship. (4)/(9) need
+product definition first, and (9) additionally needs (7) as a precondition (now satisfied). (5) is
+gated by an explicit guardrail and should come last. (8) is the natural next step in the capability
+vertical now that (1) is done — its authorization risk is known to be low, reusing an existing
+pattern, but it is still new aggregate domain code, not merely a UI layer over existing self-scoped
 functions the way (6)/(7) were. (10) stays deferred until a concrete need appears.
 
 ---
@@ -783,5 +843,7 @@ Discovered during this audit, not silently resolved:
 - **Phase 6 is `a7e68fe`**, with no separate hash for its final-contract-audit hardening (route-level
   tests, `GET` signature fix) — those changes were folded into the working tree before that commit
   landed, so they were never a distinct commit to reference.
-- **Phase 7 had no commit hash at the time this section was written** (see the note in §2) — this
-  roadmap update and the Phase 7 implementation are committed together immediately afterward.
+- **Phase 7 is `77b9f8f`** (`feat: add learner capability profile (Phase 7)`) — corrected once the
+  commit existed; this roadmap previously stated it had no hash yet.
+- **Phase 8 had no commit hash at the time this section was written** (see the note in §2) — this
+  roadmap update and the Phase 8 implementation are committed together immediately afterward.
