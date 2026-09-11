@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-10 (end of Phase 4). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-11 (end of Phase 5). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -32,14 +32,16 @@ Five systems (`docs/V2_ARCHITECTURE.md`, "System boundaries"):
 4. **Intelligence** — AI runtime, model routing, retrieval, tutor, copilot, recommendations, natural-language analytics, agents.
 5. **Action** — workflows, approvals, notifications, integrations, audited AI actions.
 
-The first flagship vertical, as established by the actual Phase 1–4 work, is:
+The first flagship vertical, as established by the actual Phase 1–5 work, is:
 
 **AI Course Creation → AI Learning → Skill Evidence**
 
-Only the first leg (AI Course Creation) is implemented today. "AI Learning" exists partially (AI
-Tutor, refactored onto the shared runtime in Phase 3). "Skill Evidence" is schema-only — no
-service layer, no emitters (verified: no code path anywhere writes a `SkillEvidence` or
-`LearningEvent` row).
+All three legs now have a real implementation. "AI Course Creation" (Phase 4) and "AI Learning" (AI
+Tutor, refactored onto the shared runtime in Phase 3) were already implemented. "Skill Evidence" —
+the capability loop (Learning → Evidence → Capability) — is now implemented as of Phase 5: course
+completion and quiz outcomes emit `SkillEvidence` and `LearningEvent` rows, and `UserSkill`
+proficiency is derived deterministically from that evidence. The vertical is not yet closed by a
+recommendation/analytics layer on top of it — that remains deferred (see §4).
 
 ---
 
@@ -52,12 +54,16 @@ service layer, no emitters (verified: no code path anywhere writes a `SkillEvide
 | Phase 3 — AI Runtime | COMPLETE | Shared runtime (`src/lib/ai/runtime/`), policy, context builder, persistence, tutor refactor |
 | Phase 3.1 — Execution Reliability | COMPLETE | `createExecutionTracker` — every `AIExecution` reaches a terminal state |
 | Phase 4 — AI Course Creator | COMPLETE | Curriculum/content/assessment generation, human review UI, application-only save boundary |
+| Phase 5 — Capability & Skill Evidence Foundation / Capability Loop | COMPLETE | Learning-outcome → SkillEvidence → UserSkill projection, instructor/SUPER_ADMIN verification, dynamic capability gaps, `LearningEvent` emission with course-completion concurrency protection |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
 **one squashed commit** (`31333e3` — there is no separate "Phase 3.1" commit; it's presented here
 as a distinct row because the user's own task framing and `docs/V2_AI_ARCHITECTURE.md` treat it as
-a distinct unit of work with its own verification), and Phase 4 is `0a51fe8`.
+a distinct unit of work with its own verification), and Phase 4 is `0a51fe8`. **Phase 5 has not
+yet been committed** as of this roadmap update — implementation, tests, and final contract audit
+are complete and verified directly against the working tree (149/149 tests passing, `tsc`/Biome/
+Prisma clean), but no commit hash exists for it yet.
 
 ### Phase 1 — Domain Foundation
 
@@ -153,6 +159,61 @@ Implemented workflow: `Define → Generate → Review → Create Draft`
   partial writes), citation correspondence, execution-failure handling.
 - Zero schema changes.
 
+### Phase 5 — Capability & Skill Evidence Foundation / Capability Loop
+
+Implements the loop `Learning → Evidence → Capability` (`src/lib/domain/capability/`):
+`outcomes.ts`, `proficiency.ts`, `proficiencyOrder.ts`, `verification.ts`, `gaps.ts`, plus
+`src/lib/domain/learning-events/emit.ts`.
+
+- **Learning outcome integration** — `recordCourseCompletionOutcome()` wired into
+  `POST /api/courses/[courseId]/lessons/[lessonId]/complete`; `recordQuizOutcome()` wired into
+  `POST /api/quizzes/[quizId]/attempt`. Both are additive, tenant-gated (no `tenantId` → no
+  capability tracking, matching every other V2 write), and never affect the route's existing
+  response shape or status behavior.
+- **SkillEvidence** — deterministic creation from `CourseSkill` mappings on course completion and
+  quiz pass; DB-enforced idempotency via a real unique constraint (`tenantId, userId, skillId,
+  sourceType, sourceId` — not an application-level check-then-insert, which cannot close the race
+  under Postgres READ COMMITTED); tenant-safe `CourseSkill` resolution (a cross-tenant mapping is
+  skipped, not thrown on).
+- **UserSkill** — deterministic full recomputation (`projectUserSkill`) over the complete
+  non-`REJECTED` evidence set on every change, order-independent; explicit hand-written proficiency
+  ordering (never Prisma enum declaration order); ceiling policy is `UNVERIFIED`/`PENDING` →
+  `BEGINNER`, `VERIFIED` → `INTERMEDIATE` (`ADVANCED`/`EXPERT` are unreachable in Phase 5 — no
+  evidence type or verification state projects to them); rejecting evidence can downgrade
+  proficiency (full recompute, not incremental); `lastAssessedAt` only advances when the projected
+  proficiency value actually changes; `confidence` is deliberately never written by any Phase 5 code
+  path (verified by code inspection and end-to-end test coverage) — no confidence scoring exists
+  yet.
+- **Verification** — INSTRUCTOR may verify/reject evidence only for courses they own
+  (`course.instructorId === actor.userId`, resolved from the evidence's source); SUPER_ADMIN may
+  verify/reject any evidence but is still subject to the same source/tenant resolution — an
+  unresolvable/malformed source is fail-closed for every actor, SUPER_ADMIN included; self-
+  verification and cross-tenant verification are both denied.
+- **Capability gaps** — `computeCapabilityGap()` computes `RoleSkill` vs `UserSkill` on read,
+  per the user's primary `JobRole` (or an explicit secondary role). No `SkillGap` table exists —
+  gaps are never persisted, consistent with the Phase 1 decision recorded in §4's Capability table.
+- **LearningEvent** — `COURSE_COMPLETED` and `QUIZ_COMPLETED` events emitted best-effort,
+  post-commit (never inside the evidence/`UserSkill` transaction, never rethrown into the caller);
+  a `LearningEvent` emission failure cannot roll back or block the underlying capability/completion
+  write. Course-completion concurrency is protected by an atomic enrollment-transition gate
+  (`db.enrollment.updateMany({ where: { status: { not: "COMPLETED" } } })`) — only the request that
+  actually flips the enrollment to `COMPLETED` runs the one-time completion side effects (XP,
+  certificate, capability outcome, event emission), closing a duplicate-event race found during the
+  Phase 5 final contract audit. `LearningEvent` itself still has no DB-level uniqueness constraint;
+  see §7 for the residual scope of that gap.
+- **Validation** — 149/149 tests passing (up from 95 at the end of Phase 4), `npx tsc --noEmit`
+  zero errors, `npx prisma validate` clean, Biome zero errors on changed files.
+- **Schema change** — one new `@@unique([tenantId, userId, skillId, sourceType, sourceId])`
+  constraint on `SkillEvidence`, additive only. See §8 for migration/deployment status.
+- **Deliberately not built this phase** (do not read as complete — see §4 for full status):
+  manager verification, recommendations, dashboards/UI for any of the above, `AIAction.EVALUATION`
+  behavior, `LessonSkill`, `AssessmentSkill`, `SkillGap` persistence, a generalized competency
+  engine, agents/workflows, assignment-sourced evidence, additional `LearningEvent` types beyond the
+  two above, `PENDING` verification-state transitions (evidence is created `UNVERIFIED`, not
+  `PENDING`, in Phase 5), and `confidence` semantics/scoring. No generalized RBAC was introduced —
+  verification authorization remains one narrow predicate for one action, matching the existing
+  assignment-grading route's shape.
+
 ---
 
 ## 3. Current Architecture
@@ -168,15 +229,17 @@ Implemented workflow: `Define → Generate → Review → Create Draft`
                  ┌─────────────────────┐
                  │   V2 Foundations    │
                  ├─────────────────────┤
-                 │ Capability (schema  │
-                 │   only, no service) │
+                 │ Capability (full    │
+                 │   evidence/gap loop,│
+                 │   Phase 5)          │
                  │ Knowledge (full RAG │
                  │   service + auth)   │
                  │ AI Runtime (policy, │
                  │   context, persist) │
                  │ Learning Events     │
-                 │   (schema only, no  │
-                 │   emitter)          │
+                 │   (emitter exists,  │
+                 │   COURSE_COMPLETED/ │
+                 │   QUIZ_COMPLETED)   │
                  └──────────┬──────────┘
                             │
                             ▼
@@ -205,6 +268,29 @@ Implemented workflow: `Define → Generate → Review → Create Draft`
 `/api/ai/tutor` is a parallel, separate path through the same AI Runtime + Knowledge layers (not
 shown above to keep the Course Creator flow legible) — both consume the identical
 policy/context/persistence stack.
+
+The Phase 5 capability loop is a separate flow, triggered by learning outcomes rather than by the
+Course Creator path above:
+
+```text
+ Lesson/Course completion            Quiz attempt (pass/fail)
+          │                                    │
+          ▼                                    ▼
+ recordCourseCompletionOutcome()      recordQuizOutcome()
+          │                                    │
+          ├──────────────┬─────────────────────┤
+          ▼              ▼                     ▼
+   SkillEvidence   UserSkill (full      LearningEvent
+   (DB-unique per   recompute via        (COURSE_COMPLETED /
+   evidence source) projectUserSkill)    QUIZ_COMPLETED,
+          │                              best-effort, post-commit)
+          ▼
+   Verification (INSTRUCTOR/SUPER_ADMIN)
+   → re-triggers UserSkill recompute
+          │
+          ▼
+   computeCapabilityGap() — read-time only, RoleSkill vs UserSkill, never persisted
+```
 
 ---
 
@@ -262,7 +348,7 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 |---|---|---|---|---|---|
 | AI Search | PLANNED | Future Phase | TBD | none | `AISurface.SEARCH` exists in policy table (READ-only), no route |
 | AI Copilot | PLANNED | Future Phase | TBD | none | `AISurface.COPILOT` exists in policy table, no route |
-| AI Recommendations | DEFERRED | Future Phase | TBD | LearningEvent emitters | Listed as a future AI workflow ("AI Learning Coach"), not started |
+| AI Recommendations | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5) | Listed as a future AI workflow ("AI Learning Coach"), not started |
 | Additional AI Tutor capabilities (standalone, not lesson-scoped) | DEFERRED | Future Phase | TBD | none | Tutor still requires `lessonId` to trigger; not yet "ask anything the tenant has indexed" |
 | Course Creator production hardening | NEXT | Future Phase | TBD | none | See §7's "Recommended next" |
 
@@ -282,18 +368,24 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 
 | Item | Status | Intended Phase | Priority | Dependencies | Notes |
 |---|---|---|---|---|---|
-| SkillEvidence automation | DEFERRED | Future Phase | TBD | LearningEvent emitters | Schema exists, zero writes anywhere |
-| LearningEvent → SkillEvidence pipeline | DEFERRED | Future Phase | TBD | LearningEvent emitters | Design intent only (`docs/V2_DOMAIN_MODEL.md`, "Relationship graph") |
-| Skill gaps | DEFERRED | Future Phase | TBD | UserSkill population | `SkillGap` was deliberately **not** added as a table in Phase 1 — intended to be computed from `UserSkill` vs `RoleSkill`, not stored |
-| Role/skill recommendations | DEFERRED | Future Phase | TBD | Skill gaps | Not started |
-| Capability analytics | DEFERRED | Future Phase | TBD | LearningEvent emitters | Not started |
+| SkillEvidence automation | **COMPLETE (Phase 5)** | — | — | — | `recordCourseCompletionOutcome()`/`recordQuizOutcome()` — see §2's Phase 5 section |
+| LearningEvent → SkillEvidence pipeline | **COMPLETE (Phase 5)** | — | — | — | Course completion and quiz outcomes now both emit evidence and events in the same outcome call |
+| Skill gaps | **COMPLETE (Phase 5)** for on-read computation | — | — | — | `computeCapabilityGap()` computes `RoleSkill` vs `UserSkill` at read time; `SkillGap` remains deliberately **not** a table — never persisted, as decided in Phase 1 |
+| Role/skill recommendations | DEFERRED | Future Phase | TBD | none (Skill gaps dependency now satisfied by Phase 5) | Not started |
+| Capability analytics | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5) | Not started |
+| Manager verification | DEFERRED | Future Phase | TBD | none | Phase 5 verification is INSTRUCTOR (course-owner) + SUPER_ADMIN only — a manager/reporting-line verifier role was explicitly out of scope |
+| Capability dashboards / UI | DEFERRED | Future Phase | TBD | none | Phase 5 is domain-layer + API only; no UI was built for evidence, verification, or gaps |
+| `AIAction.EVALUATION` (AI-assisted evidence evaluation) | DEFERRED | Future Phase | TBD | AI WRITE/EXECUTE review | Not started; Phase 5 evidence/verification is entirely non-AI |
+| `LessonSkill` / `AssessmentSkill` (lesson- and assessment-level skill granularity) | DESIGN DECISION REQUIRED | Future Phase | TBD | none | Phase 5 evidence resolves only at the `CourseSkill` level, per the locked Phase 5 contract; no such tables exist |
+| `confidence` semantics / scoring | DEFERRED | Future Phase | TBD | none | `UserSkill.confidence` exists in schema but is deliberately never written by Phase 5 — no scoring model defined yet |
+| `PENDING` verification-state transitions | DEFERRED | Future Phase | TBD | none | Phase 5 evidence is created `UNVERIFIED`; nothing transitions evidence into `PENDING` |
 | Competency frameworks | UNCONFIRMED | — | TBD | — | Not mentioned in any V2 doc or implementation; appears only as a plausible extrapolation — see §6 |
 
 ### Analytics
 
 | Item | Status | Intended Phase | Priority | Dependencies | Notes |
 |---|---|---|---|---|---|
-| Event-driven analytics | DEFERRED | Future Phase | TBD | LearningEvent emitters | `docs/V2_ARCHITECTURE.md` names this as a V2 direction ("Analytics dashboards → event-backed queries") |
+| Event-driven analytics | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5, `COURSE_COMPLETED`/`QUIZ_COMPLETED` only) | `docs/V2_ARCHITECTURE.md` names this as a V2 direction ("Analytics dashboards → event-backed queries") |
 | Learner analytics | DEFERRED | Future Phase | TBD | Event-driven analytics | Not started |
 | Manager analytics | DEFERRED | Future Phase | TBD | Event-driven analytics | Not started |
 | Capability dashboards | DEFERRED | Future Phase | TBD | Capability analytics | Not started |
@@ -305,9 +397,9 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 |---|---|---|---|---|---|
 | Learning paths | UNCONFIRMED | — | TBD | — | `src/app/api/ai/learning-path/route.ts` exists as a **V1 feature**, predates V2 and is not part of the V2 architecture docs — do not conflate with a V2 "LearningProgram" (design intent only, no code) |
 | Adaptive learning | UNCONFIRMED | — | TBD | — | Not mentioned in any V2 doc; plausible extrapolation only — see §6 |
-| Recommendations | DEFERRED | Future Phase | TBD | LearningEvent emitters | Named as "AI Learning Coach" in `docs/V2_AI_ARCHITECTURE.md`, "First AI workflows" — not started |
+| Recommendations | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5) | Named as "AI Learning Coach" in `docs/V2_AI_ARCHITECTURE.md`, "First AI workflows" — not started |
 | Certification intelligence | UNCONFIRMED | — | TBD | — | Not mentioned in any V2 doc; a `Certificate` model exists from V1 with no AI layer — see §6 |
-| Evidence-driven progression | DEFERRED | Future Phase | TBD | SkillEvidence automation | Design intent only (`docs/V2_DOMAIN_MODEL.md`, "Important invariants") |
+| Evidence-driven progression | DEFERRED | Future Phase | TBD | none (SkillEvidence automation delivered in Phase 5) | Design intent only (`docs/V2_DOMAIN_MODEL.md`, "Important invariants") — evidence now exists, but nothing yet consumes it to gate/adapt learning progression |
 
 ---
 
@@ -412,6 +504,7 @@ Only issues actually identified during Phases 1–4.
 | `COURSE_CREATOR` (runtime `AISurface`) vs `COURSE_BUILDER` (schema `AIConversationType`) naming mismatch | Low — deliberate and documented (`persistence.ts`'s `surfaceToConversationType`), not a bug | No | Revisit only if/when `SEARCH`/`COPILOT` ship real routes and need their own schema value |
 | Lesson-content/assessment generation routes exist but aren't wired into the Course Creator UI | Medium for product completeness of the Phase 4 vertical | No (routes are independently tested and functional) | Recommended next — see §9 |
 | Knowledge-document/Skill picker UI don't exist | Medium — Course Creator's Knowledge-aware and Skill-suggestion generation can't be fully exercised through the UI yet, only via direct API calls | No | Recommended next — see §9 |
+| `LearningEvent` has no DB-level uniqueness constraint | Low — `SkillEvidence`/`UserSkill` (the actual capability state) are unaffected; only the `LearningEvent` audit/analytics stream could theoretically double-write under concurrency, and nothing currently consumes `LearningEvent` | No | Course-completion duplication is already closed by the atomic enrollment-transition gate (Phase 5). Quiz events don't need dedup by design — each `QuizAttempt` legitimately emits its own event. A DB-level constraint remains a candidate if a future analytics consumer needs it, not applied speculatively |
 
 ---
 
@@ -436,6 +529,17 @@ Phase 3.1:
 
 Phase 4:
   Schema changes: NO (verified by git diff)
+
+Phase 5:
+  Schema changes: YES (1 unique constraint on SkillEvidence: tenantId, userId, skillId,
+    sourceType, sourceId — the real concurrency guarantee against duplicate evidence,
+    an application-level check-then-insert cannot close this race under Postgres
+    READ COMMITTED)
+  Migration: generated (20260911000000_add_skill_evidence_uniqueness)
+  Applied to Neon: NO
+  No additional schema change was introduced for LearningEvent — course-completion
+    concurrency is closed at the application layer (atomic enrollment transition),
+    not via a new LearningEvent constraint (see §7)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -443,15 +547,19 @@ real Neon `DATABASE_URL`, just now):
 
 ```text
 Datasource "db": PostgreSQL database "neondb" at "...aws.neon.tech"
-11 migrations found in prisma/migrations
-Following migration have not yet been applied:
+12 migrations found in prisma/migrations
+Following migrations have not yet been applied:
   20260909180000_add_v2_capability_knowledge_ai_foundation
+  20260911000000_add_skill_evidence_uniqueness
 ```
 
-**Production migration has NOT been applied.** This is the current, confirmed state — not a stale
-claim carried over from an earlier report. The migration was applied once, to a disposable local
-Postgres instance only (Phase 2, to prove the full history replays cleanly), and has never
-connected to Neon at all.
+**Production migration has NOT been applied — for either pending migration.** This is the current,
+confirmed state — not a stale claim carried over from an earlier report. Both the Phase 1/2
+migration and the Phase 5 migration exist only as generated SQL files in `prisma/migrations/`; the
+Phase 1/2 migration was applied once, to a disposable local Postgres instance only (Phase 2, to
+prove the full history replays cleanly), and neither migration has ever connected to Neon. There is
+an **implemented migration file** for Phase 5; there is **no deployment of it** — do not conflate
+the two.
 
 ---
 
@@ -468,20 +576,23 @@ Phase 3.1 (Execution Reliability)
   ↓
 Phase 4 (AI Course Creator)
   ↓
+Phase 5 (Capability & Skill Evidence Foundation / Capability Loop) — COMPLETE
+  ↓
 Course Creator Enhancements (picker UIs, content/assessment UI wiring)
        +
 AI Search
        +
 AI Copilot
        +
-Skill Evidence / Capability Loop (needs LearningEvent emitters first)
+Capability Analytics / Recommendations / Dashboards (now unblocked — LearningEvent
+  emitters and SkillEvidence/UserSkill exist as of Phase 5)
        ↓
 Action / Workflow Layer  (needs AI WRITE/EXECUTE — currently blocked by design guardrail)
        ↓
 Agents
 ```
 
-All items after Phase 4 are `Future Phase` — no exact phase numbers have been decided.
+All items after Phase 5 are `Future Phase` — no exact phase numbers have been decided.
 
 ---
 
@@ -497,10 +608,11 @@ Not approved — evaluated candidates only, per the actual completed architectur
 2. **AI Search** — `AISurface.SEARCH` already exists in the policy table (READ-only); would be a
    thin route over `searchKnowledge()`, similar shape to Course Creator's Knowledge integration.
    Low-medium effort, no schema changes expected.
-3. **Skill Evidence / capability loop** — highest strategic value (it's the third leg of the
-   flagship vertical), but has the most missing prerequisites: no `LearningEvent` emitter exists
-   anywhere yet, so this would need to start with instrumenting learner/AI actions to emit events
-   before evidence can be derived from them. Larger, multi-part effort.
+3. ~~**Skill Evidence / capability loop**~~ — **COMPLETE as of Phase 5.** Learning outcomes now
+   produce `SkillEvidence`, deterministic `UserSkill` proficiency, instructor/SUPER_ADMIN
+   verification, and on-read capability gaps. What remains on top of it (recommendations,
+   dashboards, manager verification, capability analytics) is now unblocked but not yet started —
+   see the Capability/Analytics rows in §4.
 4. **AI Copilot** — `AISurface.COPILOT` exists in the policy table but has no defined product
    surface/UX yet (unlike Search, which has an obvious shape). Needs a product-definition step
    before implementation, not just engineering.
@@ -508,11 +620,17 @@ Not approved — evaluated candidates only, per the actual completed architectur
    denial is described as "actively disabled... not merely unimplemented," requiring an explicit
    design review before any code starts. Should come after, not before, the lower-risk items above
    establish more real usage patterns to design tools around.
+6. **Capability surfacing (UI/dashboards/recommendations)** — now the highest-value remaining item
+   from the original flagship vertical, since Phase 5 delivered the underlying evidence/proficiency
+   engine with no UI on top of it. Lower engineering risk than starting the capability loop from
+   scratch (no new security surface — verification/gap authorization already exist and are tested),
+   but needs a product-definition pass for what a "capability dashboard" or "recommendation" surface
+   actually shows.
 
 **Tradeoff summary**: (1) and (2) are extensions of already-proven, already-tested infrastructure
-with no new security surface — lowest risk, fastest to ship. (3) is the highest product value but
-requires new foundational work (event emission) before it can start. (4) needs product definition
-first. (5) is gated by an explicit guardrail and should come last.
+with no new security surface — lowest risk, fastest to ship. (3) is done. (4) needs product
+definition first. (5) is gated by an explicit guardrail and should come last. (6) is now the
+natural continuation of (3) — the domain/security work is done, only the surface layer is missing.
 
 ---
 
@@ -557,3 +675,7 @@ Discovered during this audit, not silently resolved:
   (`31333e3`). Presented as its own row/section because the conversational task and
   `docs/V2_AI_ARCHITECTURE.md` both treat it as a distinct, separately-verified unit of work (own
   test file, own "Updated" note in the error-handling table).
+- **Phase 5 has no commit yet.** Unlike every prior phase in §2, Phase 5's COMPLETE status is
+  verified against the working tree directly (tests, `tsc`, Biome, `prisma validate`), not against
+  a `git log` entry — there isn't one at the time of this roadmap update. Update this note once
+  Phase 5 is committed.
