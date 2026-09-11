@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
+import { recordQuizOutcome } from "@/lib/domain/capability/outcomes";
 import { awardXP, XP_EVENTS } from "@/lib/xp";
 
 const bodySchema = z.object({
@@ -22,7 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ quizId:
 
   const dbUser = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true },
+    select: { id: true, tenantId: true },
   });
   if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
@@ -102,6 +103,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ quizId:
     const event = isPerfect ? "QUIZ_PERFECT" : "QUIZ_PASS";
     xpAwarded = XP_EVENTS[event];
     await awardXP(dbUser.id, event, xpAwarded);
+  }
+
+  // Phase 5 capability loop — additive, best-effort at this boundary (see
+  // src/lib/domain/capability/outcomes.ts): never throws, never affects
+  // this response. Tenant-gated like every other V2 write.
+  if (dbUser.tenantId) {
+    await recordQuizOutcome({
+      tenantId: dbUser.tenantId,
+      userId: dbUser.id,
+      quizId: quiz.id,
+      attemptId: attempt.id,
+      score,
+      isPassed,
+      occurredAt: attempt.completedAt,
+    });
   }
 
   return NextResponse.json({

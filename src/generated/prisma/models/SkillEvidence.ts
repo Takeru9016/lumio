@@ -333,6 +333,7 @@ export type SkillEvidenceOrderByWithRelationInput = {
 
 export type SkillEvidenceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenantId_userId_skillId_sourceType_sourceId?: Prisma.SkillEvidenceTenantIdUserIdSkillIdSourceTypeSourceIdCompoundUniqueInput
   AND?: Prisma.SkillEvidenceWhereInput | Prisma.SkillEvidenceWhereInput[]
   OR?: Prisma.SkillEvidenceWhereInput[]
   NOT?: Prisma.SkillEvidenceWhereInput | Prisma.SkillEvidenceWhereInput[]
@@ -356,7 +357,7 @@ export type SkillEvidenceWhereUniqueInput = Prisma.AtLeast<{
   skill?: Prisma.XOR<Prisma.SkillScalarRelationFilter, Prisma.SkillWhereInput>
   userSkill?: Prisma.XOR<Prisma.UserSkillNullableScalarRelationFilter, Prisma.UserSkillWhereInput> | null
   verifiedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-}, "id">
+}, "id" | "tenantId_userId_skillId_sourceType_sourceId">
 
 export type SkillEvidenceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -540,6 +541,14 @@ export type SkillEvidenceListRelationFilter = {
 
 export type SkillEvidenceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type SkillEvidenceTenantIdUserIdSkillIdSourceTypeSourceIdCompoundUniqueInput = {
+  tenantId: string
+  userId: string
+  skillId: string
+  sourceType: string
+  sourceId: string
 }
 
 export type SkillEvidenceCountOrderByAggregateInput = {

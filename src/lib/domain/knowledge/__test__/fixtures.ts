@@ -8,7 +8,9 @@ function unique(prefix: string): string {
 }
 
 /** Creates a Tenant + User row and returns a ready-to-use KnowledgeAccessContext. */
-export async function createTenantUser(role: "STUDENT" | "ORG_ADMIN" | "INSTRUCTOR" = "STUDENT") {
+export async function createTenantUser(
+  role: "STUDENT" | "ORG_ADMIN" | "INSTRUCTOR" | "SUPER_ADMIN" = "STUDENT"
+) {
   const tenant = await db.tenant.create({
     data: { name: unique("tenant"), slug: unique("tenant-slug") },
   });

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { generateCertificate } from "@/lib/certificate";
 import { db } from "@/lib/db";
+import { recordCourseCompletionOutcome } from "@/lib/domain/capability/outcomes";
 import { recordMandatoryTrainingCompletion } from "@/lib/mandatory-training";
 import { updateStreak } from "@/lib/streak";
 import { awardXP, XP_EVENTS } from "@/lib/xp";
@@ -17,7 +18,7 @@ export async function POST(
   const { courseId, lessonId } = await params;
 
   const [dbUser, course] = await Promise.all([
-    db.user.findUnique({ where: { clerkId: userId }, select: { id: true } }),
+    db.user.findUnique({ where: { clerkId: userId }, select: { id: true, tenantId: true } }),
     db.course.findUnique({ where: { slug: courseId }, select: { id: true } }),
   ]);
   if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -101,16 +102,31 @@ export async function POST(
       certificateEarned = true;
       courseCompleted = true;
       if (enrollment.status !== "COMPLETED") {
+        const completedAt = new Date();
         await Promise.all([
           db.enrollment.update({
             where: { id: enrollment.id },
-            data: { status: "COMPLETED", completedAt: new Date() },
+            data: { status: "COMPLETED", completedAt },
           }),
           awardXP(dbUser.id, "COURSE_COMPLETE", XP_EVENTS.COURSE_COMPLETE),
           generateCertificate(dbUser.id, course.id),
           recordMandatoryTrainingCompletion(dbUser.id, course.id),
         ]);
         courseXpEarned = XP_EVENTS.COURSE_COMPLETE;
+
+        // Phase 5 capability loop — additive, best-effort at this boundary
+        // (see src/lib/domain/capability/outcomes.ts): never throws, never
+        // affects this response. Tenant-gated like every other V2 write —
+        // a FREE-plan user (no tenant) has no capability tracking.
+        if (dbUser.tenantId) {
+          await recordCourseCompletionOutcome({
+            tenantId: dbUser.tenantId,
+            userId: dbUser.id,
+            courseId: course.id,
+            enrollmentId: enrollment.id,
+            completedAt,
+          });
+        }
       } else {
         await generateCertificate(dbUser.id, course.id);
       }

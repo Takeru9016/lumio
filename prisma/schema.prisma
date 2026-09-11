@@ -926,6 +926,14 @@ model SkillEvidence {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Phase 5: the real concurrency guarantee against duplicate evidence from a
+  // retried/concurrent outcome — an application-level findFirst-then-create
+  // check alone cannot prevent two concurrent transactions both passing the
+  // check under Postgres's default READ COMMITTED isolation. sourceId is
+  // nullable in general (see comment above), but every Phase 5 evidence type
+  // (COURSE_COMPLETION -> Course.id, QUIZ_SCORE -> QuizAttempt.id) always
+  // populates it, so this constraint is fully effective for both.
+  @@unique([tenantId, userId, skillId, sourceType, sourceId])
   @@index([tenantId])
   @@index([userId])
   @@index([skillId])
