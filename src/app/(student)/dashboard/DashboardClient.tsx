@@ -85,6 +85,12 @@ export function DashboardClient({
         {currentStreak >= 2 && (
           <span className="text-sm font-medium text-text-muted">🔥 {currentStreak}-day streak</span>
         )}
+        <Link
+          href="/capability"
+          className="ml-auto text-xs font-medium text-text-muted hover:text-text-primary transition-colors"
+        >
+          View your skill profile →
+        </Link>
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

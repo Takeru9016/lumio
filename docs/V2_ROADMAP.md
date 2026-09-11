@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-11 (end of Phase 5). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-11 (end of Phase 7). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -32,16 +32,18 @@ Five systems (`docs/V2_ARCHITECTURE.md`, "System boundaries"):
 4. **Intelligence** — AI runtime, model routing, retrieval, tutor, copilot, recommendations, natural-language analytics, agents.
 5. **Action** — workflows, approvals, notifications, integrations, audited AI actions.
 
-The first flagship vertical, as established by the actual Phase 1–5 work, is:
+The first flagship vertical, as established by the actual Phase 1–7 work, is:
 
-**AI Course Creation → AI Learning → Skill Evidence**
+**AI Course Creation → AI Learning → Skill Evidence → Recommendations → Capability Visibility**
 
-All three legs now have a real implementation. "AI Course Creation" (Phase 4) and "AI Learning" (AI
+All legs now have a real implementation. "AI Course Creation" (Phase 4) and "AI Learning" (AI
 Tutor, refactored onto the shared runtime in Phase 3) were already implemented. "Skill Evidence" —
-the capability loop (Learning → Evidence → Capability) — is now implemented as of Phase 5: course
-completion and quiz outcomes emit `SkillEvidence` and `LearningEvent` rows, and `UserSkill`
-proficiency is derived deterministically from that evidence. The vertical is not yet closed by a
-recommendation/analytics layer on top of it — that remains deferred (see §4).
+the capability loop (Learning → Evidence → Capability) — was implemented in Phase 5. Phase 6 closed
+the loop's first consumer (`Capability Gap → Recommended Course`, deterministic, no AI). Phase 7
+made the resulting capability state visible to the learner for the first time (`/capability`:
+role, required skills, proficiency, gap status, evidence). What remains open is an
+analytics/manager-facing layer and an AI explanation layer on top of what now exists — both
+deferred (see §4).
 
 ---
 
@@ -55,6 +57,8 @@ recommendation/analytics layer on top of it — that remains deferred (see §4).
 | Phase 3.1 — Execution Reliability | COMPLETE | `createExecutionTracker` — every `AIExecution` reaches a terminal state |
 | Phase 4 — AI Course Creator | COMPLETE | Curriculum/content/assessment generation, human review UI, application-only save boundary |
 | Phase 5 — Capability & Skill Evidence Foundation / Capability Loop | COMPLETE | Learning-outcome → SkillEvidence → UserSkill projection, instructor/SUPER_ADMIN verification, dynamic capability gaps, `LearningEvent` emission with course-completion concurrency protection |
+| Phase 6 — Capability Recommendations | COMPLETE | Deterministic `Capability Gap → Recommended Course` engine (`getRecommendedLearning()`), read-only API, dashboard "Recommended for you" card |
+| Phase 7 — Capability Progress / Skill Development View | COMPLETE | Learner-facing `/capability` profile: primary role, required skills, current vs. required proficiency, gap status, evidence visibility |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
@@ -62,7 +66,14 @@ Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 as a distinct row because the user's own task framing and `docs/V2_AI_ARCHITECTURE.md` treat it as
 a distinct unit of work with its own verification), and Phase 4 is `0a51fe8`. Phase 5 is `5e81c0b` (`feat: implement phase 5 capability loop`), with
 its final-contract-audit fixes (atomic enrollment transition, evidence-verification authorization)
-folded into a follow-up commit `bb430e5`.
+folded into a follow-up commit `bb430e5`. Phase 6 is `a7e68fe` (`feat: implement capability
+recommendations engine and integrate into student dashboard`) — its own final-contract-audit
+hardening (route-level tests, `GET` signature correction) was folded into the same working tree
+before that commit landed, so it carries no separate hash. **Phase 7 has not yet been committed**
+as of this roadmap update — implementation, tests, and this documentation update are complete and
+verified directly against the working tree (189/189 tests passing, `tsc`/Biome/Prisma clean), but
+this file is written and saved immediately before the finalize commit is created, so no hash exists
+for it yet at the moment this text is written.
 
 ### Phase 1 — Domain Foundation
 
@@ -212,6 +223,68 @@ Implements the loop `Learning → Evidence → Capability` (`src/lib/domain/capa
   `PENDING`, in Phase 5), and `confidence` semantics/scoring. No generalized RBAC was introduced —
   verification authorization remains one narrow predicate for one action, matching the existing
   assignment-grading route's shape.
+
+### Phase 6 — Capability Recommendations
+
+Implements `Capability Gap → Recommended Learning → Existing Learning Action`
+(`src/lib/domain/capability/recommendations.ts`), the first consumer of Phase 5's capability state.
+
+- **Deterministic, relational recommendation engine** — `getRecommendedLearning(ctx)` reuses
+  `computeCapabilityGap()` unchanged, joins unmet-gap skills through `CourseSkill` to
+  `PUBLISHED` courses in the caller's own tenant only (`Course.tenantId === ctx.tenantId` — never
+  `null`, never another tenant, corrected during discovery from an initial assumption that a
+  null-tenant course might be globally recommendable; the existing course catalog page never treats
+  it that way for a tenant-scoped learner, so neither does this), excludes courses with an
+  `ACTIVE`/`COMPLETED` enrollment (`REFUNDED` does not exclude).
+- **Ranking** — deterministic 4-key sort: max ordinal proficiency-distance (severity) descending,
+  distinct-skill count descending, `Course.createdAt` ascending, `Course.id` ascending as a final
+  tie-break. Aggregation and full ranking happen before a `slice(0, 5)` cap — never a raw DB `take`
+  before ranking.
+- **API** — `GET /api/capability/recommendations`, self-scoped only (`requireAuthContext()` +
+  `requireTenant()`, identical pattern to `verify/route.ts`); public response shape is
+  `{ courseId, courseTitle, reasonSkills }` — the internal `courseSlug` field (needed only for the
+  dashboard's own link) is stripped before the response is sent.
+- **Dashboard** — a "Recommended for you" card on the existing student dashboard, calling the
+  domain function directly (no client-side fetch to its own API route); empty or errored →
+  omitted, never breaks the rest of the dashboard.
+- **No AI, no RAG, no embeddings** anywhere in candidate selection or ranking — `AISurface.COPILOT`
+  remains unwired, exactly as before this phase.
+- **Validation** — 178/178 tests passing (149 at end of Phase 5 + 29 new: 23 domain + 6 route-level).
+- **Zero schema changes.**
+- **Deliberately not built this phase**: manager recommendations, recommendation persistence/
+  history, dashboards beyond the one card, AI-generated explanations, semantic/RAG ranking,
+  notifications, a new `LearningEvent` type for "recommendation shown/accepted" (the enum already
+  has an unused `RECOMMENDATION_ACCEPTED` value from Phase 1 — still unused after this phase).
+
+### Phase 7 — Capability Progress / Skill Development View
+
+Implements the first learner-facing surface for Phase 5/6's capability state:
+`src/app/(student)/capability/`, plus `src/lib/domain/capability/evidence.ts`.
+
+- **`/capability` page** — a self-scoped, read-only profile composing `computeCapabilityGap()`,
+  `getUserSkillState()` (both unchanged, reused as-is), and the new `getSkillEvidenceForUser()`.
+  Shows the learner's primary role, every required skill (met and unmet alike — `gaps` already
+  contains the complete required-skill set, not just the unmet ones), current vs. required
+  proficiency, gap status, last-assessed date, and the evidence backing each skill (type, score,
+  verification status, date).
+- **`getSkillEvidenceForUser(ctx)`** — self-scoped `SkillEvidence` read (`tenantId`/`userId` from
+  `ctx` only), deterministic order (`createdAt` desc, `id` asc tie-break).
+- **Honest empty states, never a thrown error** — no tenant, no primary role assigned (the existing
+  `{ role: null, gaps: [] }` contract, unchanged), and a query failure all render a clear message
+  instead of breaking the page; no fake role or invented data is ever shown.
+- **Dashboard integration** — one link ("View your skill profile") added to the existing dashboard;
+  no capability logic duplicated there.
+- **No new API route** — the page is a server component calling domain functions directly, same
+  convention as the dashboard.
+- **No AI, no new authorization primitive** — self-scoped via the same `AuthContext` pattern as
+  every other Phase 5/6 capability read; no manager/instructor/org-admin view was built.
+- **Validation** — 189/189 tests passing (178 at end of Phase 6 + 11 new evidence-read tests).
+- **Zero schema changes.**
+- **Deliberately not built this phase**: manager or instructor/org-admin capability views (a
+  discovery pass found the existing `ORG_ADMIN` + `/reports` pattern in `src/lib/reports.ts` would
+  make this LOW complexity if pursued later, but it was not pursued in Phase 7), `LearningPlan` or
+  any persisted goal, AI capability copilot/explanations, recommendation persistence/history,
+  advanced analytics, `SkillGap` persistence, workflows/agents.
 
 ---
 
@@ -370,10 +443,13 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 | SkillEvidence automation | **COMPLETE (Phase 5)** | — | — | — | `recordCourseCompletionOutcome()`/`recordQuizOutcome()` — see §2's Phase 5 section |
 | LearningEvent → SkillEvidence pipeline | **COMPLETE (Phase 5)** | — | — | — | Course completion and quiz outcomes now both emit evidence and events in the same outcome call |
 | Skill gaps | **COMPLETE (Phase 5)** for on-read computation | — | — | — | `computeCapabilityGap()` computes `RoleSkill` vs `UserSkill` at read time; `SkillGap` remains deliberately **not** a table — never persisted, as decided in Phase 1 |
-| Role/skill recommendations | DEFERRED | Future Phase | TBD | none (Skill gaps dependency now satisfied by Phase 5) | Not started |
+| Role/skill recommendations | **COMPLETE (Phase 6)** | — | — | — | `getRecommendedLearning()` — deterministic, relational, no AI — see §2's Phase 6 section |
 | Capability analytics | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5) | Not started |
 | Manager verification | DEFERRED | Future Phase | TBD | none | Phase 5 verification is INSTRUCTOR (course-owner) + SUPER_ADMIN only — a manager/reporting-line verifier role was explicitly out of scope |
-| Capability dashboards / UI | DEFERRED | Future Phase | TBD | none | Phase 5 is domain-layer + API only; no UI was built for evidence, verification, or gaps |
+| Learner capability profile / evidence view | **COMPLETE (Phase 7)** | — | — | — | `/capability` page — see §2's Phase 7 section |
+| Manager / instructor / org-admin capability view | DEFERRED | Future Phase | TBD | none | A Phase 7 discovery pass found `src/lib/reports.ts`'s existing `ORG_ADMIN`-gated `getCompletionReport()` pattern would make this LOW authorization complexity if pursued — not built in Phase 7 |
+| `LearningPlan` / persisted capability goals | DEFERRED | Future Phase | TBD | none | Evaluated during Phase 7 discovery and judged premature — no product signal yet that a stored goal (vs. a live-computed gap) is needed |
+| AI capability copilot / explanations | DEFERRED | Future Phase | TBD | Capability profile UI (now satisfied by Phase 7) | `AISurface.COPILOT` exists in policy table, unwired; Phase 6/7 discovery explicitly deferred AI until deterministic capability UX existed to explain — it now exists, but AI wiring was not started |
 | `AIAction.EVALUATION` (AI-assisted evidence evaluation) | DEFERRED | Future Phase | TBD | AI WRITE/EXECUTE review | Not started; Phase 5 evidence/verification is entirely non-AI |
 | `LessonSkill` / `AssessmentSkill` (lesson- and assessment-level skill granularity) | DESIGN DECISION REQUIRED | Future Phase | TBD | none | Phase 5 evidence resolves only at the `CourseSkill` level, per the locked Phase 5 contract; no such tables exist |
 | `confidence` semantics / scoring | DEFERRED | Future Phase | TBD | none | `UserSkill.confidence` exists in schema but is deliberately never written by Phase 5 — no scoring model defined yet |
@@ -539,6 +615,12 @@ Phase 5:
   No additional schema change was introduced for LearningEvent — course-completion
     concurrency is closed at the application layer (atomic enrollment transition),
     not via a new LearningEvent constraint (see §7)
+
+Phase 6:
+  Schema changes: NO (verified by git diff — pure read-only recommendation engine)
+
+Phase 7:
+  Schema changes: NO (verified by git diff — pure read-only capability profile view)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -577,21 +659,28 @@ Phase 4 (AI Course Creator)
   ↓
 Phase 5 (Capability & Skill Evidence Foundation / Capability Loop) — COMPLETE
   ↓
+Phase 6 (Capability Recommendations) — COMPLETE
+  ↓
+Phase 7 (Capability Progress / Skill Development View) — COMPLETE
+  ↓
 Course Creator Enhancements (picker UIs, content/assessment UI wiring)
        +
 AI Search
        +
-AI Copilot
+AI Copilot / capability-explanation layer (now has a deterministic UI to explain,
+  as of Phase 7 — still not started)
        +
-Capability Analytics / Recommendations / Dashboards (now unblocked — LearningEvent
-  emitters and SkillEvidence/UserSkill exist as of Phase 5)
+Manager / instructor / org-admin capability view (de-risked by the existing
+  ORG_ADMIN + reports.ts pattern — still not started)
+       +
+Capability analytics / dashboards
        ↓
 Action / Workflow Layer  (needs AI WRITE/EXECUTE — currently blocked by design guardrail)
        ↓
 Agents
 ```
 
-All items after Phase 5 are `Future Phase` — no exact phase numbers have been decided.
+All items after Phase 7 are `Future Phase` — no exact phase numbers have been decided.
 
 ---
 
@@ -609,9 +698,9 @@ Not approved — evaluated candidates only, per the actual completed architectur
    Low-medium effort, no schema changes expected.
 3. ~~**Skill Evidence / capability loop**~~ — **COMPLETE as of Phase 5.** Learning outcomes now
    produce `SkillEvidence`, deterministic `UserSkill` proficiency, instructor/SUPER_ADMIN
-   verification, and on-read capability gaps. What remains on top of it (recommendations,
-   dashboards, manager verification, capability analytics) is now unblocked but not yet started —
-   see the Capability/Analytics rows in §4.
+   verification, and on-read capability gaps. Recommendations (Phase 6) and the learner profile
+   view (Phase 7) are now also complete — see items 6/7 below. What remains (manager verification,
+   capability analytics) is tracked in §4's Capability table.
 4. **AI Copilot** — `AISurface.COPILOT` exists in the policy table but has no defined product
    surface/UX yet (unlike Search, which has an obvious shape). Needs a product-definition step
    before implementation, not just engineering.
@@ -619,17 +708,32 @@ Not approved — evaluated candidates only, per the actual completed architectur
    denial is described as "actively disabled... not merely unimplemented," requiring an explicit
    design review before any code starts. Should come after, not before, the lower-risk items above
    establish more real usage patterns to design tools around.
-6. **Capability surfacing (UI/dashboards/recommendations)** — now the highest-value remaining item
-   from the original flagship vertical, since Phase 5 delivered the underlying evidence/proficiency
-   engine with no UI on top of it. Lower engineering risk than starting the capability loop from
-   scratch (no new security surface — verification/gap authorization already exist and are tested),
-   but needs a product-definition pass for what a "capability dashboard" or "recommendation" surface
-   actually shows.
+6. ~~**Capability surfacing (recommendations)**~~ — **COMPLETE as of Phase 6** (deterministic
+   `Capability Gap → Recommended Course` engine + dashboard card).
+7. ~~**Capability surfacing (learner profile view)**~~ — **COMPLETE as of Phase 7** (`/capability`
+   page: role, required skills, proficiency, gap status, evidence).
+8. **Manager / instructor / org-admin capability view (RECOMMENDED NEXT for the capability
+   vertical)** — a Phase 7 discovery pass confirmed this is lower-risk than it first appears:
+   `src/lib/reports.ts`'s existing `getCompletionReport(tenantId, filters)` + the `ORG_ADMIN`-gated
+   `/reports` page is a directly reusable authorization/aggregation pattern — no new role, no new
+   permission primitive needed if scoped to `ORG_ADMIN`. Would require new aggregate domain code
+   (today's `computeCapabilityGap`/`getUserSkillState` are hard-scoped to `ctx.userId`, not "any
+   user in the tenant").
+9. **AI capability copilot** — `AISurface.COPILOT` exists in the policy table, unwired. Now has a
+   deterministic capability UI (Phase 7) to explain, which was the explicit precondition Phase 5/6/7
+   discovery repeatedly named before considering this. Still needs a product-definition pass for
+   what it explains and how.
+10. **`LearningPlan` / persisted capability goals** — evaluated and explicitly rejected as premature
+    during Phase 7 discovery; no product signal yet justifies persisting a goal separate from the
+    live-computed gap. Revisit only if a real need for tracked/dismissable goals emerges.
 
 **Tradeoff summary**: (1) and (2) are extensions of already-proven, already-tested infrastructure
-with no new security surface — lowest risk, fastest to ship. (3) is done. (4) needs product
-definition first. (5) is gated by an explicit guardrail and should come last. (6) is now the
-natural continuation of (3) — the domain/security work is done, only the surface layer is missing.
+with no new security surface — lowest risk, fastest to ship. (3), (6), and (7) are done. (4)/(9)
+need product definition first, and (9) additionally needs (7) as a precondition (now satisfied).
+(5) is gated by an explicit guardrail and should come last. (8) is the natural next step in the
+capability vertical — its authorization risk is now known to be low, reusing an existing pattern,
+but it is still new aggregate domain code, not merely a UI layer over existing self-scoped
+functions the way (6)/(7) were. (10) stays deferred until a concrete need appears.
 
 ---
 
@@ -676,3 +780,8 @@ Discovered during this audit, not silently resolved:
   test file, own "Updated" note in the error-handling table).
 - **Phase 5 is `5e81c0b`**, with final-contract-audit fixes in follow-up commit `bb430e5`. (This
   roadmap previously stated Phase 5 had no commit hash yet — corrected once the commit existed.)
+- **Phase 6 is `a7e68fe`**, with no separate hash for its final-contract-audit hardening (route-level
+  tests, `GET` signature fix) — those changes were folded into the working tree before that commit
+  landed, so they were never a distinct commit to reference.
+- **Phase 7 had no commit hash at the time this section was written** (see the note in §2) — this
+  roadmap update and the Phase 7 implementation are committed together immediately afterward.
