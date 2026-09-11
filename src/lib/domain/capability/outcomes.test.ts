@@ -42,6 +42,7 @@ describe("recordCourseCompletionOutcome — evidence", () => {
     const userSkills = await db.userSkill.findMany({ where: { userId: learnerCtx.userId } });
     expect(userSkills).toHaveLength(2);
     expect(userSkills.every((s) => s.proficiency === "BEGINNER")).toBe(true);
+    expect(userSkills.every((s) => s.confidence === null)).toBe(true);
   });
 
   it("creates no evidence when the course has no CourseSkill mappings", async () => {
@@ -162,6 +163,50 @@ describe("recordCourseCompletionOutcome — idempotency and concurrency", () => 
     });
     expect(userSkill?.proficiency).toBe("BEGINNER");
   });
+
+  /**
+   * KNOWN GAP, deliberately not fixed in this turn (Phase 5 final contract
+   * audit, 2026-09-11) — flagged for an explicit approval decision rather
+   * than silently patched or silently ignored. `emitLearningEvent` has no
+   * idempotency check of any kind (no DB constraint on LearningEvent, no
+   * application-level pre-check in emit.ts or outcomes.ts). The ONLY thing
+   * that prevents a duplicate COURSE_COMPLETED event in production is the
+   * caller route's `enrollment.status !== "COMPLETED"` gate — which reliably
+   * stops a SEQUENTIAL retry arriving after the first request's enrollment
+   * update has committed, but does nothing for two genuinely concurrent
+   * requests that both read the pre-commit enrollment snapshot (the same
+   * class of race Challenge 1 identified for SkillEvidence — here left
+   * unmitigated). This test proves the gap exists rather than asserting a
+   * false guarantee. SkillEvidence/UserSkill correctness is NOT affected —
+   * only the LearningEvent audit stream can double-write, and nothing
+   * currently consumes LearningEvent. See the audit report for the two
+   * candidate fixes (an application-level conditional enrollment update, or
+   * a LearningEvent uniqueness constraint) — neither is applied here.
+   */
+  it("documents a known gap: concurrent duplicate outcomes are NOT deduplicated for LearningEvent", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+
+    const params = {
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      courseId: course.id,
+      enrollmentId: "test-enrollment",
+      completedAt: new Date(),
+    };
+
+    await Promise.all([
+      recordCourseCompletionOutcome(params),
+      recordCourseCompletionOutcome(params),
+    ]);
+
+    const events = await db.learningEvent.findMany({
+      where: { userId: learnerCtx.userId, eventType: "COURSE_COMPLETED" },
+    });
+    // NOT `toHaveLength(1)` — this documents the actual current behavior.
+    expect(events.length).toBe(2);
+  });
 });
 
 describe("recordQuizOutcome", () => {
@@ -190,6 +235,11 @@ describe("recordQuizOutcome", () => {
     expect(evidence[0].sourceId).toBe("test-attempt-1");
     expect(evidence[0].score).toBe(90);
     expect(evidence[0].verificationStatus).toBe("UNVERIFIED");
+
+    const userSkill = await db.userSkill.findUniqueOrThrow({
+      where: { userId_skillId: { userId: learnerCtx.userId, skillId: skill.id } },
+    });
+    expect(userSkill.confidence).toBeNull();
   });
 
   it("a failed quiz creates no evidence and does not change UserSkill, but still records a LearningEvent", async () => {

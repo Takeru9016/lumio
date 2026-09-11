@@ -116,6 +116,26 @@ describe("verifyEvidence / rejectEvidence — authorization", () => {
     expect(updated.verificationStatus).toBe("REJECTED");
   });
 
+  it("verification never writes confidence (locked contract — no confidence semantics in Phase 5)", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    const evidence = await createCourseSourcedEvidence({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      skillId: skill.id,
+      courseId: course.id,
+    });
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    const verified = await verifyEvidence(actorCtx, evidence.id);
+    expect(verified.confidence).toBeNull();
+
+    const rejected = await rejectEvidence(actorCtx, evidence.id);
+    expect(rejected.confidence).toBeNull();
+  });
+
   it("SUPER_ADMIN can verify evidence for a course they do not own", async () => {
     const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
     const { ctx: adminCtx } = await createTenantUser("SUPER_ADMIN");
@@ -132,6 +152,31 @@ describe("verifyEvidence / rejectEvidence — authorization", () => {
     const actorCtx = { ...adminCtx, tenantId: tenant.id };
     const userSkill = await verifyEvidence(actorCtx, evidence.id);
     expect(userSkill.proficiency).toBe("INTERMEDIATE");
+  });
+
+  it("SUPER_ADMIN is still denied when the evidence's source cannot be resolved (fails closed, not an unconditional bypass)", async () => {
+    const { tenant } = await createTenantUser("INSTRUCTOR");
+    const { ctx: adminCtx } = await createTenantUser("SUPER_ADMIN");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const skill = await createSkill(tenant.id);
+    // No Course/QuizAttempt exists for this source — an unrecognized/
+    // unresolvable sourceType, same as a future evidence type this
+    // authorization logic hasn't been extended for yet.
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        skillId: skill.id,
+        type: "MANUAL",
+        sourceType: "Manual",
+        sourceId: "unresolvable-source",
+      },
+    });
+
+    const actorCtx = { ...adminCtx, tenantId: tenant.id };
+    await expect(verifyEvidence(actorCtx, evidence.id)).rejects.toThrow(
+      CapabilityVerificationError
+    );
   });
 
   it("cross-tenant verification is rejected even for an INSTRUCTOR/SUPER_ADMIN role", async () => {

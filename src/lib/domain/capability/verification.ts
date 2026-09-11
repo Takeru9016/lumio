@@ -86,13 +86,22 @@ async function authorizeVerificationActor(
   if (evidence.tenantId !== actor.tenantId) {
     throw new CapabilityVerificationError(403, "Forbidden");
   }
+
+  // Source resolution is required for EVERY actor, SUPER_ADMIN included — the
+  // locked contract is "SUPER_ADMIN may verify any valid evidence... subject
+  // to normal source/tenant validation," not an unconditional bypass. A
+  // malformed/unsupported sourceType must fail closed for everyone; only the
+  // instructor-ownership comparison below is what SUPER_ADMIN skips.
+  const course = await resolveSourceCourse(evidence);
+  if (!course) {
+    throw new CapabilityVerificationError(403, "Forbidden");
+  }
+
   if (actor.role === "SUPER_ADMIN") return;
   if (actor.role !== "INSTRUCTOR") {
     throw new CapabilityVerificationError(403, "Forbidden");
   }
-
-  const course = await resolveSourceCourse(evidence);
-  if (!course || course.instructorId !== actor.userId) {
+  if (course.instructorId !== actor.userId) {
     throw new CapabilityVerificationError(403, "Forbidden");
   }
 }

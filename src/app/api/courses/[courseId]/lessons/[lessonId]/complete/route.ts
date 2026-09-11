@@ -101,13 +101,22 @@ export async function POST(
     if (allQuizzesPassed) {
       certificateEarned = true;
       courseCompleted = true;
-      if (enrollment.status !== "COMPLETED") {
-        const completedAt = new Date();
+
+      // Atomic conditional transition is the concurrency gate: only the
+      // request whose UPDATE actually flips status away from COMPLETED may
+      // run the one-time completion side effects. A plain status !== check
+      // read from the pre-fetched `enrollment` snapshot above cannot prevent
+      // two concurrent requests both seeing NOT COMPLETED and both racing
+      // into the one-time branch (Phase 5 final contract audit finding).
+      const completedAt = new Date();
+      const { count } = await db.enrollment.updateMany({
+        where: { id: enrollment.id, status: { not: "COMPLETED" } },
+        data: { status: "COMPLETED", completedAt },
+      });
+      const wonCompletionTransition = count === 1;
+
+      if (wonCompletionTransition) {
         await Promise.all([
-          db.enrollment.update({
-            where: { id: enrollment.id },
-            data: { status: "COMPLETED", completedAt },
-          }),
           awardXP(dbUser.id, "COURSE_COMPLETE", XP_EVENTS.COURSE_COMPLETE),
           generateCertificate(dbUser.id, course.id),
           recordMandatoryTrainingCompletion(dbUser.id, course.id),
