@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-11 (end of Phase 8). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-12 (end of Phase 9). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -43,9 +43,12 @@ the loop's first consumer (`Capability Gap → Recommended Course`, deterministi
 made the resulting capability state visible to the learner for the first time (`/capability`:
 role, required skills, proficiency, gap status, evidence). Phase 8 completed the separate,
 already-shipped AI Course Creation leg — generated content, quizzes, knowledge grounding, and
-instructor-selected skills now persist into the saved course instead of being discarded. What
-remains open is an analytics/manager-facing layer and an AI explanation layer on top of the
-capability state that now exists — both deferred (see §4).
+instructor-selected skills now persist into the saved course instead of being discarded. Phase 9
+extended capability visibility to a second audience — an ORG_ADMIN-only, tenant-wide capability
+overview (`/org/capability`) — reusing the same deterministic gap semantics the learner's own
+`/capability` page already established, never duplicating them. What remains open is an
+instructor/manager-facing capability view, capability analytics, and an AI explanation layer on
+top of the capability state that now exists — all deferred (see §4).
 
 ---
 
@@ -62,6 +65,7 @@ capability state that now exists — both deferred (see §4).
 | Phase 6 — Capability Recommendations | COMPLETE | Deterministic `Capability Gap → Recommended Course` engine (`getRecommendedLearning()`), read-only API, dashboard "Recommended for you" card |
 | Phase 7 — Capability Progress / Skill Development View | COMPLETE | Learner-facing `/capability` profile: primary role, required skills, current vs. required proficiency, gap status, evidence visibility |
 | Phase 8 — Course Creator UX Completion | COMPLETE | AI-generated lesson content, quizzes, knowledge grounding, and instructor-selected skills now persist into the saved draft course; Knowledge-document and Skill picker UIs; `GET /api/knowledge/documents`, `GET /api/skills` |
+| Phase 9 — ORG_ADMIN Capability Overview | COMPLETE | Tenant-wide, ORG_ADMIN-only capability overview: `getOrganizationCapabilityReport()` (batched, cursor-paginated, no N+1), `GET /api/org/capability`, `/org/capability` |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
@@ -73,11 +77,11 @@ folded into a follow-up commit `bb430e5`. Phase 6 is `a7e68fe` (`feat: implement
 recommendations engine and integrate into student dashboard`) — its own final-contract-audit
 hardening (route-level tests, `GET` signature correction) was folded into the same working tree
 before that commit landed, so it carries no separate hash. Phase 7 is `77b9f8f` (`feat: add learner
-capability profile (Phase 7)`). **Phase 8 has not yet been committed** as of this roadmap update —
-implementation, tests, and this documentation update are complete and verified directly against the
-working tree (222/222 tests passing, `tsc`/Biome/Prisma clean), but this file is written and saved
-immediately before the finalize commit is created, so no hash exists for it yet at the moment this
-text is written.
+capability profile (Phase 7)`). Phase 8 is `e137b4c` (`feat: complete AI course creator workflow`).
+Phase 9 is `42aac3d` (`feat: implement organization capability report API, domain logic, tests, and
+UI`) — verified directly against `git log --oneline` at the time this section was written, including
+its own dedicated nullable-name pagination regression tests folded into the same commit (258/258
+tests passing, `tsc`/Biome/Prisma clean).
 
 ### Phase 1 — Domain Foundation
 
@@ -340,6 +344,56 @@ already-tested generation routes into the review step and completes the save pat
   `targetSkillNames` stay display-only), persistent course draft/version model, any manager/
   org-admin capability view, any AI-runtime change.
 
+### Phase 9 — ORG_ADMIN Capability Overview
+
+Extends the capability system built in Phase 5/6/7 to a second audience: an ORG_ADMIN can now see
+capability state across every learner in their own tenant, not just their own. Splits what had
+previously been tracked as one bundled "manager/instructor/org-admin capability view" item —
+ORG_ADMIN is the only audience built this phase (see §4).
+
+- **`getOrganizationCapabilityReport(tenantId, options?)`** (`src/lib/domain/capability/
+  organizationReport.ts`) — tenant-scoped only, no caller identity/role parameter; authorization
+  stays entirely in the route, matching `getCompletionReport(tenantId, filters)`'s existing
+  convention. Batched: a fixed number of queries per page (keyset-paginated `User` population →
+  primary `UserJobRole` rows → `RoleSkill`/`JobRole` for the resolved roles → `UserSkill`), joined
+  in memory — never loops `computeCapabilityGap()`/`getUserSkillState()`/`resolvePrimaryRoleId()`
+  per learner.
+- **Population** — every non-soft-deleted `User` in the tenant with at least one primary
+  `UserJobRole` row; `User.role` (STUDENT/INSTRUCTOR/ORG_ADMIN) does not gate inclusion, matching
+  the learner-facing `/capability` page's own lack of role distinction.
+- **Primary-role resolution** — earliest `assignedAt` wins when multiple `isPrimary:true` rows
+  exist, reproduced in batch (not by calling the self-scoped resolver per user) and proven by a
+  dedicated regression test to match `computeCapabilityGap()`'s own resolution for the same user.
+- **Capability projection** — required/current/met computed with the same rules Phase 5 locked
+  (`RoleSkill.isRequired`, `Skill.status:"ACTIVE"`, `UserSkill.proficiency ?? NONE`,
+  `isAtLeast(current, required)`), reusing `proficiencyOrder.ts` directly. `computeCapabilityGap()`
+  itself was not modified.
+- **Privacy-safe aggregate DTO** — exposes only name, role, and per-skill required/current/met.
+  Never queries or exposes `SkillEvidence`, scores, verification status, source identifiers,
+  metadata, or `confidence` — structurally incapable of returning them (no `select` clause ever
+  references them), not merely filtered in the UI.
+- **Deterministic keyset (cursor) pagination over `User`** — sort `name ASC, email ASC, id ASC`
+  (Postgres's default `NULLS LAST` handles the nullable `name` column), opaque base64 cursor,
+  default limit 50 / max 100, invalid cursor → 400. No offset pagination, no `total` count.
+- **`GET /api/org/capability`** — `requireAuthContext → requireTenant → requireRole(["ORG_ADMIN"])`
+  (401/400/403); tenant always from the authenticated context, never the query string.
+  `requireRole()` is a pre-existing Phase 1 helper, unused until now — reused, not a new primitive.
+- **`/org/capability`** — server-gated ORG_ADMIN page + client table with inline per-skill
+  expansion and cursor-driven "Load more"; gap count is `skills.filter(s => !s.met).length`,
+  never a server-fabricated field.
+- **Validation** — 258/258 tests passing (222 at end of Phase 8 + 33 new domain/route tests + 3
+  dedicated nullable-name keyset-pagination regression tests added during final audit).
+- **Zero schema changes** — every field used already existed; the aggregate is a pure projection.
+- **No AI, no `LearningEvent` consumer** — fully deterministic, matching every capability phase
+  since Phase 5.
+- **Deliberately not built this phase**: Instructor capability view (a separate, course-scoped
+  future view — not built here), Manager capability view (blocked on future identity/
+  reporting-line modeling — no such relation exists in the schema today), capability analytics/
+  matrices, evidence/verification UI, a learner-detail route, a role filter.
+- **Pending**: authenticated ORG_ADMIN browser E2E — no credentials/session were available in this
+  environment; automated test coverage (including the security/tenant-isolation/pagination
+  matrices) stands in for it.
+
 ---
 
 ## 3. Current Architecture
@@ -501,7 +555,9 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 | Capability analytics | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5) | Not started |
 | Manager verification | DEFERRED | Future Phase | TBD | none | Phase 5 verification is INSTRUCTOR (course-owner) + SUPER_ADMIN only — a manager/reporting-line verifier role was explicitly out of scope |
 | Learner capability profile / evidence view | **COMPLETE (Phase 7)** | — | — | — | `/capability` page — see §2's Phase 7 section |
-| Manager / instructor / org-admin capability view | DEFERRED | Future Phase | TBD | none | A Phase 7 discovery pass found `src/lib/reports.ts`'s existing `ORG_ADMIN`-gated `getCompletionReport()` pattern would make this LOW authorization complexity if pursued — not built in Phase 7 |
+| ORG_ADMIN capability view | **COMPLETE (Phase 9)** | — | — | — | `getOrganizationCapabilityReport()`, `/org/capability` — see §2's Phase 9 section |
+| Instructor capability view | DEFERRED | Future Phase | TBD | none | A separate, course-scoped view (own enrolled students only, per `getInstructorStudents()`'s existing scope) — not the same query or authorization as the ORG_ADMIN view; not built |
+| Manager capability view | DEFERRED | Future Phase | TBD | new identity/reporting-line modeling | No `MANAGER` role and no reporting-line relation exist in the schema today (`TeamMember` is flat membership only) — blocked on future identity modeling, not a query extension |
 | `LearningPlan` / persisted capability goals | DEFERRED | Future Phase | TBD | none | Evaluated during Phase 7 discovery and judged premature — no product signal yet that a stored goal (vs. a live-computed gap) is needed |
 | AI capability copilot / explanations | DEFERRED | Future Phase | TBD | Capability profile UI (now satisfied by Phase 7) | `AISurface.COPILOT` exists in policy table, unwired; Phase 6/7 discovery explicitly deferred AI until deterministic capability UX existed to explain — it now exists, but AI wiring was not started |
 | `AIAction.EVALUATION` (AI-assisted evidence evaluation) | DEFERRED | Future Phase | TBD | AI WRITE/EXECUTE review | Not started; Phase 5 evidence/verification is entirely non-AI |
@@ -680,6 +736,11 @@ Phase 8:
   Schema changes: NO (verified by `npx prisma validate` and `git diff prisma/schema.prisma` —
     every persisted field, Lesson.textContent/knowledgeDocumentId, Quiz, QuizQuestion, already
     existed; Phase 8 only extends application-layer persistence into them)
+
+Phase 9:
+  Schema changes: NO (verified by `npx prisma validate` and `git diff prisma/schema.prisma` —
+    the aggregate report is a pure projection over User/UserJobRole/RoleSkill/UserSkill,
+    no new model, relationship, or index was needed)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -724,23 +785,26 @@ Phase 7 (Capability Progress / Skill Development View) — COMPLETE
   ↓
 Phase 8 (Course Creator UX Completion) — COMPLETE
   ↓
-Manager / instructor / org-admin capability view (de-risked by the existing
-  ORG_ADMIN + reports.ts pattern — still not started; runner-up in Phase 8's
-  architecture discovery)
+Phase 9 (ORG_ADMIN Capability Overview) — COMPLETE
+  ↓
+Instructor capability view (separate, course-scoped, future — still not started)
+       +
+Manager capability view (blocked on future identity/reporting-line modeling — still not started)
        +
 AI Search
        +
 AI Copilot / capability-explanation layer (now has a deterministic UI to explain,
   as of Phase 7 — still not started)
        +
-Capability analytics / dashboards
+Capability analytics / dashboards (future organizational capability consumers of
+  Phase 9's aggregate report)
        ↓
 Action / Workflow Layer  (needs AI WRITE/EXECUTE — currently blocked by design guardrail)
        ↓
 Agents
 ```
 
-All items after Phase 8 are `Future Phase` — no exact phase numbers have been decided.
+All items after Phase 9 are `Future Phase` — no exact phase numbers have been decided.
 
 ---
 
@@ -770,15 +834,11 @@ Not approved — evaluated candidates only, per the actual completed architectur
    `Capability Gap → Recommended Course` engine + dashboard card).
 7. ~~**Capability surfacing (learner profile view)**~~ — **COMPLETE as of Phase 7** (`/capability`
    page: role, required skills, proficiency, gap status, evidence).
-8. **Manager / instructor / org-admin capability view (RECOMMENDED NEXT)** — the Phase 8
-   architecture discovery's evaluated-but-not-chosen candidate, still the leading next step now
-   that Course Creator UX completion is done. A Phase 7 discovery pass confirmed this is
-   lower-risk than it first appears:
-   `src/lib/reports.ts`'s existing `getCompletionReport(tenantId, filters)` + the `ORG_ADMIN`-gated
-   `/reports` page is a directly reusable authorization/aggregation pattern — no new role, no new
-   permission primitive needed if scoped to `ORG_ADMIN`. Would require new aggregate domain code
-   (today's `computeCapabilityGap`/`getUserSkillState` are hard-scoped to `ctx.userId`, not "any
-   user in the tenant").
+8. ~~**Manager / instructor / org-admin capability view**~~ — **split.** The ORG_ADMIN portion is
+   **COMPLETE as of Phase 9** (`getOrganizationCapabilityReport()`, `/org/capability`). Instructor
+   capability view (a separate, course-scoped view) and Manager capability view (blocked on future
+   identity/reporting-line modeling — no such relation exists in the schema) remain **DEFERRED,
+   Future Phase** — see §4's Capability table.
 9. **AI capability copilot** — `AISurface.COPILOT` exists in the policy table, unwired. Now has a
    deterministic capability UI (Phase 7) to explain, which was the explicit precondition Phase 5/6/7
    discovery repeatedly named before considering this. Still needs a product-definition pass for
@@ -787,13 +847,14 @@ Not approved — evaluated candidates only, per the actual completed architectur
     during Phase 7 discovery; no product signal yet justifies persisting a goal separate from the
     live-computed gap. Revisit only if a real need for tracked/dismissable goals emerges.
 
-**Tradeoff summary**: (1), (3), (6), and (7) are done. (2) is an extension of already-proven,
-already-tested infrastructure with no new security surface — low risk, fast to ship. (4)/(9) need
-product definition first, and (9) additionally needs (7) as a precondition (now satisfied). (5) is
-gated by an explicit guardrail and should come last. (8) is the natural next step in the capability
-vertical now that (1) is done — its authorization risk is known to be low, reusing an existing
-pattern, but it is still new aggregate domain code, not merely a UI layer over existing self-scoped
-functions the way (6)/(7) were. (10) stays deferred until a concrete need appears.
+**Tradeoff summary**: (1), (3), (6), (7), and the ORG_ADMIN portion of (8) are done. (2) is an
+extension of already-proven, already-tested infrastructure with no new security surface — low
+risk, fast to ship, and now the most straightforward remaining candidate. (4)/(9) need product
+definition first, and (9) additionally needs (7) as a precondition (now satisfied). (5) is gated by
+an explicit guardrail and should come last. The Instructor and Manager portions of (8) remain
+deferred — Instructor is a separate, narrower, course-scoped view; Manager is blocked on identity
+modeling that doesn't exist yet, not a query extension. (10) stays deferred until a concrete need
+appears.
 
 ---
 
@@ -845,5 +906,8 @@ Discovered during this audit, not silently resolved:
   landed, so they were never a distinct commit to reference.
 - **Phase 7 is `77b9f8f`** (`feat: add learner capability profile (Phase 7)`) — corrected once the
   commit existed; this roadmap previously stated it had no hash yet.
-- **Phase 8 had no commit hash at the time this section was written** (see the note in §2) — this
-  roadmap update and the Phase 8 implementation are committed together immediately afterward.
+- **Phase 8 is `e137b4c`** (`feat: complete AI course creator workflow`) — corrected once the
+  commit existed; this roadmap previously stated it had no hash yet.
+- **Phase 9 is `42aac3d`** (`feat: implement organization capability report API, domain logic,
+  tests, and UI`), confirmed present in `git log --oneline` at the time this section was written.
+  This roadmap-only update is a separate, subsequent edit — not part of that commit.
