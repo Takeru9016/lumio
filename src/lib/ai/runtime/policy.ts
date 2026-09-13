@@ -15,8 +15,10 @@ import { AIRuntimeError } from "@/lib/ai/runtime/types";
  */
 const POLICY: Record<AISurface, Record<AIAction, boolean>> = {
   TUTOR: { READ: true, GENERATE: true, WRITE: false, EXECUTE: false },
-  // Search only retrieves — it has no generation step of its own.
-  SEARCH: { READ: true, GENERATE: false, WRITE: false, EXECUTE: false },
+  // Phase 10: Search retrieves permission-aware Knowledge and synthesizes a
+  // grounded answer + citations (approved product/security decision — see
+  // docs/V2_AI_ARCHITECTURE.md). Still no WRITE/EXECUTE, same as every surface.
+  SEARCH: { READ: true, GENERATE: true, WRITE: false, EXECUTE: false },
   COURSE_CREATOR: { READ: true, GENERATE: true, WRITE: false, EXECUTE: false },
   COPILOT: { READ: true, GENERATE: true, WRITE: false, EXECUTE: false },
 };

@@ -10,6 +10,14 @@ describe("AI policy — TUTOR", () => {
   it("denies EXECUTE", () => expect(isActionAllowed("TUTOR", "EXECUTE")).toBe(false));
 });
 
+describe("AI policy — SEARCH", () => {
+  it("allows READ", () => expect(isActionAllowed("SEARCH", "READ")).toBe(true));
+  it("allows GENERATE (Phase 10 — approved product/security decision)", () =>
+    expect(isActionAllowed("SEARCH", "GENERATE")).toBe(true));
+  it("denies WRITE", () => expect(isActionAllowed("SEARCH", "WRITE")).toBe(false));
+  it("denies EXECUTE", () => expect(isActionAllowed("SEARCH", "EXECUTE")).toBe(false));
+});
+
 describe("AI policy — COURSE_CREATOR", () => {
   it("allows READ", () => expect(isActionAllowed("COURSE_CREATOR", "READ")).toBe(true));
   it("allows GENERATE", () => expect(isActionAllowed("COURSE_CREATOR", "GENERATE")).toBe(true));

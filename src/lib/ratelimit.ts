@@ -24,3 +24,9 @@ export const pathRatelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(2, "1 m"),
   prefix: "lumio:ai:path",
 });
+
+export const searchRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  prefix: "lumio:ai:search",
+});

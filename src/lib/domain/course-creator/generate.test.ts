@@ -64,10 +64,13 @@ afterAll(async () => {
 });
 
 describe("generateCourseProposal — AI policy boundary", () => {
-  it("throws POLICY_DENIED if called for a surface whose policy denies GENERATE (defensive — no such surface exists today)", async () => {
+  it("throws POLICY_DENIED if called for a surface whose policy denies GENERATE (defensive — every real surface now allows GENERATE, including SEARCH as of Phase 10, so this uses an unrecognized surface to exercise the fail-closed path)", async () => {
     const { tenant, ctx } = await createTenantUser("INSTRUCTOR");
     void tenant;
-    const reqCtx = { auth: ctx, surface: "SEARCH" } as AIRequestContext;
+    const reqCtx = {
+      auth: ctx,
+      surface: "NOT_A_REAL_SURFACE" as AIRequestContext["surface"],
+    } as AIRequestContext;
     lastCitationIndices = [];
     await expect(
       generateCourseProposal(reqCtx, {
