@@ -15,6 +15,7 @@ import {
   Search,
   Settings,
   Sparkles,
+  Target,
   Trophy,
   Users,
   Users2,
@@ -42,6 +43,7 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "My Courses", href: "/instructor/courses", icon: BookOpen },
     { label: "AI Course Creator", href: "/courses/create-ai", icon: Sparkles },
     { label: "Students", href: "/instructor/students", icon: Users },
+    { label: "Capability", href: "/instructor/capability", icon: Target },
     { label: "Requests", href: "/instructor/requests", icon: Inbox },
   ],
   ORG_ADMIN: [
