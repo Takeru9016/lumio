@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 13). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 14). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -61,8 +61,13 @@ retrieval, no citations, and no SkillEvidence in its prompt context. Phase 13 ex
 Copilot layer to the two staff audiences Phase 9/11 had already established — INSTRUCTOR and
 ORG_ADMIN — each explaining that audience's own already-authorized cohort/learner capability
 report, with a `learnerId` mechanism that only filters an already-fetched page in memory and never
-triggers a second database lookup. What remains open is a manager-facing capability view, capability
-analytics, and an Instructor/ORG_ADMIN variant of Search — all deferred (see §4).
+triggers a second database lookup. Phase 14 gave INSTRUCTOR and ORG_ADMIN a real product entrypoint
+into the Knowledge domain itself — create/list/retry/delete over text-only documents, synchronous
+indexing, creator identity tracked via the existing `KnowledgeDocument.metadata` field rather than a
+schema change — closing the gap between Phase 2's fully-built Knowledge/RAG domain and its previous
+seed-script-only reachability; it is deliberately not an AI surface and touches no AI route. What
+remains open is a manager-facing capability view, capability analytics, an Instructor/ORG_ADMIN
+variant of Search, Knowledge connectors, and AI conversation threading — all deferred (see §4).
 
 ---
 
@@ -84,6 +89,7 @@ analytics, and an Instructor/ORG_ADMIN variant of Search — all deferred (see �
 | Phase 11 — Instructor Capability View | COMPLETE | INSTRUCTOR-only, course-ownership-scoped capability overview: `getInstructorCapabilityReport()` (batched, cursor-paginated, no N+1), `GET /api/instructor/capability`, `/instructor/capability` |
 | Phase 12 — AI Capability Copilot | COMPLETE | STUDENT-only, one-shot AI explanation layer over deterministic capability state, embedded in `/capability`: `buildCopilotContext()`, `POST /api/ai/copilot`, `AI_COPILOT_SYSTEM_PROMPT`, `AISurface.COPILOT` (no policy change needed), `copilotRatelimit`, existing V2 AI persistence — no Knowledge retrieval, no citations, no SkillEvidence in prompt context |
 | Phase 13 — Instructor & Organization Capability Copilot | COMPLETE | INSTRUCTOR- and ORG_ADMIN-only AI explanation layer over each audience's own already-authorized capability report: `buildInstructorCopilotContext()`/`buildOrganizationCopilotContext()`, `POST /api/ai/instructor/copilot`, `POST /api/ai/org/copilot`, shared `AI_STAFF_COPILOT_SYSTEM_PROMPT`, reused `AISurface.COPILOT` (no policy change), `instructorCopilotRatelimit`/`orgCopilotRatelimit`, existing V2 AI persistence, embedded in `/instructor/capability` and `/org/capability` — `learnerId` never triggers a direct DB lookup, only in-memory filtering of the one authorized report page already fetched |
+| Phase 14 — Knowledge Ingestion & Management | COMPLETE | Real staff entrypoint into the previously-unreachable Knowledge domain — INSTRUCTOR and ORG_ADMIN can create, list, retry, and delete text-only Knowledge documents: `findOrCreateCreatorSource()`/`canManageKnowledgeDocument()`/`listManageableKnowledgeDocuments()`, `POST`/existing `GET /api/knowledge/documents`, `GET /api/knowledge/documents/manage`, `PATCH`/`DELETE /api/knowledge/documents/[id]`, `/instructor/knowledge`, `/org/knowledge` — synchronous indexing reusing `ingestion.ts` unmodified, creator identity tracked via existing `KnowledgeDocument.metadata` (no schema change), not an AI surface |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
@@ -110,7 +116,9 @@ non-blocking test-coverage observations), no code changes required (363/363 test
 `tsc`/Biome/Prisma clean). Phase 13 is `f413a18` (`feat: implement instructor & organization
 capability copilot (Phase 13)`), source-level audited and accepted with no BLOCKER/HIGH/MEDIUM
 findings (one LOW/two INFO non-blocking observations), no code changes required (422/422 tests
-passing, `tsc`/Biome/Prisma clean).
+passing, `tsc`/Biome/Prisma clean). Phase 14 is `431ada0` (`feat: implement knowledge ingestion &
+management (Phase 14)`), source-level audited and accepted with no BLOCKER/HIGH/MEDIUM findings, no
+code changes required (478/478 tests passing, `tsc`/Biome/Prisma clean).
 
 ### Phase 1 — Domain Foundation
 
@@ -696,6 +704,72 @@ context files and two separate routes, to keep each authorization boundary reada
 - **Pending**: authenticated INSTRUCTOR/ORG_ADMIN browser E2E — no credentials/session were
   available in this environment; automated test coverage stands in for it.
 
+### Phase 14 — Knowledge Ingestion & Management
+
+Gives INSTRUCTOR and ORG_ADMIN a real product entrypoint into the Knowledge domain that Phase 2's
+RAG/retrieval work and Phase 10's Search left otherwise unreachable outside a seed script — no
+schema change, text-only ingestion, synchronous indexing, hard delete. Deliberately **not an AI
+surface**: no new `AISurface`, no policy change, no new AI context builder, no Tutor/Search/Copilot
+route touched.
+
+- **Ownership without a schema change** — `KnowledgeSource`/`KnowledgeDocument` have no creator
+  field, so creator identity is tracked via the existing `KnowledgeDocument.metadata` JSON
+  (`{createdByUserId, createdByRole}`), written server-side only, never accepted from a request
+  body. A new pure predicate, `canManageKnowledgeDocument(ctx, document)`
+  (`src/lib/domain/knowledge/management.ts`), governs *manage* authorization — kept entirely
+  separate from `access.ts`'s unmodified `canReadKnowledgeDocument` (*read* authorization).
+  `ORG_ADMIN` may manage any document in their own tenant; `INSTRUCTOR` only documents whose
+  `metadata.createdByUserId` matches their own id; **`SUPER_ADMIN` and `STUDENT` are both denied,
+  with no shortcut** for either role.
+- **`findOrCreateCreatorSource(ctx)`** — one `KnowledgeSource` (`type: "DOCUMENT"`,
+  `externalId: ctx.userId`) per staff creator, found-or-created on each `POST`, reusing the same
+  per-owner-source pattern `lessonBridge.ts` already established for per-course sources.
+- **`POST /api/knowledge/documents`** (added to the existing route file) — `requireAuthContext →
+  requireTenant → requireRole(["INSTRUCTOR","ORG_ADMIN"]) → Zod .strict() {title, textContent,
+  visibility?}` (rejects `tenantId`/`userId`/`createdByUserId`/`createdByRole`/`sourceId` and any
+  unknown field) → `findOrCreateCreatorSource` → `createTextDocument` (unmodified) →
+  `indexDocument` (unmodified) called **synchronously in the same request** — no queue/worker/cron.
+  A creation that succeeds but whose indexing fails still returns 200 with `status: "ERROR"` — the
+  document *was* created; only indexing failed, never hidden behind a fake `READY` or a 500.
+- **`GET /api/knowledge/documents/manage`** (new, separate path) — returns every status
+  (`PENDING`/`PROCESSING`/`READY`/`ERROR`), role-scoped (`INSTRUCTOR`: own documents via a Prisma
+  JSON-path filter on `metadata.createdByUserId`; `ORG_ADMIN`: every document in-tenant, with
+  creator display name resolved via one batched `User` lookup). Deliberately a different path from
+  Phase 8's picker so that route never needs role branching.
+- **`PATCH`/`DELETE /api/knowledge/documents/[id]`** (new) — both look up the document scoped to
+  `{id, tenantId}` in one query, never an unscoped lookup followed by a tenant check; a cross-tenant
+  or nonexistent id and an in-tenant id the caller isn't authorized for are distinguishable (404 vs
+  403) but neither discloses cross-tenant existence. `PATCH` supports only `{action: "reindex"}` —
+  re-calls `indexDocument` unmodified; no content-editing endpoint exists (to change text, delete
+  and recreate). `DELETE` is a **hard delete** — no archive/soft-delete state was added (none
+  exists in `KnowledgeStatus`, and adding one wasn't justified), relying on the existing
+  `onDelete: Cascade` from `KnowledgeChunk.document`/`KnowledgeAccess.document`.
+- **Existing `GET /api/knowledge/documents`** (Phase 8's Course Creator picker) — byte-for-byte
+  unchanged; confirmed via `git diff --name-only` showing only additive lines above the untouched
+  `GET` handler, and its full existing test suite still passing unmodified.
+- **`RESTRICTED` visibility** — an instructor/org-admin choosing `RESTRICTED` gets a server-created
+  `USER`-scope `KnowledgeAccess` row for themselves only (`grantOwnerAccess`); no course-scoped
+  visibility was introduced (no field/relation exists to express it — see the Phase 14 contract's
+  §10) — default visibility for both roles is `TENANT`.
+- **UI** — `/instructor/knowledge`, `/org/knowledge`, two independent client components (no shared
+  abstraction, matching Phase 13's precedent of keeping separate authorization boundaries readable
+  in isolation). Create form (title/textarea/visibility, optional client-side `.txt`/`.md`
+  `FileReader` import with **no** upload backend, no PDF/DOCX, no binary parsing), status badge,
+  retry-on-`ERROR`, two-step inline delete confirmation.
+- **Validation** — 478/478 tests passing (422 at end of Phase 13 + 56 new), `tsc`/Biome/Prisma
+  clean.
+- **Zero schema changes** — verified by `npx prisma validate` and an empty
+  `git diff -- prisma/schema.prisma prisma/migrations`.
+- **Source-level audit** — `PASS`: zero BLOCKER/HIGH/MEDIUM findings, no code changes required.
+- **Deliberately not built this phase**: Knowledge connectors, PDF/DOCX/binary parsing, external
+  sync, bulk ingestion, scheduled reindexing, stale-chunk cleanup, AI conversation threading,
+  Analytics, `LearningEvent` consumers, Manager capability, Staff AI Search, any new AI
+  surface/tool/agent/workflow/approval/autonomous action, course-level Knowledge association,
+  content editing or version-history UI.
+- **Pending**: authenticated INSTRUCTOR/ORG_ADMIN browser E2E — no credentials/session were
+  available in this environment; the domain-level create→index→`searchKnowledge()` integration
+  test (`managementRetrieval.test.ts`) stands in for it.
+
 ---
 
 ## 3. Current Architecture
@@ -798,10 +872,14 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 
 | Item | Status | Intended Phase | Priority | Dependencies | Notes |
 |---|---|---|---|---|---|
-| File ingestion connectors | DEFERRED | Future Phase | TBD | none | Only `createTextDocument`/manual ingestion exists (`ingestion.ts`) |
+| Staff Knowledge creation/management entrypoint | **COMPLETE (Phase 14)** | — | — | — | `POST/GET/PATCH/DELETE /api/knowledge/documents*`, `/instructor/knowledge`, `/org/knowledge` — see §2's Phase 14 section |
+| File ingestion connectors | DEFERRED | Future Phase | TBD | Phase 14 (manual text ingestion now has a real product baseline to extend) | Only `createTextDocument`/manual text ingestion exists (`ingestion.ts`); Phase 14 gave it a staff UI, not a connector |
+| PDF/DOCX/binary document parsing | DEFERRED | Future Phase | TBD | none | No parsing library exists; explicitly out of scope for Phase 14's text-only MVP |
 | URL ingestion | DEFERRED | Future Phase | TBD | none | Not started |
 | Additional source connectors | DEFERRED | Future Phase | TBD | none | `KnowledgeSourceType` enum has room; no connector code exists |
-| Old-chunk cleanup after re-index | DEFERRED | Future Phase | TBD | none | `indexDocument()` never deletes prior-version chunks — documented gap, no cleanup job |
+| Bulk ingestion | DEFERRED | Future Phase | TBD | none | Phase 14 is single-document creation only |
+| Scheduled reindexing | DEFERRED | Future Phase | TBD | none | Phase 14's reindex is manual/on-demand (`PATCH` retry) only, no cron |
+| Old-chunk cleanup after re-index | DEFERRED | Future Phase | TBD | none | `indexDocument()` never deletes prior-version chunks — documented gap, no cleanup job; unchanged by Phase 14 |
 | Document/version lifecycle improvements | PLANNED | Future Phase | TBD | old-chunk cleanup | Versioning mechanism exists (`activeVersion`/`version`); lifecycle policy around it doesn't |
 | Dedicated embedding-model fields | DEFERRED | Future Phase | TBD | none | Currently stored as JSON in `KnowledgeChunk.metadata`, flagged in Phase 1 audit as non-blocking |
 | Automated Lesson embedding backfill | DEFERRED | Future Phase | TBD | `lessonBridge.ts` wired to a route/cron | `backfillLesson()` exists, callable, not invoked anywhere |
@@ -995,6 +1073,7 @@ Only issues actually identified during Phases 1–4.
 | ~~Lesson-content/assessment generation routes exist but aren't wired into the Course Creator UI~~ | — | — | **Resolved in Phase 8** — see §2's Phase 8 section |
 | ~~Knowledge-document/Skill picker UI don't exist~~ | — | — | **Resolved in Phase 8** — see §2's Phase 8 section |
 | `LearningEvent` has no DB-level uniqueness constraint | Low — `SkillEvidence`/`UserSkill` (the actual capability state) are unaffected; only the `LearningEvent` audit/analytics stream could theoretically double-write under concurrency, and nothing currently consumes `LearningEvent` | No | Course-completion duplication is already closed by the atomic enrollment-transition gate (Phase 5). Quiz events don't need dedup by design — each `QuizAttempt` legitimately emits its own event. A DB-level constraint remains a candidate if a future analytics consumer needs it, not applied speculatively |
+| `findOrCreateCreatorSource()`'s found-or-create has a small theoretical concurrent-request race | Low — no unique constraint exists on `(tenantId, type, externalId)`, so two simultaneous first-ever `POST`s from the same staff member could each create a `KnowledgeSource`; every document still resolves to the correct owner via its own `metadata`, so this never affects authorization or retrieval correctness — a harmless, rare duplicate source at most | No | Deliberately not solved in Phase 14 (see §2's Phase 14 section); revisit only if source deduplication becomes a real operational requirement |
 
 ---
 
@@ -1069,6 +1148,12 @@ Phase 13:
     `git diff -- prisma/schema.prisma prisma/migrations` — the instructor/org copilot context
     builders reuse Phase 9/11's existing aggregate report functions and Phase 3's V2 AI
     persistence model as-is; no new model, field, enum, index, or policy change was needed)
+
+Phase 14:
+  Schema changes: NO (verified by `npx prisma validate` and an empty
+    `git diff -- prisma/schema.prisma prisma/migrations` — creator identity is tracked via the
+    existing `KnowledgeDocument.metadata` JSON field, not a new column; no new model, field, enum,
+    index, or policy change was needed)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -1123,9 +1208,18 @@ Phase 12 (AI Capability Copilot) — COMPLETE
   ↓
 Phase 13 (Instructor & Organization Capability Copilot) — COMPLETE
   ↓
-Manager capability view (blocked on future identity/reporting-line modeling — still not started)
+Phase 14 (Knowledge Ingestion & Management) — COMPLETE
+  ↓
+real staff-managed Knowledge corpus
+  ↓
+existing Tutor / Search grounding (unmodified, now fed by real staff-created content
+  instead of seed data only)
+  ↓
+future Knowledge Connectors (now has a manual product baseline to extend)
        +
-Instructor/ORG_ADMIN AI Search variants (Phase 10 is STUDENT-only by design — still not started)
+future Staff AI Search (now has real staff-added content worth searching)
+       +
+Manager capability view (blocked on future identity/reporting-line modeling — still not started)
        +
 Capability analytics / dashboards (future organizational capability consumers of
   Phase 9's aggregate report)
@@ -1135,8 +1229,9 @@ Action / Workflow Layer  (needs AI WRITE/EXECUTE — currently blocked by design
 Agents
 ```
 
-All items after Phase 10 (except Phase 13, now complete) are `Future Phase` — no exact phase
-numbers have been decided.
+All items after Phase 10 (except Phase 13/14, now complete) are `Future Phase` — no exact phase
+numbers have been decided. The next phase after 14 has **not** been chosen automatically here — it
+requires its own fresh discovery/architecture audit (see §10).
 
 ---
 
@@ -1180,15 +1275,34 @@ Not approved — evaluated candidates only, per the actual completed architectur
 11. ~~**Instructor/ORG_ADMIN Copilot variants**~~ — **COMPLETE as of Phase 13**
     (`POST /api/ai/instructor/copilot`, `POST /api/ai/org/copilot`, embedded in
     `/instructor/capability`/`/org/capability` — see §2's Phase 13 section).
+12. ~~**Knowledge Ingestion & Management**~~ — **COMPLETE as of Phase 14** (staff-facing
+    create/list/retry/delete over the Knowledge domain, INSTRUCTOR + ORG_ADMIN,
+    `POST/GET/PATCH/DELETE /api/knowledge/documents*`, `/instructor/knowledge`, `/org/knowledge` —
+    see §2's Phase 14 section).
 
-**Tradeoff summary**: (1), (2), (3), (4)/(9), (6), (7), (11), and the ORG_ADMIN + Instructor
+**Tradeoff summary**: (1), (2), (3), (4)/(9), (6), (7), (11), (12), and the ORG_ADMIN + Instructor
 portions of (8) are done. (5) is gated by an explicit guardrail and should come last — it remains
 the only undone item in this list that isn't a deferred variant/extension of something already
 shipped. The Manager portion of (8) remains deferred — blocked on identity/reporting-line modeling
 that doesn't exist yet, not a query extension. The Instructor/ORG_ADMIN variant of (2) (AI Search)
 remains a plausible next extension of Phase 10's infrastructure, but was not built — Phase 10 is
 STUDENT-only by design; the equivalent variant of (4)/(9) (Copilot) is now done as (11). (10) stays
-deferred until a concrete need appears.
+deferred until a concrete need appears. (12)'s completion gives a real corpus for (2)'s deferred
+Instructor/ORG_ADMIN Search variant and for a future Staff AI Search candidate to actually ground
+answers in.
+
+**Phase 15 — not yet chosen.** The following remain open candidates, evaluated but not selected;
+picking one requires its own fresh discovery/architecture audit against the repository as it
+stands after Phase 14, not an automatic continuation of this list:
+
+- AI conversation threading (schema already supports multi-turn `AIConversation`/`AIMessage`;
+  every route today creates one conversation per request and never reads it back)
+- `LearningEvent` / Analytics foundation (events are emitted, nothing consumes them)
+- Knowledge Connectors (now has Phase 14's manual ingestion as a baseline to extend)
+- Staff AI Search (Instructor/ORG_ADMIN variant of Phase 10, now has real staff-added content)
+- AI Evaluation / quality infrastructure
+- Action / Tool Foundation (still gated by the Phase 3 design-review guardrail — item (5) above)
+- Manager Capability (still blocked on identity/reporting-line modeling)
 
 ---
 
@@ -1269,3 +1383,7 @@ Discovered during this audit, not silently resolved:
   13)`). Same situation again: the implementation task explicitly forbade committing, so it sat
   uncommitted until this finalization task began. Committed as its own, separate `feat:` commit
   immediately before this roadmap edit, matching the Phase 10/11/12 precedent exactly.
+- **Phase 14 is `431ada0`** (`feat: implement knowledge ingestion & management (Phase 14)`). Same
+  situation again: the implementation task explicitly forbade committing, so it sat uncommitted
+  until this finalization task began. Committed as its own, separate `feat:` commit immediately
+  before this roadmap edit, matching the Phase 10/11/12/13 precedent exactly.
