@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 11). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 12). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -53,9 +53,13 @@ built entirely on the Phase 2/3 Knowledge + AI runtime foundation (one approved 
 visibility to a third audience — an INSTRUCTOR-only view scoped to students enrolled in courses
 the instructor owns (`/instructor/capability`), distinct from both the learner's own `/capability`
 and ORG_ADMIN's tenant-wide `/org/capability`, reusing the same deterministic gap semantics without
-importing either prior report. What remains open is a manager-facing capability view, capability
-analytics, an AI explanation/Copilot layer, and Instructor/ORG_ADMIN variants of Search — all
-deferred (see §4).
+importing either prior report. Phase 12 shipped the first AI layer over the capability system
+itself — a STUDENT-only, one-shot AI Capability Copilot embedded in `/capability` that explains a
+learner's own already-computed role/gaps/recommendations in natural language, grounded exclusively
+in `computeCapabilityGap()`/`getUserSkillState()`/`getRecommendedLearning()` with no Knowledge
+retrieval, no citations, and no SkillEvidence in its prompt context. What remains open is a
+manager-facing capability view, capability analytics, and Instructor/ORG_ADMIN variants of both
+Search and Copilot — all deferred (see §4).
 
 ---
 
@@ -75,6 +79,7 @@ deferred (see §4).
 | Phase 9 — ORG_ADMIN Capability Overview | COMPLETE | Tenant-wide, ORG_ADMIN-only capability overview: `getOrganizationCapabilityReport()` (batched, cursor-paginated, no N+1), `GET /api/org/capability`, `/org/capability` |
 | Phase 10 — AI Search | COMPLETE | Student-only, permission-aware, one-shot answer + citations over tenant Knowledge: `POST /api/ai/search`, `/search`, `AISurface.SEARCH` GENERATE enabled, `AI_SEARCH_SYSTEM_PROMPT`, existing V2 AI persistence, `searchRatelimit` |
 | Phase 11 — Instructor Capability View | COMPLETE | INSTRUCTOR-only, course-ownership-scoped capability overview: `getInstructorCapabilityReport()` (batched, cursor-paginated, no N+1), `GET /api/instructor/capability`, `/instructor/capability` |
+| Phase 12 — AI Capability Copilot | COMPLETE | STUDENT-only, one-shot AI explanation layer over deterministic capability state, embedded in `/capability`: `buildCopilotContext()`, `POST /api/ai/copilot`, `AI_COPILOT_SYSTEM_PROMPT`, `AISurface.COPILOT` (no policy change needed), `copilotRatelimit`, existing V2 AI persistence — no Knowledge retrieval, no citations, no SkillEvidence in prompt context |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
@@ -95,6 +100,9 @@ tests passing, `tsc`/Biome/Prisma clean). Phase 10 is `d670609` (`feat: implemen
 changes required (292/292 tests passing, `tsc`/Biome/Prisma clean). Phase 11 is `be217db`
 (`feat: implement instructor capability view`), source-level audited and accepted with two LOW
 and two INFO non-blocking findings, no code changes required (332/332 tests passing,
+`tsc`/Biome/Prisma clean). Phase 12 is `2366e20` (`feat: implement AI capability copilot`),
+source-level audited and accepted with no BLOCKER/HIGH/MEDIUM findings (two LOW/two INFO
+non-blocking test-coverage observations), no code changes required (363/363 tests passing,
 `tsc`/Biome/Prisma clean).
 
 ### Phase 1 — Domain Foundation
@@ -538,6 +546,69 @@ authorization scope as either.
   environment; automated test coverage (including the real-DB ownership/tenant-isolation/pagination
   matrices) stands in for it.
 
+### Phase 12 — AI Capability Copilot
+
+The first AI layer over the capability system itself: a STUDENT-only, one-shot AI explanation
+surface over the learner's own already-computed capability state, embedded directly in
+`/capability` rather than as a separate route. Deliberately not AI Search: no Knowledge retrieval,
+no citations — its only grounding is the deterministic capability/recommendation data Phase 5/6/7
+already established.
+
+- **`buildCopilotContext(ctx)`** (`src/lib/domain/capability/copilotContext.ts`) — self-scoped by
+  `ctx` only, no caller-supplied identity override. Calls `computeCapabilityGap(ctx)`,
+  `getUserSkillState(ctx)`, and `getRecommendedLearning(ctx)` exactly once each via `Promise.all`,
+  never in a loop, and never modifies any of the three. Does not import `@/lib/db` at all —
+  structurally incapable of querying `SkillEvidence` or anything else, not merely filtered after
+  the fact. Returns a bounded, id-free shape (`hasPrimaryRole`, `roleName`, `requiredSkills[]`,
+  `recommendedCourses[]`) — no `skillId`/`courseId`/`roleId` reaches the model. A learner with no
+  primary role is represented honestly (`hasPrimaryRole: false`), never fabricated.
+- **`POST /api/ai/copilot`** (`src/app/api/ai/copilot/route.ts`) — `withAiGuards(userId,
+  copilotRatelimit) → tenant required (400) → STUDENT-only (403) → Zod .strict() {query} →
+  assertActionAllowed(COPILOT, GENERATE) → buildCopilotContext → generateText → V2 persistence →
+  incrementAiUsage`, mirroring Phase 10 Search's route ordering exactly. No `buildAIContext`, no
+  `searchKnowledge`, no `searchSimilarLessons` anywhere in the file — proven both by direct
+  inspection and by a source-regex architecture test (not a plain substring check, which would
+  false-fail against this file's own explanatory doc comments, per the fix Phase 11 already
+  established for the same class of test).
+- **No policy change** — `AISurface.COPILOT` has carried `{READ: true, GENERATE: true, WRITE:
+  false, EXECUTE: false}` in `policy.ts` since Phase 3, unused until this phase. `policy.ts` itself
+  is untouched. `modelFor("COPILOT")` and `surfaceToConversationType("COPILOT")` (`GENERAL`) already
+  resolved to real values before this phase (verified directly), so no `provider.ts`/`persistence.ts`
+  change was needed either.
+- **Prompt security** (`AI_SEARCH_SYSTEM_PROMPT`'s sibling, `AI_COPILOT_SYSTEM_PROMPT` in
+  `src/lib/ai/prompts.ts`) — capability context (role/skill/course names, some of which may be
+  instructor- or org-entered text) is explicitly delimited and framed as reference data, never
+  instructions; the model is told never to invent a role/skill/proficiency/course/recommendation,
+  never to claim Knowledge retrieval or action-taking, and never to reveal another learner's data.
+- **Persistence** — existing V2 tables only: one `AIConversation` (`GENERAL`), one user +
+  one assistant `AIMessage` per request (never a thread — no read-back of prior messages), one
+  `AIExecution` (`operation: "capability.copilot"`), one `AIUsageEvent`. Zero `AISourceCitation`
+  rows — `persistCitations` isn't even imported. `incrementAiUsage` fires only after `generateText`
+  succeeds; a thrown generation error returns before reaching it.
+- **UI** — `CapabilityCopilotPanel.tsx`, embedded inside `CapabilityClient.tsx`'s existing `"ready"`
+  state (2-line import + 4-line render insertion). No new route, no new Sidebar entry. `AiBadge`
+  and existing `--color-ai` tokens reused, no new visual language. Each query replaces the previous
+  answer — a single `answer` state value, no thread/history array. Plain text interpolation only,
+  no `dangerouslySetInnerHTML`.
+- **Validation** — 363/363 tests passing (332 at end of Phase 11 + 31 new: 6 domain + 25 route),
+  `tsc`/Biome/Prisma clean.
+- **Zero schema changes** — verified by `npx prisma validate` and an empty
+  `git diff -- prisma/schema.prisma prisma/migrations`.
+- **Source-level audit** — `PASS`: zero BLOCKER/HIGH/MEDIUM findings. Two LOW findings (below), two
+  INFO observations (Copilot panel renders only in `/capability`'s `"ready"` state, not the
+  no-role state, even though the API/prompt fully support explaining that state — a product/UX
+  scope choice, not a defect; and a recurring third-party banner line appearing in local `prisma
+  validate` output, external to this repository) — none required a code change.
+- **LOW findings, recorded as non-blocking future test hardening only, not a current defect**:
+  1. `assertActionAllowed`, the omission of a `tools` key from the `generateText` call, and the
+     success-path `markSucceeded` call are all true in source (verified directly) but not
+     independently spied on in `route.test.ts` — a future regression in any of the three wouldn't
+     be caught by a dedicated test today, only inferred from response status.
+- **Deliberately not built this phase**: Knowledge retrieval, citations, multi-turn/thread UI,
+  Instructor or ORG_ADMIN Copilot variants, any tool/action/WRITE/EXECUTE capability.
+- **Pending**: authenticated STUDENT browser E2E — no credentials/session were available in this
+  environment; automated test coverage stands in for it.
+
 ---
 
 ## 3. Current Architecture
@@ -672,7 +743,8 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 |---|---|---|---|---|---|
 | AI Search | **COMPLETE (Phase 10)** | — | — | — | Student-only answer + citations over tenant Knowledge — `POST /api/ai/search`, `/search`; see §2's Phase 10 section |
 | Instructor/ORG_ADMIN AI Search variants | DEFERRED | Future Phase | TBD | none | Phase 10 is STUDENT-only by design; a broader-corpus/cross-user search variant was deliberately not built |
-| AI Copilot | PLANNED | Future Phase | TBD | none | `AISurface.COPILOT` exists in policy table, no route |
+| AI Capability Copilot | **COMPLETE (Phase 12)** | — | — | — | STUDENT-only, one-shot capability explanation, embedded in `/capability` — `POST /api/ai/copilot`; see §2's Phase 12 section |
+| Instructor/ORG_ADMIN Copilot variants | DEFERRED | Future Phase | TBD | none | Phase 12 is STUDENT-only by design; not built |
 | AI Recommendations | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5) | Listed as a future AI workflow ("AI Learning Coach"), not started |
 | Additional AI Tutor capabilities (standalone, not lesson-scoped) | DEFERRED | Future Phase | TBD | none | Tutor still requires `lessonId` to trigger; not yet "ask anything the tenant has indexed" |
 | Course Creator production hardening | **COMPLETE (Phase 8)** | — | — | — | Picker UIs + content/assessment UI wiring — see §2's Phase 8 section |
@@ -704,7 +776,7 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 | Instructor capability view | **COMPLETE (Phase 11)** | — | — | — | `getInstructorCapabilityReport()`, `/instructor/capability` — course-ownership-scoped, own enrolled students only — see §2's Phase 11 section |
 | Manager capability view | DEFERRED | Future Phase | TBD | new identity/reporting-line modeling | No `MANAGER` role and no reporting-line relation exist in the schema today (`TeamMember` is flat membership only) — blocked on future identity modeling, not a query extension |
 | `LearningPlan` / persisted capability goals | DEFERRED | Future Phase | TBD | none | Evaluated during Phase 7 discovery and judged premature — no product signal yet that a stored goal (vs. a live-computed gap) is needed |
-| AI capability copilot / explanations | DEFERRED | Future Phase | TBD | Capability profile UI (now satisfied by Phase 7) | `AISurface.COPILOT` exists in policy table, unwired; Phase 6/7 discovery explicitly deferred AI until deterministic capability UX existed to explain — it now exists, but AI wiring was not started |
+| AI capability copilot / explanations | **COMPLETE (Phase 12)** | — | — | — | `buildCopilotContext()`, `POST /api/ai/copilot`, embedded in `/capability` — see §2's Phase 12 section |
 | `AIAction.EVALUATION` (AI-assisted evidence evaluation) | DEFERRED | Future Phase | TBD | AI WRITE/EXECUTE review | Not started; Phase 5 evidence/verification is entirely non-AI |
 | `LessonSkill` / `AssessmentSkill` (lesson- and assessment-level skill granularity) | DESIGN DECISION REQUIRED | Future Phase | TBD | none | Phase 5 evidence resolves only at the `CourseSkill` level, per the locked Phase 5 contract; no such tables exist |
 | `confidence` semantics / scoring | DEFERRED | Future Phase | TBD | none | `UserSkill.confidence` exists in schema but is deliberately never written by Phase 5 — no scoring model defined yet |
@@ -831,7 +903,7 @@ Only issues actually identified during Phases 1–4.
 | `AIUsageEvent.estimatedCost` not computed | Low — no pricing table exists; field is simply always null | No | Deferred — needs a pricing table, not invented speculatively |
 | Route-level AI integration tests are limited | Medium for confidence in full request/response wiring — domain-layer tests are thorough (95 tests), but no route-level Clerk-mocked test exists for any `/api/ai/*` route | No | Deliberate: "Do NOT add route-level Clerk mocks merely for this test" was a repeated, explicit constraint — not an oversight |
 | Test database setup is manual/local, not scripted | Low — reproducible by a documented sequence (`docs/V2_DATABASE_MIGRATION.md` §10), but not a single command | No | A `docker-compose.test.yml` was named as the natural next step if this becomes recurring friction — not done |
-| `COURSE_CREATOR` (runtime `AISurface`) vs `COURSE_BUILDER` (schema `AIConversationType`) naming mismatch | Low — deliberate and documented (`persistence.ts`'s `surfaceToConversationType`), not a bug | No | Revisit only if/when `SEARCH`/`COPILOT` ship real routes and need their own schema value |
+| `COURSE_CREATOR` (runtime `AISurface`) vs `COURSE_BUILDER` (schema `AIConversationType`) naming mismatch | Low — deliberate and documented (`persistence.ts`'s `surfaceToConversationType`), not a bug | No | `SEARCH` (Phase 10) and `COPILOT` (Phase 12) have both now shipped real routes, both still mapping to `GENERAL` — neither needed its own schema value in practice; revisit only if a future surface's persisted rows genuinely need to be distinguished from `GENERAL` |
 | ~~Lesson-content/assessment generation routes exist but aren't wired into the Course Creator UI~~ | — | — | **Resolved in Phase 8** — see §2's Phase 8 section |
 | ~~Knowledge-document/Skill picker UI don't exist~~ | — | — | **Resolved in Phase 8** — see §2's Phase 8 section |
 | `LearningEvent` has no DB-level uniqueness constraint | Low — `SkillEvidence`/`UserSkill` (the actual capability state) are unaffected; only the `LearningEvent` audit/analytics stream could theoretically double-write under concurrency, and nothing currently consumes `LearningEvent` | No | Course-completion duplication is already closed by the atomic enrollment-transition gate (Phase 5). Quiz events don't need dedup by design — each `QuizAttempt` legitimately emits its own event. A DB-level constraint remains a candidate if a future analytics consumer needs it, not applied speculatively |
@@ -897,6 +969,12 @@ Phase 11:
     `git diff -- prisma/schema.prisma prisma/migrations` — the instructor aggregate is a pure
     projection over Enrollment/Course/User/UserJobRole/RoleSkill/UserSkill, no new model,
     relationship, or index was needed)
+
+Phase 12:
+  Schema changes: NO (verified by `npx prisma validate` and an empty
+    `git diff -- prisma/schema.prisma prisma/migrations` — Copilot reuses every existing
+    capability read function and V2 AI persistence model as-is; no new model, field, enum,
+    index, or policy change was needed)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -947,12 +1025,13 @@ Phase 10 (AI Search) — COMPLETE
   ↓
 Phase 11 (Instructor Capability View) — COMPLETE
   ↓
+Phase 12 (AI Capability Copilot) — COMPLETE
+  ↓
 Manager capability view (blocked on future identity/reporting-line modeling — still not started)
        +
 Instructor/ORG_ADMIN AI Search variants (Phase 10 is STUDENT-only by design — still not started)
        +
-AI Copilot / capability-explanation layer (now has a deterministic UI to explain,
-  as of Phase 7 — still not started)
+Instructor/ORG_ADMIN Copilot variants (Phase 12 is STUDENT-only by design — still not started)
        +
 Capability analytics / dashboards (future organizational capability consumers of
   Phase 9's aggregate report)
@@ -981,9 +1060,9 @@ Not approved — evaluated candidates only, per the actual completed architectur
    verification, and on-read capability gaps. Recommendations (Phase 6) and the learner profile
    view (Phase 7) are now also complete — see items 6/7 below. What remains (manager verification,
    capability analytics) is tracked in §4's Capability table.
-4. **AI Copilot** — `AISurface.COPILOT` exists in the policy table but has no defined product
-   surface/UX yet (unlike Search, which has an obvious shape). Needs a product-definition step
-   before implementation, not just engineering.
+4. ~~**AI Copilot**~~ — **COMPLETE as of Phase 12** (`POST /api/ai/copilot`, embedded in
+   `/capability`; STUDENT-only, one-shot, grounded exclusively in deterministic capability state —
+   see §2's Phase 12 section).
 5. **Action/tool foundation** — explicitly the highest-guardrail item: `policy.ts`'s WRITE/EXECUTE
    denial is described as "actively disabled... not merely unimplemented," requiring an explicit
    design review before any code starts. Should come after, not before, the lower-risk items above
@@ -998,21 +1077,19 @@ Not approved — evaluated candidates only, per the actual completed architectur
    `/instructor/capability`). Manager capability view (blocked on future identity/reporting-line
    modeling — no such relation exists in the schema) remains **DEFERRED, Future Phase** — see §4's
    Capability table.
-9. **AI capability copilot** — `AISurface.COPILOT` exists in the policy table, unwired. Now has a
-   deterministic capability UI (Phase 7) to explain, which was the explicit precondition Phase 5/6/7
-   discovery repeatedly named before considering this. Still needs a product-definition pass for
-   what it explains and how.
+9. ~~**AI capability copilot**~~ — **COMPLETE as of Phase 12** (same item as (4) above — listed
+   twice in this section's original numbering; both entries now point to the same shipped surface).
 10. **`LearningPlan` / persisted capability goals** — evaluated and explicitly rejected as premature
     during Phase 7 discovery; no product signal yet justifies persisting a goal separate from the
     live-computed gap. Revisit only if a real need for tracked/dismissable goals emerges.
 
-**Tradeoff summary**: (1), (2), (3), (6), (7), and the ORG_ADMIN + Instructor portions of (8) are
-done. (4)/(9) need product definition first, and (9) additionally needs (7) as a precondition (now
-satisfied). (5) is gated by an explicit guardrail and should come last. The Manager portion of (8)
-remains deferred — blocked on identity/reporting-line modeling that doesn't exist yet, not a query
-extension. An Instructor/ORG_ADMIN variant of (2) is a plausible next extension of Phase 10's
-infrastructure but was not built — Phase 10 is STUDENT-only by design. (10) stays deferred until a
-concrete need appears.
+**Tradeoff summary**: (1), (2), (3), (4)/(9), (6), (7), and the ORG_ADMIN + Instructor portions of
+(8) are done. (5) is gated by an explicit guardrail and should come last — it remains the only
+undone item in this list that isn't a deferred variant/extension of something already shipped. The
+Manager portion of (8) remains deferred — blocked on identity/reporting-line modeling that doesn't
+exist yet, not a query extension. Instructor/ORG_ADMIN variants of (2) and (4)/(9) are plausible
+next extensions of Phase 10's and Phase 12's infrastructure respectively, but neither was built —
+both are STUDENT-only by design. (10) stays deferred until a concrete need appears.
 
 ---
 
@@ -1082,3 +1159,10 @@ Discovered during this audit, not silently resolved:
   roadmap-finalization task began, per the task's own explicit "do not commit/push during
   implementation" instruction from the prior phase. Committed as its own, separate commit
   immediately before this roadmap edit, matching the Phase 10 precedent exactly.
+- **Phase 12 is `2366e20`** (`feat: implement AI capability copilot`). Same situation again: the
+  implementation was still uncommitted when this finalization task began (the audit task before it
+  explicitly forbade committing), so it was committed as its own, separate `feat:` commit
+  immediately before this roadmap edit — even though this task's own instruction asked for "exactly
+  one final documentation commit." Splitting it in two keeps the `docs:`-titled commit actually
+  docs-only and avoids the repository ever showing this document claiming Phase 12 "complete" while
+  its code sat uncommitted, matching the Phase 10/11 precedent exactly.
