@@ -252,3 +252,93 @@ export async function recordQuizOutcome(params: QuizOutcomeParams): Promise<void
     );
   }
 }
+
+export type AssignmentGradeOutcomeParams = {
+  tenantId: string;
+  userId: string;
+  assignmentId: string;
+  submissionId: string;
+  score: number;
+  maxScore: number;
+  occurredAt: Date;
+};
+
+/**
+ * The single entry point the assignment-grading route calls. Phase 17:
+ * assignments have no pass/fail concept anywhere in the schema (unlike
+ * Quiz.passingScore), so — per the locked contract — every successfully
+ * graded submission qualifies for ASSESSMENT evidence; score magnitude does
+ * not gate evidence creation. sourceId is the submission's id, which is
+ * stable across regrades (AssignmentSubmission is unique per
+ * [userId, assignmentId]), so a regrade that still qualifies (always true
+ * here) hits the same SkillEvidence P2002 no-op as quiz's regrading case —
+ * first grade's evidence wins, a later regrade never updates or removes it.
+ * ASSIGNMENT_GRADED is always emitted; metadata omits any pass/fail field
+ * rather than inventing one.
+ */
+export async function recordAssignmentGradeOutcome(
+  params: AssignmentGradeOutcomeParams
+): Promise<void> {
+  const { tenantId, userId, assignmentId, submissionId, score, maxScore, occurredAt } = params;
+
+  const assignment = await db.assignment.findUnique({
+    where: { id: assignmentId },
+    select: {
+      lesson: {
+        select: { section: { select: { course: { select: { id: true, tenantId: true } } } } },
+      },
+    },
+  });
+
+  let courseId: string | undefined;
+
+  if (assignment) {
+    const course = assignment.lesson.section.course;
+    courseId = course.id;
+    try {
+      assertSameTenant(tenantId, [{ tenantId: course.tenantId ?? "", label: "Course" }]);
+      const mappings = await resolveValidCourseSkillMappings(tenantId, course.id);
+      for (const mapping of mappings) {
+        await recordSkillEvidenceOutcome({
+          tenantId,
+          userId,
+          skillId: mapping.skillId,
+          type: "ASSESSMENT",
+          sourceType: "AssignmentSubmission",
+          sourceId: submissionId,
+          score,
+          occurredAt,
+        });
+      }
+    } catch (err) {
+      if (err instanceof KnowledgeAccessError) {
+        console.warn(
+          `[capability] Skipping evidence for assignment ${assignmentId}: course tenant mismatch`,
+          err
+        );
+      } else {
+        console.error(
+          `[capability] Failed to record assessment evidence for submission ${submissionId}`,
+          err
+        );
+      }
+    }
+  }
+
+  try {
+    await emitLearningEvent({
+      tenantId,
+      userId,
+      eventType: "ASSIGNMENT_GRADED",
+      entityType: "AssignmentSubmission",
+      entityId: submissionId,
+      occurredAt,
+      metadata: { assignmentId, courseId, score, maxScore },
+    });
+  } catch (err) {
+    console.error(
+      `[capability] Failed to emit ASSIGNMENT_GRADED LearningEvent for submission ${submissionId}`,
+      err
+    );
+  }
+}

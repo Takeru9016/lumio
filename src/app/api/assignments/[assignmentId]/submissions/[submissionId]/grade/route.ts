@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
+import { recordAssignmentGradeOutcome } from "@/lib/domain/capability/outcomes";
 import { createNotification } from "@/lib/notifications";
 
 const bodySchema = z.object({
@@ -90,6 +91,20 @@ export async function PUT(
       body: `"${assignment.title}" in ${assignment.lesson.section.course.title} scored ${score}/${assignment.maxScore}`,
       link: "/assignments",
     }).catch(() => {});
+
+    // Phase 17 capability loop — additive, best-effort at this boundary (see
+    // src/lib/domain/capability/outcomes.ts): never throws, never affects
+    // this response. Tenant-gated like every other V2 write. The student
+    // (submission owner) is the evidence owner, never the grading instructor.
+    await recordAssignmentGradeOutcome({
+      tenantId: existingSubmission.user.tenantId,
+      userId: existingSubmission.userId,
+      assignmentId,
+      submissionId: submission.id,
+      score,
+      maxScore: assignment.maxScore,
+      occurredAt: submission.gradedAt ?? new Date(),
+    });
   }
 
   return NextResponse.json({ submission });

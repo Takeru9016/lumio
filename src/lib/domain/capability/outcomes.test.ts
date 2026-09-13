@@ -1,12 +1,18 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import {
+  createAssignment,
+  createAssignmentSubmission,
   createCourse,
   createQuiz,
   createSkill,
   mapCourseSkill,
 } from "@/lib/domain/capability/__test__/fixtures";
-import { recordCourseCompletionOutcome, recordQuizOutcome } from "@/lib/domain/capability/outcomes";
+import {
+  recordAssignmentGradeOutcome,
+  recordCourseCompletionOutcome,
+  recordQuizOutcome,
+} from "@/lib/domain/capability/outcomes";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 
 afterAll(async () => {
@@ -296,5 +302,227 @@ describe("recordQuizOutcome", () => {
     expect(events).toHaveLength(1);
     expect(events[0].entityType).toBe("QuizAttempt");
     expect(events[0].entityId).toBe("test-attempt-pass");
+  });
+});
+
+describe("recordAssignmentGradeOutcome", () => {
+  it("a graded submission creates ASSESSMENT evidence for every mapped skill, owned by the student", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skillA = await createSkill(tenant.id);
+    const skillB = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skillA.id);
+    await mapCourseSkill(course.id, skillB.id);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 40,
+      maxScore: 100,
+      occurredAt: new Date(),
+    });
+
+    const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
+    expect(evidence).toHaveLength(2);
+    expect(evidence.every((e) => e.type === "ASSESSMENT")).toBe(true);
+    expect(
+      evidence.every((e) => e.sourceType === "AssignmentSubmission" && e.sourceId === submission.id)
+    ).toBe(true);
+    expect(evidence.every((e) => e.score === 40)).toBe(true);
+    expect(evidence.every((e) => e.verificationStatus === "UNVERIFIED")).toBe(true);
+
+    const userSkills = await db.userSkill.findMany({ where: { userId: learnerCtx.userId } });
+    expect(userSkills).toHaveLength(2);
+  });
+
+  it("a low-scoring graded submission still creates evidence — no pass/fail concept exists for assignments", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 5,
+      maxScore: 100,
+      occurredAt: new Date(),
+    });
+
+    const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
+    expect(evidence).toHaveLength(1);
+    expect(evidence[0].score).toBe(5);
+  });
+
+  it("creates no evidence when the course has no CourseSkill mappings, but still emits ASSIGNMENT_GRADED", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 80,
+      maxScore: 100,
+      occurredAt: new Date(),
+    });
+
+    const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
+    expect(evidence).toHaveLength(0);
+
+    const events = await db.learningEvent.findMany({
+      where: { userId: learnerCtx.userId, eventType: "ASSIGNMENT_GRADED" },
+    });
+    expect(events).toHaveLength(1);
+  });
+
+  it("skips a cross-tenant CourseSkill mapping and still processes valid ones, without throwing", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { tenant: otherTenant } = await createTenantUser();
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const validSkill = await createSkill(tenant.id);
+    const crossTenantSkill = await createSkill(otherTenant.id);
+    await mapCourseSkill(course.id, validSkill.id);
+    await mapCourseSkill(course.id, crossTenantSkill.id);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 60,
+      maxScore: 100,
+      occurredAt: new Date(),
+    });
+
+    const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
+    expect(evidence).toHaveLength(1);
+    expect(evidence[0].skillId).toBe(validSkill.id);
+  });
+
+  it("emits ASSIGNMENT_GRADED with assignmentId/courseId/score/maxScore metadata and no isPassed field", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const assignment = await createAssignment(lesson.id, 50);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 30,
+      maxScore: 50,
+      occurredAt: new Date(),
+    });
+
+    const events = await db.learningEvent.findMany({
+      where: { userId: learnerCtx.userId, eventType: "ASSIGNMENT_GRADED" },
+    });
+    expect(events).toHaveLength(1);
+    expect(events[0].entityType).toBe("AssignmentSubmission");
+    expect(events[0].entityId).toBe(submission.id);
+    expect(events[0].metadata).toMatchObject({
+      assignmentId: assignment.id,
+      courseId: course.id,
+      score: 30,
+      maxScore: 50,
+    });
+    expect(events[0].metadata).not.toHaveProperty("isPassed");
+  });
+
+  it("a regrade of the same submission is idempotent — first evidence wins, no duplicate row", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 70,
+      maxScore: 100,
+      occurredAt: new Date(),
+    });
+    // Regrade: same stable submission.id (AssignmentSubmission is unique per
+    // [userId, assignmentId]) — hits the existing SkillEvidence P2002 no-op.
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 95,
+      maxScore: 100,
+      occurredAt: new Date(),
+    });
+
+    const evidence = await db.skillEvidence.findMany({
+      where: { userId: learnerCtx.userId, skillId: skill.id },
+    });
+    expect(evidence).toHaveLength(1);
+    expect(evidence[0].score).toBe(70);
+  });
+
+  it("a regrade that lowers the score never degrades or removes existing evidence", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 90,
+      maxScore: 100,
+      occurredAt: new Date(),
+    });
+    await recordAssignmentGradeOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      assignmentId: assignment.id,
+      submissionId: submission.id,
+      score: 10,
+      maxScore: 100,
+      occurredAt: new Date(),
+    });
+
+    const evidence = await db.skillEvidence.findMany({
+      where: { userId: learnerCtx.userId, skillId: skill.id },
+    });
+    expect(evidence).toHaveLength(1);
+    expect(evidence[0].score).toBe(90);
+
+    const userSkill = await db.userSkill.findUniqueOrThrow({
+      where: { userId_skillId: { userId: learnerCtx.userId, skillId: skill.id } },
+    });
+    expect(userSkill.proficiency).toBe("BEGINNER");
   });
 });

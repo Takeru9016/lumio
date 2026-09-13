@@ -60,6 +60,19 @@ export async function createQuizAttempt(
   });
 }
 
+/** Adds an Assignment to an existing lesson (a lesson can hold at most one Assignment). */
+export async function createAssignment(lessonId: string, maxScore = 100) {
+  return db.assignment.create({
+    data: { title: unique("assignment"), description: "test assignment", maxScore, lessonId },
+  });
+}
+
+export async function createAssignmentSubmission(userId: string, assignmentId: string) {
+  return db.assignmentSubmission.create({
+    data: { userId, assignmentId, status: "SUBMITTED", textContent: "test submission" },
+  });
+}
+
 export async function createJobRole(tenantId: string, name = unique("role")) {
   return db.jobRole.create({
     data: { tenantId, name, slug: unique("role-slug") },
