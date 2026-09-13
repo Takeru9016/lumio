@@ -1,0 +1,138 @@
+"use client";
+
+import { useState } from "react";
+import { AiBadge } from "@/components";
+
+const EXAMPLE_PROMPTS = [
+  "What am I missing for my role?",
+  "What should I focus on next?",
+  "Why is this skill a gap?",
+];
+
+type Status = "idle" | "loading" | "error";
+
+/**
+ * Embedded Capability Copilot panel (Phase 12 locked contract) — one-shot
+ * Q&A over the learner's own already-computed capability state, rendered
+ * directly on /capability rather than as a separate route/nav entry. Each
+ * query replaces the previous answer; no thread, no history.
+ */
+export function CapabilityCopilotPanel() {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [answer, setAnswer] = useState<string | null>(null);
+
+  async function ask(q: string) {
+    const trimmed = q.trim();
+    if (!trimmed || status === "loading") return;
+
+    setStatus("loading");
+    setError(null);
+
+    try {
+      const res = await fetch("/api/ai/copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: trimmed }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error ?? "Copilot couldn't answer that. Please try again.");
+        setAnswer(null);
+        setStatus("error");
+        return;
+      }
+
+      const data = (await res.json()) as { answer: string };
+      setAnswer(data.answer);
+      setStatus("idle");
+    } catch {
+      setError("Copilot couldn't answer that. Please try again.");
+      setAnswer(null);
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div className="bg-ai-bg border border-ai-border rounded-lg p-4 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <AiBadge label="Capability Copilot" size="md" />
+      </div>
+      <p className="text-xs text-text-muted">
+        Ask about your role, required skills, gaps, or recommended courses — Copilot explains
+        what&apos;s already shown above, in plain language.
+      </p>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void ask(query);
+        }}
+        className="flex gap-2"
+      >
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="What am I missing for my role?"
+          maxLength={2000}
+          disabled={status === "loading"}
+          className="flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-ai disabled:opacity-60"
+        />
+        <button
+          type="submit"
+          disabled={status === "loading" || query.trim().length === 0}
+          className="bg-ai text-white rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          {status === "loading" ? "Asking..." : "Ask"}
+        </button>
+      </form>
+
+      {status === "idle" && !answer && !error && (
+        <div className="flex flex-col gap-1.5">
+          {EXAMPLE_PROMPTS.map((example) => (
+            <button
+              key={example}
+              type="button"
+              onClick={() => {
+                setQuery(example);
+                void ask(example);
+              }}
+              className="text-left text-xs text-ai hover:underline"
+            >
+              &ldquo;{example}&rdquo;
+            </button>
+          ))}
+        </div>
+      )}
+
+      {status === "loading" && (
+        <div className="animate-pulse space-y-2">
+          <div className="h-3 bg-white/60 rounded w-2/3" />
+          <div className="h-3 bg-white/60 rounded w-1/2" />
+        </div>
+      )}
+
+      {status === "error" && error && (
+        <div className="rounded-md border border-border bg-white px-3 py-2">
+          <p className="text-xs text-text-primary">{error}</p>
+          <button
+            type="button"
+            onClick={() => void ask(query)}
+            className="mt-1 text-xs text-ai hover:underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {status === "idle" && answer && (
+        <div className="rounded-md border border-border bg-white px-3 py-2">
+          <p className="text-sm text-text-primary whitespace-pre-wrap">{answer}</p>
+        </div>
+      )}
+    </div>
+  );
+}

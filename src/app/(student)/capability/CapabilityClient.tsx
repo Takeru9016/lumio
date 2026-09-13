@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 
 import { EmptyState } from "@/components";
+import { CapabilityCopilotPanel } from "./CapabilityCopilotPanel";
 
 export type EvidenceRow = {
   id: string;
@@ -130,6 +131,10 @@ export function CapabilityClient({ state, roleName, skills }: CapabilityClientPr
             {metCount} of {skills.length} required skills met
           </p>
         )}
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <CapabilityCopilotPanel />
       </motion.div>
 
       <div className="space-y-3">

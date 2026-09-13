@@ -30,3 +30,9 @@ export const searchRatelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(10, "1 m"),
   prefix: "lumio:ai:search",
 });
+
+export const copilotRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  prefix: "lumio:ai:copilot",
+});
