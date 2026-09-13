@@ -42,6 +42,24 @@ async function getStudent() {
   return userId;
 }
 
+/**
+ * Phase 16 — Knowledge file upload. Deliberately NOT getInstructor()/
+ * getOrgAdmin() above: both of those allow a SUPER_ADMIN fallback, which
+ * directly contradicts Phase 14's locked correction that SUPER_ADMIN has no
+ * shortcut into Knowledge management. INSTRUCTOR and ORG_ADMIN only.
+ */
+async function getKnowledgeStaff() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  const user = await db.user.findUnique({
+    where: { clerkId: userId },
+    select: { id: true, role: true },
+  });
+  if (!user) throw new Error("User not found");
+  if (user.role !== "INSTRUCTOR" && user.role !== "ORG_ADMIN") throw new Error("Forbidden");
+  return userId;
+}
+
 export const ourFileRouter = {
   videoUploader: f({ video: { maxFileSize: "2GB", maxFileCount: 1 } })
     .input(z.object({ lessonId: z.string() }))
@@ -92,6 +110,26 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ file }) => {
       return { url: file.ufsUrl };
+    }),
+
+  /**
+   * Phase 16 — Knowledge PDF/DOCX upload. `blob` (not a dedicated `pdf`
+   * route type) matches the existing assignmentUploader precedent: actual
+   * PDF/DOCX format is never trusted from this upload step (a client can
+   * name/type anything) — it is verified authoritatively, from the
+   * downloaded bytes' magic numbers, by fileExtraction.ts's detectFormat()
+   * once POST /api/knowledge/documents/upload re-downloads the file. This
+   * middleware only returns {url, name, size}; it deliberately makes no
+   * database write — the actual KnowledgeDocument creation happens from the
+   * client's explicit follow-up call, not from this server callback.
+   */
+  knowledgeDocumentUploader: f({ blob: { maxFileSize: "16MB", maxFileCount: 1 } })
+    .middleware(async () => {
+      const userId = await getKnowledgeStaff();
+      return { userId };
+    })
+    .onUploadComplete(async ({ file }) => {
+      return { url: file.ufsUrl, name: file.name, size: file.size };
     }),
 } satisfies FileRouter;
 
