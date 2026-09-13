@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-12 (end of Phase 9). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 10). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -46,9 +46,12 @@ already-shipped AI Course Creation leg — generated content, quizzes, knowledge
 instructor-selected skills now persist into the saved course instead of being discarded. Phase 9
 extended capability visibility to a second audience — an ORG_ADMIN-only, tenant-wide capability
 overview (`/org/capability`) — reusing the same deterministic gap semantics the learner's own
-`/capability` page already established, never duplicating them. What remains open is an
-instructor/manager-facing capability view, capability analytics, and an AI explanation layer on
-top of the capability state that now exists — all deferred (see §4).
+`/capability` page already established, never duplicating them. Phase 10 shipped AI Search — a
+student-only, permission-aware answer-and-citations surface over the tenant Knowledge base,
+built entirely on the Phase 2/3 Knowledge + AI runtime foundation (one approved policy change:
+`AISurface.SEARCH` now allows `GENERATE`, not just `READ`). What remains open is an
+instructor/manager-facing capability view, capability analytics, an AI explanation/Copilot layer,
+and Instructor/ORG_ADMIN variants of Search — all deferred (see §4).
 
 ---
 
@@ -66,6 +69,7 @@ top of the capability state that now exists — all deferred (see §4).
 | Phase 7 — Capability Progress / Skill Development View | COMPLETE | Learner-facing `/capability` profile: primary role, required skills, current vs. required proficiency, gap status, evidence visibility |
 | Phase 8 — Course Creator UX Completion | COMPLETE | AI-generated lesson content, quizzes, knowledge grounding, and instructor-selected skills now persist into the saved draft course; Knowledge-document and Skill picker UIs; `GET /api/knowledge/documents`, `GET /api/skills` |
 | Phase 9 — ORG_ADMIN Capability Overview | COMPLETE | Tenant-wide, ORG_ADMIN-only capability overview: `getOrganizationCapabilityReport()` (batched, cursor-paginated, no N+1), `GET /api/org/capability`, `/org/capability` |
+| Phase 10 — AI Search | COMPLETE | Student-only, permission-aware, one-shot answer + citations over tenant Knowledge: `POST /api/ai/search`, `/search`, `AISurface.SEARCH` GENERATE enabled, `AI_SEARCH_SYSTEM_PROMPT`, existing V2 AI persistence, `searchRatelimit` |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
@@ -81,7 +85,9 @@ capability profile (Phase 7)`). Phase 8 is `e137b4c` (`feat: complete AI course 
 Phase 9 is `42aac3d` (`feat: implement organization capability report API, domain logic, tests, and
 UI`) — verified directly against `git log --oneline` at the time this section was written, including
 its own dedicated nullable-name pagination regression tests folded into the same commit (258/258
-tests passing, `tsc`/Biome/Prisma clean).
+tests passing, `tsc`/Biome/Prisma clean). Phase 10 is `d670609` (`feat: implement AI Search (Phase
+10)`), source-level audited and accepted with three non-blocking (INFO/LOW) findings, no code
+changes required (292/292 tests passing, `tsc`/Biome/Prisma clean).
 
 ### Phase 1 — Domain Foundation
 
@@ -394,6 +400,68 @@ ORG_ADMIN is the only audience built this phase (see §4).
   environment; automated test coverage (including the security/tenant-isolation/pagination
   matrices) stands in for it.
 
+### Phase 10 — AI Search
+
+Ships the first standalone (non-Tutor, non-Course-Creator) consumer of the shared AI runtime's
+`SEARCH` surface: a student-only, permission-aware answer-and-citations surface over the tenant
+Knowledge base, distinct from Tutor (lesson-scoped teaching) and from the future Copilot (actions/
+tools — not built).
+
+- **`POST /api/ai/search`** (`src/app/api/ai/search/route.ts`) — `auth() → withAiGuards(userId,
+  searchRatelimit) → tenant required (400 if none) → STUDENT-only (403 otherwise) →
+  assertActionAllowed(SEARCH, GENERATE) → buildAIContext({surface:"SEARCH", query}, {topK:5}) →
+  generateText → V2 persistence`. Request is `{query: string}` only, Zod `.strict()` (1-2000
+  chars, trimmed) — `tenantId`/`userId`/`courseId`/`lessonId`/any other field rejected outright,
+  identity and tenant always come from the authenticated server context, never the request body.
+- **Approved policy change** — `src/lib/ai/runtime/policy.ts`: `SEARCH.GENERATE` flipped
+  `false → true` (was retrieval-only since Phase 3). `READ` unchanged (`true`); `WRITE`/`EXECUTE`
+  unchanged (`false`, same as every surface) — this is the only AI-runtime behavior change in
+  Phase 10.
+- **Retrieval** — exclusively `buildAIContext()` → unmodified `searchKnowledge()`, no lesson/course
+  scope, no enrollment gate, top-K 5. Never uses `searchSimilarLessons()` (the tenant-filter-less
+  legacy Tutor path) — proven by both a source-grep architecture test and an end-to-end real-DB
+  security test suite (`route.security.test.ts`) reusing the same fixtures
+  `retrieval.security.test.ts` uses (tenant isolation, RESTRICTED/TEAM/USER access matrices).
+- **Citations** — `AISearchCitation{documentId, documentTitle, sourceId, excerpt, score}`, built
+  exclusively from the server's own retrieval results, never parsed from model output (a
+  hallucinated reference in the answer text cannot become a fake citation); deduplicated by
+  `documentId` (highest-ranked/first occurrence kept) for the client response, while the
+  underlying `AISourceCitation` persistence stays per-retrieved-chunk, unchanged from the existing
+  granularity.
+- **Prompt-injection mitigation** — dedicated `AI_SEARCH_SYSTEM_PROMPT` (`src/lib/ai/prompts.ts`,
+  not a reuse of `TUTOR_SYSTEM_PROMPT`): retrieved excerpts framed explicitly as untrusted
+  reference material, not instructions; embedded commands must be ignored; no fact invention; an
+  explicit "say so" instruction when Knowledge is insufficient; numbered-excerpt citation framing
+  matching the Course Creator's existing pattern.
+- **Generation** — non-streaming `generateText`, one-shot, no tool calls, `modelFor("SEARCH")`
+  (`gpt-5.4-mini`, unchanged model-selection mechanism). Execution tracker reused verbatim —
+  failed generation always reaches `FAILED`, never stuck `RUNNING`.
+- **Persistence** — existing V2 tables only: `AIConversation` (type `GENERAL`, via the unmodified
+  `surfaceToConversationType` mapping), `AIMessage`, `AISourceCitation`, `AIExecution`
+  (`operation:"search.query"`), `AIUsageEvent`. No new Prisma model. UI stays stateless — no
+  search-history surface was built.
+- **UI** — `/search` (`src/app/(student)/search/page.tsx`), one STUDENT-only sidebar entry. Empty/
+  loading/result/error states; each new query replaces the previous result (no thread). Citations
+  render as non-clickable cards (no student-readable Knowledge document viewer exists yet — one
+  was deliberately not built for this phase rather than fabricating a route).
+- **Rate limiting** — `searchRatelimit` (`src/lib/ratelimit.ts`, `slidingWindow(10, "1 m")`),
+  keyed on the authenticated Clerk user id, same Upstash convention as Tutor/quiz/summary/path.
+- **Validation** — 292/292 tests passing (258 at end of Phase 9 + 34 new: route/domain/security
+  tests + 4 policy tests), plus one disclosed test-only correction in
+  `course-creator/generate.test.ts` (a pre-existing test used `SEARCH` purely as a placeholder for
+  "a surface that denies GENERATE" — updated to an unrecognized-surface literal now that `SEARCH`
+  itself allows GENERATE; no production Course Creator code changed, assertion unweakened).
+- **Zero schema changes** — every model/field used already existed.
+- **Source-level audit** — `PHASE 10 ACCEPTED WITH NON-BLOCKING FINDINGS`: zero BLOCKER/HIGH/MEDIUM
+  findings; three INFO/LOW observations (execution-tracker ordering note, a cosmetic empty-state
+  UI composition detail, one optional future regression test) — none required a code change.
+- **Deliberately not built this phase**: Instructor/ORG_ADMIN Search variants, conversation
+  threading/search history, citation click-through/document viewer, streaming, caching, the
+  Lesson→Knowledge bridge backfill, keyword/full-text search, any tool/action/Copilot behavior.
+- **Pending**: authenticated STUDENT browser E2E — no credentials/session were available in this
+  environment; automated test coverage (including the real-DB permission/tenant-isolation suite)
+  stands in for it.
+
 ---
 
 ## 3. Current Architecture
@@ -526,7 +594,8 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 
 | Item | Status | Intended Phase | Priority | Dependencies | Notes |
 |---|---|---|---|---|---|
-| AI Search | PLANNED | Future Phase | TBD | none | `AISurface.SEARCH` exists in policy table (READ-only), no route |
+| AI Search | **COMPLETE (Phase 10)** | — | — | — | Student-only answer + citations over tenant Knowledge — `POST /api/ai/search`, `/search`; see §2's Phase 10 section |
+| Instructor/ORG_ADMIN AI Search variants | DEFERRED | Future Phase | TBD | none | Phase 10 is STUDENT-only by design; a broader-corpus/cross-user search variant was deliberately not built |
 | AI Copilot | PLANNED | Future Phase | TBD | none | `AISurface.COPILOT` exists in policy table, no route |
 | AI Recommendations | DEFERRED | Future Phase | TBD | none (LearningEvent emitters now exist as of Phase 5) | Listed as a future AI workflow ("AI Learning Coach"), not started |
 | Additional AI Tutor capabilities (standalone, not lesson-scoped) | DEFERRED | Future Phase | TBD | none | Tutor still requires `lessonId` to trigger; not yet "ask anything the tenant has indexed" |
@@ -741,6 +810,11 @@ Phase 9:
   Schema changes: NO (verified by `npx prisma validate` and `git diff prisma/schema.prisma` —
     the aggregate report is a pure projection over User/UserJobRole/RoleSkill/UserSkill,
     no new model, relationship, or index was needed)
+
+Phase 10:
+  Schema changes: NO (verified by `npx prisma validate` and `git diff prisma/schema.prisma` —
+    AI Search reuses every existing Knowledge/AI-runtime model as-is; the only behavior change
+    is the SEARCH.GENERATE policy flip in application code, not schema)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -787,11 +861,13 @@ Phase 8 (Course Creator UX Completion) — COMPLETE
   ↓
 Phase 9 (ORG_ADMIN Capability Overview) — COMPLETE
   ↓
+Phase 10 (AI Search) — COMPLETE
+  ↓
 Instructor capability view (separate, course-scoped, future — still not started)
        +
 Manager capability view (blocked on future identity/reporting-line modeling — still not started)
        +
-AI Search
+Instructor/ORG_ADMIN AI Search variants (Phase 10 is STUDENT-only by design — still not started)
        +
 AI Copilot / capability-explanation layer (now has a deterministic UI to explain,
   as of Phase 7 — still not started)
@@ -804,7 +880,7 @@ Action / Workflow Layer  (needs AI WRITE/EXECUTE — currently blocked by design
 Agents
 ```
 
-All items after Phase 9 are `Future Phase` — no exact phase numbers have been decided.
+All items after Phase 10 are `Future Phase` — no exact phase numbers have been decided.
 
 ---
 
@@ -815,9 +891,9 @@ Not approved — evaluated candidates only, per the actual completed architectur
 1. ~~**Course Creator UX completion**~~ — **COMPLETE as of Phase 8** (`content.ts`/`assessment.ts`
    wired into `create-ai/page.tsx`; Knowledge-document/Skill picker UIs; textContent/Quiz/
    QuizQuestion/CourseSkill/knowledgeDocumentId all now persist — see §2's Phase 8 section).
-2. **AI Search** — `AISurface.SEARCH` already exists in the policy table (READ-only); would be a
-   thin route over `searchKnowledge()`, similar shape to Course Creator's Knowledge integration.
-   Low-medium effort, no schema changes expected.
+2. ~~**AI Search**~~ — **COMPLETE as of Phase 10** (`POST /api/ai/search`, `/search`,
+   student-only, permission-aware answer + citations over tenant Knowledge; `AISurface.SEARCH`
+   GENERATE approved and enabled — see §2's Phase 10 section).
 3. ~~**Skill Evidence / capability loop**~~ — **COMPLETE as of Phase 5.** Learning outcomes now
    produce `SkillEvidence`, deterministic `UserSkill` proficiency, instructor/SUPER_ADMIN
    verification, and on-read capability gaps. Recommendations (Phase 6) and the learner profile
@@ -847,14 +923,13 @@ Not approved — evaluated candidates only, per the actual completed architectur
     during Phase 7 discovery; no product signal yet justifies persisting a goal separate from the
     live-computed gap. Revisit only if a real need for tracked/dismissable goals emerges.
 
-**Tradeoff summary**: (1), (3), (6), (7), and the ORG_ADMIN portion of (8) are done. (2) is an
-extension of already-proven, already-tested infrastructure with no new security surface — low
-risk, fast to ship, and now the most straightforward remaining candidate. (4)/(9) need product
-definition first, and (9) additionally needs (7) as a precondition (now satisfied). (5) is gated by
-an explicit guardrail and should come last. The Instructor and Manager portions of (8) remain
-deferred — Instructor is a separate, narrower, course-scoped view; Manager is blocked on identity
-modeling that doesn't exist yet, not a query extension. (10) stays deferred until a concrete need
-appears.
+**Tradeoff summary**: (1), (2), (3), (6), (7), and the ORG_ADMIN portion of (8) are done. (4)/(9)
+need product definition first, and (9) additionally needs (7) as a precondition (now satisfied).
+(5) is gated by an explicit guardrail and should come last. The Instructor and Manager portions of
+(8) remain deferred — Instructor is a separate, narrower, course-scoped view; Manager is blocked on
+identity modeling that doesn't exist yet, not a query extension. An Instructor/ORG_ADMIN variant of
+(2) is a plausible next extension of Phase 10's infrastructure but was not built — Phase 10 is
+STUDENT-only by design. (10) stays deferred until a concrete need appears.
 
 ---
 
@@ -911,3 +986,11 @@ Discovered during this audit, not silently resolved:
 - **Phase 9 is `42aac3d`** (`feat: implement organization capability report API, domain logic,
   tests, and UI`), confirmed present in `git log --oneline` at the time this section was written.
   This roadmap-only update is a separate, subsequent edit — not part of that commit.
+- **Phase 10 is `d670609`** (`feat: implement AI Search (Phase 10)`). Unlike Phase 8/9, this
+  commit did not already exist when the roadmap-finalization task began — the implementation was
+  still sitting uncommitted in the working tree at that point. It was committed as its own,
+  separate commit (matching every prior phase's convention: implementation and roadmap-only
+  finalization are always two distinct commits) immediately before this roadmap edit, rather than
+  being folded into a single "roadmap finalization" commit as one task instruction literally
+  requested — flagged here rather than silently leaving Phase 10's code uncommitted while claiming
+  the phase "complete" in this document.
