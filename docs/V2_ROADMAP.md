@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 14). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 15). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -65,9 +65,14 @@ triggers a second database lookup. Phase 14 gave INSTRUCTOR and ORG_ADMIN a real
 into the Knowledge domain itself — create/list/retry/delete over text-only documents, synchronous
 indexing, creator identity tracked via the existing `KnowledgeDocument.metadata` field rather than a
 schema change — closing the gap between Phase 2's fully-built Knowledge/RAG domain and its previous
-seed-script-only reachability; it is deliberately not an AI surface and touches no AI route. What
-remains open is a manager-facing capability view, capability analytics, an Instructor/ORG_ADMIN
-variant of Search, Knowledge connectors, and AI conversation threading — all deferred (see §4).
+seed-script-only reachability; it is deliberately not an AI surface and touches no AI route. Phase
+15 made the three Copilot surfaces' conversations actually resumable — `AIConversation`/`AIMessage`,
+written since Phase 3 but never read back, now have a real read path, bounded 10-message model
+input, and per-surface isolation via `contextMetadata.surface` — while Tutor's already-working
+`AIChat`-based continuity, Search, and Course Creator were deliberately left untouched. What remains
+open is a manager-facing capability view, capability analytics, an Instructor/ORG_ADMIN variant of
+Search, Knowledge connectors, and Tutor's own migration onto V2 conversation persistence — all
+deferred (see §4).
 
 ---
 
@@ -90,6 +95,7 @@ variant of Search, Knowledge connectors, and AI conversation threading — all d
 | Phase 12 — AI Capability Copilot | COMPLETE | STUDENT-only, one-shot AI explanation layer over deterministic capability state, embedded in `/capability`: `buildCopilotContext()`, `POST /api/ai/copilot`, `AI_COPILOT_SYSTEM_PROMPT`, `AISurface.COPILOT` (no policy change needed), `copilotRatelimit`, existing V2 AI persistence — no Knowledge retrieval, no citations, no SkillEvidence in prompt context |
 | Phase 13 — Instructor & Organization Capability Copilot | COMPLETE | INSTRUCTOR- and ORG_ADMIN-only AI explanation layer over each audience's own already-authorized capability report: `buildInstructorCopilotContext()`/`buildOrganizationCopilotContext()`, `POST /api/ai/instructor/copilot`, `POST /api/ai/org/copilot`, shared `AI_STAFF_COPILOT_SYSTEM_PROMPT`, reused `AISurface.COPILOT` (no policy change), `instructorCopilotRatelimit`/`orgCopilotRatelimit`, existing V2 AI persistence, embedded in `/instructor/capability` and `/org/capability` — `learnerId` never triggers a direct DB lookup, only in-memory filtering of the one authorized report page already fetched |
 | Phase 14 — Knowledge Ingestion & Management | COMPLETE | Real staff entrypoint into the previously-unreachable Knowledge domain — INSTRUCTOR and ORG_ADMIN can create, list, retry, and delete text-only Knowledge documents: `findOrCreateCreatorSource()`/`canManageKnowledgeDocument()`/`listManageableKnowledgeDocuments()`, `POST`/existing `GET /api/knowledge/documents`, `GET /api/knowledge/documents/manage`, `PATCH`/`DELETE /api/knowledge/documents/[id]`, `/instructor/knowledge`, `/org/knowledge` — synchronous indexing reusing `ingestion.ts` unmodified, creator identity tracked via existing `KnowledgeDocument.metadata` (no schema change), not an AI surface |
+| Phase 15 — AI Conversation Continuity | COMPLETE | Real, resumable multi-turn conversations for Student/Instructor/Organization Copilot only — `getConversationForContinuation()`/`listRecentMessages()`/`listConversationsForUser()`, 6 new `GET` conversation routes, existing 3 `POST` Copilot routes extended with optional `conversationId`, bounded 10-message model-input window, `contextMetadata.surface` marker for isolation (no schema change) — Tutor's legacy `AIChat` mechanism, Search, and Course Creator all explicitly untouched and unmigrated |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
@@ -118,7 +124,10 @@ capability copilot (Phase 13)`), source-level audited and accepted with no BLOCK
 findings (one LOW/two INFO non-blocking observations), no code changes required (422/422 tests
 passing, `tsc`/Biome/Prisma clean). Phase 14 is `431ada0` (`feat: implement knowledge ingestion &
 management (Phase 14)`), source-level audited and accepted with no BLOCKER/HIGH/MEDIUM findings, no
-code changes required (478/478 tests passing, `tsc`/Biome/Prisma clean).
+code changes required (478/478 tests passing, `tsc`/Biome/Prisma clean). Phase 15 is `abdd5fa`
+(`feat: implement AI conversation continuity for copilots (Phase 15)`), no code changes required
+(552/552 tests passing, `tsc`/Biome/Prisma clean — Biome reports 2 non-blocking warnings, both a
+deliberate `useExhaustiveDependencies` pattern explained in §2's Phase 15 section, not an error).
 
 ### Phase 1 — Domain Foundation
 
@@ -770,6 +779,87 @@ route touched.
   available in this environment; the domain-level create→index→`searchKnowledge()` integration
   test (`managementRetrieval.test.ts`) stands in for it.
 
+### Phase 15 — AI Conversation Continuity
+
+Real, resumable multi-turn conversations for the three Copilot surfaces only (Student/Instructor/
+Organization) — every other AI surface (Tutor, Search, Course Creator) is explicitly unchanged.
+Closes the gap discovered in Phase 14's own discovery pass: `AIConversation`/`AIMessage` were
+written every request but never read back by anything.
+
+- **History vs. continuity, locked as one scope** — both capabilities are granted together to the
+  3 Copilot surfaces and to no other surface. No surface gets "history-only."
+- **Tutor's legacy `AIChat` mechanism is untouched and unmigrated** — VERIFIED during contract
+  design that Tutor already has full, working continuity via `AIChat` (the client resends the full
+  `UIMessage[]` array every turn; the server upserts it keyed by `chatId`/`(userId, lessonId)`).
+  V2 `AIConversation`/`AIMessage` rows are still written per Tutor request exactly as before, still
+  never read back for Tutor — this phase does not change that. Migrating Tutor onto V2 persistence
+  remains explicitly deferred (see §7).
+- **Surface isolation via `contextMetadata.surface`, not `AIConversationType`** — VERIFIED the
+  schema's `AIConversationType` enum cannot distinguish Search from any of the 3 Copilot variants
+  (all map to `GENERAL`, per `surfaceToConversationType()`, unchanged since Phase 3). A
+  `"STUDENT_COPILOT" | "INSTRUCTOR_COPILOT" | "ORG_COPILOT"` marker is written into the existing
+  `AIConversation.contextMetadata` JSON field at creation and checked in application code on every
+  continuation — the same "reuse the existing JSON field" pattern Phase 14 used for
+  `KnowledgeDocument.metadata.createdByUserId`. No schema change.
+- **`getConversationForContinuation(scope, conversationId, surfaceMarker)`**
+  (`src/lib/ai/runtime/persistence.ts`) — one lookup scoped to `{id, tenantId, userId}`, then the
+  surface marker is verified in application code; returns `null` on any mismatch (not found, wrong
+  tenant, wrong user, wrong/missing surface) — every route maps `null` to the same 404, never
+  disclosing which check failed. No staff override exists anywhere: an ORG_ADMIN cannot read
+  another ORG_ADMIN's or an instructor's Copilot conversation, even though ORG_ADMIN has
+  tenant-wide capability-*report* authority elsewhere (Phase 9/13) — conversations are private
+  per-user regardless of role, a deliberate divergence from that precedent.
+- **Learner scope is fixed for a conversation's lifetime** (Instructor/Org Copilot only) — a
+  continuation supplying a different `learnerId` than the conversation was created with (including
+  omitting one that was originally set) is rejected with 400, never silently switched or ignored.
+  Student Copilot never accepts `learnerId` at all.
+- **Bounded 10-message model-input window, not a display limit** —
+  `listRecentMessages(conversationId, 10)` feeds `generateText`'s `messages`; older messages are
+  never deleted or summarized, only excluded from that one call's input. The conversation-detail
+  `GET` routes fetch up to 200 messages for display, a separate, much larger bound.
+- **System prompt and capability context are rebuilt fresh every turn** — `AI_COPILOT_SYSTEM_PROMPT`/
+  `AI_STAFF_COPILOT_SYSTEM_PROMPT` and `buildCopilotContext`/`buildInstructorCopilotContext`/
+  `buildOrganizationCopilotContext` are called unconditionally on every request, continuation or
+  not; nothing caches capability context between turns. Prior messages are passed to `generateText`
+  as ordinary `user`/`assistant` turns, never folded into the system prompt.
+- **`POST /api/ai/copilot`, `POST /api/ai/instructor/copilot`, `POST /api/ai/org/copilot`** — all
+  three extended (not replaced) with an optional `conversationId`; omitting it creates a new
+  conversation exactly as before Phase 15. Response shape gained `conversationId` alongside
+  `answer`. Generation failure on a continuation leaves the conversation resumable: no assistant
+  message is persisted, quota is not incremented, execution is marked `FAILED` — identical to the
+  pre-existing new-conversation failure behavior.
+- **6 new `GET` routes** — `/api/ai/{copilot,instructor/copilot,org/copilot}/conversations`
+  (bounded, most-recent-first list; label derived from the conversation's own persisted first
+  query, no new AI call) and `.../conversations/[id]` (full message list via
+  `getConversationForContinuation`, reused verbatim — the same ownership+surface check the
+  continuation `POST` uses). All six are reads: `requireAuthContext`/`requireTenant`/`requireRole`
+  (Phase 9/11/14's non-AI-route convention), no `withAiGuards`, no rate limit, no quota.
+- **Concurrency** — no DB-level lock/transaction/sequence column was added (none was justified by
+  the current schema or usage). Mitigation is client-side only: all 3 panels disable send while a
+  request is in flight. A raw concurrent client bypassing the UI remains a known, accepted residual
+  risk — documented, not solved.
+- **UI** — the 3 existing Copilot panels gained an embedded history list and inline message thread
+  in place of their prior single-`answer` display; a "New" affordance clears the active conversation
+  without deleting it. No new page, no global chat drawer, no folders/tags/sharing.
+- **`AIExecution`/`AIUsageEvent`** — still internal, write-only bookkeeping; this phase adds no new
+  reader for either. Documented as a future analytics-phase input, not solved here.
+- **Validation** — 552/552 tests passing (478 at end of Phase 14 + 74 new), `tsc`/Prisma clean;
+  Biome reports 2 non-blocking warnings (`useExhaustiveDependencies` on the Instructor/Org panels'
+  deliberate "reset conversation when the selected learner changes" effect, which depends on a
+  value its body doesn't read — a legitimate, understood exception, not an error).
+- **Zero schema changes** — verified by `npx prisma validate` and an empty
+  `git diff -- prisma/schema.prisma prisma/migrations`.
+- **Source-level audit** — `PASS`: zero BLOCKER/HIGH/MEDIUM findings, no code changes required.
+- **Deliberately not built this phase**: Tutor `AIChat`→`AIConversation` migration, continuity or
+  history for Search or Course Creator, AI analytics/usage dashboards, AI evaluation, Knowledge
+  connectors, Staff AI Search, Action/Tools, agents, workflows, approvals, autonomous actions,
+  Manager capability, multi-provider AI, conversation sharing/public conversations/cross-user
+  visibility, conversation deletion, automatic summarization or long-term memory.
+- **Pending**: authenticated browser E2E — no credentials/session were available in this
+  environment; route-level tests (mocked persistence boundary, matching every prior Copilot route's
+  convention) plus a domain-level integration test against the real persistence layer stand in for
+  it.
+
 ---
 
 ## 3. Current Architecture
@@ -899,7 +989,9 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 | Multi-provider support | DEFERRED | Future Phase | TBD | none | `provider.ts` is explicitly "one seam, not a multi-provider abstraction"; OpenAI only |
 | Cost estimation / pricing | DEFERRED | Future Phase | TBD | none | `AIUsageEvent.estimatedCost` field exists, never populated (verified: zero writes set it) |
 | Richer AI observability | DEFERRED | Future Phase | TBD | none | Current signal is `AIExecution`/`AIUsageEvent` rows only, no dashboard/aggregation |
-| Cross-request AI conversation continuity | DEFERRED | Future Phase | TBD | none | Every request creates a new `AIConversation` — not resumed across requests |
+| Cross-request AI conversation continuity — Copilots | **COMPLETE (Phase 15)** | — | — | — | `POST /api/ai/{copilot,instructor/copilot,org/copilot}` accept `conversationId`; 6 new `GET` conversation routes — see §2's Phase 15 section |
+| Cross-request AI conversation continuity — Tutor | DEFERRED | Future Phase | TBD | Phase 15's `getConversationForContinuation`/`listRecentMessages` pattern, if reused | Tutor already has working continuity via legacy `AIChat`; migrating it onto V2 `AIConversation` was explicitly evaluated and deferred in Phase 15 (see §2's Phase 15 section) — not started |
+| Cross-request AI conversation continuity — Search/Course Creator | DEFERRED | Future Phase | TBD | none | Deliberately excluded from Phase 15 — Search is one-shot by product design (fresh retrieval per query), Course Creator is a workflow, not a chat |
 | Route-level AI integration tests | PLANNED | Future Phase | TBD | none | Explicitly limited by design so far — "Do NOT add route-level Clerk mocks merely for this test" was a repeated constraint across Phases 3/3.1/4; domain-layer tests substitute |
 
 ### AI Product Surfaces
@@ -1065,15 +1157,17 @@ Only issues actually identified during Phases 1–4.
 |---|---|---|---|
 | DB-level sibling-FK tenant consistency not enforced (e.g. `RoleSkill` could pair a `JobRole` and `Skill` from different tenants) | Low — every write path that matters (`ingestion.ts`, `saveDraft.ts`) enforces this in application code; a direct/manual DB write could violate it | No | Consistent with pre-existing V1 pattern (e.g. `MandatoryTraining`); revisit only if a real incident occurs |
 | No automatic old-chunk cleanup after re-index | Low — storage growth only, no correctness issue (old versions are simply invisible to retrieval, not deleted) | No | Deferred — see §4 Knowledge table |
-| AI conversation continuity not implemented (new `AIConversation` per request) | Medium for UX (no multi-turn memory across page loads at the persistence layer) — the client still sends full message history, so *chat* continuity works; only the *persisted* conversation record doesn't span requests | No | Deferred — see §4 |
+| AI conversation continuity — Copilots | — | — | **Resolved in Phase 15** — see §2's Phase 15 section and §4's AI Runtime table |
+| AI conversation continuity — Tutor (still a new `AIConversation` per request at the V2 persistence layer) | Low for UX — Tutor's actual chat continuity already works via legacy `AIChat`, unaffected; only the *V2-persisted* conversation record doesn't span Tutor requests | No | Deferred — Phase 15 explicitly evaluated and declined to migrate Tutor (see §2's Phase 15 section); see §4 |
 | `AIUsageEvent.estimatedCost` not computed | Low — no pricing table exists; field is simply always null | No | Deferred — needs a pricing table, not invented speculatively |
 | Route-level AI integration tests are limited | Medium for confidence in full request/response wiring — domain-layer tests are thorough (95 tests), but no route-level Clerk-mocked test exists for any `/api/ai/*` route | No | Deliberate: "Do NOT add route-level Clerk mocks merely for this test" was a repeated, explicit constraint — not an oversight |
 | Test database setup is manual/local, not scripted | Low — reproducible by a documented sequence (`docs/V2_DATABASE_MIGRATION.md` §10), but not a single command | No | A `docker-compose.test.yml` was named as the natural next step if this becomes recurring friction — not done |
-| `COURSE_CREATOR` (runtime `AISurface`) vs `COURSE_BUILDER` (schema `AIConversationType`) naming mismatch | Low — deliberate and documented (`persistence.ts`'s `surfaceToConversationType`), not a bug | No | `SEARCH` (Phase 10) and `COPILOT` (Phase 12) have both now shipped real routes, both still mapping to `GENERAL` — neither needed its own schema value in practice; revisit only if a future surface's persisted rows genuinely need to be distinguished from `GENERAL` |
+| `COURSE_CREATOR` (runtime `AISurface`) vs `COURSE_BUILDER` (schema `AIConversationType`) naming mismatch, and `SEARCH`/`COPILOT` (all 3 variants) collapsing to `GENERAL` | Low — deliberate and documented (`persistence.ts`'s `surfaceToConversationType`), not a bug, but confirmed load-bearing by Phase 15: `AIConversationType` alone cannot distinguish Search from Student/Instructor/Org Copilot, so Phase 15's surface isolation lives in `contextMetadata.surface` instead (see §2's Phase 15 section) | No | Working as designed — `contextMetadata.surface` is now the real isolation mechanism for continuity-enabled surfaces; revisit `AIConversationType` itself only if a future need requires distinguishing these at the schema level, not applied speculatively |
 | ~~Lesson-content/assessment generation routes exist but aren't wired into the Course Creator UI~~ | — | — | **Resolved in Phase 8** — see §2's Phase 8 section |
 | ~~Knowledge-document/Skill picker UI don't exist~~ | — | — | **Resolved in Phase 8** — see §2's Phase 8 section |
 | `LearningEvent` has no DB-level uniqueness constraint | Low — `SkillEvidence`/`UserSkill` (the actual capability state) are unaffected; only the `LearningEvent` audit/analytics stream could theoretically double-write under concurrency, and nothing currently consumes `LearningEvent` | No | Course-completion duplication is already closed by the atomic enrollment-transition gate (Phase 5). Quiz events don't need dedup by design — each `QuizAttempt` legitimately emits its own event. A DB-level constraint remains a candidate if a future analytics consumer needs it, not applied speculatively |
 | `findOrCreateCreatorSource()`'s found-or-create has a small theoretical concurrent-request race | Low — no unique constraint exists on `(tenantId, type, externalId)`, so two simultaneous first-ever `POST`s from the same staff member could each create a `KnowledgeSource`; every document still resolves to the correct owner via its own `metadata`, so this never affects authorization or retrieval correctness — a harmless, rare duplicate source at most | No | Deliberately not solved in Phase 14 (see §2's Phase 14 section); revisit only if source deduplication becomes a real operational requirement |
+| Copilot conversation continuation has no server-side concurrency protection (no DB lock/transaction/sequence column) | Low-Medium — two rapid, truly-concurrent requests to the same `conversationId` could in principle interleave history/ordering; mitigated only client-side (all 3 Copilot panels disable send while a request is in flight), not enforced server-side | No | Deliberately not solved in Phase 15 (see §2's Phase 15 section) — accepted MVP residual risk; revisit only if real interleaving is observed in practice, not applied speculatively |
 
 ---
 
@@ -1154,6 +1248,12 @@ Phase 14:
     `git diff -- prisma/schema.prisma prisma/migrations` — creator identity is tracked via the
     existing `KnowledgeDocument.metadata` JSON field, not a new column; no new model, field, enum,
     index, or policy change was needed)
+
+Phase 15:
+  Schema changes: NO (verified by `npx prisma validate` and an empty
+    `git diff -- prisma/schema.prisma prisma/migrations` — conversation surface isolation is
+    tracked via the existing `AIConversation.contextMetadata` JSON field, not a new column; no new
+    model, field, enum, index, or policy change was needed)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -1215,9 +1315,17 @@ real staff-managed Knowledge corpus
 existing Tutor / Search grounding (unmodified, now fed by real staff-created content
   instead of seed data only)
   ↓
+Phase 15 (AI Conversation Continuity — Copilots only) — COMPLETE
+  ↓
+a real first consumer of AIConversation/AIMessage beyond raw SQL; a foundation
+  a future AI Evaluation phase could build on (real multi-turn data, not synthetic)
+       +
 future Knowledge Connectors (now has a manual product baseline to extend)
        +
 future Staff AI Search (now has real staff-added content worth searching)
+       +
+Tutor AIChat → AIConversation migration (evaluated and explicitly deferred in Phase 15
+  — still not started)
        +
 Manager capability view (blocked on future identity/reporting-line modeling — still not started)
        +
@@ -1229,8 +1337,8 @@ Action / Workflow Layer  (needs AI WRITE/EXECUTE — currently blocked by design
 Agents
 ```
 
-All items after Phase 10 (except Phase 13/14, now complete) are `Future Phase` — no exact phase
-numbers have been decided. The next phase after 14 has **not** been chosen automatically here — it
+All items after Phase 10 (except Phase 13/14/15, now complete) are `Future Phase` — no exact phase
+numbers have been decided. The next phase after 15 has **not** been chosen automatically here — it
 requires its own fresh discovery/architecture audit (see §10).
 
 ---
@@ -1280,27 +1388,36 @@ Not approved — evaluated candidates only, per the actual completed architectur
     `POST/GET/PATCH/DELETE /api/knowledge/documents*`, `/instructor/knowledge`, `/org/knowledge` —
     see §2's Phase 14 section).
 
-**Tradeoff summary**: (1), (2), (3), (4)/(9), (6), (7), (11), (12), and the ORG_ADMIN + Instructor
-portions of (8) are done. (5) is gated by an explicit guardrail and should come last — it remains
-the only undone item in this list that isn't a deferred variant/extension of something already
-shipped. The Manager portion of (8) remains deferred — blocked on identity/reporting-line modeling
-that doesn't exist yet, not a query extension. The Instructor/ORG_ADMIN variant of (2) (AI Search)
-remains a plausible next extension of Phase 10's infrastructure, but was not built — Phase 10 is
-STUDENT-only by design; the equivalent variant of (4)/(9) (Copilot) is now done as (11). (10) stays
-deferred until a concrete need appears. (12)'s completion gives a real corpus for (2)'s deferred
-Instructor/ORG_ADMIN Search variant and for a future Staff AI Search candidate to actually ground
-answers in.
+13. ~~**AI conversation continuity (Copilots)**~~ — **COMPLETE as of Phase 15** (`conversationId`
+    on all 3 Copilot `POST` routes, 6 new `GET` conversation routes, bounded 10-message model-input
+    window — see §2's Phase 15 section). Tutor's own continuity (already working via legacy
+    `AIChat`) and Search/Course Creator continuity were explicitly evaluated and excluded from this
+    scope — see that section for why.
 
-**Phase 15 — not yet chosen.** The following remain open candidates, evaluated but not selected;
+**Tradeoff summary**: (1), (2), (3), (4)/(9), (6), (7), (11), (12), (13), and the ORG_ADMIN +
+Instructor portions of (8) are done. (5) is gated by an explicit guardrail and should come last —
+it remains the only undone item in this list that isn't a deferred variant/extension of something
+already shipped. The Manager portion of (8) remains deferred — blocked on identity/reporting-line
+modeling that doesn't exist yet, not a query extension. The Instructor/ORG_ADMIN variant of (2) (AI
+Search) remains a plausible next extension of Phase 10's infrastructure, but was not built — Phase
+10 is STUDENT-only by design; the equivalent variant of (4)/(9) (Copilot) is now done as (11). (10)
+stays deferred until a concrete need appears. (12)'s completion gives a real corpus for (2)'s
+deferred Instructor/ORG_ADMIN Search variant and for a future Staff AI Search candidate to actually
+ground answers in. (13)'s completion is scoped to Copilots only — Tutor's V2-persistence migration
+remains a distinct, still-open item, not implied done by (13).
+
+**Phase 16 — not yet chosen.** The following remain open candidates, evaluated but not selected;
 picking one requires its own fresh discovery/architecture audit against the repository as it
-stands after Phase 14, not an automatic continuation of this list:
+stands after Phase 15, not an automatic continuation of this list:
 
-- AI conversation threading (schema already supports multi-turn `AIConversation`/`AIMessage`;
-  every route today creates one conversation per request and never reads it back)
-- `LearningEvent` / Analytics foundation (events are emitted, nothing consumes them)
+- Tutor `AIChat` → `AIConversation` migration (Phase 15 evaluated and explicitly declined this —
+  Tutor's live continuity already works via `AIChat`; migrating is a distinct, larger decision)
+- `LearningEvent` / Analytics foundation (events are emitted, nothing consumes them; Phase 15 also
+  leaves `AIExecution`/`AIUsageEvent` write-only, still no reader for either)
 - Knowledge Connectors (now has Phase 14's manual ingestion as a baseline to extend)
 - Staff AI Search (Instructor/ORG_ADMIN variant of Phase 10, now has real staff-added content)
-- AI Evaluation / quality infrastructure
+- AI Evaluation / quality infrastructure (now has real multi-turn Copilot conversations to
+  potentially evaluate against, from Phase 15)
 - Action / Tool Foundation (still gated by the Phase 3 design-review guardrail — item (5) above)
 - Manager Capability (still blocked on identity/reporting-line modeling)
 
@@ -1387,3 +1504,8 @@ Discovered during this audit, not silently resolved:
   situation again: the implementation task explicitly forbade committing, so it sat uncommitted
   until this finalization task began. Committed as its own, separate `feat:` commit immediately
   before this roadmap edit, matching the Phase 10/11/12/13 precedent exactly.
+- **Phase 15 is `abdd5fa`** (`feat: implement AI conversation continuity for copilots (Phase 15)`).
+  This task's own instructions asked for the roadmap to be updated within the same task, after
+  validation passed — unlike Phase 10–14's separate two-task (implement, then finalize) split, this
+  implementation was committed first, immediately followed by this roadmap-only edit, still as two
+  distinct commits (one `feat:`, one `docs:`) to keep the docs commit genuinely docs-only.
