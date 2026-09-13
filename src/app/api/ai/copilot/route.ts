@@ -7,6 +7,8 @@ import { incrementAiUsage } from "@/lib/ai/quota";
 import { createExecutionTracker } from "@/lib/ai/runtime/execution";
 import {
   createConversation,
+  getConversationForContinuation,
+  listRecentMessages,
   persistMessage,
   recordUsageEvent,
   startExecution,
@@ -17,20 +19,29 @@ import { buildCopilotContext } from "@/lib/domain/capability/copilotContext";
 import { copilotRatelimit } from "@/lib/ratelimit";
 
 const MAX_QUERY_LENGTH = 2000;
+const SURFACE_MARKER = "STUDENT_COPILOT" as const;
+// Model-input bound only (Phase 15 contract §8) — persisted history is never
+// deleted or summarized; only what's sent to generateText is bounded.
+const HISTORY_WINDOW = 10;
 
 // .strict() rejects any unexpected field outright (tenantId/userId/role/plan/
 // capability state/etc.) — the caller never gets to influence identity or
-// scope beyond the natural-language question itself.
+// scope beyond the natural-language question itself. Student Copilot never
+// accepts learnerId — it has no concept of "another learner" to scope to.
 const copilotRequestSchema = z
-  .object({ query: z.string().trim().min(1).max(MAX_QUERY_LENGTH) })
+  .object({
+    query: z.string().trim().min(1).max(MAX_QUERY_LENGTH),
+    conversationId: z.string().min(1).optional(),
+  })
   .strict();
 
 /**
- * Learner-facing AI Capability Copilot (Phase 12 locked contract) —
- * explains the caller's own already-computed capability state. Deliberately
- * NOT AI Search: no buildAIContext, no searchKnowledge, no Knowledge
- * retrieval, no citations. Structurally incapable of becoming a second
- * Search implementation because it never imports either.
+ * Learner-facing AI Capability Copilot (Phase 12 locked contract, extended
+ * with Phase 15 conversation continuity) — explains the caller's own
+ * already-computed capability state. Deliberately NOT AI Search: no
+ * buildAIContext, no searchKnowledge, no Knowledge retrieval, no citations.
+ * Structurally incapable of becoming a second Search implementation because
+ * it never imports either.
  */
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -61,13 +72,32 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return Response.json({ error: "Invalid query" }, { status: 400 });
   }
-  const { query } = parsed.data;
+  const { query, conversationId: suppliedConversationId } = parsed.data;
 
   const surface = "COPILOT" as const;
   // Always passes today (COPILOT.GENERATE is true) — asserted explicitly
   // rather than assumed, matching every other AI route's convention.
   assertActionAllowed(surface, "GENERATE");
 
+  // Phase 15: resolve a supplied conversationId for continuation. Scoped to
+  // {id, tenantId, userId} + the STUDENT_COPILOT surface marker in one call —
+  // any mismatch (not found, wrong tenant/user, wrong/missing surface) comes
+  // back as the same null, which this route always turns into the same 404
+  // (never distinguishing why to the caller).
+  let existingConversation: Awaited<ReturnType<typeof getConversationForContinuation>> = null;
+  if (suppliedConversationId) {
+    existingConversation = await getConversationForContinuation(
+      { tenantId: user.tenantId, userId: user.id },
+      suppliedConversationId,
+      SURFACE_MARKER
+    );
+    if (!existingConversation) {
+      return Response.json({ error: "Conversation not found" }, { status: 404 });
+    }
+  }
+
+  // Capability context is always freshly assembled — never cached between
+  // turns, whether this is a new conversation or a continuation.
   const capabilityContext = await buildCopilotContext({
     userId: user.id,
     clerkId: userId as string,
@@ -77,15 +107,17 @@ export async function POST(req: Request) {
 
   const { model, provider, modelId } = modelFor(surface);
 
-  let conversationId: string | undefined;
+  let conversationId: string | undefined = existingConversation?.id;
   let executionId: string | undefined;
   const startedAt = Date.now();
   try {
-    const conversation = await createConversation(
-      { tenantId: user.tenantId, userId: user.id },
-      { surface, contextMetadata: { query } }
-    );
-    conversationId = conversation.id;
+    if (!conversationId) {
+      const conversation = await createConversation(
+        { tenantId: user.tenantId, userId: user.id },
+        { surface, contextMetadata: { surface: SURFACE_MARKER, query } }
+      );
+      conversationId = conversation.id;
+    }
     const execution = await startExecution(
       { tenantId: user.tenantId, userId: user.id },
       { model: modelId, provider, operation: "capability.copilot", conversationId }
@@ -97,11 +129,21 @@ export async function POST(req: Request) {
     // best-effort posture as Search/Tutor (docs/V2_AI_ARCHITECTURE.md,
     // "Error handling").
     console.error("[ai-runtime] Failed to start V2 conversation/execution", err);
-    conversationId = undefined;
+    conversationId = existingConversation?.id;
     executionId = undefined;
   }
 
   const executionTracker = createExecutionTracker(executionId, startedAt);
+
+  // Bounded prior history (Phase 15 contract §8) — only sent to the model
+  // when continuing an existing conversation; a brand-new conversation has
+  // no prior turns. System prompt is rebuilt fresh above/below regardless.
+  const historyMessages = existingConversation
+    ? (await listRecentMessages(existingConversation.id, HISTORY_WINDOW)).map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }))
+    : [];
 
   let answer: string;
   let inputTokens: number | undefined;
@@ -110,7 +152,7 @@ export async function POST(req: Request) {
     const result = await generateText({
       model,
       system: AI_COPILOT_SYSTEM_PROMPT(capabilityContext),
-      prompt: query,
+      messages: [...historyMessages, { role: "user", content: query }],
     });
     answer = result.text.trim();
     inputTokens = result.usage?.inputTokens;
@@ -150,5 +192,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return Response.json({ answer });
+  return Response.json({ answer, conversationId });
 }

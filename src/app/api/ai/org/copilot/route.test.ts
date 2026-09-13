@@ -35,12 +35,20 @@ vi.mock("@/lib/ai/runtime/provider", () => ({
   modelFor: vi.fn(() => ({ model: {}, provider: "openai", modelId: "gpt-5.4-mini" })),
 }));
 
-vi.mock("@/lib/ai/runtime/persistence", () => ({
-  createConversation: vi.fn(),
-  startExecution: vi.fn(),
-  persistMessage: vi.fn(),
-  recordUsageEvent: vi.fn(),
-}));
+vi.mock("@/lib/ai/runtime/persistence", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/ai/runtime/persistence")>(
+    "@/lib/ai/runtime/persistence"
+  );
+  return {
+    createConversation: vi.fn(),
+    startExecution: vi.fn(),
+    persistMessage: vi.fn(),
+    recordUsageEvent: vi.fn(),
+    getConversationForContinuation: vi.fn(),
+    listRecentMessages: vi.fn(),
+    readConversationLearnerId: actual.readConversationLearnerId,
+  };
+});
 
 vi.mock("@/lib/ai/runtime/execution", () => ({
   createExecutionTracker: vi.fn(() => ({
@@ -60,9 +68,14 @@ const { generateText } = await import("ai");
 const { buildOrganizationCopilotContext, OrganizationCopilotLearnerNotFoundError } = await import(
   "@/lib/domain/capability/organizationCopilotContext"
 );
-const { createConversation, startExecution, persistMessage, recordUsageEvent } = await import(
-  "@/lib/ai/runtime/persistence"
-);
+const {
+  createConversation,
+  startExecution,
+  persistMessage,
+  recordUsageEvent,
+  getConversationForContinuation,
+  listRecentMessages,
+} = await import("@/lib/ai/runtime/persistence");
 const { createExecutionTracker } = await import("@/lib/ai/runtime/execution");
 const { incrementAiUsage } = await import("@/lib/ai/quota");
 const { POST } = await import("./route");
@@ -75,6 +88,8 @@ const createConversationMock = vi.mocked(createConversation);
 const startExecutionMock = vi.mocked(startExecution);
 const persistMessageMock = vi.mocked(persistMessage);
 const recordUsageEventMock = vi.mocked(recordUsageEvent);
+const getConversationForContinuationMock = vi.mocked(getConversationForContinuation);
+const listRecentMessagesMock = vi.mocked(listRecentMessages);
 const createExecutionTrackerMock = vi.mocked(createExecutionTracker);
 const incrementAiUsageMock = vi.mocked(incrementAiUsage);
 
@@ -288,7 +303,7 @@ describe("POST /api/ai/org/copilot — AI contract", () => {
 });
 
 describe("POST /api/ai/org/copilot — response shape", () => {
-  it("successful response is exactly { answer }", async () => {
+  it("successful response is exactly { answer, conversationId }", async () => {
     mockUser();
     buildContextMock.mockResolvedValue(COHORT_CONTEXT as never);
     mockPersistenceHappyPath();
@@ -297,7 +312,145 @@ describe("POST /api/ai/org/copilot — response shape", () => {
     const res = await POST(req({ query: "What should I focus on?" }));
     const body = await res.json();
 
-    expect(body).toEqual({ answer: "Focus on Negotiation." });
+    expect(body).toEqual({ answer: "Focus on Negotiation.", conversationId: "conv1" });
+  });
+});
+
+describe("POST /api/ai/org/copilot — Phase 15 conversation continuity", () => {
+  it("omitting conversationId creates a new conversation with the ORG_COPILOT surface marker", async () => {
+    mockUser();
+    buildContextMock.mockResolvedValue(COHORT_CONTEXT as never);
+    mockPersistenceHappyPath();
+    generateTextMock.mockResolvedValue({ text: "Answer.", usage: {} } as never);
+
+    await POST(req({ query: "hello" }));
+
+    expect(createConversationMock).toHaveBeenCalledWith(
+      { tenantId: "t1", userId: "u1" },
+      expect.objectContaining({
+        contextMetadata: { surface: "ORG_COPILOT", query: "hello", learnerId: undefined },
+      })
+    );
+  });
+
+  it("a valid conversationId reuses the existing conversation", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "ORG_COPILOT" },
+    } as never);
+    listRecentMessagesMock.mockResolvedValue([]);
+    buildContextMock.mockResolvedValue(COHORT_CONTEXT as never);
+    mockPersistenceHappyPath();
+    generateTextMock.mockResolvedValue({ text: "Second answer.", usage: {} } as never);
+
+    const res = await POST(req({ query: "and then?", conversationId: "conv1" }));
+
+    expect(res.status).toBe(200);
+    expect(createConversationMock).not.toHaveBeenCalled();
+    expect(getConversationForContinuationMock).toHaveBeenCalledWith(
+      { tenantId: "t1", userId: "u1" },
+      "conv1",
+      "ORG_COPILOT"
+    );
+  });
+
+  it("invalid/cross-tenant/cross-surface conversationId -> 404", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue(null);
+
+    const res = await POST(req({ query: "hello", conversationId: "not-mine" }));
+    expect(res.status).toBe(404);
+  });
+
+  it("second generation receives the first turn as bounded history (limit 10)", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "ORG_COPILOT" },
+    } as never);
+    listRecentMessagesMock.mockResolvedValue([
+      { role: "user", content: "Which skills are missing?" },
+      { role: "assistant", content: "Negotiation is the biggest gap." },
+    ] as never);
+    buildContextMock.mockResolvedValue(COHORT_CONTEXT as never);
+    mockPersistenceHappyPath();
+    generateTextMock.mockResolvedValue({ text: "Focus there first.", usage: {} } as never);
+
+    await POST(req({ query: "What should we do about it?", conversationId: "conv1" }));
+
+    expect(listRecentMessagesMock).toHaveBeenCalledWith("conv1", 10);
+    const call = generateTextMock.mock.calls[0][0] as {
+      messages: Array<{ role: string; content: string }>;
+    };
+    expect(call.messages).toEqual([
+      { role: "user", content: "Which skills are missing?" },
+      { role: "assistant", content: "Negotiation is the biggest gap." },
+      { role: "user", content: "What should we do about it?" },
+    ]);
+  });
+});
+
+describe("POST /api/ai/org/copilot — Phase 15 learner context lock", () => {
+  it("continuing with the same learnerId -> success", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "ORG_COPILOT", learnerId: "learner-1" },
+    } as never);
+    listRecentMessagesMock.mockResolvedValue([]);
+    buildContextMock.mockResolvedValue(COHORT_CONTEXT as never);
+    mockPersistenceHappyPath();
+    generateTextMock.mockResolvedValue({ text: "Answer.", usage: {} } as never);
+
+    const res = await POST(
+      req({ query: "more about this learner", learnerId: "learner-1", conversationId: "conv1" })
+    );
+
+    expect(res.status).toBe(200);
+  });
+
+  it("continuing with a DIFFERENT learnerId -> 400, never silently switches", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "ORG_COPILOT", learnerId: "learner-1" },
+    } as never);
+
+    const res = await POST(
+      req({ query: "tell me about someone else", learnerId: "learner-2", conversationId: "conv1" })
+    );
+
+    expect(res.status).toBe(400);
+    expect(buildContextMock).not.toHaveBeenCalled();
+  });
+
+  it("omitting learnerId on a continuation that originally had one -> 400", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "ORG_COPILOT", learnerId: "learner-1" },
+    } as never);
+
+    const res = await POST(req({ query: "cohort question", conversationId: "conv1" }));
+
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("POST /api/ai/org/copilot — Phase 15 surface isolation", () => {
+  it("a Student/Instructor Copilot conversation id is never usable here", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue(null);
+
+    const res = await POST(req({ query: "hello", conversationId: "other-surface-conv" }));
+
+    expect(getConversationForContinuationMock).toHaveBeenCalledWith(
+      expect.anything(),
+      "other-surface-conv",
+      "ORG_COPILOT"
+    );
+    expect(res.status).toBe(404);
   });
 });
 

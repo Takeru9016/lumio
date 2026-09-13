@@ -7,7 +7,10 @@ import { incrementAiUsage } from "@/lib/ai/quota";
 import { createExecutionTracker } from "@/lib/ai/runtime/execution";
 import {
   createConversation,
+  getConversationForContinuation,
+  listRecentMessages,
   persistMessage,
+  readConversationLearnerId,
   recordUsageEvent,
   startExecution,
 } from "@/lib/ai/runtime/persistence";
@@ -20,6 +23,10 @@ import {
 import { instructorCopilotRatelimit } from "@/lib/ratelimit";
 
 const MAX_QUERY_LENGTH = 2000;
+const SURFACE_MARKER = "INSTRUCTOR_COPILOT" as const;
+// Model-input bound only (Phase 15 contract §8) — persisted history is never
+// deleted or summarized; only what's sent to generateText is bounded.
+const HISTORY_WINDOW = 10;
 
 // .strict() rejects any unexpected field outright (tenantId/userId/instructorId/
 // role/plan/etc.) — the only identity-like field the caller may ever supply is
@@ -29,16 +36,18 @@ const requestSchema = z
   .object({
     query: z.string().trim().min(1).max(MAX_QUERY_LENGTH),
     learnerId: z.string().min(1).optional(),
+    conversationId: z.string().min(1).optional(),
   })
   .strict();
 
 /**
- * INSTRUCTOR-facing Capability Copilot (Phase 13 locked contract) —
- * explains the capability state of students enrolled in courses this
- * instructor owns. Deliberately NOT AI Search: no buildAIContext, no
- * searchKnowledge, no Knowledge retrieval, no citations. Reuses the
- * COPILOT surface and the existing instructor-ownership boundary from
- * Phase 11's getInstructorCapabilityReport() — never re-derived here.
+ * INSTRUCTOR-facing Capability Copilot (Phase 13 locked contract, extended
+ * with Phase 15 conversation continuity) — explains the capability state of
+ * students enrolled in courses this instructor owns. Deliberately NOT AI
+ * Search: no buildAIContext, no searchKnowledge, no Knowledge retrieval, no
+ * citations. Reuses the COPILOT surface and the existing instructor-ownership
+ * boundary from Phase 11's getInstructorCapabilityReport() — never
+ * re-derived here.
  */
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -69,11 +78,39 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return Response.json({ error: "Invalid query" }, { status: 400 });
   }
-  const { query, learnerId } = parsed.data;
+  const { query, learnerId, conversationId: suppliedConversationId } = parsed.data;
 
   const surface = "COPILOT" as const;
   assertActionAllowed(surface, "GENERATE");
 
+  // Phase 15: resolve a supplied conversationId for continuation. Scoped to
+  // {id, tenantId, userId} + the INSTRUCTOR_COPILOT surface marker in one
+  // call. Any mismatch (not found, wrong tenant/user, wrong/missing surface)
+  // becomes the same 404. A learner scope, once set at creation, is fixed
+  // for the conversation's lifetime — a continuation attempting a different
+  // learnerId (including omitting one that was originally set) is rejected
+  // with 400 rather than silently switching or ignoring it.
+  let existingConversation: Awaited<ReturnType<typeof getConversationForContinuation>> = null;
+  if (suppliedConversationId) {
+    existingConversation = await getConversationForContinuation(
+      { tenantId: user.tenantId, userId: user.id },
+      suppliedConversationId,
+      SURFACE_MARKER
+    );
+    if (!existingConversation) {
+      return Response.json({ error: "Conversation not found" }, { status: 404 });
+    }
+    const originalLearnerId = readConversationLearnerId(existingConversation.contextMetadata);
+    if ((learnerId ?? null) !== originalLearnerId) {
+      return Response.json(
+        { error: "This conversation is scoped to a different learner" },
+        { status: 400 }
+      );
+    }
+  }
+
+  // Capability context is always freshly assembled — never cached between
+  // turns, whether this is a new conversation or a continuation.
   let capabilityContext: Awaited<ReturnType<typeof buildInstructorCopilotContext>>;
   try {
     capabilityContext = await buildInstructorCopilotContext(
@@ -92,15 +129,17 @@ export async function POST(req: Request) {
 
   const { model, provider, modelId } = modelFor(surface);
 
-  let conversationId: string | undefined;
+  let conversationId: string | undefined = existingConversation?.id;
   let executionId: string | undefined;
   const startedAt = Date.now();
   try {
-    const conversation = await createConversation(
-      { tenantId: user.tenantId, userId: user.id },
-      { surface, contextMetadata: { query, learnerId } }
-    );
-    conversationId = conversation.id;
+    if (!conversationId) {
+      const conversation = await createConversation(
+        { tenantId: user.tenantId, userId: user.id },
+        { surface, contextMetadata: { surface: SURFACE_MARKER, query, learnerId } }
+      );
+      conversationId = conversation.id;
+    }
     const execution = await startExecution(
       { tenantId: user.tenantId, userId: user.id },
       { model: modelId, provider, operation: "capability.instructor.copilot", conversationId }
@@ -109,11 +148,20 @@ export async function POST(req: Request) {
     await persistMessage(conversationId, "user", query);
   } catch (err) {
     console.error("[ai-runtime] Failed to start V2 conversation/execution", err);
-    conversationId = undefined;
+    conversationId = existingConversation?.id;
     executionId = undefined;
   }
 
   const executionTracker = createExecutionTracker(executionId, startedAt);
+
+  // Bounded prior history (Phase 15 contract §8) — only sent to the model
+  // when continuing an existing conversation.
+  const historyMessages = existingConversation
+    ? (await listRecentMessages(existingConversation.id, HISTORY_WINDOW)).map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }))
+    : [];
 
   let answer: string;
   let inputTokens: number | undefined;
@@ -122,7 +170,7 @@ export async function POST(req: Request) {
     const result = await generateText({
       model,
       system: AI_STAFF_COPILOT_SYSTEM_PROMPT("the courses you own", capabilityContext),
-      prompt: query,
+      messages: [...historyMessages, { role: "user", content: query }],
     });
     answer = result.text.trim();
     inputTokens = result.usage?.inputTokens;
@@ -158,5 +206,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return Response.json({ answer });
+  return Response.json({ answer, conversationId });
 }

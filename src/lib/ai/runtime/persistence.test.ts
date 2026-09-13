@@ -2,8 +2,12 @@ import { afterAll, describe, expect, it } from "vitest";
 import {
   completeExecution,
   createConversation,
+  getConversationForContinuation,
+  listConversationsForUser,
+  listRecentMessages,
   persistCitations,
   persistMessage,
+  readConversationLearnerId,
   recordUsageEvent,
   startExecution,
   surfaceToConversationType,
@@ -138,6 +142,218 @@ describe("V2 AI persistence", () => {
       select: { conversationId: true },
     });
     expect(linkedExecution?.conversationId).toBe(conversation.id);
+  });
+});
+
+describe("Phase 15 — getConversationForContinuation", () => {
+  it("resolves a conversation scoped to {id, tenantId, userId} with a matching surface marker", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT", contextMetadata: { surface: "STUDENT_COPILOT", query: "hi" } }
+    );
+
+    const resolved = await getConversationForContinuation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      conversation.id,
+      "STUDENT_COPILOT"
+    );
+
+    expect(resolved?.id).toBe(conversation.id);
+  });
+
+  it("returns null for a nonexistent id", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const resolved = await getConversationForContinuation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      "does-not-exist",
+      "STUDENT_COPILOT"
+    );
+    expect(resolved).toBeNull();
+  });
+
+  it("returns null for another user's conversation, even in the same tenant", async () => {
+    const { tenant, ctx: ownerCtx } = await createTenantUser();
+    const { ctx: otherCtx } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenant.id, userId: ownerCtx.userId },
+      { surface: "COPILOT", contextMetadata: { surface: "STUDENT_COPILOT" } }
+    );
+
+    const resolved = await getConversationForContinuation(
+      { tenantId: tenant.id, userId: otherCtx.userId },
+      conversation.id,
+      "STUDENT_COPILOT"
+    );
+    expect(resolved).toBeNull();
+  });
+
+  it("returns null for a cross-tenant conversation id", async () => {
+    const { tenant: tenantA, ctx: ctxA } = await createTenantUser();
+    const { ctx: ctxB } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenantA.id, userId: ctxA.userId },
+      { surface: "COPILOT", contextMetadata: { surface: "STUDENT_COPILOT" } }
+    );
+
+    const resolved = await getConversationForContinuation(
+      { tenantId: ctxB.tenantId as string, userId: ctxB.userId },
+      conversation.id,
+      "STUDENT_COPILOT"
+    );
+    expect(resolved).toBeNull();
+  });
+
+  it("returns null when the surface marker doesn't match (surface isolation)", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT", contextMetadata: { surface: "INSTRUCTOR_COPILOT" } }
+    );
+
+    const resolved = await getConversationForContinuation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      conversation.id,
+      "STUDENT_COPILOT"
+    );
+    expect(resolved).toBeNull();
+  });
+
+  it("returns null when contextMetadata is missing/malformed — never accidentally authorizes continuation", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT" } // no contextMetadata at all
+    );
+
+    const resolved = await getConversationForContinuation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      conversation.id,
+      "STUDENT_COPILOT"
+    );
+    expect(resolved).toBeNull();
+  });
+});
+
+describe("Phase 15 — readConversationLearnerId", () => {
+  it("reads a string learnerId from contextMetadata", () => {
+    expect(readConversationLearnerId({ surface: "INSTRUCTOR_COPILOT", learnerId: "u1" })).toBe(
+      "u1"
+    );
+  });
+  it("returns null when absent, null, or malformed", () => {
+    expect(readConversationLearnerId({ surface: "INSTRUCTOR_COPILOT" })).toBeNull();
+    expect(readConversationLearnerId(null)).toBeNull();
+    expect(readConversationLearnerId("not-an-object")).toBeNull();
+  });
+});
+
+describe("Phase 15 — listRecentMessages", () => {
+  it("returns an empty array for a conversation with zero messages", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT" }
+    );
+    expect(await listRecentMessages(conversation.id, 10)).toEqual([]);
+  });
+
+  it("returns messages oldest-first, bounded to the given limit, when more than the limit exist", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT" }
+    );
+    for (let i = 0; i < 12; i++) {
+      await persistMessage(conversation.id, i % 2 === 0 ? "user" : "assistant", `message ${i}`);
+    }
+
+    const recent = await listRecentMessages(conversation.id, 10);
+
+    expect(recent).toHaveLength(10);
+    // The 12 messages are 0..11 — the latest 10 are messages 2..11, oldest first.
+    expect(recent[0].content).toBe("message 2");
+    expect(recent[9].content).toBe("message 11");
+    // Chronological order confirmed.
+    for (let i = 1; i < recent.length; i++) {
+      expect(recent[i].createdAt.getTime()).toBeGreaterThanOrEqual(
+        recent[i - 1].createdAt.getTime()
+      );
+    }
+  });
+
+  it("returns exactly the limit when message count equals the limit", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT" }
+    );
+    for (let i = 0; i < 10; i++) {
+      await persistMessage(conversation.id, "user", `message ${i}`);
+    }
+    expect(await listRecentMessages(conversation.id, 10)).toHaveLength(10);
+  });
+
+  it("only returns user/assistant roles, never system rows", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const conversation = await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT" }
+    );
+    await persistMessage(conversation.id, "system", "internal note");
+    await persistMessage(conversation.id, "user", "hello");
+
+    const recent = await listRecentMessages(conversation.id, 10);
+    expect(recent.map((m) => m.role)).toEqual(["user"]);
+  });
+});
+
+describe("Phase 15 — listConversationsForUser", () => {
+  it("returns only the caller's own conversations for the requested surface, most-recent-first", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    const { ctx: otherCtx } = await createTenantUser();
+    await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT", contextMetadata: { surface: "STUDENT_COPILOT", query: "first" } }
+    );
+    const second = await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "COPILOT", contextMetadata: { surface: "STUDENT_COPILOT", query: "second" } }
+    );
+    // Different surface, same user — must not appear.
+    await createConversation(
+      { tenantId: tenant.id, userId: ctx.userId },
+      { surface: "SEARCH", contextMetadata: { surface: "SEARCH" } }
+    );
+    // Same surface, different user — must not appear.
+    await createConversation(
+      { tenantId: tenant.id, userId: otherCtx.userId },
+      { surface: "COPILOT", contextMetadata: { surface: "STUDENT_COPILOT" } }
+    );
+
+    const result = await listConversationsForUser(
+      { tenantId: tenant.id, userId: ctx.userId },
+      "STUDENT_COPILOT"
+    );
+
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe(second.id);
+  });
+
+  it("bounds the list to the given limit", async () => {
+    const { tenant, ctx } = await createTenantUser();
+    for (let i = 0; i < 5; i++) {
+      await createConversation(
+        { tenantId: tenant.id, userId: ctx.userId },
+        { surface: "COPILOT", contextMetadata: { surface: "STUDENT_COPILOT" } }
+      );
+    }
+    const result = await listConversationsForUser(
+      { tenantId: tenant.id, userId: ctx.userId },
+      "STUDENT_COPILOT",
+      3
+    );
+    expect(result).toHaveLength(3);
   });
 });
 

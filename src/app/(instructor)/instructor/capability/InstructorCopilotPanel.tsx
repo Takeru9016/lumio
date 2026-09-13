@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiBadge } from "@/components";
 
 const EXAMPLE_PROMPTS = [
@@ -10,6 +10,8 @@ const EXAMPLE_PROMPTS = [
 ];
 
 type Status = "idle" | "loading" | "error";
+type ChatMessage = { role: "user" | "assistant"; content: string };
+type ConversationSummary = { id: string; label: string; createdAt: string };
 
 interface InstructorCopilotPanelProps {
   selectedLearner: { id: string; name: string } | null;
@@ -17,13 +19,15 @@ interface InstructorCopilotPanelProps {
 }
 
 /**
- * Embedded Instructor Capability Copilot panel (Phase 13 locked contract) —
- * one-shot Q&A over the capability state of students enrolled in the
- * instructor's own courses, rendered directly on /instructor/capability.
- * Each query replaces the previous answer; no thread, no history. Learner
- * selection reuses the existing capability table's rows — this panel never
- * fetches learner data itself, it only forwards the id the parent page
- * already rendered.
+ * Embedded Instructor Capability Copilot panel (Phase 13 locked contract,
+ * extended with Phase 15 conversation continuity) — Q&A over the capability
+ * state of students enrolled in the instructor's own courses, rendered
+ * directly on /instructor/capability. A conversation's learner scope is
+ * fixed at creation (Phase 15 contract §5/§7) — switching the selected
+ * learner always starts a new conversation rather than attempting to
+ * continue the old one under a different scope (the server would reject
+ * that with 400 anyway). Disabling input while a request is in flight is
+ * this panel's half of the Phase 15 concurrency mitigation.
  */
 export function InstructorCopilotPanel({
   selectedLearner,
@@ -32,7 +36,20 @@ export function InstructorCopilotPanel({
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<ConversationSummary[] | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  // Learner scope is fixed for a conversation's lifetime — a different
+  // learner selection always means a new conversation, never a continuation.
+  useEffect(() => {
+    setConversationId(null);
+    setMessages([]);
+    setError(null);
+    setShowHistory(false);
+  }, [selectedLearner?.id]);
 
   async function ask(q: string) {
     const trimmed = q.trim();
@@ -40,30 +57,77 @@ export function InstructorCopilotPanel({
 
     setStatus("loading");
     setError(null);
+    setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
 
     try {
       const res = await fetch("/api/ai/instructor/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          selectedLearner ? { query: trimmed, learnerId: selectedLearner.id } : { query: trimmed }
-        ),
+        body: JSON.stringify({
+          query: trimmed,
+          ...(selectedLearner ? { learnerId: selectedLearner.id } : {}),
+          ...(conversationId ? { conversationId } : {}),
+        }),
       });
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         setError(body?.error ?? "Copilot couldn't answer that. Please try again.");
-        setAnswer(null);
+        setMessages((prev) => prev.slice(0, -1));
         setStatus("error");
         return;
       }
 
-      const data = (await res.json()) as { answer: string };
-      setAnswer(data.answer);
+      const data = (await res.json()) as { answer: string; conversationId?: string };
+      setMessages((prev) => [...prev, { role: "assistant", content: data.answer }]);
+      if (data.conversationId) setConversationId(data.conversationId);
       setStatus("idle");
     } catch {
       setError("Copilot couldn't answer that. Please try again.");
-      setAnswer(null);
+      setMessages((prev) => prev.slice(0, -1));
+      setStatus("error");
+    }
+  }
+
+  function startNewConversation() {
+    setConversationId(null);
+    setMessages([]);
+    setError(null);
+    setShowHistory(false);
+  }
+
+  async function toggleHistory() {
+    const next = !showHistory;
+    setShowHistory(next);
+    if (next && history === null) {
+      setHistoryLoading(true);
+      try {
+        const res = await fetch("/api/ai/instructor/copilot/conversations");
+        if (res.ok) {
+          const data = (await res.json()) as { conversations: ConversationSummary[] };
+          setHistory(data.conversations);
+        }
+      } finally {
+        setHistoryLoading(false);
+      }
+    }
+  }
+
+  async function openConversation(id: string) {
+    setStatus("loading");
+    setError(null);
+    try {
+      const res = await fetch(`/api/ai/instructor/copilot/conversations/${id}`);
+      if (!res.ok) throw new Error();
+      const data = (await res.json()) as {
+        conversation: { id: string; messages: ChatMessage[] };
+      };
+      setMessages(data.conversation.messages);
+      setConversationId(data.conversation.id);
+      setShowHistory(false);
+      setStatus("idle");
+    } catch {
+      setError("Couldn't load that conversation.");
       setStatus("error");
     }
   }
@@ -72,6 +136,20 @@ export function InstructorCopilotPanel({
     <div className="bg-ai-bg border border-ai-border rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <AiBadge label="Capability Copilot" size="md" />
+        <div className="flex items-center gap-3 text-xs">
+          <button type="button" onClick={toggleHistory} className="text-ai hover:underline">
+            History
+          </button>
+          {(conversationId || messages.length > 0) && (
+            <button
+              type="button"
+              onClick={startNewConversation}
+              className="text-ai hover:underline"
+            >
+              New
+            </button>
+          )}
+        </div>
       </div>
       <p className="text-xs text-text-muted">
         Ask about your students&apos; roles, required skills, or capability gaps — Copilot explains
@@ -86,6 +164,41 @@ export function InstructorCopilotPanel({
           <button type="button" onClick={onClearLearner} className="text-ai hover:underline">
             Clear
           </button>
+        </div>
+      )}
+
+      {showHistory && (
+        <div className="rounded-md border border-border bg-white px-3 py-2 space-y-1">
+          {historyLoading && <p className="text-xs text-text-muted">Loading…</p>}
+          {!historyLoading && history?.length === 0 && (
+            <p className="text-xs text-text-muted">No previous conversations yet.</p>
+          )}
+          {!historyLoading &&
+            history?.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => void openConversation(c.id)}
+                className="block w-full text-left text-xs text-text-primary hover:text-ai truncate"
+              >
+                {c.label}
+              </button>
+            ))}
+        </div>
+      )}
+
+      {messages.length > 0 && (
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {messages.map((m, i) => (
+            <div
+              key={`${m.role}-${i}`}
+              className={`rounded-md border border-border px-3 py-2 ${
+                m.role === "user" ? "bg-surface-2" : "bg-white"
+              }`}
+            >
+              <p className="text-sm text-text-primary whitespace-pre-wrap">{m.content}</p>
+            </div>
+          ))}
         </div>
       )}
 
@@ -114,16 +227,13 @@ export function InstructorCopilotPanel({
         </button>
       </form>
 
-      {status === "idle" && !answer && !error && !selectedLearner && (
+      {status === "idle" && messages.length === 0 && !error && !selectedLearner && (
         <div className="flex flex-col gap-1.5">
           {EXAMPLE_PROMPTS.map((example) => (
             <button
               key={example}
               type="button"
-              onClick={() => {
-                setQuery(example);
-                void ask(example);
-              }}
+              onClick={() => void ask(example)}
               className="text-left text-xs text-ai hover:underline"
             >
               &ldquo;{example}&rdquo;
@@ -149,12 +259,6 @@ export function InstructorCopilotPanel({
           >
             Try again
           </button>
-        </div>
-      )}
-
-      {status === "idle" && answer && (
-        <div className="rounded-md border border-border bg-white px-3 py-2">
-          <p className="text-sm text-text-primary whitespace-pre-wrap">{answer}</p>
         </div>
       )}
     </div>
