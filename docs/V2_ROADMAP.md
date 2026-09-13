@@ -1,6 +1,6 @@
 # Lumio V2 Roadmap
 
-**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 10). This document consolidates
+**Status:** Canonical roadmap as of 2026-09-13 (end of Phase 11). This document consolidates
 `V2_ARCHITECTURE.md`, `V2_DOMAIN_MODEL.md`, `V2_AI_ARCHITECTURE.md`, `V2_MIGRATION_MAP.md`, and
 `V2_DATABASE_MIGRATION.md`, verified against the actual repository (git log, schema, `src/lib/`,
 routes, tests) — not copied from prior chat reports without re-checking. Where this document and
@@ -49,9 +49,13 @@ overview (`/org/capability`) — reusing the same deterministic gap semantics th
 `/capability` page already established, never duplicating them. Phase 10 shipped AI Search — a
 student-only, permission-aware answer-and-citations surface over the tenant Knowledge base,
 built entirely on the Phase 2/3 Knowledge + AI runtime foundation (one approved policy change:
-`AISurface.SEARCH` now allows `GENERATE`, not just `READ`). What remains open is an
-instructor/manager-facing capability view, capability analytics, an AI explanation/Copilot layer,
-and Instructor/ORG_ADMIN variants of Search — all deferred (see §4).
+`AISurface.SEARCH` now allows `GENERATE`, not just `READ`). Phase 11 extended capability
+visibility to a third audience — an INSTRUCTOR-only view scoped to students enrolled in courses
+the instructor owns (`/instructor/capability`), distinct from both the learner's own `/capability`
+and ORG_ADMIN's tenant-wide `/org/capability`, reusing the same deterministic gap semantics without
+importing either prior report. What remains open is a manager-facing capability view, capability
+analytics, an AI explanation/Copilot layer, and Instructor/ORG_ADMIN variants of Search — all
+deferred (see §4).
 
 ---
 
@@ -70,6 +74,7 @@ and Instructor/ORG_ADMIN variants of Search — all deferred (see §4).
 | Phase 8 — Course Creator UX Completion | COMPLETE | AI-generated lesson content, quizzes, knowledge grounding, and instructor-selected skills now persist into the saved draft course; Knowledge-document and Skill picker UIs; `GET /api/knowledge/documents`, `GET /api/skills` |
 | Phase 9 — ORG_ADMIN Capability Overview | COMPLETE | Tenant-wide, ORG_ADMIN-only capability overview: `getOrganizationCapabilityReport()` (batched, cursor-paginated, no N+1), `GET /api/org/capability`, `/org/capability` |
 | Phase 10 — AI Search | COMPLETE | Student-only, permission-aware, one-shot answer + citations over tenant Knowledge: `POST /api/ai/search`, `/search`, `AISurface.SEARCH` GENERATE enabled, `AI_SEARCH_SYSTEM_PROMPT`, existing V2 AI persistence, `searchRatelimit` |
+| Phase 11 — Instructor Capability View | COMPLETE | INSTRUCTOR-only, course-ownership-scoped capability overview: `getInstructorCapabilityReport()` (batched, cursor-paginated, no N+1), `GET /api/instructor/capability`, `/instructor/capability` |
 
 Verified against `git log --oneline`: Phase 1+2 schema work is one commit
 (`4b24fb1`/`51e0712` — schema foundation, then knowledge/RAG), Phase 3 + the reliability fix are
@@ -87,7 +92,10 @@ UI`) — verified directly against `git log --oneline` at the time this section 
 its own dedicated nullable-name pagination regression tests folded into the same commit (258/258
 tests passing, `tsc`/Biome/Prisma clean). Phase 10 is `d670609` (`feat: implement AI Search (Phase
 10)`), source-level audited and accepted with three non-blocking (INFO/LOW) findings, no code
-changes required (292/292 tests passing, `tsc`/Biome/Prisma clean).
+changes required (292/292 tests passing, `tsc`/Biome/Prisma clean). Phase 11 is `be217db`
+(`feat: implement instructor capability view`), source-level audited and accepted with two LOW
+and two INFO non-blocking findings, no code changes required (332/332 tests passing,
+`tsc`/Biome/Prisma clean).
 
 ### Phase 1 — Domain Foundation
 
@@ -462,6 +470,74 @@ tools — not built).
   environment; automated test coverage (including the real-DB permission/tenant-isolation suite)
   stands in for it.
 
+### Phase 11 — Instructor Capability View
+
+Extends the capability system to a third audience: an INSTRUCTOR can now see capability state for
+students enrolled in courses they own — distinct from the student's own `/capability` and
+ORG_ADMIN's tenant-wide `/org/capability` (Phase 9), and deliberately not the same query or
+authorization scope as either.
+
+- **`getInstructorCapabilityReport(instructorId, tenantId, options?)`** (`src/lib/domain/
+  capability/instructorReport.ts`) — takes the authenticated instructor id and tenant id only,
+  never a role or caller-supplied student/tenant id; authorization stays entirely in the route.
+  Population: students with at least one `Enrollment` in a `Course` owned by `instructorId`
+  (`Course.instructorId = instructorId`), with `Course.tenantId = tenantId` enforced as an explicit
+  defense-in-depth predicate alongside it — the ownership boundary is enforced in the Prisma `where`
+  clause itself, never fetch-then-filter.
+- **Batched, fixed-stage query architecture** — 6 Prisma operations across 5 sequential stages
+  (distinct enrolled-student ids → keyset user page → primary `UserJobRole` rows → `RoleSkill` +
+  `JobRole` in parallel → `UserSkill`), joined in memory; reproduces Phase 9's aggregate pattern and
+  Phase 5's primary-role tie-break (earliest `assignedAt` wins) independently rather than importing
+  either — proven not to import `organizationReport.ts` or `getInstructorStudents()` by a dedicated
+  architecture test.
+- **Deduplication** — a student enrolled in multiple of the instructor's own courses appears exactly
+  once (`distinct: ["userId"]` on the population query), proven by a dedicated regression test.
+- **Capability projection** — identical rules to Phase 5/9 (`RoleSkill.isRequired`,
+  `Skill.status:"ACTIVE"`, `UserSkill.proficiency ?? NONE`, `isAtLeast(current, required)`); no new
+  proficiency rule invented; `computeCapabilityGap()`/`gaps.ts` untouched.
+- **Privacy-safe DTO** — never selects or exposes `SkillEvidence`, scores, verification status, or
+  any evidence-adjacent field — structurally incapable of leaking it, proven by a spy test asserting
+  `db.skillEvidence.findMany` is never called even when evidence rows exist.
+- **Deterministic keyset pagination** — identical shape to Phase 9 (`name ASC, email ASC, id ASC`,
+  opaque base64 cursor, default limit 50 / max 100, invalid cursor → 400), including the same
+  nullable-name boundary handling, verified by dedicated named→unnamed/unnamed→unnamed/full-mixed
+  regression tests.
+- **`GET /api/instructor/capability`** — `requireAuthContext → requireTenant →
+  requireRole(["INSTRUCTOR"])` (401/400/403); instructor id and tenant always from the authenticated
+  context, never the query string (explicitly proven by a test that supplies a different
+  `instructorId`/`tenantId` in the query string and asserts they're ignored).
+- **`/instructor/capability`** — server-gated INSTRUCTOR page + client table mirroring
+  `/org/capability`'s structure exactly (inline per-skill expansion, cursor "Load more"); one new
+  INSTRUCTOR-only Sidebar entry ("Capability"). No evidence/verification/AI controls, no separate
+  learner-detail route.
+- **Validation** — 332/332 tests passing (292 at end of Phase 10 + 40 new: 28 domain + 12 route),
+  `tsc`/Biome/Prisma clean.
+- **Zero schema changes** — verified by `npx prisma validate` and an empty
+  `git diff -- prisma/schema.prisma prisma/migrations`; every field used already existed.
+- **No AI** — fully deterministic, matching every capability phase since Phase 5; no
+  `generateText`/`generateObject`/`streamText`/embedding call anywhere in the new files.
+- **Source-level audit** — `PHASE 11 ACCEPTED WITH NON-BLOCKING FINDINGS`: zero BLOCKER/HIGH/MEDIUM
+  findings. Two LOW findings (see below), two INFO observations (the "5-query" doc-comment label
+  actually being 6 operations across 5 stages, matching Phase 9's own labeling convention; the
+  fixed-query-count test not independently spying `roleSkill`/`jobRole`) — none required a code
+  change.
+- **LOW findings, recorded as non-blocking future hardening only, not a current defect**:
+  1. No test isolates the explicit `Course.tenantId` predicate independently of `instructorId` —
+     every cross-tenant/cross-instructor test varies both fields together. The predicate is present
+     in source (verified directly); this is a test-coverage gap, not a live vulnerability. Future
+     hardening: add a same-instructor/different-tenant regression fixture.
+  2. The enrollment-population query (Query 1) has no `take` bound — for a very large instructor
+     roster it loads all matching student ids into memory before the keyset page is applied. Query
+     *count* stays fixed and correctness/security are unaffected. Future hardening: consider
+     replacing it with a directly paginated `User` relation predicate (as Phase 9 does for its own
+     population filter) if instructor populations become large.
+- **Deliberately not built this phase**: Manager capability view (still blocked on future
+  identity/reporting-line modeling), capability analytics/matrices, evidence/verification UI, a
+  separate learner-detail route, a role filter, Instructor/ORG_ADMIN Search variants.
+- **Pending**: authenticated INSTRUCTOR browser E2E — no credentials/session were available in this
+  environment; automated test coverage (including the real-DB ownership/tenant-isolation/pagination
+  matrices) stands in for it.
+
 ---
 
 ## 3. Current Architecture
@@ -625,7 +701,7 @@ Statuses used: COMPLETE, NEXT, PLANNED, DEFERRED, BLOCKED, DESIGN DECISION REQUI
 | Manager verification | DEFERRED | Future Phase | TBD | none | Phase 5 verification is INSTRUCTOR (course-owner) + SUPER_ADMIN only — a manager/reporting-line verifier role was explicitly out of scope |
 | Learner capability profile / evidence view | **COMPLETE (Phase 7)** | — | — | — | `/capability` page — see §2's Phase 7 section |
 | ORG_ADMIN capability view | **COMPLETE (Phase 9)** | — | — | — | `getOrganizationCapabilityReport()`, `/org/capability` — see §2's Phase 9 section |
-| Instructor capability view | DEFERRED | Future Phase | TBD | none | A separate, course-scoped view (own enrolled students only, per `getInstructorStudents()`'s existing scope) — not the same query or authorization as the ORG_ADMIN view; not built |
+| Instructor capability view | **COMPLETE (Phase 11)** | — | — | — | `getInstructorCapabilityReport()`, `/instructor/capability` — course-ownership-scoped, own enrolled students only — see §2's Phase 11 section |
 | Manager capability view | DEFERRED | Future Phase | TBD | new identity/reporting-line modeling | No `MANAGER` role and no reporting-line relation exist in the schema today (`TeamMember` is flat membership only) — blocked on future identity modeling, not a query extension |
 | `LearningPlan` / persisted capability goals | DEFERRED | Future Phase | TBD | none | Evaluated during Phase 7 discovery and judged premature — no product signal yet that a stored goal (vs. a live-computed gap) is needed |
 | AI capability copilot / explanations | DEFERRED | Future Phase | TBD | Capability profile UI (now satisfied by Phase 7) | `AISurface.COPILOT` exists in policy table, unwired; Phase 6/7 discovery explicitly deferred AI until deterministic capability UX existed to explain — it now exists, but AI wiring was not started |
@@ -815,6 +891,12 @@ Phase 10:
   Schema changes: NO (verified by `npx prisma validate` and `git diff prisma/schema.prisma` —
     AI Search reuses every existing Knowledge/AI-runtime model as-is; the only behavior change
     is the SEARCH.GENERATE policy flip in application code, not schema)
+
+Phase 11:
+  Schema changes: NO (verified by `npx prisma validate` and an empty
+    `git diff -- prisma/schema.prisma prisma/migrations` — the instructor aggregate is a pure
+    projection over Enrollment/Course/User/UserJobRole/RoleSkill/UserSkill, no new model,
+    relationship, or index was needed)
 ```
 
 **Verified directly against the repository this task** (`npx prisma migrate status` against the
@@ -863,8 +945,8 @@ Phase 9 (ORG_ADMIN Capability Overview) — COMPLETE
   ↓
 Phase 10 (AI Search) — COMPLETE
   ↓
-Instructor capability view (separate, course-scoped, future — still not started)
-       +
+Phase 11 (Instructor Capability View) — COMPLETE
+  ↓
 Manager capability view (blocked on future identity/reporting-line modeling — still not started)
        +
 Instructor/ORG_ADMIN AI Search variants (Phase 10 is STUDENT-only by design — still not started)
@@ -911,10 +993,11 @@ Not approved — evaluated candidates only, per the actual completed architectur
 7. ~~**Capability surfacing (learner profile view)**~~ — **COMPLETE as of Phase 7** (`/capability`
    page: role, required skills, proficiency, gap status, evidence).
 8. ~~**Manager / instructor / org-admin capability view**~~ — **split.** The ORG_ADMIN portion is
-   **COMPLETE as of Phase 9** (`getOrganizationCapabilityReport()`, `/org/capability`). Instructor
-   capability view (a separate, course-scoped view) and Manager capability view (blocked on future
-   identity/reporting-line modeling — no such relation exists in the schema) remain **DEFERRED,
-   Future Phase** — see §4's Capability table.
+   **COMPLETE as of Phase 9** (`getOrganizationCapabilityReport()`, `/org/capability`) and the
+   Instructor portion is **COMPLETE as of Phase 11** (`getInstructorCapabilityReport()`,
+   `/instructor/capability`). Manager capability view (blocked on future identity/reporting-line
+   modeling — no such relation exists in the schema) remains **DEFERRED, Future Phase** — see §4's
+   Capability table.
 9. **AI capability copilot** — `AISurface.COPILOT` exists in the policy table, unwired. Now has a
    deterministic capability UI (Phase 7) to explain, which was the explicit precondition Phase 5/6/7
    discovery repeatedly named before considering this. Still needs a product-definition pass for
@@ -923,13 +1006,13 @@ Not approved — evaluated candidates only, per the actual completed architectur
     during Phase 7 discovery; no product signal yet justifies persisting a goal separate from the
     live-computed gap. Revisit only if a real need for tracked/dismissable goals emerges.
 
-**Tradeoff summary**: (1), (2), (3), (6), (7), and the ORG_ADMIN portion of (8) are done. (4)/(9)
-need product definition first, and (9) additionally needs (7) as a precondition (now satisfied).
-(5) is gated by an explicit guardrail and should come last. The Instructor and Manager portions of
-(8) remain deferred — Instructor is a separate, narrower, course-scoped view; Manager is blocked on
-identity modeling that doesn't exist yet, not a query extension. An Instructor/ORG_ADMIN variant of
-(2) is a plausible next extension of Phase 10's infrastructure but was not built — Phase 10 is
-STUDENT-only by design. (10) stays deferred until a concrete need appears.
+**Tradeoff summary**: (1), (2), (3), (6), (7), and the ORG_ADMIN + Instructor portions of (8) are
+done. (4)/(9) need product definition first, and (9) additionally needs (7) as a precondition (now
+satisfied). (5) is gated by an explicit guardrail and should come last. The Manager portion of (8)
+remains deferred — blocked on identity/reporting-line modeling that doesn't exist yet, not a query
+extension. An Instructor/ORG_ADMIN variant of (2) is a plausible next extension of Phase 10's
+infrastructure but was not built — Phase 10 is STUDENT-only by design. (10) stays deferred until a
+concrete need appears.
 
 ---
 
@@ -994,3 +1077,8 @@ Discovered during this audit, not silently resolved:
   being folded into a single "roadmap finalization" commit as one task instruction literally
   requested — flagged here rather than silently leaving Phase 10's code uncommitted while claiming
   the phase "complete" in this document.
+- **Phase 11 is `be217db`** (`feat: implement instructor capability view`). Same situation as
+  Phase 10: the implementation was still uncommitted in the working tree when this
+  roadmap-finalization task began, per the task's own explicit "do not commit/push during
+  implementation" instruction from the prior phase. Committed as its own, separate commit
+  immediately before this roadmap edit, matching the Phase 10 precedent exactly.
