@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { EmptyState } from "@/components";
 import type { OrgCapabilityPage } from "@/lib/domain/capability/organizationReport";
+import { OrgCopilotPanel } from "./OrgCopilotPanel";
 
 interface OrgCapabilityClientProps {
   initialPage: OrgCapabilityPage;
@@ -20,6 +21,7 @@ export function OrgCapabilityClient({ initialPage }: OrgCapabilityClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [selectedLearner, setSelectedLearner] = useState<{ id: string; name: string } | null>(null);
 
   function toggleExpanded(userId: string) {
     setExpanded((prev) => {
@@ -60,6 +62,11 @@ export function OrgCapabilityClient({ initialPage }: OrgCapabilityClientProps) {
           Role, required skills, and proficiency for every learner in your organization.
         </p>
       </div>
+
+      <OrgCopilotPanel
+        selectedLearner={selectedLearner}
+        onClearLearner={() => setSelectedLearner(null)}
+      />
 
       {learners.length === 0 ? (
         <div className="bg-surface-1 border border-border rounded-lg">
@@ -158,6 +165,13 @@ export function OrgCapabilityClient({ initialPage }: OrgCapabilityClientProps) {
                         ))}
                       </div>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLearner({ id: learner.userId, name: learner.name })}
+                      className="mt-2 text-xs text-ai hover:underline"
+                    >
+                      Ask Copilot about {learner.name}
+                    </button>
                   </div>
                 )}
               </div>

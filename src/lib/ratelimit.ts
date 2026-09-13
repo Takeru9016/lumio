@@ -36,3 +36,15 @@ export const copilotRatelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(10, "1 m"),
   prefix: "lumio:ai:copilot",
 });
+
+export const instructorCopilotRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  prefix: "lumio:ai:instructor-copilot",
+});
+
+export const orgCopilotRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  prefix: "lumio:ai:org-copilot",
+});

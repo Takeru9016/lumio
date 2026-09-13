@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { EmptyState } from "@/components";
 import type { InstructorCapabilityPage } from "@/lib/domain/capability/instructorReport";
+import { InstructorCopilotPanel } from "./InstructorCopilotPanel";
 
 interface InstructorCapabilityClientProps {
   initialPage: InstructorCapabilityPage;
@@ -20,6 +21,7 @@ export function InstructorCapabilityClient({ initialPage }: InstructorCapability
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [selectedLearner, setSelectedLearner] = useState<{ id: string; name: string } | null>(null);
 
   function toggleExpanded(userId: string) {
     setExpanded((prev) => {
@@ -60,6 +62,11 @@ export function InstructorCapabilityClient({ initialPage }: InstructorCapability
           Role, required skills, and proficiency for students enrolled in your courses.
         </p>
       </div>
+
+      <InstructorCopilotPanel
+        selectedLearner={selectedLearner}
+        onClearLearner={() => setSelectedLearner(null)}
+      />
 
       {learners.length === 0 ? (
         <div className="bg-surface-1 border border-border rounded-lg">
@@ -158,6 +165,13 @@ export function InstructorCapabilityClient({ initialPage }: InstructorCapability
                         ))}
                       </div>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLearner({ id: learner.userId, name: learner.name })}
+                      className="mt-2 text-xs text-ai hover:underline"
+                    >
+                      Ask Copilot about {learner.name}
+                    </button>
                   </div>
                 )}
               </div>
