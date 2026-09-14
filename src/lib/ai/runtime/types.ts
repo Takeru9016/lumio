@@ -8,7 +8,7 @@ import type { AuthContext } from "@/lib/auth/context";
  * exist so policy.ts/provider.ts have a real shape to extend into rather than
  * being TUTOR-only.
  */
-export type AISurface = "TUTOR" | "SEARCH" | "COURSE_CREATOR" | "COPILOT";
+export type AISurface = "TUTOR" | "SEARCH" | "COURSE_CREATOR" | "COPILOT" | "ASSESSMENT";
 
 /**
  * Action classification, not a permission framework. READ/GENERATE are

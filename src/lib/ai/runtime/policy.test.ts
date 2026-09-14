@@ -25,8 +25,15 @@ describe("AI policy — COURSE_CREATOR", () => {
   it("denies EXECUTE", () => expect(isActionAllowed("COURSE_CREATOR", "EXECUTE")).toBe(false));
 });
 
+describe("AI policy — ASSESSMENT", () => {
+  it("allows READ", () => expect(isActionAllowed("ASSESSMENT", "READ")).toBe(true));
+  it("allows GENERATE", () => expect(isActionAllowed("ASSESSMENT", "GENERATE")).toBe(true));
+  it("denies WRITE", () => expect(isActionAllowed("ASSESSMENT", "WRITE")).toBe(false));
+  it("denies EXECUTE", () => expect(isActionAllowed("ASSESSMENT", "EXECUTE")).toBe(false));
+});
+
 describe("AI policy — every surface denies WRITE and EXECUTE", () => {
-  const surfaces: AISurface[] = ["TUTOR", "SEARCH", "COURSE_CREATOR", "COPILOT"];
+  const surfaces: AISurface[] = ["TUTOR", "SEARCH", "COURSE_CREATOR", "COPILOT", "ASSESSMENT"];
   for (const surface of surfaces) {
     it(`${surface} denies WRITE`, () => expect(isActionAllowed(surface, "WRITE")).toBe(false));
     it(`${surface} denies EXECUTE`, () => expect(isActionAllowed(surface, "EXECUTE")).toBe(false));

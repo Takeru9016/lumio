@@ -35,6 +35,7 @@ export function surfaceToConversationType(surface: AISurface): AIConversationTyp
       return "COURSE_BUILDER";
     case "SEARCH":
     case "COPILOT":
+    case "ASSESSMENT":
       return "GENERAL";
   }
 }

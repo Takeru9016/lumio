@@ -4,10 +4,18 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { format } from "date-fns";
 import { toast } from "gooey-toast";
-import { CheckCircle2, ClipboardList, ExternalLink, Loader2 } from "lucide-react";
+import { CheckCircle2, ClipboardList, ExternalLink, Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
 
+import { AiBadge } from "@/components/shared/AiBadge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+
+interface AssessmentDraft {
+  suggestedScore: number;
+  feedback: string;
+  rationale: string;
+  citations: string[];
+}
 
 export interface SubmissionItem {
   id: string;
@@ -59,6 +67,45 @@ function GradingForm({ submission, onGraded, onClose }: GradingFormProps) {
   const [score, setScore] = useState<number | "">("");
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [aiDraft, setAiDraft] = useState<AssessmentDraft | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  async function handleSuggestGrade() {
+    // Single-flight: a second click while a request is already in flight is
+    // a no-op (the button is also disabled meanwhile). Switching to a
+    // different submission remounts this component fresh (see the `key`
+    // prop below), so a stale response can never populate another
+    // submission's form — there is no shared state for it to write into.
+    if (aiLoading) return;
+    setAiLoading(true);
+    setAiDraft(null);
+    try {
+      const res = await fetch(
+        `/api/ai/assignments/${submission.assignmentId}/submissions/${submission.id}/suggest-grade`,
+        { method: "POST" }
+      );
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        toast.error({ title: data.error ?? "Failed to generate a suggestion." });
+        return;
+      }
+      const draft = (await res.json()) as AssessmentDraft;
+      setAiDraft(draft);
+    } catch {
+      toast.error({ title: "Failed to generate a suggestion. Please try again." });
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  // Pre-fills the existing manual fields only — this NEVER calls the grade
+  // endpoint. The instructor still has to press the unchanged "Submit
+  // grade" button below to commit anything.
+  function useSuggestion() {
+    if (!aiDraft) return;
+    setScore(aiDraft.suggestedScore);
+    setFeedback(aiDraft.feedback);
+  }
 
   async function handleGrade() {
     if (score === "" || score < 0) {
@@ -148,6 +195,58 @@ function GradingForm({ submission, onGraded, onClose }: GradingFormProps) {
           </a>
         </div>
       )}
+
+      <div className="border-t border-border pt-4">
+        <button
+          type="button"
+          onClick={() => void handleSuggestGrade()}
+          disabled={aiLoading}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-ai border border-ai-border rounded-md hover:bg-ai-bg disabled:opacity-50 transition-colors"
+        >
+          {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+          Suggest grade
+        </button>
+
+        {aiDraft && (
+          <div className="mt-3 rounded-lg border border-ai-border bg-ai-bg p-4 space-y-3">
+            <AiBadge label="AI-generated suggestion — review before grading" size="md" />
+
+            <div>
+              <p className="text-xs font-medium text-text-secondary mb-1">
+                Suggested score{" "}
+                <span className="text-text-disabled font-normal">
+                  (out of {submission.maxScore})
+                </span>
+              </p>
+              <p className="text-sm text-text-primary">{aiDraft.suggestedScore}</p>
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-text-secondary mb-1">Suggested feedback</p>
+              <p className="text-sm text-text-primary whitespace-pre-wrap">{aiDraft.feedback}</p>
+            </div>
+
+            <div className="rounded-md bg-surface-1 border border-border p-2">
+              <p className="text-xs font-medium text-text-secondary mb-1">Rationale</p>
+              <p className="text-xs text-text-muted whitespace-pre-wrap">{aiDraft.rationale}</p>
+            </div>
+
+            {aiDraft.citations.length > 0 && (
+              <p className="text-xs text-text-disabled">Based on: {aiDraft.citations.join(", ")}</p>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={useSuggestion}
+                className="px-3 py-1.5 text-xs font-medium bg-ai text-white rounded-md hover:opacity-90 transition-colors"
+              >
+                Use suggestion
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="border-t border-border pt-4 space-y-3">
         <div>
@@ -270,6 +369,7 @@ export function SubmissionsGrader({ initialSubmissions }: SubmissionsGraderProps
           <DialogTitle>Grade submission</DialogTitle>
           {activeSubmission && (
             <GradingForm
+              key={activeSubmission.id}
               submission={activeSubmission}
               onGraded={removeGraded}
               onClose={() => setActiveSubmission(null)}

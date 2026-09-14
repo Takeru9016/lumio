@@ -26,5 +26,9 @@ export function modelFor(surface: AISurface): ModelSelection {
     case "COPILOT":
       // Not wired to a route yet — default to the cheaper model until a real surface says otherwise.
       return { model: openai("gpt-5.4-mini"), provider: "openai", modelId: "gpt-5.4-mini" };
+    case "ASSESSMENT":
+      // Grading-quality reasoning matters more than latency for a one-shot,
+      // instructor-initiated draft — matches Course Creator's model choice.
+      return { model: openai("gpt-5.4"), provider: "openai", modelId: "gpt-5.4" };
   }
 }

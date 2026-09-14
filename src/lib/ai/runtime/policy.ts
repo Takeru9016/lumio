@@ -21,6 +21,12 @@ const POLICY: Record<AISurface, Record<AIAction, boolean>> = {
   SEARCH: { READ: true, GENERATE: true, WRITE: false, EXECUTE: false },
   COURSE_CREATOR: { READ: true, GENERATE: true, WRITE: false, EXECUTE: false },
   COPILOT: { READ: true, GENERATE: true, WRITE: false, EXECUTE: false },
+  // Phase 18: instructor-facing grading-draft suggestions. READ (Knowledge
+  // retrieval) + GENERATE (the draft itself) only — same WRITE/EXECUTE=false
+  // as every other surface. The AI never grades; it only proposes a draft
+  // the instructor reviews and manually submits through the existing grade
+  // route (see src/lib/domain/assessment/evaluate.ts).
+  ASSESSMENT: { READ: true, GENERATE: true, WRITE: false, EXECUTE: false },
 };
 
 /** Pure — no I/O. An unrecognized surface has no table entry and is denied. */
