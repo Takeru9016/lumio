@@ -46,3 +46,31 @@ export async function generateUniqueLessonSlug(title: string, courseId: string):
 
   return slug;
 }
+
+/** Generates a JobRole slug unique within the given tenant (JobRole.slug is [tenantId, slug]-unique). */
+export async function generateUniqueJobRoleSlug(title: string, tenantId: string): Promise<string> {
+  const base = slugify(title) || "role";
+
+  let slug = base;
+  let suffix = 2;
+  while (await db.jobRole.findUnique({ where: { tenantId_slug: { tenantId, slug } } })) {
+    slug = `${base}-${suffix}`;
+    suffix += 1;
+  }
+
+  return slug;
+}
+
+/** Generates a Skill slug unique within the given tenant (Skill.slug is [tenantId, slug]-unique). */
+export async function generateUniqueSkillSlug(title: string, tenantId: string): Promise<string> {
+  const base = slugify(title) || "skill";
+
+  let slug = base;
+  let suffix = 2;
+  while (await db.skill.findUnique({ where: { tenantId_slug: { tenantId, slug } } })) {
+    slug = `${base}-${suffix}`;
+    suffix += 1;
+  }
+
+  return slug;
+}

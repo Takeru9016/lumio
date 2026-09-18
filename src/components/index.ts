@@ -33,6 +33,7 @@ export { TrustSection } from "./marketing/TrustSection";
 export { BrandingForm } from "./org/BrandingForm";
 export { CompletionReportClient } from "./org/CompletionReportClient";
 export { CoursesClient } from "./org/CoursesClient";
+export { RolesClient } from "./org/RolesClient";
 export { SendNudgeButton } from "./org/SendNudgeButton";
 export { TeamsClient } from "./org/TeamsClient";
 export { AiBadge } from "./shared/AiBadge";

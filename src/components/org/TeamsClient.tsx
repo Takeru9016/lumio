@@ -15,6 +15,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Role = "STUDENT" | "INSTRUCTOR" | "ORG_ADMIN" | "SUPER_ADMIN";
 type InvitableRole = "STUDENT" | "INSTRUCTOR";
@@ -37,11 +44,24 @@ interface InvitationData {
   expiresAt: Date;
 }
 
+interface JobRoleOption {
+  id: string;
+  name: string;
+}
+
+interface UserCapabilityRole {
+  roleId: string;
+  roleName: string;
+  isPrimary: boolean;
+}
+
 interface TeamsClientProps {
   initialTeams: TeamData[];
   seatCount: number;
   seatLimit: number;
   initialInvitations: InvitationData[];
+  jobRoles: JobRoleOption[];
+  userRolesMap: Record<string, UserCapabilityRole[]>;
 }
 
 const roleBadgeStyles: Record<Role, string> = {
@@ -56,11 +76,14 @@ export function TeamsClient({
   seatCount,
   seatLimit,
   initialInvitations,
+  jobRoles,
+  userRolesMap,
 }: TeamsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [createOpen, setCreateOpen] = useState(false);
   const [teamName, setTeamName] = useState("");
+  const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const [detailTeamId, setDetailTeamId] = useState<string | null>(null);
@@ -180,6 +203,57 @@ export function TeamsClient({
       toast.error({ title: "Couldn't remove member" });
     } finally {
       setRemoveTarget(null);
+    }
+  }
+
+  async function handleAssignCapabilityRole(userId: string, roleId: string) {
+    setAssigningUserId(userId);
+    try {
+      const res = await fetch(`/api/org/roles/${roleId}/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Couldn't assign role");
+      toast.success({ title: "Capability role assigned" });
+      router.refresh();
+    } catch (err) {
+      toast.error({ title: err instanceof Error ? err.message : "Couldn't assign role" });
+    } finally {
+      setAssigningUserId(null);
+    }
+  }
+
+  async function handleSetPrimaryCapabilityRole(userId: string, roleId: string) {
+    setAssigningUserId(userId);
+    try {
+      const res = await fetch(`/api/org/roles/${roleId}/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPrimary: true }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success({ title: "Primary role updated" });
+      router.refresh();
+    } catch {
+      toast.error({ title: "Couldn't set primary role" });
+    } finally {
+      setAssigningUserId(null);
+    }
+  }
+
+  async function handleRemoveCapabilityRole(userId: string, roleId: string) {
+    setAssigningUserId(userId);
+    try {
+      const res = await fetch(`/api/org/roles/${roleId}/users/${userId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      toast.success({ title: "Capability role removed" });
+      router.refresh();
+    } catch {
+      toast.error({ title: "Couldn't remove capability role" });
+    } finally {
+      setAssigningUserId(null);
     }
   }
 
@@ -384,33 +458,104 @@ export function TeamsClient({
                 {detailTeam.members.length === 0 ? (
                   <p className="px-4 py-6 text-sm text-text-muted text-center">No members yet.</p>
                 ) : (
-                  detailTeam.members.map(({ user }) => (
-                    <div key={user.id} className="flex items-center justify-between px-4 py-2.5">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-text-primary truncate">
-                          {user.name ?? user.email}
-                        </p>
-                        <p className="text-xs text-text-muted truncate">{user.email}</p>
+                  detailTeam.members.map(({ user }) => {
+                    const capabilityRoles = userRolesMap[user.id] ?? [];
+                    const assignableRoles = jobRoles.filter(
+                      (r) => !capabilityRoles.some((cr) => cr.roleId === r.id)
+                    );
+                    const isBusy = assigningUserId === user.id;
+                    return (
+                      <div key={user.id} className="px-4 py-2.5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-text-primary truncate">
+                              {user.name ?? user.email}
+                            </p>
+                            <p className="text-xs text-text-muted truncate">{user.email}</p>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="text-xs text-text-disabled">Permission:</span>
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${roleBadgeStyles[user.role]}`}
+                            >
+                              {user.role}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setRemoveTarget({ userId: user.id, name: user.name ?? user.email })
+                              }
+                              className="text-text-muted hover:text-danger transition-colors"
+                              title="Remove from team"
+                            >
+                              <UserMinus size={15} />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center flex-wrap gap-1.5 pl-0.5">
+                          <span className="text-xs text-text-disabled shrink-0">
+                            Capability role:
+                          </span>
+                          {capabilityRoles.length === 0 && (
+                            <span className="text-xs text-text-disabled italic">None assigned</span>
+                          )}
+                          {capabilityRoles.map((cr) => (
+                            <span
+                              key={cr.roleId}
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                                cr.isPrimary
+                                  ? "bg-brand-light text-brand"
+                                  : "bg-surface-2 text-text-muted"
+                              }`}
+                            >
+                              {cr.roleName}
+                              {cr.isPrimary && <span className="opacity-70">· primary</span>}
+                              {!cr.isPrimary && (
+                                <button
+                                  type="button"
+                                  disabled={isBusy}
+                                  onClick={() => handleSetPrimaryCapabilityRole(user.id, cr.roleId)}
+                                  className="hover:underline disabled:opacity-50"
+                                >
+                                  set primary
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                disabled={isBusy}
+                                onClick={() => handleRemoveCapabilityRole(user.id, cr.roleId)}
+                                className="text-text-disabled hover:text-danger disabled:opacity-50"
+                                title="Remove capability role"
+                              >
+                                <X size={11} />
+                              </button>
+                            </span>
+                          ))}
+                          {assignableRoles.length > 0 && (
+                            <Select
+                              value=""
+                              onValueChange={(roleId) =>
+                                handleAssignCapabilityRole(user.id, roleId)
+                              }
+                              disabled={isBusy}
+                            >
+                              <SelectTrigger className="h-6 w-auto text-xs px-2 py-0 gap-1 border-dashed">
+                                <SelectValue placeholder="+ Assign role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {assignableRoles.map((r) => (
+                                  <SelectItem key={r.id} value={r.id}>
+                                    {r.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${roleBadgeStyles[user.role]}`}
-                        >
-                          {user.role}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setRemoveTarget({ userId: user.id, name: user.name ?? user.email })
-                          }
-                          className="text-text-muted hover:text-danger transition-colors"
-                          title="Remove from team"
-                        >
-                          <UserMinus size={15} />
-                        </button>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </>

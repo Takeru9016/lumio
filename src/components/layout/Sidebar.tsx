@@ -3,6 +3,7 @@
 import {
   BarChart2,
   BookOpen,
+  Briefcase,
   Building2,
   ChevronLeft,
   ChevronRight,
@@ -51,6 +52,7 @@ const ROLE_NAV_ITEMS: Record<Role, NavItem[]> = {
   ORG_ADMIN: [
     { label: "Overview", href: "/org/dashboard", icon: LayoutDashboard },
     { label: "Teams", href: "/org/teams", icon: Users2 },
+    { label: "Capability roles", href: "/org/roles", icon: Briefcase },
     { label: "Courses", href: "/org/courses", icon: BookOpen },
     { label: "Knowledge", href: "/org/knowledge", icon: Library },
     { label: "Requests", href: "/org/requests", icon: Inbox },
