@@ -49,7 +49,7 @@ export async function saveCourseDraft(authCtx: AuthContext, rawInput: unknown) {
   let verifiedSkillIds: string[] = [];
   if (input.targetSkillIds.length > 0) {
     const skills = await db.skill.findMany({
-      where: { id: { in: input.targetSkillIds }, tenantId: authCtx.tenantId },
+      where: { id: { in: input.targetSkillIds }, tenantId: authCtx.tenantId, status: "ACTIVE" },
       select: { id: true },
     });
     verifiedSkillIds = skills.map((s) => s.id);

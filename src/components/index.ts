@@ -7,6 +7,7 @@ export { AssignmentBuilder } from "./course/AssignmentBuilder";
 export { CourseCard } from "./course/CourseCard";
 export { CourseEditor } from "./course/CourseEditor";
 export { CourseSettingsForm } from "./course/CourseSettingsForm";
+export { CourseSkillsPanel } from "./course/CourseSkillsPanel";
 export { CreateCourseButton } from "./course/CreateCourseButton";
 export { EnrollmentChart } from "./course/EnrollmentChart";
 export { InlineInput } from "./course/InlineInput";

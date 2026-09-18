@@ -302,6 +302,13 @@ export function CourseEditor({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => router.push(`/courses/${courseId}/skills`)}
+              className="text-sm text-text-muted hover:text-text-primary transition-colors"
+            >
+              Skills
+            </button>
+            <button
+              type="button"
               onClick={() => router.push(`/courses/${courseId}/settings`)}
               className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >

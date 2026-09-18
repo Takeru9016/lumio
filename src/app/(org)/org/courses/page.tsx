@@ -21,7 +21,14 @@ export default async function OrgCoursesPage() {
         status: "PUBLISHED",
         OR: [{ tenantId: dbUser.tenantId }, { tenantId: null }],
       },
-      select: { id: true, title: true, thumbnailUrl: true, category: true, tenantId: true },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        thumbnailUrl: true,
+        category: true,
+        tenantId: true,
+      },
       orderBy: { title: "asc" },
     }),
     db.team.findMany({

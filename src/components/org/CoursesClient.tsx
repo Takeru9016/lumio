@@ -2,6 +2,7 @@
 
 import { toast } from "gooey-toast";
 import { ClipboardList } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -24,6 +25,7 @@ interface Assignment {
 
 interface CourseData {
   id: string;
+  slug: string;
   title: string;
   thumbnailUrl: string | null;
   category: string | null;
@@ -149,17 +151,28 @@ export function CoursesClient({ courses, teams }: CoursesClientProps) {
                 </div>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => openAssignModal(course.id)}
-              disabled={teams.length === 0}
-              className="shrink-0 bg-white text-text-primary border border-border rounded-md
-                         px-3 py-1.5 text-xs font-medium hover:bg-surface-2 transition-colors
-                         disabled:opacity-50 disabled:cursor-not-allowed"
-              title={teams.length === 0 ? "Create a team first" : undefined}
-            >
-              Assign as mandatory
-            </button>
+            <div className="shrink-0 flex items-center gap-2">
+              {!course.isMarketplace && (
+                <Link
+                  href={`/org/courses/${course.slug}/skills`}
+                  className="bg-white text-text-primary border border-border rounded-md
+                             px-3 py-1.5 text-xs font-medium hover:bg-surface-2 transition-colors"
+                >
+                  Manage skills
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => openAssignModal(course.id)}
+                disabled={teams.length === 0}
+                className="bg-white text-text-primary border border-border rounded-md
+                           px-3 py-1.5 text-xs font-medium hover:bg-surface-2 transition-colors
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                title={teams.length === 0 ? "Create a team first" : undefined}
+              >
+                Assign as mandatory
+              </button>
+            </div>
           </div>
         ))}
       </div>
