@@ -15,6 +15,7 @@ export { LessonList, type SectionItem } from "./course/LessonList";
 export { QuizBuilder } from "./course/QuizBuilder";
 export { TextEditor } from "./course/TextEditor";
 export { VideoPlayer } from "./course/VideoPlayer";
+export { EvidenceReviewList } from "./instructor/EvidenceReviewList";
 export { Sidebar } from "./layout/Sidebar";
 export { TopNav } from "./layout/TopNav";
 export { AiSpotlight } from "./marketing/AiSpotlight";

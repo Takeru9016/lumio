@@ -4,7 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { EvidenceReviewList } from "@/components";
 import { db } from "@/lib/db";
+import { getReviewableEvidenceForInstructor } from "@/lib/domain/capability/verification";
 import { getInstructorStudentDetail } from "@/lib/instructor-students";
 
 interface InstructorStudentDetailPageProps {
@@ -20,12 +22,22 @@ export default async function InstructorStudentDetailPage({
 
   const dbUser = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true },
+    select: { id: true, role: true, tenantId: true },
   });
   if (!dbUser) redirect("/sign-in");
 
   const student = await getInstructorStudentDetail(dbUser.id, studentId);
   if (!student) notFound();
+
+  // Capability evidence is tenant-only (SkillEvidence.tenantId is required) —
+  // a tenant-less instructor has none to review, so this is skipped rather
+  // than calling getReviewableEvidenceForInstructor with a fabricated tenant.
+  const reviewableEvidence = dbUser.tenantId
+    ? await getReviewableEvidenceForInstructor(
+        { userId: dbUser.id, clerkId: userId, tenantId: dbUser.tenantId, role: dbUser.role },
+        studentId
+      )
+    : [];
 
   const avgQuizScore =
     student.quizAttempts.length > 0
@@ -146,6 +158,13 @@ export default async function InstructorStudentDetailPage({
             </tbody>
           </table>
         )}
+      </div>
+
+      <div className="bg-white border border-border rounded-lg overflow-hidden shadow-sm">
+        <div className="px-4 py-3 border-b border-border">
+          <p className="text-sm font-semibold text-text-primary">Skill evidence</p>
+        </div>
+        <EvidenceReviewList initialEvidence={reviewableEvidence ?? []} />
       </div>
     </div>
   );

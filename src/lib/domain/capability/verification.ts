@@ -1,4 +1,8 @@
-import type { EvidenceVerificationStatus, UserSkill } from "@/generated/prisma/client";
+import type {
+  EvidenceType,
+  EvidenceVerificationStatus,
+  UserSkill,
+} from "@/generated/prisma/client";
 import type { AuthContext } from "@/lib/auth/context";
 import { db } from "@/lib/db";
 import { projectUserSkill } from "@/lib/domain/capability/proficiency";
@@ -13,20 +17,32 @@ export class CapabilityVerificationError extends Error {
   }
 }
 
-type ResolvedSourceCourse = { id: string; instructorId: string; tenantId: string | null };
+type ResolvedSourceCourse = {
+  id: string;
+  instructorId: string;
+  tenantId: string | null;
+  title: string;
+};
 
 /**
  * Resolves a SkillEvidence row's source back to the one Course whose
- * instructor is authorized to verify/reject it. Both Phase 5 evidence types
- * resolve to exactly one Course:
+ * instructor is authorized to verify/reject it. Every evidence type with a
+ * production writer (src/lib/domain/capability/outcomes.ts) resolves to
+ * exactly one Course:
  *   COURSE_COMPLETION: sourceType="Course", sourceId is the Course id directly.
  *   QUIZ_SCORE: sourceType="QuizAttempt", sourceId -> QuizAttempt.quizId ->
  *     Quiz.lessonId -> Lesson.sectionId -> Section.courseId -> Course.
- * An unrecognized sourceType (none exist in Phase 5, but a future evidence
- * type might add one) resolves to null — fails closed, never verifiable
- * until this function is deliberately extended for it.
+ *   ASSESSMENT: sourceType="AssignmentSubmission", sourceId ->
+ *     AssignmentSubmission.assignmentId -> Assignment.lessonId ->
+ *     Lesson.sectionId -> Section.courseId -> Course. (Phase 20 — this branch
+ *     was missing since Phase 17 added ASSESSMENT evidence, which meant
+ *     assignment-grade evidence silently failed closed for every actor,
+ *     including SUPER_ADMIN, and could never be verified.)
+ * An unrecognized sourceType (none exist in production today) resolves to
+ * null — fails closed, never verifiable until this function is deliberately
+ * extended for it.
  */
-async function resolveSourceCourse(evidence: {
+export async function resolveSourceCourse(evidence: {
   sourceType: string;
   sourceId: string | null;
 }): Promise<ResolvedSourceCourse | null> {
@@ -35,7 +51,7 @@ async function resolveSourceCourse(evidence: {
   if (evidence.sourceType === "Course") {
     return db.course.findUnique({
       where: { id: evidence.sourceId },
-      select: { id: true, instructorId: true, tenantId: true },
+      select: { id: true, instructorId: true, tenantId: true, title: true },
     });
   }
 
@@ -48,7 +64,11 @@ async function resolveSourceCourse(evidence: {
             lesson: {
               select: {
                 section: {
-                  select: { course: { select: { id: true, instructorId: true, tenantId: true } } },
+                  select: {
+                    course: {
+                      select: { id: true, instructorId: true, tenantId: true, title: true },
+                    },
+                  },
                 },
               },
             },
@@ -57,6 +77,30 @@ async function resolveSourceCourse(evidence: {
       },
     });
     return attempt?.quiz.lesson.section.course ?? null;
+  }
+
+  if (evidence.sourceType === "AssignmentSubmission") {
+    const submission = await db.assignmentSubmission.findUnique({
+      where: { id: evidence.sourceId },
+      select: {
+        assignment: {
+          select: {
+            lesson: {
+              select: {
+                section: {
+                  select: {
+                    course: {
+                      select: { id: true, instructorId: true, tenantId: true, title: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    return submission?.assignment.lesson.section.course ?? null;
   }
 
   return null;
@@ -153,4 +197,81 @@ export async function rejectEvidence(
   evidenceId: string
 ): Promise<UserSkill> {
   return setEvidenceVerificationStatus(actor, evidenceId, "REJECTED");
+}
+
+export type ReviewableEvidenceRow = {
+  id: string;
+  skillId: string;
+  skillName: string;
+  type: EvidenceType;
+  sourceType: string;
+  score: number | null;
+  verificationStatus: EvidenceVerificationStatus;
+  courseTitle: string;
+  createdAt: Date;
+};
+
+/**
+ * Phase 20 — the reviewable-evidence read path for the instructor student-
+ * detail page. Scoped identically to the mutation path above: an
+ * INSTRUCTOR-only actor (ORG_ADMIN is deliberately not granted this — see
+ * the Phase 20 contract, "Authorization"), a student the actor has an
+ * actual shared enrollment with (mirrors getInstructorStudentDetail's own
+ * "no shared course = same as not found" convention — see
+ * src/lib/instructor-students.ts), and, per evidence row, only rows whose
+ * resolved source Course the actor actually owns — reusing
+ * `resolveSourceCourse` rather than re-deriving a parallel join, so a
+ * student enrolled with multiple instructors never has another
+ * instructor's course evidence exposed here.
+ *
+ * Returns null for "not authorized to view this student at all" (caller
+ * should 404, matching getInstructorStudentDetail) — an empty array means
+ * "authorized, but no evidence yet."
+ */
+export async function getReviewableEvidenceForInstructor(
+  actor: AuthContext & { tenantId: string },
+  studentId: string
+): Promise<ReviewableEvidenceRow[] | null> {
+  if (actor.role !== "INSTRUCTOR") return null;
+
+  const sharedEnrollment = await db.enrollment.findFirst({
+    where: { userId: studentId, course: { instructorId: actor.userId, tenantId: actor.tenantId } },
+    select: { id: true },
+  });
+  if (!sharedEnrollment) return null;
+
+  const rows = await db.skillEvidence.findMany({
+    where: { tenantId: actor.tenantId, userId: studentId },
+    select: {
+      id: true,
+      skillId: true,
+      type: true,
+      sourceType: true,
+      sourceId: true,
+      score: true,
+      verificationStatus: true,
+      createdAt: true,
+      skill: { select: { name: true } },
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+  });
+
+  const reviewable: ReviewableEvidenceRow[] = [];
+  for (const row of rows) {
+    const course = await resolveSourceCourse(row);
+    if (!course || course.instructorId !== actor.userId) continue;
+    reviewable.push({
+      id: row.id,
+      skillId: row.skillId,
+      skillName: row.skill.name,
+      type: row.type,
+      sourceType: row.sourceType,
+      score: row.score,
+      verificationStatus: row.verificationStatus,
+      courseTitle: course.title,
+      createdAt: row.createdAt,
+    });
+  }
+
+  return reviewable;
 }

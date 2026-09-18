@@ -1,13 +1,20 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import {
+  createAssignment,
+  createAssignmentSubmission,
   createCourse,
+  createJobRole,
   createQuiz,
   createQuizAttempt,
+  createRoleSkill,
   createSkill,
+  createUserJobRole,
 } from "@/lib/domain/capability/__test__/fixtures";
+import { computeCapabilityGap } from "@/lib/domain/capability/gaps";
 import {
   CapabilityVerificationError,
+  getReviewableEvidenceForInstructor,
   rejectEvidence,
   verifyEvidence,
 } from "@/lib/domain/capability/verification";
@@ -338,5 +345,273 @@ describe("rejection recompute (Phase 5 architecture challenge, Challenge 6)", ()
 
     const userSkill = await rejectEvidence(actorCtx, evidenceA.id);
     expect(userSkill.proficiency).toBe("INTERMEDIATE");
+  });
+});
+
+describe("ASSESSMENT evidence (Phase 20 — AssignmentSubmission source resolution)", () => {
+  it("resolves ASSESSMENT evidence back to the owning course via AssignmentSubmission->Assignment->Lesson->Section->Course", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        skillId: skill.id,
+        type: "ASSESSMENT",
+        sourceType: "AssignmentSubmission",
+        sourceId: submission.id,
+        score: 85,
+      },
+    });
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    const userSkill = await verifyEvidence(actorCtx, evidence.id);
+    expect(userSkill.proficiency).toBe("INTERMEDIATE");
+  });
+
+  it("an instructor who does not own the assignment's course is rejected", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: otherInstructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        skillId: skill.id,
+        type: "ASSESSMENT",
+        sourceType: "AssignmentSubmission",
+        sourceId: submission.id,
+        score: 85,
+      },
+    });
+
+    const actorCtx = { ...otherInstructorCtx, tenantId: tenant.id };
+    await expect(verifyEvidence(actorCtx, evidence.id)).rejects.toThrow(
+      CapabilityVerificationError
+    );
+  });
+
+  it("SUPER_ADMIN can verify ASSESSMENT evidence — the source resolves, so SUPER_ADMIN is not blocked by the previously-missing branch", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: adminCtx } = await createTenantUser("SUPER_ADMIN");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    const assignment = await createAssignment(lesson.id);
+    const submission = await createAssignmentSubmission(learnerCtx.userId, assignment.id);
+
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        skillId: skill.id,
+        type: "ASSESSMENT",
+        sourceType: "AssignmentSubmission",
+        sourceId: submission.id,
+        score: 85,
+      },
+    });
+
+    const actorCtx = { ...adminCtx, tenantId: tenant.id };
+    const userSkill = await verifyEvidence(actorCtx, evidence.id);
+    expect(userSkill.proficiency).toBe("INTERMEDIATE");
+  });
+});
+
+describe("getReviewableEvidenceForInstructor", () => {
+  it("returns null for a non-INSTRUCTOR actor (ORG_ADMIN does not gain verification authority)", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: orgAdminCtx } = await createTenantUser("ORG_ADMIN");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    await createCourse(tenant.id, instructorCtx.userId);
+
+    const actorCtx = { ...orgAdminCtx, tenantId: tenant.id };
+    const result = await getReviewableEvidenceForInstructor(actorCtx, learnerCtx.userId);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when the instructor has no shared enrollment with the student (same as not-found)", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    await createCourse(tenant.id, instructorCtx.userId);
+    // learnerCtx is never enrolled in instructorCtx's course.
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    const result = await getReviewableEvidenceForInstructor(actorCtx, learnerCtx.userId);
+    expect(result).toBeNull();
+  });
+
+  it("returns eligible evidence for a student enrolled in the instructor's course", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await db.enrollment.create({
+      data: { userId: learnerCtx.userId, courseId: course.id, status: "ACTIVE" },
+    });
+    const evidence = await createCourseSourcedEvidence({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      skillId: skill.id,
+      courseId: course.id,
+    });
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    const result = await getReviewableEvidenceForInstructor(actorCtx, learnerCtx.userId);
+
+    expect(result).not.toBeNull();
+    expect(result).toHaveLength(1);
+    expect(result?.[0]).toMatchObject({
+      id: evidence.id,
+      skillName: skill.name,
+      verificationStatus: "UNVERIFIED",
+      courseTitle: course.title,
+    });
+  });
+
+  it("does not expose evidence from a course the instructor does not own, even for a shared student", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: otherInstructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course: ownCourse } = await createCourse(tenant.id, instructorCtx.userId);
+    const { course: otherCourse } = await createCourse(tenant.id, otherInstructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    // The student is enrolled with BOTH instructors.
+    await db.enrollment.create({
+      data: { userId: learnerCtx.userId, courseId: ownCourse.id, status: "ACTIVE" },
+    });
+    await db.enrollment.create({
+      data: { userId: learnerCtx.userId, courseId: otherCourse.id, status: "ACTIVE" },
+    });
+    // Evidence belongs only to the OTHER instructor's course.
+    await createCourseSourcedEvidence({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      skillId: skill.id,
+      courseId: otherCourse.id,
+    });
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    const result = await getReviewableEvidenceForInstructor(actorCtx, learnerCtx.userId);
+
+    // Authorized to view the student (shared enrollment via ownCourse), but
+    // the one evidence row belongs to a course this instructor does not own.
+    expect(result).not.toBeNull();
+    expect(result).toHaveLength(0);
+  });
+
+  it("does not expose evidence belonging to another tenant", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { tenant: otherTenant } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await db.enrollment.create({
+      data: { userId: learnerCtx.userId, courseId: course.id, status: "ACTIVE" },
+    });
+    // The legitimate row, at the instructor's own tenant.
+    const ownTenantEvidence = await createCourseSourcedEvidence({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      skillId: skill.id,
+      courseId: course.id,
+    });
+    // A row for the same student/course/skill, but stamped with a foreign
+    // tenantId — this must never surface, regardless of whether it would
+    // otherwise resolve to an owned course. Proves the query's own
+    // `tenantId: actor.tenantId` filter, not just the enrollment gate.
+    await db.skillEvidence.create({
+      data: {
+        tenantId: otherTenant.id,
+        userId: learnerCtx.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+      },
+    });
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    const result = await getReviewableEvidenceForInstructor(actorCtx, learnerCtx.userId);
+
+    expect(result).not.toBeNull();
+    expect(result).toHaveLength(1);
+    expect(result?.[0].id).toBe(ownTenantEvidence.id);
+  });
+
+  it("shows verified and rejected evidence with their correct status", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skillA = await createSkill(tenant.id);
+    const skillB = await createSkill(tenant.id);
+    await db.enrollment.create({
+      data: { userId: learnerCtx.userId, courseId: course.id, status: "ACTIVE" },
+    });
+    const evidenceA = await createCourseSourcedEvidence({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      skillId: skillA.id,
+      courseId: course.id,
+    });
+    const evidenceB = await createCourseSourcedEvidence({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      skillId: skillB.id,
+      courseId: course.id,
+    });
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    await verifyEvidence(actorCtx, evidenceA.id);
+    await rejectEvidence(actorCtx, evidenceB.id);
+
+    const result = await getReviewableEvidenceForInstructor(actorCtx, learnerCtx.userId);
+    const byId = new Map(result?.map((r) => [r.id, r]));
+    expect(byId.get(evidenceA.id)?.verificationStatus).toBe("VERIFIED");
+    expect(byId.get(evidenceB.id)?.verificationStatus).toBe("REJECTED");
+  });
+});
+
+describe("Downstream capability integration — verification composes with the unmodified capability engine", () => {
+  it("UNVERIFIED evidence -> unmet gap; verifying it -> UserSkill INTERMEDIATE -> gap met", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    const role = await createJobRole(tenant.id);
+    await createRoleSkill(role.id, skill.id, "INTERMEDIATE");
+    await createUserJobRole(tenant.id, learnerCtx.userId, role.id);
+    await db.enrollment.create({
+      data: { userId: learnerCtx.userId, courseId: course.id, status: "ACTIVE" },
+    });
+    const evidence = await createCourseSourcedEvidence({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      skillId: skill.id,
+      courseId: course.id,
+    });
+
+    const learnerGapCtx = { ...learnerCtx, tenantId: tenant.id };
+    const before = await computeCapabilityGap(learnerGapCtx);
+    expect(before.gaps).toHaveLength(1);
+    expect(before.gaps[0].currentProficiency).toBe("NONE");
+    expect(before.gaps[0].met).toBe(false);
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    await verifyEvidence(actorCtx, evidence.id);
+
+    const after = await computeCapabilityGap(learnerGapCtx);
+    expect(after.gaps[0].currentProficiency).toBe("INTERMEDIATE");
+    expect(after.gaps[0].met).toBe(true);
   });
 });
