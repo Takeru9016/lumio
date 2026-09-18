@@ -18,6 +18,7 @@ vi.mock("@/lib/domain/capability/organizationReport", async () => {
   );
   return {
     OrgCapabilityCursorError: actual.OrgCapabilityCursorError,
+    OrgCapabilityInvalidRoleError: actual.OrgCapabilityInvalidRoleError,
     getOrganizationCapabilityReport: vi.fn(),
   };
 });
@@ -25,9 +26,8 @@ vi.mock("@/lib/domain/capability/organizationReport", async () => {
 const { AuthContextError, requireAuthContext, requireTenant, requireRole } = await import(
   "@/lib/auth/context"
 );
-const { getOrganizationCapabilityReport, OrgCapabilityCursorError } = await import(
-  "@/lib/domain/capability/organizationReport"
-);
+const { getOrganizationCapabilityReport, OrgCapabilityCursorError, OrgCapabilityInvalidRoleError } =
+  await import("@/lib/domain/capability/organizationReport");
 const { GET } = await import("./route");
 
 const requireAuthContextMock = vi.mocked(requireAuthContext);
@@ -215,5 +215,47 @@ describe("GET /api/org/capability", () => {
     expect(res.status).toBe(500);
     expect(body).toEqual({ error: "Failed to load capability report" });
     expect(JSON.stringify(body)).not.toContain("postgres://secret");
+  });
+});
+
+describe("GET /api/org/capability — Phase 21 role filter", () => {
+  it("passes roleId through to the domain function", async () => {
+    mockAuthed("ORG_ADMIN");
+    requireRoleMock.mockImplementation(() => {});
+    getReportMock.mockResolvedValue({ learners: [], nextCursor: null });
+
+    await GET(req("?roleId=r1"));
+
+    expect(getReportMock).toHaveBeenCalledWith("t1", {
+      cursor: undefined,
+      limit: undefined,
+      roleId: "r1",
+    });
+  });
+
+  it("a roleId from another tenant -> 400, surfaced by the domain function", async () => {
+    mockAuthed("ORG_ADMIN");
+    requireRoleMock.mockImplementation(() => {});
+    getReportMock.mockRejectedValue(new OrgCapabilityInvalidRoleError());
+
+    const res = await GET(req("?roleId=r-cross-tenant"));
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({ error: "Role not found" });
+  });
+
+  it("no roleId query param -> undefined passed through, matching pre-Phase-21 behavior", async () => {
+    mockAuthed("ORG_ADMIN");
+    requireRoleMock.mockImplementation(() => {});
+    getReportMock.mockResolvedValue({ learners: [], nextCursor: null });
+
+    await GET(req());
+
+    expect(getReportMock).toHaveBeenCalledWith("t1", {
+      cursor: undefined,
+      limit: undefined,
+      roleId: undefined,
+    });
   });
 });

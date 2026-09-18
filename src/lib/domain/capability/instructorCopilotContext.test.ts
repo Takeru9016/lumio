@@ -12,14 +12,18 @@ import { afterEach, describe, expect, it, vi } from "vitest";
  */
 vi.mock("@/lib/domain/capability/instructorReport", () => ({
   getInstructorCapabilityReport: vi.fn(),
+  getInstructorCapabilityForLearnerRole: vi.fn(),
 }));
 
-const { getInstructorCapabilityReport } = await import("@/lib/domain/capability/instructorReport");
+const { getInstructorCapabilityReport, getInstructorCapabilityForLearnerRole } = await import(
+  "@/lib/domain/capability/instructorReport"
+);
 const { buildInstructorCopilotContext, InstructorCopilotLearnerNotFoundError } = await import(
   "@/lib/domain/capability/instructorCopilotContext"
 );
 
 const getReportMock = vi.mocked(getInstructorCapabilityReport);
+const getForRoleMock = vi.mocked(getInstructorCapabilityForLearnerRole);
 
 const ctx = { userId: "instructor-1", clerkId: "c1", tenantId: "t1", role: "INSTRUCTOR" as const };
 
@@ -140,6 +144,64 @@ describe("buildInstructorCopilotContext", () => {
 
     expect(JSON.stringify(cohort)).not.toMatch(/"u1"|"u2"|"s1"|"s2"|"r1"/);
     expect(JSON.stringify(learner)).not.toMatch(/"u1"|"u2"|"s1"|"s2"|"r1"/);
+  });
+
+  it("Phase 21: learnerId + roleId together delegate to getInstructorCapabilityForLearnerRole, not the batch page match", async () => {
+    getReportMock.mockResolvedValue(PAGE as never);
+    getForRoleMock.mockResolvedValue({
+      userId: "u1",
+      name: "Amy",
+      roleId: "r2",
+      roleName: "Team Lead",
+      hasMultipleRoles: true,
+      skills: [
+        {
+          skillId: "s3",
+          skillName: "Leadership",
+          required: "ADVANCED",
+          current: "NONE",
+          met: false,
+        },
+      ],
+    });
+
+    const result = await buildInstructorCopilotContext(ctx, { learnerId: "u1", roleId: "r2" });
+
+    expect(getForRoleMock).toHaveBeenCalledWith("instructor-1", "t1", "u1", "r2");
+    expect(result.scope).toBe("learner");
+    expect(result.learner).toEqual({
+      learnerName: "Amy",
+      roleName: "Team Lead",
+      skills: [{ skillName: "Leadership", required: "ADVANCED", current: "NONE", met: false }],
+    });
+  });
+
+  it("Phase 21: roleId alone (no learnerId) is ignored — still resolves the cohort view, never calls getInstructorCapabilityForLearnerRole", async () => {
+    getReportMock.mockResolvedValue(PAGE as never);
+
+    const result = await buildInstructorCopilotContext(ctx, { roleId: "r2" });
+
+    expect(getForRoleMock).not.toHaveBeenCalled();
+    expect(result.scope).toBe("cohort");
+  });
+
+  it("Phase 21: learnerId alone (no roleId) still matches from the batch page, unchanged from pre-Phase-21 behavior", async () => {
+    getReportMock.mockResolvedValue(PAGE as never);
+
+    const result = await buildInstructorCopilotContext(ctx, { learnerId: "u1" });
+
+    expect(getForRoleMock).not.toHaveBeenCalled();
+    expect(result.scope).toBe("learner");
+    expect(result.learner?.learnerName).toBe("Amy");
+  });
+
+  it("Phase 21: getInstructorCapabilityForLearnerRole returning null -> InstructorCopilotLearnerNotFoundError, same as an unmatched batch learnerId", async () => {
+    getReportMock.mockResolvedValue(PAGE as never);
+    getForRoleMock.mockResolvedValue(null);
+
+    await expect(
+      buildInstructorCopilotContext(ctx, { learnerId: "u1", roleId: "role-not-held" })
+    ).rejects.toThrow(InstructorCopilotLearnerNotFoundError);
   });
 
   it("never imports the database, SkillEvidence, getRecommendedLearning, or Knowledge/Search infrastructure", () => {

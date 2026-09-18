@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { EmptyState } from "@/components";
@@ -9,19 +10,31 @@ import { OrgCopilotPanel } from "./OrgCopilotPanel";
 
 interface OrgCapabilityClientProps {
   initialPage: OrgCapabilityPage;
+  jobRoles: Array<{ id: string; name: string }>;
+  selectedRoleId: string | null;
 }
 
 function proficiencyLabel(value: string): string {
   return value.charAt(0) + value.slice(1).toLowerCase();
 }
 
-export function OrgCapabilityClient({ initialPage }: OrgCapabilityClientProps) {
+export function OrgCapabilityClient({
+  initialPage,
+  jobRoles,
+  selectedRoleId,
+}: OrgCapabilityClientProps) {
+  const router = useRouter();
   const [learners, setLearners] = useState(initialPage.learners);
   const [cursor, setCursor] = useState(initialPage.nextCursor);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [selectedLearner, setSelectedLearner] = useState<{ id: string; name: string } | null>(null);
+
+  function handleRoleFilterChange(roleId: string) {
+    const url = roleId ? `/org/capability?role=${encodeURIComponent(roleId)}` : "/org/capability";
+    router.push(url);
+  }
 
   function toggleExpanded(userId: string) {
     setExpanded((prev) => {
@@ -37,7 +50,9 @@ export function OrgCapabilityClient({ initialPage }: OrgCapabilityClientProps) {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/org/capability?cursor=${encodeURIComponent(cursor)}`);
+      const params = new URLSearchParams({ cursor });
+      if (selectedRoleId) params.set("roleId", selectedRoleId);
+      const res = await fetch(`/api/org/capability?${params.toString()}`);
       if (!res.ok) throw new Error();
       const data: OrgCapabilityPage = await res.json();
       setLearners((prev) => [...prev, ...data.learners]);
@@ -62,6 +77,24 @@ export function OrgCapabilityClient({ initialPage }: OrgCapabilityClientProps) {
           Role, required skills, and proficiency for every learner in your organization.
         </p>
       </div>
+
+      {jobRoles.length > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-text-muted">Filter by role:</span>
+          <select
+            value={selectedRoleId ?? ""}
+            onChange={(e) => handleRoleFilterChange(e.target.value)}
+            className="text-sm font-medium text-text-primary bg-white border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand"
+          >
+            <option value="">All learners (primary role)</option>
+            {jobRoles.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <OrgCopilotPanel
         selectedLearner={selectedLearner}

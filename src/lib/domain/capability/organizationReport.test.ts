@@ -8,7 +8,10 @@ import {
 } from "@/lib/domain/capability/__test__/fixtures";
 import * as gapsModule from "@/lib/domain/capability/gaps";
 import { computeCapabilityGap } from "@/lib/domain/capability/gaps";
-import { getOrganizationCapabilityReport } from "@/lib/domain/capability/organizationReport";
+import {
+  getOrganizationCapabilityReport,
+  OrgCapabilityInvalidRoleError,
+} from "@/lib/domain/capability/organizationReport";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 
 afterAll(async () => {
@@ -470,5 +473,71 @@ describe("getOrganizationCapabilityReport — no N+1 reuse of self-scoped functi
     await getOrganizationCapabilityReport(tenant.id);
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
+  });
+});
+
+describe("getOrganizationCapabilityReport — Phase 21 role filter", () => {
+  it("includes a user whose ONLY assignment to this role is non-primary (the bug this phase fixes)", async () => {
+    const { tenant, ctx } = await createTenantUser("STUDENT");
+    const primaryRole = await createJobRole(tenant.id);
+    const targetRole = await createJobRole(tenant.id);
+    const skill = await createSkill(tenant.id);
+    await createRoleSkill(targetRole.id, skill.id, "BEGINNER");
+    await createUserJobRole(tenant.id, ctx.userId, primaryRole.id, true);
+    await createUserJobRole(tenant.id, ctx.userId, targetRole.id, false);
+
+    // Unfiltered (primary-only) — this user is invisible under targetRole.
+    const unfiltered = await getOrganizationCapabilityReport(tenant.id);
+    expect(unfiltered.learners.find((l) => l.userId === ctx.userId)?.roleId).toBe(primaryRole.id);
+
+    // Filtered by the non-primary role — now included, scoped to THAT role.
+    const filtered = await getOrganizationCapabilityReport(tenant.id, { roleId: targetRole.id });
+    const row = filtered.learners.find((l) => l.userId === ctx.userId);
+    expect(row).toBeDefined();
+    expect(row?.roleId).toBe(targetRole.id);
+    expect(row?.skills[0]?.skillId).toBe(skill.id);
+  });
+
+  it("excludes a user who does not hold the filtered role at all", async () => {
+    const { tenant, ctx } = await createTenantUser("STUDENT");
+    const heldRole = await createJobRole(tenant.id);
+    const unheldRole = await createJobRole(tenant.id);
+    await createUserJobRole(tenant.id, ctx.userId, heldRole.id, true);
+
+    const result = await getOrganizationCapabilityReport(tenant.id, { roleId: unheldRole.id });
+    expect(result.learners.find((l) => l.userId === ctx.userId)).toBeUndefined();
+  });
+
+  it("a roleId from another tenant throws OrgCapabilityInvalidRoleError, never silently returns an empty page", async () => {
+    const { tenant } = await createTenantUser("STUDENT");
+    const { tenant: otherTenant } = await createTenantUser("STUDENT");
+    const otherRole = await createJobRole(otherTenant.id);
+
+    await expect(
+      getOrganizationCapabilityReport(tenant.id, { roleId: otherRole.id })
+    ).rejects.toThrow(OrgCapabilityInvalidRoleError);
+  });
+
+  it("the same skill can be met under one role and a gap under another for the same UserSkill", async () => {
+    const { tenant, ctx } = await createTenantUser("STUDENT");
+    const roleA = await createJobRole(tenant.id);
+    const roleB = await createJobRole(tenant.id);
+    const skill = await createSkill(tenant.id);
+    await createRoleSkill(roleA.id, skill.id, "ADVANCED");
+    await createRoleSkill(roleB.id, skill.id, "INTERMEDIATE");
+    await createUserJobRole(tenant.id, ctx.userId, roleA.id, true);
+    await createUserJobRole(tenant.id, ctx.userId, roleB.id, false);
+    await setUserSkill({
+      tenantId: tenant.id,
+      userId: ctx.userId,
+      skillId: skill.id,
+      proficiency: "INTERMEDIATE",
+    });
+
+    const resultA = await getOrganizationCapabilityReport(tenant.id, { roleId: roleA.id });
+    const resultB = await getOrganizationCapabilityReport(tenant.id, { roleId: roleB.id });
+
+    expect(resultA.learners[0]?.skills[0]?.met).toBe(false);
+    expect(resultB.learners[0]?.skills[0]?.met).toBe(true);
   });
 });

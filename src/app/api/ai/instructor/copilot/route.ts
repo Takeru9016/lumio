@@ -11,6 +11,7 @@ import {
   listRecentMessages,
   persistMessage,
   readConversationLearnerId,
+  readConversationRoleId,
   recordUsageEvent,
   startExecution,
 } from "@/lib/ai/runtime/persistence";
@@ -36,6 +37,7 @@ const requestSchema = z
   .object({
     query: z.string().trim().min(1).max(MAX_QUERY_LENGTH),
     learnerId: z.string().min(1).optional(),
+    roleId: z.string().min(1).optional(),
     conversationId: z.string().min(1).optional(),
   })
   .strict();
@@ -78,7 +80,13 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return Response.json({ error: "Invalid query" }, { status: 400 });
   }
-  const { query, learnerId, conversationId: suppliedConversationId } = parsed.data;
+  const { query, learnerId, roleId, conversationId: suppliedConversationId } = parsed.data;
+
+  // Phase 21: a role only makes sense scoped to a specific learner — the
+  // cohort-wide view has no single role to scope to.
+  if (roleId && !learnerId) {
+    return Response.json({ error: "roleId requires learnerId" }, { status: 400 });
+  }
 
   const surface = "COPILOT" as const;
   assertActionAllowed(surface, "GENERATE");
@@ -86,10 +94,11 @@ export async function POST(req: Request) {
   // Phase 15: resolve a supplied conversationId for continuation. Scoped to
   // {id, tenantId, userId} + the INSTRUCTOR_COPILOT surface marker in one
   // call. Any mismatch (not found, wrong tenant/user, wrong/missing surface)
-  // becomes the same 404. A learner scope, once set at creation, is fixed
-  // for the conversation's lifetime — a continuation attempting a different
-  // learnerId (including omitting one that was originally set) is rejected
-  // with 400 rather than silently switching or ignoring it.
+  // becomes the same 404. A learner (and, Phase 21, role) scope, once set at
+  // creation, is fixed for the conversation's lifetime — a continuation
+  // attempting a different learnerId or roleId (including omitting one that
+  // was originally set) is rejected with 400 rather than silently switching
+  // or ignoring it.
   let existingConversation: Awaited<ReturnType<typeof getConversationForContinuation>> = null;
   if (suppliedConversationId) {
     existingConversation = await getConversationForContinuation(
@@ -107,6 +116,13 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const originalRoleId = readConversationRoleId(existingConversation.contextMetadata);
+    if ((roleId ?? null) !== originalRoleId) {
+      return Response.json(
+        { error: "This conversation is scoped to a different role" },
+        { status: 400 }
+      );
+    }
   }
 
   // Capability context is always freshly assembled — never cached between
@@ -115,7 +131,7 @@ export async function POST(req: Request) {
   try {
     capabilityContext = await buildInstructorCopilotContext(
       { userId: user.id, clerkId: userId as string, tenantId: user.tenantId, role: user.role },
-      { learnerId }
+      { learnerId, roleId }
     );
   } catch (err) {
     if (err instanceof InstructorCopilotLearnerNotFoundError) {
@@ -136,7 +152,7 @@ export async function POST(req: Request) {
     if (!conversationId) {
       const conversation = await createConversation(
         { tenantId: user.tenantId, userId: user.id },
-        { surface, contextMetadata: { surface: SURFACE_MARKER, query, learnerId } }
+        { surface, contextMetadata: { surface: SURFACE_MARKER, query, learnerId, roleId } }
       );
       conversationId = conversation.id;
     }

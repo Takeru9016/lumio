@@ -3,10 +3,19 @@ import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { getSkillEvidenceForUser } from "@/lib/domain/capability/evidence";
-import { computeCapabilityGap, getUserSkillState } from "@/lib/domain/capability/gaps";
+import {
+  computeCapabilityGap,
+  getUserAssignedRoles,
+  getUserSkillState,
+} from "@/lib/domain/capability/gaps";
+import { getRecommendedLearning } from "@/lib/domain/capability/recommendations";
 import { CapabilityClient, type RequiredSkillRow } from "./CapabilityClient";
 
-export default async function CapabilityPage() {
+interface CapabilityPageProps {
+  searchParams: Promise<{ role?: string }>;
+}
+
+export default async function CapabilityPage({ searchParams }: CapabilityPageProps) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
@@ -21,7 +30,16 @@ export default async function CapabilityPage() {
   // Rendered as an honest empty state, not a redirect — this is a direct
   // nav destination, not a best-effort dashboard widget.
   if (!dbUser.tenantId) {
-    return <CapabilityClient state="no-tenant" roleName={null} skills={[]} />;
+    return (
+      <CapabilityClient
+        state="no-tenant"
+        roleName={null}
+        skills={[]}
+        assignedRoles={[]}
+        selectedRoleId={null}
+        recommendations={[]}
+      />
+    );
   }
 
   const ctx = {
@@ -31,24 +49,59 @@ export default async function CapabilityPage() {
     role: dbUser.role,
   };
 
+  // Phase 21: URL search-param role selection — shareable/bookmarkable,
+  // survives refresh, and lets this Server Component derive the role
+  // context directly without any client-side role-fetch round trip.
+  // `requestedRoleId` is validated against the caller's own assigned roles
+  // below (getUserAssignedRoles) before it's ever passed into
+  // computeCapabilityGap — an unheld/stale roleId is never silently trusted.
+  const { role: requestedRoleId } = await searchParams;
+
+  let assignedRoles: Awaited<ReturnType<typeof getUserAssignedRoles>>;
   let gapResult: Awaited<ReturnType<typeof computeCapabilityGap>>;
   let userSkills: Awaited<ReturnType<typeof getUserSkillState>>;
   let evidence: Awaited<ReturnType<typeof getSkillEvidenceForUser>>;
+  let recommended: Awaited<ReturnType<typeof getRecommendedLearning>>;
   try {
-    [gapResult, userSkills, evidence] = await Promise.all([
-      computeCapabilityGap(ctx),
+    assignedRoles = await getUserAssignedRoles(ctx);
+    const effectiveRoleId =
+      requestedRoleId && assignedRoles.some((r) => r.roleId === requestedRoleId)
+        ? requestedRoleId
+        : undefined;
+
+    [gapResult, userSkills, evidence, recommended] = await Promise.all([
+      computeCapabilityGap(ctx, effectiveRoleId),
       getUserSkillState(ctx),
       getSkillEvidenceForUser(ctx),
+      getRecommendedLearning(ctx, effectiveRoleId),
     ]);
   } catch {
     // Never expose internal/database errors to the learner — an honest
     // "couldn't load" state instead, matching every other best-effort
     // capability read in this app (Phase 6 dashboard card precedent).
-    return <CapabilityClient state="load-failed" roleName={null} skills={[]} />;
+    return (
+      <CapabilityClient
+        state="load-failed"
+        roleName={null}
+        skills={[]}
+        assignedRoles={[]}
+        selectedRoleId={null}
+        recommendations={[]}
+      />
+    );
   }
 
   if (!gapResult.role) {
-    return <CapabilityClient state="no-role" roleName={null} skills={[]} />;
+    return (
+      <CapabilityClient
+        state="no-role"
+        roleName={null}
+        skills={[]}
+        assignedRoles={[]}
+        selectedRoleId={null}
+        recommendations={[]}
+      />
+    );
   }
 
   const lastAssessedBySkill = new Map(userSkills.map((s) => [s.skillId, s.lastAssessedAt]));
@@ -81,5 +134,18 @@ export default async function CapabilityPage() {
     })),
   }));
 
-  return <CapabilityClient state="ready" roleName={gapResult.role.name} skills={skills} />;
+  return (
+    <CapabilityClient
+      state="ready"
+      roleName={gapResult.role.name}
+      skills={skills}
+      assignedRoles={assignedRoles}
+      // The ACTUALLY resolved role, not the raw searchParam — a stale/unheld
+      // requestedRoleId silently falls through to primary above, and the
+      // selector must reflect that real outcome rather than the URL's
+      // (possibly wrong) claim, so the fallback is visible, not silent.
+      selectedRoleId={gapResult.role.id}
+      recommendations={recommended.recommendations}
+    />
+  );
 }

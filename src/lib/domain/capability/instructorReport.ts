@@ -16,6 +16,11 @@ export type InstructorCapabilityLearnerRow = {
   roleId: string;
   roleName: string;
   skills: InstructorCapabilitySkillRow[];
+  // Phase 21 — true when this learner holds more than one JobRole. Cheap to
+  // compute alongside the existing primary-role batch query (one extra
+  // grouped count over the same page of users); lets the client decide
+  // whether to offer a role switcher without a second round trip per row.
+  hasMultipleRoles: boolean;
 };
 
 export type InstructorCapabilityPage = {
@@ -97,6 +102,8 @@ function decodeCursor(raw: string): Cursor {
  *             forbids)
  *   Query 4 — RoleSkill (+ JobRole names) for the page's distinct roles
  *   Query 5 — UserSkill for the page's users
+ *   Query 6 (Phase 21) — role-count-per-user (db.userJobRole.groupBy), so
+ *             hasMultipleRoles never requires a per-learner follow-up query
  *
  * Never selects/queries SkillEvidence or any evidence-adjacent field —
  * structurally incapable of leaking it, not merely filtered in the UI.
@@ -184,6 +191,17 @@ export async function getInstructorCapabilityReport(
 
   const distinctRoleIds = [...new Set(resolvedRoleIdByUser.values())];
 
+  // Phase 21 — role-count-per-user, batched over the same page (one extra
+  // query, never a per-learner loop). Only the count is needed here, not
+  // which other roles — the client fetches those lazily, per learner, only
+  // when a role switcher is actually opened (see getInstructorLearnerRoles).
+  const roleCountRows = await db.userJobRole.groupBy({
+    by: ["userId"],
+    where: { tenantId, userId: { in: pageUserIds } },
+    _count: { roleId: true },
+  });
+  const roleCountByUser = new Map(roleCountRows.map((r) => [r.userId, r._count.roleId]));
+
   const [roleSkillRows, roles] = await Promise.all([
     distinctRoleIds.length > 0
       ? db.roleSkill.findMany({
@@ -250,9 +268,111 @@ export async function getInstructorCapabilityReport(
       name: user.name ?? user.email,
       roleId,
       roleName: roleNameById.get(roleId) ?? "",
+      hasMultipleRoles: (roleCountByUser.get(user.id) ?? 0) > 1,
       skills,
     });
   }
 
   return { learners, nextCursor };
+}
+
+export type InstructorLearnerRoleOption = {
+  roleId: string;
+  roleName: string;
+  isPrimary: boolean;
+};
+
+/**
+ * Phase 21 — every role a specific learner holds, for the instructor's role
+ * switcher on that learner's expanded row. This IS the authorization
+ * boundary for the two functions below: an instructor may see a learner's
+ * roles only if that instructor owns an Enrollment for them (same ownership
+ * relationship getInstructorCapabilityReport's population query already
+ * uses). Returns null — never an empty array — when the instructor has no
+ * such enrollment, so the caller can tell "learner has zero roles" (valid,
+ * real state) apart from "not your student" (unauthorized).
+ */
+export async function getInstructorLearnerRoles(
+  instructorId: string,
+  tenantId: string,
+  learnerId: string
+): Promise<InstructorLearnerRoleOption[] | null> {
+  const owns = await db.enrollment.findFirst({
+    where: { userId: learnerId, course: { instructorId, tenantId } },
+    select: { id: true },
+  });
+  if (!owns) return null;
+
+  const rows = await db.userJobRole.findMany({
+    where: { tenantId, userId: learnerId },
+    select: { roleId: true, isPrimary: true, role: { select: { name: true } } },
+    orderBy: [{ isPrimary: "desc" }, { assignedAt: "asc" }],
+  });
+  return rows.map((r) => ({ roleId: r.roleId, roleName: r.role.name, isPrimary: r.isPrimary }));
+}
+
+/**
+ * Phase 21 — one learner's required-vs-current skills for one EXPLICIT role
+ * (not necessarily their primary one), for the instructor role switcher.
+ * Reuses getInstructorLearnerRoles for both the ownership check and to
+ * confirm `roleId` is actually one this learner holds — never trusts a
+ * client-supplied roleId beyond what that learner's own UserJobRole rows
+ * say. Returns null on any authorization or validation failure (not the
+ * instructor's student, or a roleId the learner doesn't hold) — the caller
+ * must map every case to the same 404, never distinguishing why.
+ *
+ * Deliberately not batched (unlike getInstructorCapabilityReport) — this is
+ * an interactive, one-learner-at-a-time lookup triggered by opening a role
+ * switcher, not a page-wide aggregate, so the small fixed query count here
+ * (in addition to the roles lookup) is the right tradeoff over reusing the
+ * batch report's machinery for a single row.
+ */
+export async function getInstructorCapabilityForLearnerRole(
+  instructorId: string,
+  tenantId: string,
+  learnerId: string,
+  roleId: string
+): Promise<InstructorCapabilityLearnerRow | null> {
+  const roles = await getInstructorLearnerRoles(instructorId, tenantId, learnerId);
+  if (!roles) return null;
+  const selectedRole = roles.find((r) => r.roleId === roleId);
+  if (!selectedRole) return null;
+
+  const user = await db.user.findFirst({
+    where: { id: learnerId, tenantId, deletedAt: null },
+    select: { id: true, name: true, email: true },
+  });
+  if (!user) return null;
+
+  const [requirements, userSkillRows] = await Promise.all([
+    db.roleSkill.findMany({
+      where: { roleId, isRequired: true, skill: { status: "ACTIVE" } },
+      select: { requiredProficiency: true, skill: { select: { id: true, name: true } } },
+    }),
+    db.userSkill.findMany({
+      where: { tenantId, userId: learnerId },
+      select: { skillId: true, proficiency: true },
+    }),
+  ]);
+
+  const currentBySkill = new Map(userSkillRows.map((r) => [r.skillId, r.proficiency]));
+  const skills: InstructorCapabilitySkillRow[] = requirements.map((req) => {
+    const current = currentBySkill.get(req.skill.id) ?? "NONE";
+    return {
+      skillId: req.skill.id,
+      skillName: req.skill.name,
+      required: req.requiredProficiency,
+      current,
+      met: isAtLeast(current, req.requiredProficiency),
+    };
+  });
+
+  return {
+    userId: user.id,
+    name: user.name ?? user.email,
+    roleId: selectedRole.roleId,
+    roleName: selectedRole.roleName,
+    hasMultipleRoles: roles.length > 1,
+    skills,
+  };
 }

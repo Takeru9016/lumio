@@ -84,6 +84,30 @@ async function resolvePrimaryRoleId(ctx: Ctx): Promise<string | null> {
   return primaryRows[0].roleId;
 }
 
+export type UserRoleOption = {
+  roleId: string;
+  roleName: string;
+  isPrimary: boolean;
+};
+
+/**
+ * Every JobRole the caller themselves holds (Phase 21) — the one query that
+ * doubles as both "what roles can this learner switch between" (for a role
+ * selector) and "does this learner actually hold roleId X" (the
+ * authorization check every explicit-roleId call site must run before
+ * passing that id into computeCapabilityGap/getRecommendedLearning, since
+ * neither of those validates ownership — only tenant match, see
+ * computeCapabilityGap's own doc comment below). Self-scoped by `ctx` only.
+ */
+export async function getUserAssignedRoles(ctx: Ctx): Promise<UserRoleOption[]> {
+  const rows = await db.userJobRole.findMany({
+    where: { tenantId: ctx.tenantId, userId: ctx.userId },
+    select: { roleId: true, isPrimary: true, role: { select: { name: true } } },
+    orderBy: [{ isPrimary: "desc" }, { assignedAt: "asc" }],
+  });
+  return rows.map((r) => ({ roleId: r.roleId, roleName: r.role.name, isPrimary: r.isPrimary }));
+}
+
 export type CapabilityGapItem = RoleRequirement & {
   currentProficiency: SkillProficiency;
   met: boolean;
@@ -104,6 +128,16 @@ export type CapabilityGapResult = {
  * With no `roleId` argument, resolves the caller's own primary role
  * (§ resolvePrimaryRoleId). A user with no primary role returns an empty
  * result (`role: null, gaps: []`), never an error.
+ *
+ * SECURITY NOTE (Phase 21): an explicit `roleId` is validated only against
+ * `tenantId` here — NOT against "does ctx.userId actually hold this role."
+ * That is intentional at this layer (an instructor/org report computing gaps
+ * for a role a learner doesn't hold isn't nonsensical the way it would be
+ * for a learner's own self-service view), but it means every call site that
+ * accepts a client-supplied roleId for the CALLER'S OWN capability view
+ * (student capability page, Student Copilot) must independently confirm
+ * ownership first, e.g. via getUserAssignedRoles(ctx) — never pass an
+ * unvalidated client-supplied roleId straight through.
  */
 export async function computeCapabilityGap(
   ctx: Ctx,

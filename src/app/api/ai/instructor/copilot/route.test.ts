@@ -48,6 +48,7 @@ vi.mock("@/lib/ai/runtime/persistence", async () => {
     getConversationForContinuation: vi.fn(),
     listRecentMessages: vi.fn(),
     readConversationLearnerId: actual.readConversationLearnerId,
+    readConversationRoleId: actual.readConversationRoleId,
   };
 });
 
@@ -273,6 +274,85 @@ describe("POST /api/ai/instructor/copilot — learnerId security", () => {
 
     expect(res.status).toBe(404);
     expect(body).toEqual({ error: "Learner not found in your capability report" });
+  });
+});
+
+describe("POST /api/ai/instructor/copilot — Phase 21 role scoping", () => {
+  it("roleId without learnerId -> 400", async () => {
+    mockUser();
+
+    const res = await POST(req({ query: "Which role?", roleId: "r1" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({ error: "roleId requires learnerId" });
+    expect(buildContextMock).not.toHaveBeenCalled();
+  });
+
+  it("learnerId + roleId are both passed through to buildInstructorCopilotContext", async () => {
+    mockUser();
+    buildContextMock.mockResolvedValue(COHORT_CONTEXT as never);
+    mockPersistenceHappyPath();
+    generateTextMock.mockResolvedValue({ text: "Answer.", usage: {} } as never);
+
+    await POST(req({ query: "Tell me about this role", learnerId: "u2", roleId: "r2" }));
+
+    expect(buildContextMock).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: "u1", tenantId: "t1", role: "INSTRUCTOR" }),
+      { learnerId: "u2", roleId: "r2" }
+    );
+  });
+
+  it("a role a specific learner doesn't hold -> the same 404 as a not-found learner (via buildInstructorCopilotContext)", async () => {
+    mockUser();
+    buildContextMock.mockRejectedValue(new InstructorCopilotLearnerNotFoundError());
+
+    const res = await POST(
+      req({ query: "Tell me about this role", learnerId: "u2", roleId: "not-held" })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(404);
+    expect(body).toEqual({ error: "Learner not found in your capability report" });
+  });
+
+  it("continuing a conversation under a different role than it was created with -> 400", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "INSTRUCTOR_COPILOT", learnerId: "u2", roleId: "r1" },
+    } as never);
+
+    const res = await POST(
+      req({ query: "continuing", conversationId: "conv1", learnerId: "u2", roleId: "r2" })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({ error: "This conversation is scoped to a different role" });
+    expect(buildContextMock).not.toHaveBeenCalled();
+  });
+
+  it("continuing a conversation with the same role it was created with -> success", async () => {
+    mockUser();
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "INSTRUCTOR_COPILOT", learnerId: "u2", roleId: "r1" },
+    } as never);
+    listRecentMessagesMock.mockResolvedValue([]);
+    buildContextMock.mockResolvedValue(COHORT_CONTEXT as never);
+    mockPersistenceHappyPath();
+    generateTextMock.mockResolvedValue({ text: "Answer.", usage: {} } as never);
+
+    const res = await POST(
+      req({ query: "continuing", conversationId: "conv1", learnerId: "u2", roleId: "r1" })
+    );
+
+    expect(res.status).toBe(200);
+    expect(buildContextMock).toHaveBeenCalledWith(expect.anything(), {
+      learnerId: "u2",
+      roleId: "r1",
+    });
   });
 });
 

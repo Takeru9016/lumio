@@ -41,11 +41,24 @@ describe("buildCopilotContext", () => {
     await buildCopilotContext(ctx);
 
     expect(computeCapabilityGapMock).toHaveBeenCalledTimes(1);
-    expect(computeCapabilityGapMock).toHaveBeenCalledWith(ctx);
+    // Phase 21: roleId is always passed through explicitly (undefined when
+    // the caller supplies none) — never omitted as a shorter arg list.
+    expect(computeCapabilityGapMock).toHaveBeenCalledWith(ctx, undefined);
     expect(getUserSkillStateMock).toHaveBeenCalledTimes(1);
     expect(getUserSkillStateMock).toHaveBeenCalledWith(ctx);
     expect(getRecommendedLearningMock).toHaveBeenCalledTimes(1);
-    expect(getRecommendedLearningMock).toHaveBeenCalledWith(ctx);
+    expect(getRecommendedLearningMock).toHaveBeenCalledWith(ctx, undefined);
+  });
+
+  it("Phase 21: passes an explicit roleId through to both computeCapabilityGap and getRecommendedLearning", async () => {
+    computeCapabilityGapMock.mockResolvedValue({ role: { id: "r2", name: "Team Lead" }, gaps: [] });
+    getUserSkillStateMock.mockResolvedValue([]);
+    getRecommendedLearningMock.mockResolvedValue({ recommendations: [] });
+
+    await buildCopilotContext(ctx, "r2");
+
+    expect(computeCapabilityGapMock).toHaveBeenCalledWith(ctx, "r2");
+    expect(getRecommendedLearningMock).toHaveBeenCalledWith(ctx, "r2");
   });
 
   it("represents a learner with no primary role honestly, without fabricating one", async () => {

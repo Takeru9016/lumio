@@ -41,12 +41,23 @@ export type CopilotCapabilityContext = {
  * imported here) and every internal id (skillId/courseId/roleId) — only
  * display-facing names/proficiencies/titles reach the model, per the locked
  * Phase 12 contract's "no raw Prisma rows, no unnecessary ids" requirement.
+ *
+ * Phase 21: `roleId` is an optional pass-through to computeCapabilityGap/
+ * getRecommendedLearning — the caller (the /api/ai/copilot route) is
+ * responsible for confirming the caller actually holds `roleId` before
+ * passing it in here; this function does not re-validate it. `hasPrimaryRole`
+ * keeps its Phase 12 name for minimal diff even though it's now true for any
+ * resolved role (primary-default or an explicitly selected non-primary one)
+ * — it means "a role was resolved," not literally "the resolved role is primary."
  */
-export async function buildCopilotContext(ctx: Ctx): Promise<CopilotCapabilityContext> {
+export async function buildCopilotContext(
+  ctx: Ctx,
+  roleId?: string
+): Promise<CopilotCapabilityContext> {
   const [gapResult, userSkills, recommended] = await Promise.all([
-    computeCapabilityGap(ctx),
+    computeCapabilityGap(ctx, roleId),
     getUserSkillState(ctx),
-    getRecommendedLearning(ctx),
+    getRecommendedLearning(ctx, roleId),
   ]);
 
   if (!gapResult.role) {

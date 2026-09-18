@@ -14,7 +14,7 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 type ConversationSummary = { id: string; label: string; createdAt: string };
 
 interface InstructorCopilotPanelProps {
-  selectedLearner: { id: string; name: string } | null;
+  selectedLearner: { id: string; name: string; roleId: string } | null;
   onClearLearner: () => void;
 }
 
@@ -42,14 +42,16 @@ export function InstructorCopilotPanel({
   const [history, setHistory] = useState<ConversationSummary[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  // Learner scope is fixed for a conversation's lifetime — a different
-  // learner selection always means a new conversation, never a continuation.
+  // Learner (and, Phase 21, role) scope is fixed for a conversation's
+  // lifetime — a different learner OR role selection always means a new
+  // conversation, never a continuation.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: learner/role identity is intentionally a trigger-only dependency — the effect body doesn't read it, it just needs to rerun on selection change.
   useEffect(() => {
     setConversationId(null);
     setMessages([]);
     setError(null);
     setShowHistory(false);
-  }, [selectedLearner?.id]);
+  }, [selectedLearner?.id, selectedLearner?.roleId]);
 
   async function ask(q: string) {
     const trimmed = q.trim();
@@ -65,7 +67,9 @@ export function InstructorCopilotPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: trimmed,
-          ...(selectedLearner ? { learnerId: selectedLearner.id } : {}),
+          ...(selectedLearner
+            ? { learnerId: selectedLearner.id, roleId: selectedLearner.roleId }
+            : {}),
           ...(conversationId ? { conversationId } : {}),
         }),
       });

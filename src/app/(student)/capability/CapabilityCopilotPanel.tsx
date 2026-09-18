@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiBadge } from "@/components";
 
 const EXAMPLE_PROMPTS = [
@@ -24,7 +24,7 @@ type ConversationSummary = { id: string; label: string; createdAt: string };
  * see contract §13/§18 — a raw concurrent client bypassing this UI is a
  * known, accepted residual risk).
  */
-export function CapabilityCopilotPanel() {
+export function CapabilityCopilotPanel({ roleId }: { roleId: string | null }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +33,19 @@ export function CapabilityCopilotPanel() {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<ConversationSummary[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // Phase 21: switching the page's selected role must not let the model
+  // keep reasoning from the previous role's gaps — clear any in-flight
+  // conversation client-side (the server independently rejects a
+  // continuation whose stored role differs; this just avoids the learner
+  // hitting that 400 after switching roles on the page above this panel).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: roleId is intentionally a trigger-only dependency — the effect body doesn't read it, it just needs to rerun on role change.
+  useEffect(() => {
+    setConversationId(null);
+    setMessages([]);
+    setError(null);
+    setShowHistory(false);
+  }, [roleId]);
 
   async function ask(q: string) {
     const trimmed = q.trim();
@@ -46,9 +59,11 @@ export function CapabilityCopilotPanel() {
       const res = await fetch("/api/ai/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          conversationId ? { query: trimmed, conversationId } : { query: trimmed }
-        ),
+        body: JSON.stringify({
+          query: trimmed,
+          ...(conversationId ? { conversationId } : {}),
+          ...(roleId ? { roleId } : {}),
+        }),
       });
 
       if (!res.ok) {

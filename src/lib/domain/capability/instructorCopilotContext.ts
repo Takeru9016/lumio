@@ -1,5 +1,8 @@
 import type { AuthContext } from "@/lib/auth/context";
-import { getInstructorCapabilityReport } from "@/lib/domain/capability/instructorReport";
+import {
+  getInstructorCapabilityForLearnerRole,
+  getInstructorCapabilityReport,
+} from "@/lib/domain/capability/instructorReport";
 
 type Ctx = AuthContext & { tenantId: string };
 
@@ -59,14 +62,51 @@ export class InstructorCopilotLearnerNotFoundError extends Error {
  * when more learners exist beyond this page, so the prompt (and the model's
  * answer) can disclose that honestly rather than silently treating the
  * first page as the whole population.
+ *
+ * Phase 21: `options.roleId`, only meaningful alongside `learnerId`, scopes
+ * the learner detail to one explicit role instead of the batch page's
+ * primary-role-only row. This moves authorization for that path OUT of "the
+ * report's own where-clause" and into getInstructorCapabilityForLearnerRole
+ * itself, which re-validates both that this instructor owns the learner AND
+ * that the learner actually holds `roleId` — the batch page's in-memory
+ * match (still used when `roleId` is omitted) never carries non-primary
+ * role data to match against.
  */
 export async function buildInstructorCopilotContext(
   ctx: Ctx,
-  options?: { learnerId?: string }
+  options?: { learnerId?: string; roleId?: string }
 ): Promise<StaffCopilotContext> {
   const page = await getInstructorCapabilityReport(ctx.userId, ctx.tenantId);
   const { learners, nextCursor } = page;
   const cohortTruncated = nextCursor !== null;
+
+  if (options?.learnerId && options?.roleId) {
+    const match = await getInstructorCapabilityForLearnerRole(
+      ctx.userId,
+      ctx.tenantId,
+      options.learnerId,
+      options.roleId
+    );
+    if (!match) throw new InstructorCopilotLearnerNotFoundError();
+
+    return {
+      scope: "learner",
+      cohortSize: learners.length,
+      cohortTruncated,
+      roleBreakdown: [],
+      skillAggregates: [],
+      learner: {
+        learnerName: match.name,
+        roleName: match.roleName,
+        skills: match.skills.map((s) => ({
+          skillName: s.skillName,
+          required: s.required,
+          current: s.current,
+          met: s.met,
+        })),
+      },
+    };
+  }
 
   if (options?.learnerId) {
     const match = learners.find((l) => l.userId === options.learnerId);

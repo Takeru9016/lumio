@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * Route-level test for POST /api/ai/copilot, mirroring
@@ -27,6 +27,10 @@ vi.mock("@/lib/domain/capability/copilotContext", () => ({
   buildCopilotContext: vi.fn(),
 }));
 
+vi.mock("@/lib/domain/capability/gaps", () => ({
+  getUserAssignedRoles: vi.fn(),
+}));
+
 vi.mock("@/lib/ai/runtime/provider", () => ({
   modelFor: vi.fn(() => ({ model: {}, provider: "openai", modelId: "gpt-5.4-mini" })),
 }));
@@ -38,6 +42,7 @@ vi.mock("@/lib/ai/runtime/persistence", () => ({
   recordUsageEvent: vi.fn(),
   getConversationForContinuation: vi.fn(),
   listRecentMessages: vi.fn(),
+  readConversationRoleId: vi.fn(() => null),
 }));
 
 vi.mock("@/lib/ai/runtime/execution", () => ({
@@ -56,6 +61,7 @@ const { auth } = await import("@clerk/nextjs/server");
 const { withAiGuards } = await import("@/lib/ai/middleware");
 const { generateText } = await import("ai");
 const { buildCopilotContext } = await import("@/lib/domain/capability/copilotContext");
+const { getUserAssignedRoles } = await import("@/lib/domain/capability/gaps");
 const {
   createConversation,
   startExecution,
@@ -63,6 +69,7 @@ const {
   recordUsageEvent,
   getConversationForContinuation,
   listRecentMessages,
+  readConversationRoleId,
 } = await import("@/lib/ai/runtime/persistence");
 const { createExecutionTracker } = await import("@/lib/ai/runtime/execution");
 const { incrementAiUsage } = await import("@/lib/ai/quota");
@@ -80,6 +87,8 @@ const getConversationForContinuationMock = vi.mocked(getConversationForContinuat
 const listRecentMessagesMock = vi.mocked(listRecentMessages);
 const createExecutionTrackerMock = vi.mocked(createExecutionTracker);
 const incrementAiUsageMock = vi.mocked(incrementAiUsage);
+const getUserAssignedRolesMock = vi.mocked(getUserAssignedRoles);
+const readConversationRoleIdMock = vi.mocked(readConversationRoleId);
 
 const req = (body: unknown) =>
   new Request("http://localhost/api/ai/copilot", {
@@ -146,6 +155,13 @@ function mockPersistenceHappyPath() {
 
 afterEach(() => {
   vi.resetAllMocks();
+});
+
+beforeEach(() => {
+  // Default: no stored role scope on any conversation, matching every
+  // pre-Phase-21 test's implicit "no roleId ever sent" shape. Tests that
+  // exercise the role-mismatch rejection override this explicitly.
+  readConversationRoleIdMock.mockReturnValue(null);
 });
 
 describe("POST /api/ai/copilot — authentication & authorization", () => {
@@ -633,6 +649,89 @@ describe("POST /api/ai/copilot — generation failure", () => {
     expect(body).toEqual({ error: "AI failed to generate a response. Please try again." });
     expect(JSON.stringify(body)).not.toContain("secret-leaking");
     expect(markFailed).toHaveBeenCalled();
+  });
+});
+
+describe("POST /api/ai/copilot — Phase 21 role scoping", () => {
+  it("an unheld roleId is rejected with 403, never silently degraded to primary", async () => {
+    mockUser();
+    getUserAssignedRolesMock.mockResolvedValue([
+      { roleId: "r-other", roleName: "Other", isPrimary: true },
+    ]);
+
+    const res = await POST(req({ query: "What am I missing?", roleId: "r-not-mine" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body).toEqual({ error: "You don't hold that role" });
+    expect(buildCopilotContextMock).not.toHaveBeenCalled();
+  });
+
+  it("a held roleId is validated then threaded into buildCopilotContext", async () => {
+    mockUser();
+    getUserAssignedRolesMock.mockResolvedValue([
+      { roleId: "r1", roleName: "Sales Rep", isPrimary: true },
+      { roleId: "r2", roleName: "Team Lead", isPrimary: false },
+    ]);
+    buildCopilotContextMock.mockResolvedValue(CONTEXT_WITH_ROLE as never);
+    mockPersistenceHappyPath();
+    generateTextMock.mockResolvedValue({ text: "answer", usage: {} } as never);
+
+    const res = await POST(req({ query: "What about my other role?", roleId: "r2" }));
+
+    expect(res.status).toBe(200);
+    expect(buildCopilotContextMock).toHaveBeenCalledWith(expect.anything(), "r2");
+    expect(createConversationMock).toHaveBeenCalledWith(
+      { tenantId: "t1", userId: "u1" },
+      expect.objectContaining({
+        contextMetadata: {
+          surface: "STUDENT_COPILOT",
+          query: "What about my other role?",
+          roleId: "r2",
+        },
+      })
+    );
+  });
+
+  it("continuing a conversation under a different role than it was created with -> 400", async () => {
+    mockUser();
+    getUserAssignedRolesMock.mockResolvedValue([
+      { roleId: "r1", roleName: "Sales Rep", isPrimary: true },
+      { roleId: "r2", roleName: "Team Lead", isPrimary: false },
+    ]);
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "STUDENT_COPILOT", roleId: "r1" },
+    } as never);
+    readConversationRoleIdMock.mockReturnValue("r1");
+
+    const res = await POST(req({ query: "continuing", conversationId: "conv1", roleId: "r2" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({ error: "This conversation is scoped to a different role" });
+    expect(buildCopilotContextMock).not.toHaveBeenCalled();
+  });
+
+  it("continuing a conversation with the same role it was created with -> success", async () => {
+    mockUser();
+    getUserAssignedRolesMock.mockResolvedValue([
+      { roleId: "r1", roleName: "Sales Rep", isPrimary: true },
+    ]);
+    getConversationForContinuationMock.mockResolvedValue({
+      id: "conv1",
+      contextMetadata: { surface: "STUDENT_COPILOT", roleId: "r1" },
+    } as never);
+    readConversationRoleIdMock.mockReturnValue("r1");
+    listRecentMessagesMock.mockResolvedValue([]);
+    buildCopilotContextMock.mockResolvedValue(CONTEXT_WITH_ROLE as never);
+    mockPersistenceHappyPath();
+    generateTextMock.mockResolvedValue({ text: "answer", usage: {} } as never);
+
+    const res = await POST(req({ query: "continuing", conversationId: "conv1", roleId: "r1" }));
+
+    expect(res.status).toBe(200);
+    expect(buildCopilotContextMock).toHaveBeenCalledWith(expect.anything(), "r1");
   });
 });
 

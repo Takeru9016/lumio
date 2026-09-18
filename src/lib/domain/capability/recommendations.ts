@@ -54,16 +54,26 @@ type CourseAggregate = {
  * comparison. Performs zero writes, no $transaction, no AI, no RAG.
  *
  * Query shape is exactly three DB round trips (locked §P):
- *   1. computeCapabilityGap(ctx) — gap resolution (2 queries internally)
+ *   1. computeCapabilityGap(ctx, roleId) — gap resolution (2 queries internally)
  *   2. one CourseSkill.findMany, joined through Course + Skill for
  *      tenant/status/active filtering in a single query
  *   3. one Enrollment.findMany for the candidate course ids
  * Aggregation, ranking, and the top-5 cap all happen in memory afterward —
  * never a raw `take` before aggregation (that could discard a more severe
  * candidate whose CourseSkill row simply sorted later in the DB).
+ *
+ * Phase 21: `roleId` is an optional pass-through to computeCapabilityGap,
+ * unchanged otherwise — never re-derived here, never defaulted to primary
+ * independently of what computeCapabilityGap itself does with `undefined`.
+ * Same authorization note as computeCapabilityGap: this function does not
+ * itself confirm the caller holds `roleId` — callers scoping their own
+ * capability view to a caller-supplied roleId must validate that first.
  */
-export async function getRecommendedLearning(ctx: Ctx): Promise<RecommendedLearning> {
-  const { gaps } = await computeCapabilityGap(ctx);
+export async function getRecommendedLearning(
+  ctx: Ctx,
+  roleId?: string
+): Promise<RecommendedLearning> {
+  const { gaps } = await computeCapabilityGap(ctx, roleId);
   const unmetGaps = gaps.filter((g) => !g.met);
   if (unmetGaps.length === 0) {
     return { recommendations: [] };

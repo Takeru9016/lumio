@@ -462,3 +462,49 @@ describe("getRecommendedLearning — ranking", () => {
     expect(droppedCount).toBe(1);
   });
 });
+
+describe("getRecommendedLearning — Phase 21 role scoping", () => {
+  it("recommendations for role A never surface a course relevant only to role B", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx } = await createTenantUser("STUDENT");
+    const roleA = await createJobRole(tenant.id);
+    const roleB = await createJobRole(tenant.id);
+    const skillA = await createSkill(tenant.id);
+    const skillB = await createSkill(tenant.id);
+    await createRoleSkill(roleA.id, skillA.id, "BEGINNER");
+    await createRoleSkill(roleB.id, skillB.id, "BEGINNER");
+    await createUserJobRole(tenant.id, ctx.userId, roleA.id, true);
+    await createUserJobRole(tenant.id, ctx.userId, roleB.id, false);
+
+    const { course: courseA } = await createCourse(tenant.id, instructorCtx.userId);
+    await mapCourseSkill(courseA.id, skillA.id);
+    await publish(courseA.id);
+    const { course: courseB } = await createCourse(tenant.id, instructorCtx.userId);
+    await mapCourseSkill(courseB.id, skillB.id);
+    await publish(courseB.id);
+
+    const resultA = await getRecommendedLearning({ ...ctx, tenantId: tenant.id }, roleA.id);
+    expect(resultA.recommendations.map((r) => r.courseId)).toEqual([courseA.id]);
+
+    const resultB = await getRecommendedLearning({ ...ctx, tenantId: tenant.id }, roleB.id);
+    expect(resultB.recommendations.map((r) => r.courseId)).toEqual([courseB.id]);
+  });
+
+  it("enrollment exclusion still applies identically under an explicit roleId", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx } = await createTenantUser("STUDENT");
+    const role = await createJobRole(tenant.id);
+    const skill = await createSkill(tenant.id);
+    await createRoleSkill(role.id, skill.id, "BEGINNER");
+    await createUserJobRole(tenant.id, ctx.userId, role.id, true);
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    await mapCourseSkill(course.id, skill.id);
+    await publish(course.id);
+    await db.enrollment.create({
+      data: { userId: ctx.userId, courseId: course.id, status: "ACTIVE" },
+    });
+
+    const result = await getRecommendedLearning({ ...ctx, tenantId: tenant.id }, role.id);
+    expect(result.recommendations).toEqual([]);
+  });
+});

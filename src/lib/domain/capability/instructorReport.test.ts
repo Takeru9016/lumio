@@ -10,7 +10,11 @@ import {
 } from "@/lib/domain/capability/__test__/fixtures";
 import * as gapsModule from "@/lib/domain/capability/gaps";
 import { computeCapabilityGap } from "@/lib/domain/capability/gaps";
-import { getInstructorCapabilityReport } from "@/lib/domain/capability/instructorReport";
+import {
+  getInstructorCapabilityForLearnerRole,
+  getInstructorCapabilityReport,
+  getInstructorLearnerRoles,
+} from "@/lib/domain/capability/instructorReport";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 
 afterAll(async () => {
@@ -609,5 +613,171 @@ describe("getInstructorCapabilityReport — architecture", () => {
     // own files do) — the real check is that no import statement pulls them in.
     expect(source).not.toMatch(/from ["']@\/lib\/domain\/capability\/organizationReport["']/);
     expect(source).not.toMatch(/from ["']@\/lib\/instructor-students["']/);
+  });
+});
+
+describe("getInstructorCapabilityReport — Phase 21 hasMultipleRoles", () => {
+  it("is false for a single-role learner and true for a multi-role one", async () => {
+    const { tenant } = await createTenantUser("STUDENT");
+    const { instructorId, course } = await setupInstructor(tenant.id);
+    const roleA = await createJobRole(tenant.id);
+    const roleB = await createJobRole(tenant.id);
+
+    const { ctx: singleRoleCtx } = await createTenantUser("STUDENT");
+    await db.user.update({ where: { id: singleRoleCtx.userId }, data: { tenantId: tenant.id } });
+    await enroll(singleRoleCtx.userId, course.id);
+    await createUserJobRole(tenant.id, singleRoleCtx.userId, roleA.id, true);
+
+    const { ctx: multiRoleCtx } = await createTenantUser("STUDENT");
+    await db.user.update({ where: { id: multiRoleCtx.userId }, data: { tenantId: tenant.id } });
+    await enroll(multiRoleCtx.userId, course.id);
+    await createUserJobRole(tenant.id, multiRoleCtx.userId, roleA.id, true);
+    await createUserJobRole(tenant.id, multiRoleCtx.userId, roleB.id, false);
+
+    const result = await getInstructorCapabilityReport(instructorId, tenant.id);
+    const singleRow = result.learners.find((l) => l.userId === singleRoleCtx.userId);
+    const multiRow = result.learners.find((l) => l.userId === multiRoleCtx.userId);
+    expect(singleRow?.hasMultipleRoles).toBe(false);
+    expect(multiRow?.hasMultipleRoles).toBe(true);
+  });
+});
+
+describe("getInstructorLearnerRoles", () => {
+  it("returns every role the learner holds when the instructor owns an enrollment with them", async () => {
+    const { tenant } = await createTenantUser("STUDENT");
+    const { instructorId, course } = await setupInstructor(tenant.id);
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    await db.user.update({ where: { id: learnerCtx.userId }, data: { tenantId: tenant.id } });
+    await enroll(learnerCtx.userId, course.id);
+    const roleA = await createJobRole(tenant.id, "Role A");
+    const roleB = await createJobRole(tenant.id, "Role B");
+    await createUserJobRole(tenant.id, learnerCtx.userId, roleA.id, true);
+    await createUserJobRole(tenant.id, learnerCtx.userId, roleB.id, false);
+
+    const roles = await getInstructorLearnerRoles(instructorId, tenant.id, learnerCtx.userId);
+    expect(roles).toHaveLength(2);
+    expect(roles?.[0]).toMatchObject({ roleId: roleA.id, isPrimary: true });
+  });
+
+  it("returns null (not an empty array) when the instructor has no shared enrollment with the learner", async () => {
+    const { tenant } = await createTenantUser("STUDENT");
+    const { instructorId } = await setupInstructor(tenant.id);
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    await db.user.update({ where: { id: learnerCtx.userId }, data: { tenantId: tenant.id } });
+    // learnerCtx is never enrolled in the instructor's course.
+
+    const roles = await getInstructorLearnerRoles(instructorId, tenant.id, learnerCtx.userId);
+    expect(roles).toBeNull();
+  });
+
+  it("an instructor cannot see another instructor's student's roles (not-your-student, not not-found)", async () => {
+    const { tenant } = await createTenantUser("STUDENT");
+    const { instructorId: instructorA } = await setupInstructor(tenant.id);
+    const { instructorId: instructorB, course: courseB } = await setupInstructor(tenant.id);
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    await db.user.update({ where: { id: learnerCtx.userId }, data: { tenantId: tenant.id } });
+    await enroll(learnerCtx.userId, courseB.id);
+    const role = await createJobRole(tenant.id);
+    await createUserJobRole(tenant.id, learnerCtx.userId, role.id, true);
+
+    // instructorB owns the enrollment; instructorA does not.
+    const rolesForA = await getInstructorLearnerRoles(instructorA, tenant.id, learnerCtx.userId);
+    const rolesForB = await getInstructorLearnerRoles(instructorB, tenant.id, learnerCtx.userId);
+    expect(rolesForA).toBeNull();
+    expect(rolesForB).toHaveLength(1);
+  });
+
+  it("a cross-tenant learnerId resolves as inaccessible, not merely empty", async () => {
+    const { tenant: tenantA } = await createTenantUser("STUDENT");
+    const { instructorId } = await setupInstructor(tenantA.id);
+    const { tenant: tenantB, ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course: courseInB } = await setupInstructor(tenantB.id);
+    await enroll(learnerCtx.userId, courseInB.id);
+
+    const roles = await getInstructorLearnerRoles(instructorId, tenantA.id, learnerCtx.userId);
+    expect(roles).toBeNull();
+  });
+});
+
+describe("getInstructorCapabilityForLearnerRole", () => {
+  it("computes skills for an explicit non-primary role the learner holds", async () => {
+    const { tenant } = await createTenantUser("STUDENT");
+    const { instructorId, course } = await setupInstructor(tenant.id);
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    await db.user.update({ where: { id: learnerCtx.userId }, data: { tenantId: tenant.id } });
+    await enroll(learnerCtx.userId, course.id);
+
+    const roleA = await createJobRole(tenant.id, "Role A");
+    const roleB = await createJobRole(tenant.id, "Role B");
+    const skillA = await createSkill(tenant.id);
+    const skillB = await createSkill(tenant.id);
+    await createRoleSkill(roleA.id, skillA.id, "BEGINNER");
+    await createRoleSkill(roleB.id, skillB.id, "INTERMEDIATE");
+    await createUserJobRole(tenant.id, learnerCtx.userId, roleA.id, true);
+    await createUserJobRole(tenant.id, learnerCtx.userId, roleB.id, false);
+    await setUserSkill({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      skillId: skillB.id,
+      proficiency: "INTERMEDIATE",
+    });
+
+    const result = await getInstructorCapabilityForLearnerRole(
+      instructorId,
+      tenant.id,
+      learnerCtx.userId,
+      roleB.id
+    );
+    expect(result?.roleId).toBe(roleB.id);
+    expect(result?.skills).toHaveLength(1);
+    expect(result?.skills[0]).toMatchObject({ skillId: skillB.id, met: true });
+    expect(result?.hasMultipleRoles).toBe(true);
+  });
+
+  it("returns null for a role the learner does not hold, even if the instructor owns them", async () => {
+    const { tenant } = await createTenantUser("STUDENT");
+    const { instructorId, course } = await setupInstructor(tenant.id);
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    await db.user.update({ where: { id: learnerCtx.userId }, data: { tenantId: tenant.id } });
+    await enroll(learnerCtx.userId, course.id);
+    const heldRole = await createJobRole(tenant.id);
+    const unheldRole = await createJobRole(tenant.id);
+    await createUserJobRole(tenant.id, learnerCtx.userId, heldRole.id, true);
+
+    const result = await getInstructorCapabilityForLearnerRole(
+      instructorId,
+      tenant.id,
+      learnerCtx.userId,
+      unheldRole.id
+    );
+    expect(result).toBeNull();
+  });
+
+  it("returns null for another instructor's student, regardless of roleId validity", async () => {
+    const { tenant } = await createTenantUser("STUDENT");
+    const { instructorId: ownerInstructor, course } = await setupInstructor(tenant.id);
+    const { instructorId: otherInstructor } = await setupInstructor(tenant.id);
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    await db.user.update({ where: { id: learnerCtx.userId }, data: { tenantId: tenant.id } });
+    await enroll(learnerCtx.userId, course.id);
+    const role = await createJobRole(tenant.id);
+    await createUserJobRole(tenant.id, learnerCtx.userId, role.id, true);
+
+    const result = await getInstructorCapabilityForLearnerRole(
+      otherInstructor,
+      tenant.id,
+      learnerCtx.userId,
+      role.id
+    );
+    expect(result).toBeNull();
+    // The rightful owner, same inputs otherwise, succeeds — proving the
+    // null above is an authorization denial, not a data problem.
+    const ownerResult = await getInstructorCapabilityForLearnerRole(
+      ownerInstructor,
+      tenant.id,
+      learnerCtx.userId,
+      role.id
+    );
+    expect(ownerResult).not.toBeNull();
   });
 });

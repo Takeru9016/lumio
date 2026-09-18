@@ -7,6 +7,7 @@ import {
 import {
   getOrganizationCapabilityReport,
   OrgCapabilityCursorError,
+  OrgCapabilityInvalidRoleError,
 } from "@/lib/domain/capability/organizationReport";
 
 const MAX_LIMIT = 100;
@@ -32,6 +33,7 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const cursor = searchParams.get("cursor") ?? undefined;
+  const roleId = searchParams.get("roleId") ?? undefined;
   const limitParam = searchParams.get("limit");
   let limit: number | undefined;
   if (limitParam !== null) {
@@ -43,11 +45,14 @@ export async function GET(req: Request) {
   }
 
   try {
-    const page = await getOrganizationCapabilityReport(ctx.tenantId, { cursor, limit });
+    const page = await getOrganizationCapabilityReport(ctx.tenantId, { cursor, limit, roleId });
     return Response.json(page);
   } catch (err) {
     if (err instanceof OrgCapabilityCursorError) {
       return Response.json({ error: "Invalid cursor" }, { status: 400 });
+    }
+    if (err instanceof OrgCapabilityInvalidRoleError) {
+      return Response.json({ error: "Role not found" }, { status: 400 });
     }
     console.error("[org/capability] Failed to compute capability report", err);
     return Response.json({ error: "Failed to load capability report" }, { status: 500 });

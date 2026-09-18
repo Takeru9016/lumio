@@ -35,6 +35,13 @@ export class OrgCapabilityCursorError extends Error {
   }
 }
 
+export class OrgCapabilityInvalidRoleError extends Error {
+  constructor() {
+    super("Role not found in this organization");
+    this.name = "OrgCapabilityInvalidRoleError";
+  }
+}
+
 function encodeCursor(row: Cursor): string {
   return Buffer.from(JSON.stringify(row), "utf8").toString("base64");
 }
@@ -83,10 +90,27 @@ function decodeCursor(raw: string): Cursor {
  */
 export async function getOrganizationCapabilityReport(
   tenantId: string,
-  options?: { cursor?: string; limit?: number }
+  options?: { cursor?: string; limit?: number; roleId?: string }
 ): Promise<OrgCapabilityPage> {
   const limit = Math.min(options?.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
   const cursor = options?.cursor ? decodeCursor(options.cursor) : null;
+
+  // Phase 21: an explicit roleId changes the population from "users with a
+  // primary role" to "users who hold this exact role, primary or not" —
+  // deliberately NOT layered on top of the primary-role branch below (that
+  // would silently exclude a user whose only assignment to this role is
+  // non-primary, exactly the bug this phase exists to fix). Validated
+  // against the tenant's own JobRole set before it touches the population
+  // query — never trust a client-supplied roleId to belong to this tenant.
+  let filterRoleId: string | undefined;
+  if (options?.roleId) {
+    const role = await db.jobRole.findFirst({
+      where: { id: options.roleId, tenantId },
+      select: { id: true },
+    });
+    if (!role) throw new OrgCapabilityInvalidRoleError();
+    filterRoleId = role.id;
+  }
 
   // Postgres ASC places NULL name last by default — mirrored here by
   // treating a null cursor.name as "greater than every non-null name" so
@@ -95,7 +119,9 @@ export async function getOrganizationCapabilityReport(
     where: {
       tenantId,
       deletedAt: null,
-      userJobRoles: { some: { isPrimary: true } },
+      userJobRoles: filterRoleId
+        ? { some: { roleId: filterRoleId } }
+        : { some: { isPrimary: true } },
       ...(cursor
         ? {
             OR:
@@ -134,19 +160,28 @@ export async function getOrganizationCapabilityReport(
 
   const pageUserIds = pageUsers.map((u) => u.id);
 
-  const primaryRows = await db.userJobRole.findMany({
-    where: { tenantId, userId: { in: pageUserIds }, isPrimary: true },
-    select: { userId: true, roleId: true, assignedAt: true },
-    orderBy: [{ userId: "asc" }, { assignedAt: "asc" }],
-  });
-
-  // Earliest assignedAt per user wins — identical tie-break to
-  // resolvePrimaryRoleId(), reproduced across the whole page in one pass
-  // rather than calling that self-scoped function once per user.
+  // Phase 21: with an explicit filterRoleId, every included user already
+  // holds exactly that role (enforced by the population query above) — no
+  // per-user resolution needed, no primary-role query at all.
   const resolvedRoleIdByUser = new Map<string, string>();
-  for (const row of primaryRows) {
-    if (!resolvedRoleIdByUser.has(row.userId)) {
-      resolvedRoleIdByUser.set(row.userId, row.roleId);
+  if (filterRoleId) {
+    for (const id of pageUserIds) {
+      resolvedRoleIdByUser.set(id, filterRoleId);
+    }
+  } else {
+    const primaryRows = await db.userJobRole.findMany({
+      where: { tenantId, userId: { in: pageUserIds }, isPrimary: true },
+      select: { userId: true, roleId: true, assignedAt: true },
+      orderBy: [{ userId: "asc" }, { assignedAt: "asc" }],
+    });
+
+    // Earliest assignedAt per user wins — identical tie-break to
+    // resolvePrimaryRoleId(), reproduced across the whole page in one pass
+    // rather than calling that self-scoped function once per user.
+    for (const row of primaryRows) {
+      if (!resolvedRoleIdByUser.has(row.userId)) {
+        resolvedRoleIdByUser.set(row.userId, row.roleId);
+      }
     }
   }
 

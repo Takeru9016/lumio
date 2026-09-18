@@ -187,6 +187,19 @@ export function readConversationLearnerId(contextMetadata: unknown): string | nu
 }
 
 /**
+ * Reads the `roleId` a conversation was created with, if any (Phase 21 —
+ * Student/Instructor Copilot role-scoping). Same "reuse contextMetadata,
+ * no schema change" pattern as readConversationLearnerId above.
+ */
+export function readConversationRoleId(contextMetadata: unknown): string | null {
+  if (contextMetadata && typeof contextMetadata === "object" && !Array.isArray(contextMetadata)) {
+    const value = (contextMetadata as Record<string, unknown>).roleId;
+    if (typeof value === "string") return value;
+  }
+  return null;
+}
+
+/**
  * Last N `user`/`assistant` messages, oldest first — the bounded model-input
  * window (Phase 15 contract §8: 10 messages, not a display limit — callers
  * needing the full history for UI display should query AIMessage directly

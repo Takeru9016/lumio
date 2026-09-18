@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { EmptyState } from "@/components";
 import { CapabilityCopilotPanel } from "./CapabilityCopilotPanel";
@@ -24,10 +25,26 @@ export type RequiredSkillRow = {
   evidence: EvidenceRow[];
 };
 
+export type AssignedRoleOption = {
+  roleId: string;
+  roleName: string;
+  isPrimary: boolean;
+};
+
+export type RecommendedCourseRow = {
+  courseId: string;
+  courseTitle: string;
+  courseSlug: string;
+  reasonSkills: Array<{ skillName: string }>;
+};
+
 interface CapabilityClientProps {
   state: "ready" | "no-role" | "no-tenant" | "load-failed";
   roleName: string | null;
   skills: RequiredSkillRow[];
+  assignedRoles: AssignedRoleOption[];
+  selectedRoleId: string | null;
+  recommendations: RecommendedCourseRow[];
 }
 
 const containerVariants = {
@@ -64,7 +81,21 @@ function evidenceTypeLabel(value: string): string {
     .join(" ");
 }
 
-export function CapabilityClient({ state, roleName, skills }: CapabilityClientProps) {
+export function CapabilityClient({
+  state,
+  roleName,
+  skills,
+  assignedRoles,
+  selectedRoleId,
+  recommendations,
+}: CapabilityClientProps) {
+  const router = useRouter();
+
+  function handleRoleChange(roleId: string) {
+    const url = roleId ? `/capability?role=${encodeURIComponent(roleId)}` : "/capability";
+    router.push(url);
+  }
+
   if (state === "no-tenant") {
     return (
       <div className="p-6 max-w-3xl mx-auto">
@@ -123,9 +154,27 @@ export function CapabilityClient({ state, roleName, skills }: CapabilityClientPr
         >
           Capability profile
         </h1>
-        <p className="text-sm text-text-muted">
-          Primary role: <span className="text-text-primary font-medium">{roleName}</span>
-        </p>
+        {assignedRoles.length > 1 ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-text-muted">Viewing role:</span>
+            <select
+              value={selectedRoleId ?? ""}
+              onChange={(e) => handleRoleChange(e.target.value)}
+              className="text-sm font-medium text-text-primary bg-white border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand"
+            >
+              {assignedRoles.map((r) => (
+                <option key={r.roleId} value={r.roleId}>
+                  {r.roleName}
+                  {r.isPrimary ? " (primary)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <p className="text-sm text-text-muted">
+            Role: <span className="text-text-primary font-medium">{roleName}</span>
+          </p>
+        )}
         {skills.length > 0 && (
           <p className="text-sm text-text-muted">
             {metCount} of {skills.length} required skills met
@@ -134,7 +183,7 @@ export function CapabilityClient({ state, roleName, skills }: CapabilityClientPr
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <CapabilityCopilotPanel />
+        <CapabilityCopilotPanel roleId={selectedRoleId} />
       </motion.div>
 
       <div className="space-y-3">
@@ -203,19 +252,33 @@ export function CapabilityClient({ state, roleName, skills }: CapabilityClientPr
         )}
       </div>
 
-      <motion.div variants={itemVariants}>
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-3 bg-ai-bg border border-ai-border rounded-lg p-4 hover:opacity-90 transition-opacity"
-        >
-          <span className="text-xl text-ai">✦</span>
-          <div>
-            <p className="text-sm font-semibold text-ai">View recommended learning</p>
-            <p className="text-xs text-text-muted mt-0.5">
-              See courses matched to your remaining skill gaps
+      <motion.div variants={itemVariants} className="space-y-2">
+        <p className="text-sm font-semibold text-ai flex items-center gap-1.5">
+          <span className="text-ai">✦</span> Recommended learning
+        </p>
+        {recommendations.length === 0 ? (
+          <div className="bg-ai-bg border border-ai-border rounded-lg p-4">
+            <p className="text-xs text-text-muted">
+              No recommendations for this role right now — either every required skill is met, or no
+              course maps to the remaining gaps yet.
             </p>
           </div>
-        </Link>
+        ) : (
+          <div className="space-y-2">
+            {recommendations.map((course) => (
+              <Link
+                key={course.courseId}
+                href={`/courses/${course.courseSlug}`}
+                className="block bg-ai-bg border border-ai-border rounded-lg p-3 hover:opacity-90 transition-opacity"
+              >
+                <p className="text-sm font-medium text-text-primary">{course.courseTitle}</p>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Closes: {course.reasonSkills.map((s) => s.skillName).join(", ")}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );

@@ -22,14 +22,21 @@ vi.mock("@/lib/domain/capability/recommendations", () => ({
   getRecommendedLearning: vi.fn(),
 }));
 
+vi.mock("@/lib/domain/capability/gaps", () => ({
+  getUserAssignedRoles: vi.fn(),
+}));
+
 const { AuthContextError, requireAuthContext, requireTenant } = await import("@/lib/auth/context");
 const { getRecommendedLearning } = await import("@/lib/domain/capability/recommendations");
+const { getUserAssignedRoles } = await import("@/lib/domain/capability/gaps");
 const { GET } = await import("./route");
 
 const requireAuthContextMock = vi.mocked(requireAuthContext);
 const requireTenantMock = vi.mocked(requireTenant);
-const req = () => new Request("http://localhost/api/capability/recommendations");
+const req = (search = "") =>
+  new Request(`http://localhost/api/capability/recommendations${search}`);
 const getRecommendedLearningMock = vi.mocked(getRecommendedLearning);
+const getUserAssignedRolesMock = vi.mocked(getUserAssignedRoles);
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -81,12 +88,15 @@ describe("GET /api/capability/recommendations", () => {
       )
     );
 
-    expect(getRecommendedLearningMock).toHaveBeenCalledWith({
-      userId: "real-user",
-      clerkId: "c1",
-      tenantId: "real-tenant",
-      role: "STUDENT",
-    });
+    expect(getRecommendedLearningMock).toHaveBeenCalledWith(
+      {
+        userId: "real-user",
+        clerkId: "c1",
+        tenantId: "real-tenant",
+        role: "STUDENT",
+      },
+      undefined
+    );
   });
 
   it("success response shape contains only courseId/courseTitle/reasonSkills -- internal courseSlug is never exposed", async () => {
@@ -172,5 +182,50 @@ describe("GET /api/capability/recommendations", () => {
     expect(res.status).toBe(500);
     expect(body).toEqual({ error: "Failed to compute recommendations" });
     expect(JSON.stringify(body)).not.toContain("postgres://secret");
+  });
+});
+
+describe("GET /api/capability/recommendations — Phase 21 role scoping", () => {
+  const AUTHED_STUDENT = { userId: "u1", clerkId: "c1", tenantId: "t1", role: "STUDENT" as const };
+
+  it("an unheld roleId is rejected with 403, never silently degraded to primary", async () => {
+    requireAuthContextMock.mockResolvedValue(AUTHED_STUDENT);
+    requireTenantMock.mockImplementation(() => {});
+    getUserAssignedRolesMock.mockResolvedValue([
+      { roleId: "r-other", roleName: "Other", isPrimary: true },
+    ]);
+
+    const res = await GET(req("?roleId=r-not-mine"));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body).toEqual({ error: "You don't hold that role" });
+    expect(getRecommendedLearningMock).not.toHaveBeenCalled();
+  });
+
+  it("a held roleId is validated then threaded into getRecommendedLearning", async () => {
+    requireAuthContextMock.mockResolvedValue(AUTHED_STUDENT);
+    requireTenantMock.mockImplementation(() => {});
+    getUserAssignedRolesMock.mockResolvedValue([
+      { roleId: "r1", roleName: "Sales Rep", isPrimary: true },
+      { roleId: "r2", roleName: "Team Lead", isPrimary: false },
+    ]);
+    getRecommendedLearningMock.mockResolvedValue({ recommendations: [] });
+
+    const res = await GET(req("?roleId=r2"));
+
+    expect(res.status).toBe(200);
+    expect(getRecommendedLearningMock).toHaveBeenCalledWith(AUTHED_STUDENT, "r2");
+  });
+
+  it("no roleId query param -> getUserAssignedRoles is never called, primary default preserved", async () => {
+    requireAuthContextMock.mockResolvedValue(AUTHED_STUDENT);
+    requireTenantMock.mockImplementation(() => {});
+    getRecommendedLearningMock.mockResolvedValue({ recommendations: [] });
+
+    await GET(req());
+
+    expect(getUserAssignedRolesMock).not.toHaveBeenCalled();
+    expect(getRecommendedLearningMock).toHaveBeenCalledWith(AUTHED_STUDENT, undefined);
   });
 });

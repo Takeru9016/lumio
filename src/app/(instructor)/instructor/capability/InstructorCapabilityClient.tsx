@@ -4,7 +4,11 @@ import { ChevronDown, Users } from "lucide-react";
 import { useState } from "react";
 
 import { EmptyState } from "@/components";
-import type { InstructorCapabilityPage } from "@/lib/domain/capability/instructorReport";
+import type {
+  InstructorCapabilityLearnerRow,
+  InstructorCapabilityPage,
+  InstructorLearnerRoleOption,
+} from "@/lib/domain/capability/instructorReport";
 import { InstructorCopilotPanel } from "./InstructorCopilotPanel";
 
 interface InstructorCapabilityClientProps {
@@ -15,21 +19,124 @@ function proficiencyLabel(value: string): string {
   return value.charAt(0) + value.slice(1).toLowerCase();
 }
 
+type RoleSwitchState = {
+  roles: InstructorLearnerRoleOption[];
+  selectedRoleId: string;
+  loading: boolean;
+};
+
 export function InstructorCapabilityClient({ initialPage }: InstructorCapabilityClientProps) {
   const [learners, setLearners] = useState(initialPage.learners);
   const [cursor, setCursor] = useState(initialPage.nextCursor);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [selectedLearner, setSelectedLearner] = useState<{ id: string; name: string } | null>(null);
+  const [selectedLearner, setSelectedLearner] = useState<{
+    id: string;
+    name: string;
+    roleId: string;
+  } | null>(null);
+  // Phase 21 — per-learner role-switcher state, keyed by userId. Populated
+  // lazily on first expand of a multi-role learner's row; switching roles
+  // only replaces that one learner's row (via displayedRow below), never
+  // touches the batch-fetched `learners` list or any other row.
+  const [roleSwitch, setRoleSwitch] = useState<Map<string, RoleSwitchState>>(new Map());
+
+  async function openRoleSwitcher(learnerId: string) {
+    if (roleSwitch.has(learnerId)) return;
+    setRoleSwitch((prev) => {
+      const next = new Map(prev);
+      next.set(learnerId, { roles: [], selectedRoleId: "", loading: true });
+      return next;
+    });
+    try {
+      const res = await fetch(`/api/instructor/capability/${learnerId}`);
+      if (!res.ok) throw new Error();
+      const data: {
+        roles: InstructorLearnerRoleOption[];
+        learner: InstructorCapabilityLearnerRow | null;
+      } = await res.json();
+      setRoleSwitch((prev) => {
+        const next = new Map(prev);
+        next.set(learnerId, {
+          roles: data.roles,
+          selectedRoleId: data.learner?.roleId ?? "",
+          loading: false,
+        });
+        return next;
+      });
+      if (data.learner) {
+        setLearners((prev) =>
+          prev.map((l) =>
+            l.userId === learnerId ? (data.learner as InstructorCapabilityLearnerRow) : l
+          )
+        );
+      }
+    } catch {
+      setRoleSwitch((prev) => {
+        const next = new Map(prev);
+        next.delete(learnerId);
+        return next;
+      });
+      setError("Couldn't load this learner's roles");
+    }
+  }
+
+  async function switchLearnerRole(learnerId: string, roleId: string) {
+    const current = roleSwitch.get(learnerId);
+    if (!current || current.selectedRoleId === roleId) return;
+    setRoleSwitch((prev) => {
+      const next = new Map(prev);
+      next.set(learnerId, { ...current, loading: true });
+      return next;
+    });
+    try {
+      const res = await fetch(
+        `/api/instructor/capability/${learnerId}?roleId=${encodeURIComponent(roleId)}`
+      );
+      if (!res.ok) throw new Error();
+      const data: {
+        roles: InstructorLearnerRoleOption[];
+        learner: InstructorCapabilityLearnerRow | null;
+      } = await res.json();
+      setRoleSwitch((prev) => {
+        const next = new Map(prev);
+        next.set(learnerId, {
+          roles: data.roles,
+          selectedRoleId: data.learner?.roleId ?? roleId,
+          loading: false,
+        });
+        return next;
+      });
+      if (data.learner) {
+        setLearners((prev) =>
+          prev.map((l) =>
+            l.userId === learnerId ? (data.learner as InstructorCapabilityLearnerRow) : l
+          )
+        );
+      }
+    } catch {
+      setRoleSwitch((prev) => {
+        const next = new Map(prev);
+        next.set(learnerId, { ...current, loading: false });
+        return next;
+      });
+      setError("Couldn't switch role for this learner");
+    }
+  }
 
   function toggleExpanded(userId: string) {
+    const willExpand = !expanded.has(userId);
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(userId)) next.delete(userId);
       else next.add(userId);
       return next;
     });
+    const learner = learners.find((l) => l.userId === userId);
+    if (willExpand && learner?.hasMultipleRoles) {
+      void openRoleSwitcher(userId);
+    }
   }
 
   async function loadMore() {
@@ -122,6 +229,28 @@ export function InstructorCapabilityClient({ initialPage }: InstructorCapability
 
                 {isExpanded && (
                   <div className="px-4 pb-3">
+                    {learner.hasMultipleRoles && (
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-text-muted">Role:</span>
+                        {roleSwitch.get(learner.userId)?.roles.length ? (
+                          <select
+                            value={roleSwitch.get(learner.userId)?.selectedRoleId ?? learner.roleId}
+                            disabled={roleSwitch.get(learner.userId)?.loading}
+                            onChange={(e) => switchLearnerRole(learner.userId, e.target.value)}
+                            className="text-xs font-medium text-text-primary bg-white border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand disabled:opacity-60"
+                          >
+                            {roleSwitch.get(learner.userId)?.roles.map((r) => (
+                              <option key={r.roleId} value={r.roleId}>
+                                {r.roleName}
+                                {r.isPrimary ? " (primary)" : ""}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-xs text-text-muted">Loading roles…</span>
+                        )}
+                      </div>
+                    )}
                     {learner.skills.length === 0 ? (
                       <p className="text-xs text-text-muted py-2">
                         No skills configured for this role.
@@ -167,7 +296,13 @@ export function InstructorCapabilityClient({ initialPage }: InstructorCapability
                     )}
                     <button
                       type="button"
-                      onClick={() => setSelectedLearner({ id: learner.userId, name: learner.name })}
+                      onClick={() =>
+                        setSelectedLearner({
+                          id: learner.userId,
+                          name: learner.name,
+                          roleId: learner.roleId,
+                        })
+                      }
                       className="mt-2 text-xs text-ai hover:underline"
                     >
                       Ask Copilot about {learner.name}

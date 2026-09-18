@@ -10,12 +10,14 @@ import {
   getConversationForContinuation,
   listRecentMessages,
   persistMessage,
+  readConversationRoleId,
   recordUsageEvent,
   startExecution,
 } from "@/lib/ai/runtime/persistence";
 import { assertActionAllowed } from "@/lib/ai/runtime/policy";
 import { modelFor } from "@/lib/ai/runtime/provider";
 import { buildCopilotContext } from "@/lib/domain/capability/copilotContext";
+import { getUserAssignedRoles } from "@/lib/domain/capability/gaps";
 import { copilotRatelimit } from "@/lib/ratelimit";
 
 const MAX_QUERY_LENGTH = 2000;
@@ -32,6 +34,7 @@ const copilotRequestSchema = z
   .object({
     query: z.string().trim().min(1).max(MAX_QUERY_LENGTH),
     conversationId: z.string().min(1).optional(),
+    roleId: z.string().min(1).optional(),
   })
   .strict();
 
@@ -72,7 +75,29 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return Response.json({ error: "Invalid query" }, { status: 400 });
   }
-  const { query, conversationId: suppliedConversationId } = parsed.data;
+  const { query, conversationId: suppliedConversationId, roleId: requestedRoleId } = parsed.data;
+
+  const ctx = {
+    userId: user.id,
+    clerkId: userId as string,
+    tenantId: user.tenantId,
+    role: user.role,
+  };
+
+  // Phase 21: an explicit roleId must belong to the caller's own
+  // UserJobRole set — computeCapabilityGap only validates tenant match, not
+  // ownership (see gaps.ts's SECURITY NOTE), so this route owns that check.
+  // An unheld roleId is rejected outright, never silently degraded to the
+  // primary role — a silent fallback would look like a working role switch
+  // that actually isn't.
+  let roleId: string | undefined;
+  if (requestedRoleId) {
+    const assignedRoles = await getUserAssignedRoles(ctx);
+    if (!assignedRoles.some((r) => r.roleId === requestedRoleId)) {
+      return Response.json({ error: "You don't hold that role" }, { status: 403 });
+    }
+    roleId = requestedRoleId;
+  }
 
   const surface = "COPILOT" as const;
   // Always passes today (COPILOT.GENERATE is true) — asserted explicitly
@@ -94,16 +119,22 @@ export async function POST(req: Request) {
     if (!existingConversation) {
       return Response.json({ error: "Conversation not found" }, { status: 404 });
     }
+    // Phase 21: a conversation's role scope, once set at creation, is fixed
+    // for its lifetime — mirrors Instructor Copilot's learnerId lock. A
+    // continuation attempting a different role (including switching to/from
+    // no role) is rejected rather than silently reusing stale role context.
+    const originalRoleId = readConversationRoleId(existingConversation.contextMetadata);
+    if ((roleId ?? null) !== originalRoleId) {
+      return Response.json(
+        { error: "This conversation is scoped to a different role" },
+        { status: 400 }
+      );
+    }
   }
 
   // Capability context is always freshly assembled — never cached between
   // turns, whether this is a new conversation or a continuation.
-  const capabilityContext = await buildCopilotContext({
-    userId: user.id,
-    clerkId: userId as string,
-    tenantId: user.tenantId,
-    role: user.role,
-  });
+  const capabilityContext = await buildCopilotContext(ctx, roleId);
 
   const { model, provider, modelId } = modelFor(surface);
 
@@ -114,7 +145,7 @@ export async function POST(req: Request) {
     if (!conversationId) {
       const conversation = await createConversation(
         { tenantId: user.tenantId, userId: user.id },
-        { surface, contextMetadata: { surface: SURFACE_MARKER, query } }
+        { surface, contextMetadata: { surface: SURFACE_MARKER, query, roleId } }
       );
       conversationId = conversation.id;
     }

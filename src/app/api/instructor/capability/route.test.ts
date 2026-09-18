@@ -173,6 +173,7 @@ describe("GET /api/instructor/capability", () => {
           name: "Learner Two",
           roleId: "r1",
           roleName: "Sales Rep",
+          hasMultipleRoles: false,
           skills: [
             {
               skillId: "s1",
@@ -197,6 +198,7 @@ describe("GET /api/instructor/capability", () => {
           name: "Learner Two",
           roleId: "r1",
           roleName: "Sales Rep",
+          hasMultipleRoles: false,
           skills: [
             {
               skillId: "s1",
