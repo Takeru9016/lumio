@@ -15,32 +15,6 @@ async function getCourseAndUser(courseSlug: string, clerkId: string) {
   return { dbUser, course };
 }
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> }
-) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { courseId } = await params;
-
-  const course = await db.course.findUnique({
-    where: { slug: courseId },
-    select: {
-      sections: {
-        orderBy: { order: "asc" },
-        include: {
-          lessons: { orderBy: { order: "asc" } },
-        },
-      },
-    },
-  });
-
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-  return NextResponse.json(course.sections);
-}
-
 const createSectionSchema = z.object({
   title: z.string().min(1),
 });

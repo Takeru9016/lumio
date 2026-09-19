@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
+import { courseOrderNotes, courseOrderReceipt } from "@/lib/domain/course/paymentVerification";
 import { razorpay } from "@/lib/razorpay";
 
 export async function POST(
@@ -51,11 +52,13 @@ export async function POST(
     return Response.json({ error: "Already enrolled" }, { status: 409 });
   }
 
-  const receipt = `c_${course.id}_${user.id}`.slice(0, 40);
+  // Receipt/notes are the trusted record enroll/route.ts verifies a payment
+  // against (paymentVerification.ts) — keep them derived from one place.
   const order = await razorpay.orders.create({
     amount: Math.round(course.price * 100),
     currency: course.currency,
-    receipt,
+    receipt: courseOrderReceipt(course.id, user.id),
+    notes: courseOrderNotes(course.id, user.id),
   });
 
   return Response.json({

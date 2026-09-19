@@ -97,6 +97,8 @@
 
 - Guard: `STUDENT`
 - Body: `{}` (free courses) or `{ razorpayPaymentId }` (paid)
+- Paid courses: the payment must be captured, its `order_id` must resolve to a Razorpay Order for the same amount/currency, and that Order's receipt (and, on orders created since Phase 23, its full `courseId`/`userId` notes) must match this user and course. A payment with no `order_id` is rejected.
+- Legacy orders (created before Phase 23) have no notes; their receipt holds the full course id but only a 12-character user-id prefix, so their user binding is a compatibility check, not a strict proof.
 - Creates `Enrollment` record; sends welcome email via Resend
 - Returns: `Enrollment`
 

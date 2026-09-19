@@ -2,6 +2,10 @@ import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
+import {
+  PaymentVerificationError,
+  verifyCoursePayment,
+} from "@/lib/domain/course/paymentVerification";
 import { EnrollmentEmail } from "@/lib/emails/enrollment";
 import { razorpay } from "@/lib/razorpay";
 import { resend } from "@/lib/resend";
@@ -57,34 +61,20 @@ export async function POST(
   }
 
   if (course.price > 0) {
-    if (!body.razorpayPaymentId) {
-      return Response.json(
-        { error: "razorpayPaymentId required for paid courses" },
-        { status: 400 }
-      );
-    }
-
-    type PaymentResult = {
-      status: string;
-      amount: number | string;
-      currency: string;
-    };
-    let payment: PaymentResult;
+    // Payment must be proven to belong to THIS user and THIS course via its
+    // Razorpay Order (see paymentVerification.ts) — a captured payment of the
+    // right amount alone is replayable across courses and accounts.
     try {
-      payment = (await razorpay.payments.fetch(body.razorpayPaymentId)) as unknown as PaymentResult;
-    } catch {
-      return Response.json({ error: "Invalid payment ID" }, { status: 402 });
-    }
-
-    if (payment.status !== "captured") {
-      return Response.json({ error: "Payment not captured" }, { status: 402 });
-    }
-
-    if (
-      Number(payment.amount) !== Math.round(course.price * 100) ||
-      payment.currency !== course.currency
-    ) {
-      return Response.json({ error: "Payment amount mismatch" }, { status: 402 });
+      await verifyCoursePayment(razorpay, {
+        paymentId: body.razorpayPaymentId,
+        course,
+        userId: user.id,
+      });
+    } catch (err) {
+      if (err instanceof PaymentVerificationError) {
+        return Response.json({ error: err.message }, { status: err.status });
+      }
+      throw err;
     }
   }
 

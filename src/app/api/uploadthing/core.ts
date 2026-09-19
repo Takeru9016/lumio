@@ -3,6 +3,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
+import { authorizeLessonVideoUpload } from "@/lib/domain/course/contentAuthorization";
 import { mux } from "@/lib/mux";
 
 const f = createUploadthing();
@@ -62,10 +63,12 @@ async function getKnowledgeStaff() {
 
 export const ourFileRouter = {
   videoUploader: f({ video: { maxFileSize: "2GB", maxFileCount: 1 } })
-    .input(z.object({ lessonId: z.string() }))
+    .input(z.object({ lessonId: z.string().min(1) }))
     .middleware(async ({ input }) => {
-      const userId = await getInstructor();
-      return { userId, lessonId: input.lessonId };
+      const { userId: clerkId } = await auth();
+      // input.lessonId is client-supplied: the lesson's real course is
+      // resolved and ownership proven here, before any upload is accepted.
+      return authorizeLessonVideoUpload(clerkId, input.lessonId);
     })
     .onUploadComplete(async ({ file, metadata }) => {
       const asset = await mux.video.assets.create({

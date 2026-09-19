@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
+import { filterLessonIdsInCourse } from "@/lib/domain/course/contentAuthorization";
 
 const reorderSchema = z.object({
   type: z.enum(["section", "lesson"]),
@@ -37,6 +38,18 @@ export async function POST(
 
   const { type, items } = parsed.data;
 
+  if (type === "lesson") {
+    // Each lesson id is client-supplied: prove it belongs to the course the
+    // caller was just authorized for (lesson -> section -> course) before any
+    // write. A foreign, cross-tenant or nonexistent id is a uniform 404 — the
+    // whole batch is rejected, nothing is partially reordered.
+    const requestedIds = [...new Set(items.map((item) => item.id))];
+    const ownedIds = await filterLessonIdsInCourse(course.id, requestedIds);
+    if (ownedIds.size !== requestedIds.length) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+  }
+
   await db.$transaction(
     items.map((item) =>
       type === "section"
@@ -45,7 +58,7 @@ export async function POST(
             data: { order: item.order },
           })
         : db.lesson.update({
-            where: { id: item.id },
+            where: { id: item.id, section: { courseId: course.id } },
             data: { order: item.order },
           })
     )

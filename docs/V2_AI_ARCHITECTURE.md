@@ -53,10 +53,12 @@ active-version match — directly into the `WHERE` of the one query that also ra
 results (pgvector `<=>` cosine distance, deterministic tie-break by `chunk.id`). No candidate
 chunk is ever fetched, ranked, or logged before Postgres itself has evaluated the authorization
 predicate — this is the specific difference from the interim `searchSimilarLessons`
-(`src/lib/ai/search.ts`), which has no tenant filter at all (`Lesson` has no `tenantId`) and
-relies entirely on an optional, caller-supplied `courseId`. `searchSimilarLessons` is unchanged
-and still runs as-is; `searchKnowledge` does not replace it this phase (see "Lesson bridge" in
-`docs/V2_MIGRATION_MAP.md`).
+(`src/lib/ai/search.ts`), which has no tenant filter at all (`Lesson` has no `tenantId`), so
+its required `courseId` scope is its only isolation boundary. As of Phase 23 that `courseId` is
+derived server-side from the enrollment-authorized lesson (`api/ai/tutor/route.ts`) and an empty
+scope throws — it can no longer be caller-supplied or omitted to search globally.
+`searchSimilarLessons` still runs alongside the Knowledge layer; `searchKnowledge` does not
+replace it (see "Lesson bridge" in `docs/V2_MIGRATION_MAP.md`).
 
 Required retrieval metadata (below) — current coverage: tenantId, sourceId/documentId/chunkId,
 and embedding model (stored as `{embeddingModel, embeddingProvider}` in `KnowledgeChunk.metadata`

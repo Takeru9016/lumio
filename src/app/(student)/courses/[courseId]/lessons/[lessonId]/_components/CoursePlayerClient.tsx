@@ -293,7 +293,6 @@ export function CoursePlayerClient({
                   <AiTutorChat
                     className="h-[520px]"
                     lessonId={lesson.id}
-                    courseId={courseId}
                     chatId={tutorChatId}
                     initialMessages={tutorInitialMessages}
                   />

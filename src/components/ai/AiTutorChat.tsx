@@ -14,7 +14,6 @@ const PLAN_ORDER: Plan[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
 interface AiTutorChatProps {
   lessonId?: string;
   chatId?: string;
-  courseId?: string;
   initialMessages?: UIMessage[];
   /** Fill available height (course player tab). Standalone page sets its own. */
   className?: string;
@@ -31,7 +30,6 @@ function messageText(message: UIMessage): string {
 export function AiTutorChat({
   lessonId,
   chatId,
-  courseId,
   initialMessages,
   className = "",
 }: AiTutorChatProps) {
@@ -47,7 +45,7 @@ export function AiTutorChat({
     messages: initialMessages,
     transport: new DefaultChatTransport({
       api: "/api/ai/tutor",
-      body: { lessonId, courseId, chatId },
+      body: { lessonId, chatId },
     }),
   });
 

@@ -36,9 +36,9 @@ type Row = {
 /**
  * Permission-aware semantic search over the Knowledge layer.
  *
- * Unlike src/lib/ai/search.ts (searchSimilarLessons — trusts an optional
- * courseId and otherwise searches every published lesson with no tenant
- * filter at all, because Lesson has no tenantId), every clause of
+ * Unlike src/lib/ai/search.ts (searchSimilarLessons — has no tenant filter
+ * at all because Lesson has no tenantId, so it relies on a required,
+ * server-derived courseId scope as its only boundary), every clause of
  * authorization here is inlined directly into the SQL WHERE, in the SAME
  * query that ranks and limits results. This is deliberate: fetching
  * candidate chunks first and filtering permissions in application code would

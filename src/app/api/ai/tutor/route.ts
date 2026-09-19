@@ -33,7 +33,6 @@ const RAG_TOP_K = 3;
 interface TutorRequestBody {
   messages: UIMessage[];
   lessonId?: string;
-  courseId?: string;
   chatId?: string;
 }
 
@@ -107,14 +106,19 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { messages, lessonId, courseId, chatId } = body;
+  const { messages, lessonId, chatId } = body;
   if (!Array.isArray(messages) || messages.length === 0) {
     return Response.json({ error: "messages is required" }, { status: 400 });
   }
 
   // Enrollment guard: a lesson-scoped chat may only pull RAG context from a
   // course the user is actually enrolled in. Standalone chats (no lessonId) skip
-  // this entirely.
+  // this entirely. The enrolled course containing `lessonId` is the ONLY
+  // source of course scope for the rest of this request — a `courseId` in the
+  // request body is never read (it used to be trusted for legacy retrieval,
+  // which let an enrolled user aim the search at any other course, or omit it
+  // to search every lesson in the database).
+  let authorizedCourseId: string | undefined;
   if (lessonId) {
     const enrollment = await db.enrollment.findFirst({
       where: {
@@ -124,10 +128,12 @@ export async function POST(req: Request) {
         },
         status: { in: ["ACTIVE", "COMPLETED"] },
       },
+      select: { courseId: true },
     });
     if (!enrollment) {
       return new Response("Not enrolled in this course", { status: 403 });
     }
+    authorizedCourseId = enrollment.courseId;
   }
 
   // Every AI call goes through the runtime's policy gate first — for TUTOR
@@ -137,7 +143,7 @@ export async function POST(req: Request) {
     auth: { userId: user.id, clerkId: userId as string, tenantId: user.tenantId, role: user.role },
     surface: "TUTOR",
     conversationId: chatId,
-    courseId,
+    courseId: authorizedCourseId,
     lessonId,
   };
   assertActionAllowed(aiRequestContext.surface, "GENERATE");
@@ -147,13 +153,13 @@ export async function POST(req: Request) {
   let context: string | undefined;
   let query = "";
   const knowledgeItems: Awaited<ReturnType<typeof buildAIContext>>["knowledge"] = [];
-  if (lessonId) {
+  if (lessonId && authorizedCourseId) {
     query = lastUserMessageText(messages);
     if (query) {
       const contextBlocks: string[] = [];
 
-      // Legacy lesson-scoped retrieval — unchanged from before this phase.
-      const similar = await searchSimilarLessons(query, courseId, RAG_TOP_K);
+      // Legacy lesson-scoped retrieval, scoped to the server-derived course.
+      const similar = await searchSimilarLessons(query, authorizedCourseId, RAG_TOP_K);
       if (similar.length > 0) {
         contextBlocks.push(...similar.map((l) => `## ${l.title}\n${l.textContent ?? ""}`.trim()));
       }
@@ -191,7 +197,10 @@ export async function POST(req: Request) {
     try {
       const conversation = await createConversation(
         { tenantId: user.tenantId, userId: user.id },
-        { surface: aiRequestContext.surface, contextMetadata: { lessonId, courseId } }
+        {
+          surface: aiRequestContext.surface,
+          contextMetadata: { lessonId, courseId: authorizedCourseId },
+        }
       );
       conversationId = conversation.id;
       const execution = await startExecution(
