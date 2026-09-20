@@ -350,6 +350,12 @@ async function skillsWithLegacyQuizEvidence(params: {
  * attempts safe. The row keeps the score of the pass that created it. The
  * attempt itself is still recorded (QuizAttempt, and the per-attempt
  * QUIZ_COMPLETED LearningEvent).
+ *
+ * Never throws. The caller has already committed the attempt, so every step
+ * here — the quiz/course lookup, the skill mappings, the evidence writes and the
+ * event — is best-effort: a failure is logged and the remaining steps still run.
+ * A failed lookup skips the evidence and the event is still emitted, without a
+ * courseId, as it already is for a failed attempt.
  */
 export async function recordQuizOutcome(params: QuizOutcomeParams): Promise<void> {
   const { tenantId, userId, quizId, attemptId, score, isPassed, occurredAt } = params;
@@ -357,14 +363,26 @@ export async function recordQuizOutcome(params: QuizOutcomeParams): Promise<void
   let courseId: string | undefined;
 
   if (isPassed) {
-    const quiz = await db.quiz.findUnique({
-      where: { id: quizId },
-      select: {
-        lesson: {
-          select: { section: { select: { course: { select: { id: true, tenantId: true } } } } },
+    // The lookup shares the evidence path's best-effort contract: if it fails
+    // there is no course to attach evidence to, so the evidence is skipped and
+    // the failure logged rather than thrown into a caller whose attempt has
+    // already committed.
+    const quiz = await db.quiz
+      .findUnique({
+        where: { id: quizId },
+        select: {
+          lesson: {
+            select: { section: { select: { course: { select: { id: true, tenantId: true } } } } },
+          },
         },
-      },
-    });
+      })
+      .catch((err: unknown) => {
+        console.error(
+          `[capability] Failed to resolve the course for quiz ${quizId}, attempt ${attemptId} — quiz evidence skipped`,
+          err
+        );
+        return null;
+      });
 
     if (quiz) {
       const course = quiz.lesson.section.course;

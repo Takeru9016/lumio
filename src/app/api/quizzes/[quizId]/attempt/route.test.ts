@@ -711,3 +711,179 @@ describe("POST /api/quizzes/[quizId]/attempt — XP when it works", () => {
     expect(await xpTransactions(s.student.id)).toHaveLength(0);
   });
 });
+
+// recordQuizOutcome's own quiz lookup (it selects only the lesson chain) is the
+// query that used to sit outside its error handling. The route's own lookup
+// selects the questions, so telling them apart by the select lets a test break
+// exactly the outcome step, however many requests are in flight.
+const realQuizFindUnique = db.quiz.findUnique.bind(db.quiz);
+const OUTCOME_BOOM = "outcome-lookup-boom-INTERNAL-DETAIL";
+const failOutcomeLookup = () => {
+  vi.spyOn(db.quiz, "findUnique").mockImplementation(((args: {
+    select?: Record<string, unknown>;
+  }) =>
+    args?.select && "questions" in args.select
+      ? realQuizFindUnique(args as never)
+      : Promise.reject(new Error(OUTCOME_BOOM))) as never);
+  return vi.spyOn(console, "error").mockImplementation(() => {});
+};
+
+describe("POST /api/quizzes/[quizId]/attempt — outcome processing is best-effort", () => {
+  it("an outcome lookup failure on an unlimited quiz does not fail the attempt", async () => {
+    const s = await setup({ maxAttempts: null, skills: 1 });
+    const logged = failOutcomeLookup();
+
+    const res = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toMatchObject({
+      isPassed: true,
+      score: 100,
+      xpAwarded: 50,
+      answersRevealed: true,
+    });
+    expect(JSON.stringify(body)).not.toContain(OUTCOME_BOOM);
+    expect(await attemptCount(s.student.id, s.quiz.id)).toBe(1);
+    expect(await evidenceOf(s.student.id)).toHaveLength(0);
+    expect(await db.userSkill.count({ where: { userId: s.student.id } })).toBe(0);
+    expect(await xpTransactions(s.student.id)).toHaveLength(1);
+    // The event stream is independent of the evidence path: the completion is still recorded.
+    expect(await quizCompletedEvents(s.student.id)).toBe(1);
+
+    expect(logged).toHaveBeenCalledTimes(1);
+    const [message] = logged.mock.calls[0];
+    expect(message).toContain("[capability]");
+    expect(message).toContain(s.quiz.id);
+    expect(message).toContain(body.attemptId);
+    expect(message).not.toContain(KEY_MCQ);
+  });
+
+  it("with maxAttempts=1, an outcome failure does not strand the learner: the result is returned and the attempt is legitimately spent", async () => {
+    const s = await setup({ maxAttempts: 1, skills: 1 });
+    failOutcomeLookup();
+
+    const first = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const firstBody = await first.json();
+
+    expect(first.status).toBe(200);
+    expect(firstBody).toMatchObject({
+      isPassed: true,
+      attemptsUsed: 1,
+      remainingAttempts: 0,
+      answersRevealed: true,
+    });
+    expect(firstBody.correctAnswers).toHaveLength(3);
+    expect(JSON.stringify(firstBody)).not.toContain(OUTCOME_BOOM);
+    expect(await attemptCount(s.student.id, s.quiz.id)).toBe(1);
+
+    vi.restoreAllMocks();
+    const second = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const secondBody = await second.json();
+
+    expect(second.status).toBe(403);
+    expect(secondBody).toMatchObject({ attemptsExhausted: true, remainingAttempts: 0 });
+    const text = JSON.stringify(secondBody);
+    for (const secret of [KEY_MCQ, KEY_SHORT, EXPLAIN_MCQ, EXPLAIN_TF, "correctAnswer"]) {
+      expect(text).not.toContain(secret);
+    }
+    expect(await attemptCount(s.student.id, s.quiz.id)).toBe(1);
+  });
+
+  it("a failed outcome does not poison the next pass: its evidence is recorded normally", async () => {
+    const s = await setup({ maxAttempts: null, skills: 1 });
+    failOutcomeLookup();
+    await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    expect(await evidenceOf(s.student.id)).toHaveLength(0);
+
+    vi.restoreAllMocks();
+    const res = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+
+    expect(res.status).toBe(200);
+    const rows = await evidenceOf(s.student.id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ sourceType: "Quiz", sourceId: s.quiz.id });
+  });
+
+  it("a CourseSkill failure leaves the response successful and records the event", async () => {
+    const s = await setup({ maxAttempts: 1, skills: 1 });
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(db.courseSkill, "findMany").mockRejectedValue(new Error(OUTCOME_BOOM));
+
+    const res = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.isPassed).toBe(true);
+    expect(JSON.stringify(body)).not.toContain(OUTCOME_BOOM);
+    expect(await evidenceOf(s.student.id)).toHaveLength(0);
+    expect(await quizCompletedEvents(s.student.id)).toBe(1);
+    expect(logged).toHaveBeenCalled();
+  });
+
+  it("a LearningEvent failure leaves the response successful and the evidence intact", async () => {
+    const s = await setup({ maxAttempts: 1, skills: 1 });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(db.learningEvent, "create").mockRejectedValue(new Error(OUTCOME_BOOM));
+
+    const res = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(body)).not.toContain(OUTCOME_BOOM);
+    expect(await evidenceOf(s.student.id)).toHaveLength(1);
+    expect(await db.userSkill.count({ where: { userId: s.student.id } })).toBe(1);
+    expect(await quizCompletedEvents(s.student.id)).toBe(0);
+  });
+
+  it("an XP failure and an outcome failure together still return the result", async () => {
+    const s = await setup({ maxAttempts: 1, skills: 1 });
+    failOutcomeLookup();
+    xpFault.error = new Error(XP_BOOM);
+
+    const res = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toMatchObject({ isPassed: true, xpAwarded: 0, answersRevealed: true });
+    expect(await attemptCount(s.student.id, s.quiz.id)).toBe(1);
+  });
+
+  it.each([
+    [1, 3],
+    [2, 4],
+  ])(
+    "maxAttempts %i with %i simultaneous requests still holds when every outcome lookup fails",
+    async (limit, total) => {
+      for (let round = 0; round < 3; round += 1) {
+        const s = await setup({ maxAttempts: limit, skills: 1 });
+        failOutcomeLookup();
+
+        const responses = await Promise.all(
+          Array.from({ length: total }, () => attempt(s.quiz.id, s.student.clerkId, passAnswers(s)))
+        );
+        vi.restoreAllMocks();
+
+        const statuses = responses.map((res) => res.status).sort();
+        expect(statuses.filter((status) => status === 200)).toHaveLength(limit);
+        expect(statuses.filter((status) => status === 403)).toHaveLength(total - limit);
+        expect(statuses.filter((status) => status >= 500)).toHaveLength(0);
+        expect(await attemptCount(s.student.id, s.quiz.id)).toBe(limit);
+        expect(await evidenceOf(s.student.id)).toHaveLength(0);
+        expect(await quizCompletedEvents(s.student.id)).toBe(limit);
+      }
+    }
+  );
+
+  it("simultaneous passing outcomes, all healthy, still leave exactly one evidence row per skill", async () => {
+    const s = await setup({ maxAttempts: null, skills: 3 });
+
+    const responses = await Promise.all(
+      Array.from({ length: 6 }, () => attempt(s.quiz.id, s.student.clerkId, passAnswers(s)))
+    );
+
+    expect(responses.map((res) => res.status)).toEqual(Array(6).fill(200));
+    expect(await evidenceOf(s.student.id)).toHaveLength(3);
+    expect(await db.userSkill.count({ where: { userId: s.student.id } })).toBe(3);
+  });
+});

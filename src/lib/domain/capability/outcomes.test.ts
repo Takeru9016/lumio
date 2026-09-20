@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { db } from "@/lib/db";
 import {
   createAssignment,
@@ -14,6 +14,10 @@ import {
   recordQuizOutcome,
 } from "@/lib/domain/capability/outcomes";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 afterAll(async () => {
   await db.$disconnect();
@@ -499,6 +503,109 @@ describe("recordQuizOutcome", () => {
     expect(events).toHaveLength(1);
     expect(events[0].entityType).toBe("QuizAttempt");
     expect(events[0].entityId).toBe("test-attempt-pass");
+  });
+});
+
+describe("recordQuizOutcome — failure isolation", () => {
+  async function passedQuiz() {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const quiz = await createQuiz(lesson.id);
+    const outcome = (attemptId = "iso-attempt") => ({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      quizId: quiz.id,
+      attemptId,
+      score: 100,
+      isPassed: true,
+      occurredAt: new Date(),
+    });
+    return { tenant, course, skill, quiz, userId: learnerCtx.userId, outcome };
+  }
+  const quiet = () => vi.spyOn(console, "error").mockImplementation(() => {});
+  const events = (userId: string) =>
+    db.learningEvent.findMany({ where: { userId, eventType: "QUIZ_COMPLETED" } });
+
+  it("a failing quiz lookup never throws: it is logged, no evidence is written, and the event is still recorded", async () => {
+    const s = await passedQuiz();
+    const logged = quiet();
+    vi.spyOn(db.quiz, "findUnique").mockRejectedValue(new Error("lookup-boom"));
+
+    await expect(recordQuizOutcome(s.outcome("iso-lookup"))).resolves.toBeUndefined();
+
+    expect(await db.skillEvidence.count({ where: { userId: s.userId } })).toBe(0);
+    expect(await db.userSkill.count({ where: { userId: s.userId } })).toBe(0);
+    const emitted = await events(s.userId);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0].entityId).toBe("iso-lookup");
+    expect(emitted[0].metadata).toMatchObject({ quizId: s.quiz.id, isPassed: true });
+    expect(logged).toHaveBeenCalledTimes(1);
+    const [message, error] = logged.mock.calls[0];
+    expect(message).toContain("[capability]");
+    expect(message).toContain(s.quiz.id);
+    expect(message).toContain("iso-lookup");
+    expect(error).toBeInstanceOf(Error);
+  });
+
+  it("a failed lookup is not sticky: the next outcome records the evidence normally", async () => {
+    const s = await passedQuiz();
+    quiet();
+    const lookup = vi.spyOn(db.quiz, "findUnique").mockRejectedValueOnce(new Error("lookup-boom"));
+
+    await recordQuizOutcome(s.outcome("iso-first"));
+    expect(await db.skillEvidence.count({ where: { userId: s.userId } })).toBe(0);
+    await recordQuizOutcome(s.outcome("iso-second"));
+
+    expect(lookup).toHaveBeenCalledTimes(2);
+    const rows = await db.skillEvidence.findMany({ where: { userId: s.userId } });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ sourceType: "Quiz", sourceId: s.quiz.id });
+  });
+
+  it("a failing CourseSkill lookup never throws and still records the event with its course", async () => {
+    const s = await passedQuiz();
+    const logged = quiet();
+    vi.spyOn(db.courseSkill, "findMany").mockRejectedValue(new Error("mapping-boom"));
+
+    await expect(recordQuizOutcome(s.outcome("iso-mapping"))).resolves.toBeUndefined();
+
+    expect(await db.skillEvidence.count({ where: { userId: s.userId } })).toBe(0);
+    expect(await db.userSkill.count({ where: { userId: s.userId } })).toBe(0);
+    const emitted = await events(s.userId);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0].metadata).toMatchObject({ courseId: s.course.id });
+    expect(logged).toHaveBeenCalledTimes(1);
+  });
+
+  it("a failing LearningEvent write never throws and leaves the evidence and UserSkill intact", async () => {
+    const s = await passedQuiz();
+    const logged = quiet();
+    vi.spyOn(db.learningEvent, "create").mockRejectedValue(new Error("event-boom"));
+
+    await expect(recordQuizOutcome(s.outcome("iso-event"))).resolves.toBeUndefined();
+
+    const rows = await db.skillEvidence.findMany({ where: { userId: s.userId } });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ sourceType: "Quiz", sourceId: s.quiz.id, score: 100 });
+    expect(await db.userSkill.count({ where: { userId: s.userId } })).toBe(1);
+    expect(await events(s.userId)).toHaveLength(0);
+    expect(logged).toHaveBeenCalledTimes(1);
+    expect(logged.mock.calls[0][0]).toContain("iso-event");
+  });
+
+  it("with everything healthy it still records the evidence, the projection and one event with its course", async () => {
+    const s = await passedQuiz();
+
+    await recordQuizOutcome(s.outcome("iso-ok"));
+
+    expect(await db.skillEvidence.count({ where: { userId: s.userId } })).toBe(1);
+    expect(await db.userSkill.count({ where: { userId: s.userId } })).toBe(1);
+    const emitted = await events(s.userId);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0].metadata).toMatchObject({ courseId: s.course.id });
   });
 });
 
