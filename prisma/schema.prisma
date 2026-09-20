@@ -78,6 +78,15 @@ enum NotificationType {
   INVITATION_ACCEPTED
   ORG_REQUEST_CREATED
   ORG_REQUEST_RESOLVED
+  LEARNING_ASSIGNED
+  LEARNING_DUE_SOON
+  LEARNING_OVERDUE
+}
+
+enum AssignmentSource {
+  MANUAL
+  MANDATORY
+  CAPABILITY_GAP
 }
 
 enum OrgRequestType {
@@ -251,6 +260,12 @@ model User {
   orgRequestsMade     OrgRequest[]           @relation("OrgRequestRequester")
   orgRequestsResolved OrgRequest[]           @relation("OrgRequestResolver")
 
+  // Learning assignments (Phase 28) — additive, no existing record requires these
+  learningAssignments          LearningAssignment[] @relation("LearningAssignmentAssignee")
+  learningAssignmentsMade      LearningAssignment[] @relation("LearningAssignmentAssigner")
+  learningAssignmentsCancelled LearningAssignment[] @relation("LearningAssignmentCanceller")
+  mandatoryTrainingsCreated    MandatoryTraining[]  @relation("MandatoryTrainingCreator")
+
   // V2 — additive, no existing record requires these
   userSkills            UserSkill[]
   userJobRoles          UserJobRole[]
@@ -305,6 +320,8 @@ model Tenant {
   invitations        Invitation[]
   notifications      Notification[]
   orgRequests        OrgRequest[]
+
+  learningAssignments LearningAssignment[]
 
   // V2 — additive, no existing record requires these
   skillCategories    SkillCategory[]
@@ -388,6 +405,12 @@ model Notification {
   link   String?
   isRead Boolean          @default(false)
 
+  // Optional idempotency key. NULL (every pre-existing notification) is
+  // always insertable — Postgres treats NULLs as distinct in a unique index.
+  // A non-null key is unique per user, so a repeated logical notification
+  // (e.g. "assignment:<id>:assigned") can only ever produce one row.
+  dedupeKey String?
+
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -396,6 +419,7 @@ model Notification {
 
   createdAt DateTime @default(now())
 
+  @@unique([userId, dedupeKey])
   @@index([userId, isRead])
   @@index([userId, createdAt])
 }
@@ -449,6 +473,8 @@ model Course {
   enrollments        Enrollment[]
   mandatoryTrainings MandatoryTraining[]
   certificates       Certificate[]
+
+  learningAssignments LearningAssignment[]
 
   // V2 — additive; existing courses are valid with zero skills mapped
   skills CourseSkill[]
@@ -743,6 +769,13 @@ model MandatoryTraining {
   dueDate        DateTime
   completedCount Int      @default(0)
 
+  // Phase 28 — nullable and unused until a later slice wraps this policy
+  // around per-learner LearningAssignment rows. NULL activatedAt marks a
+  // legacy policy that has not been expanded into assignments.
+  activatedAt DateTime?
+  createdById String?
+  createdBy   User?     @relation("MandatoryTrainingCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
   courseId String
   teamId   String
   tenantId String
@@ -750,11 +783,68 @@ model MandatoryTraining {
   team     Team   @relation(fields: [teamId], references: [id])
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
+  assignments LearningAssignment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([courseId, teamId])
   @@index([tenantId])
+}
+
+// ============================================================
+// LEARNING ASSIGNMENTS (Phase 28)
+// ============================================================
+
+// One learner assigned one concrete Course, from one source. Status is never
+// stored — it is derived (see src/lib/domain/learning-assignment/status.ts)
+// from cancelledAt, dueDate, the learner's Enrollment and their LessonProgress.
+//
+// Identity is (userId, courseId, source, sourceKey), so a repeated assignment
+// from the same source is idempotent while independent sources (e.g. a manual
+// assignment and a mandatory-training one) are kept as separate rows, each with
+// its own provenance and cancellation. `sourceKey` and `reason` are computed by
+// the domain service and are never accepted from a client:
+//   MANUAL          manual:<courseId>          (one per learner + course)
+//   MANDATORY       mandatory:<mandatoryTrainingId>
+//   CAPABILITY_GAP  gap:<roleId>:<skillId>
+// `reason` is an immutable provenance snapshot written once at creation.
+model LearningAssignment {
+  id String @id @default(cuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("LearningAssignmentAssignee", fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  source    AssignmentSource
+  sourceKey String
+  reason    Json
+
+  dueDate DateTime?
+
+  mandatoryTrainingId String?
+  mandatoryTraining   MandatoryTraining? @relation(fields: [mandatoryTrainingId], references: [id], onDelete: SetNull)
+
+  assignedById String?
+  assignedBy   User?   @relation("LearningAssignmentAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  cancelledAt   DateTime?
+  cancelledById String?
+  cancelledBy   User?     @relation("LearningAssignmentCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId, source, sourceKey])
+  @@index([tenantId, cancelledAt, dueDate])
+  @@index([userId, cancelledAt])
+  @@index([courseId])
+  @@index([mandatoryTrainingId])
 }
 
 // ============================================================

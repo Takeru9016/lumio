@@ -73,6 +73,7 @@ export const ModelName = {
   Certificate: 'Certificate',
   AIChat: 'AIChat',
   MandatoryTraining: 'MandatoryTraining',
+  LearningAssignment: 'LearningAssignment',
   AdminAuditLog: 'AdminAuditLog',
   SkillCategory: 'SkillCategory',
   Skill: 'Skill',
@@ -205,6 +206,7 @@ export const NotificationScalarFieldEnum = {
   body: 'body',
   link: 'link',
   isRead: 'isRead',
+  dedupeKey: 'dedupeKey',
   userId: 'userId',
   tenantId: 'tenantId',
   createdAt: 'createdAt'
@@ -435,6 +437,8 @@ export const MandatoryTrainingScalarFieldEnum = {
   id: 'id',
   dueDate: 'dueDate',
   completedCount: 'completedCount',
+  activatedAt: 'activatedAt',
+  createdById: 'createdById',
   courseId: 'courseId',
   teamId: 'teamId',
   tenantId: 'tenantId',
@@ -443,6 +447,26 @@ export const MandatoryTrainingScalarFieldEnum = {
 } as const
 
 export type MandatoryTrainingScalarFieldEnum = (typeof MandatoryTrainingScalarFieldEnum)[keyof typeof MandatoryTrainingScalarFieldEnum]
+
+
+export const LearningAssignmentScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  courseId: 'courseId',
+  source: 'source',
+  sourceKey: 'sourceKey',
+  reason: 'reason',
+  dueDate: 'dueDate',
+  mandatoryTrainingId: 'mandatoryTrainingId',
+  assignedById: 'assignedById',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LearningAssignmentScalarFieldEnum = (typeof LearningAssignmentScalarFieldEnum)[keyof typeof LearningAssignmentScalarFieldEnum]
 
 
 export const AdminAuditLogScalarFieldEnum = {

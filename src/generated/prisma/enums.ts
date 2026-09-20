@@ -100,10 +100,22 @@ export const NotificationType = {
   ASSIGNMENT_GRADED: 'ASSIGNMENT_GRADED',
   INVITATION_ACCEPTED: 'INVITATION_ACCEPTED',
   ORG_REQUEST_CREATED: 'ORG_REQUEST_CREATED',
-  ORG_REQUEST_RESOLVED: 'ORG_REQUEST_RESOLVED'
+  ORG_REQUEST_RESOLVED: 'ORG_REQUEST_RESOLVED',
+  LEARNING_ASSIGNED: 'LEARNING_ASSIGNED',
+  LEARNING_DUE_SOON: 'LEARNING_DUE_SOON',
+  LEARNING_OVERDUE: 'LEARNING_OVERDUE'
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const AssignmentSource = {
+  MANUAL: 'MANUAL',
+  MANDATORY: 'MANDATORY',
+  CAPABILITY_GAP: 'CAPABILITY_GAP'
+} as const
+
+export type AssignmentSource = (typeof AssignmentSource)[keyof typeof AssignmentSource]
 
 
 export const OrgRequestType = {

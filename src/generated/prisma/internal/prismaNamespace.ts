@@ -406,6 +406,7 @@ export const ModelName = {
   Certificate: 'Certificate',
   AIChat: 'AIChat',
   MandatoryTraining: 'MandatoryTraining',
+  LearningAssignment: 'LearningAssignment',
   AdminAuditLog: 'AdminAuditLog',
   SkillCategory: 'SkillCategory',
   Skill: 'Skill',
@@ -441,7 +442,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "courseSkill" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
+    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "learningAssignment" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "courseSkill" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2073,6 +2074,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LearningAssignment: {
+      payload: Prisma.$LearningAssignmentPayload<ExtArgs>
+      fields: Prisma.LearningAssignmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LearningAssignmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LearningAssignmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>
+        }
+        findFirst: {
+          args: Prisma.LearningAssignmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LearningAssignmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>
+        }
+        findMany: {
+          args: Prisma.LearningAssignmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>[]
+        }
+        create: {
+          args: Prisma.LearningAssignmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>
+        }
+        createMany: {
+          args: Prisma.LearningAssignmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LearningAssignmentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>[]
+        }
+        delete: {
+          args: Prisma.LearningAssignmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>
+        }
+        update: {
+          args: Prisma.LearningAssignmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.LearningAssignmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LearningAssignmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LearningAssignmentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>[]
+        }
+        upsert: {
+          args: Prisma.LearningAssignmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LearningAssignmentPayload>
+        }
+        aggregate: {
+          args: Prisma.LearningAssignmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLearningAssignment>
+        }
+        groupBy: {
+          args: Prisma.LearningAssignmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LearningAssignmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LearningAssignmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LearningAssignmentCountAggregateOutputType> | number
+        }
+      }
+    }
     AdminAuditLog: {
       payload: Prisma.$AdminAuditLogPayload<ExtArgs>
       fields: Prisma.AdminAuditLogFieldRefs
@@ -3686,6 +3761,7 @@ export const NotificationScalarFieldEnum = {
   body: 'body',
   link: 'link',
   isRead: 'isRead',
+  dedupeKey: 'dedupeKey',
   userId: 'userId',
   tenantId: 'tenantId',
   createdAt: 'createdAt'
@@ -3916,6 +3992,8 @@ export const MandatoryTrainingScalarFieldEnum = {
   id: 'id',
   dueDate: 'dueDate',
   completedCount: 'completedCount',
+  activatedAt: 'activatedAt',
+  createdById: 'createdById',
   courseId: 'courseId',
   teamId: 'teamId',
   tenantId: 'tenantId',
@@ -3924,6 +4002,26 @@ export const MandatoryTrainingScalarFieldEnum = {
 } as const
 
 export type MandatoryTrainingScalarFieldEnum = (typeof MandatoryTrainingScalarFieldEnum)[keyof typeof MandatoryTrainingScalarFieldEnum]
+
+
+export const LearningAssignmentScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  courseId: 'courseId',
+  source: 'source',
+  sourceKey: 'sourceKey',
+  reason: 'reason',
+  dueDate: 'dueDate',
+  mandatoryTrainingId: 'mandatoryTrainingId',
+  assignedById: 'assignedById',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LearningAssignmentScalarFieldEnum = (typeof LearningAssignmentScalarFieldEnum)[keyof typeof LearningAssignmentScalarFieldEnum]
 
 
 export const AdminAuditLogScalarFieldEnum = {
@@ -4525,6 +4623,20 @@ export type ListEnumSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'AssignmentSource'
+ */
+export type EnumAssignmentSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentSource'>
+    
+
+
+/**
+ * Reference to a field of type 'AssignmentSource[]'
+ */
+export type ListEnumAssignmentSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentSource[]'>
+    
+
+
+/**
  * Reference to a field of type 'SkillStatus'
  */
 export type EnumSkillStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SkillStatus'>
@@ -4809,6 +4921,7 @@ export type GlobalOmitConfig = {
   certificate?: Prisma.CertificateOmit
   aIChat?: Prisma.AIChatOmit
   mandatoryTraining?: Prisma.MandatoryTrainingOmit
+  learningAssignment?: Prisma.LearningAssignmentOmit
   adminAuditLog?: Prisma.AdminAuditLogOmit
   skillCategory?: Prisma.SkillCategoryOmit
   skill?: Prisma.SkillOmit

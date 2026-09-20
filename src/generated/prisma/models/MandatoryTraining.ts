@@ -38,6 +38,8 @@ export type MandatoryTrainingMinAggregateOutputType = {
   id: string | null
   dueDate: Date | null
   completedCount: number | null
+  activatedAt: Date | null
+  createdById: string | null
   courseId: string | null
   teamId: string | null
   tenantId: string | null
@@ -49,6 +51,8 @@ export type MandatoryTrainingMaxAggregateOutputType = {
   id: string | null
   dueDate: Date | null
   completedCount: number | null
+  activatedAt: Date | null
+  createdById: string | null
   courseId: string | null
   teamId: string | null
   tenantId: string | null
@@ -60,6 +64,8 @@ export type MandatoryTrainingCountAggregateOutputType = {
   id: number
   dueDate: number
   completedCount: number
+  activatedAt: number
+  createdById: number
   courseId: number
   teamId: number
   tenantId: number
@@ -81,6 +87,8 @@ export type MandatoryTrainingMinAggregateInputType = {
   id?: true
   dueDate?: true
   completedCount?: true
+  activatedAt?: true
+  createdById?: true
   courseId?: true
   teamId?: true
   tenantId?: true
@@ -92,6 +100,8 @@ export type MandatoryTrainingMaxAggregateInputType = {
   id?: true
   dueDate?: true
   completedCount?: true
+  activatedAt?: true
+  createdById?: true
   courseId?: true
   teamId?: true
   tenantId?: true
@@ -103,6 +113,8 @@ export type MandatoryTrainingCountAggregateInputType = {
   id?: true
   dueDate?: true
   completedCount?: true
+  activatedAt?: true
+  createdById?: true
   courseId?: true
   teamId?: true
   tenantId?: true
@@ -201,6 +213,8 @@ export type MandatoryTrainingGroupByOutputType = {
   id: string
   dueDate: Date
   completedCount: number
+  activatedAt: Date | null
+  createdById: string | null
   courseId: string
   teamId: string
   tenantId: string
@@ -235,28 +249,36 @@ export type MandatoryTrainingWhereInput = {
   id?: Prisma.StringFilter<"MandatoryTraining"> | string
   dueDate?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
   completedCount?: Prisma.IntFilter<"MandatoryTraining"> | number
+  activatedAt?: Prisma.DateTimeNullableFilter<"MandatoryTraining"> | Date | string | null
+  createdById?: Prisma.StringNullableFilter<"MandatoryTraining"> | string | null
   courseId?: Prisma.StringFilter<"MandatoryTraining"> | string
   teamId?: Prisma.StringFilter<"MandatoryTraining"> | string
   tenantId?: Prisma.StringFilter<"MandatoryTraining"> | string
   createdAt?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
   team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  assignments?: Prisma.LearningAssignmentListRelationFilter
 }
 
 export type MandatoryTrainingOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completedCount?: Prisma.SortOrder
+  activatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   courseId?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  createdBy?: Prisma.UserOrderByWithRelationInput
   course?: Prisma.CourseOrderByWithRelationInput
   team?: Prisma.TeamOrderByWithRelationInput
   tenant?: Prisma.TenantOrderByWithRelationInput
+  assignments?: Prisma.LearningAssignmentOrderByRelationAggregateInput
 }
 
 export type MandatoryTrainingWhereUniqueInput = Prisma.AtLeast<{
@@ -267,20 +289,26 @@ export type MandatoryTrainingWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MandatoryTrainingWhereInput | Prisma.MandatoryTrainingWhereInput[]
   dueDate?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
   completedCount?: Prisma.IntFilter<"MandatoryTraining"> | number
+  activatedAt?: Prisma.DateTimeNullableFilter<"MandatoryTraining"> | Date | string | null
+  createdById?: Prisma.StringNullableFilter<"MandatoryTraining"> | string | null
   courseId?: Prisma.StringFilter<"MandatoryTraining"> | string
   teamId?: Prisma.StringFilter<"MandatoryTraining"> | string
   tenantId?: Prisma.StringFilter<"MandatoryTraining"> | string
   createdAt?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
   team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  assignments?: Prisma.LearningAssignmentListRelationFilter
 }, "id" | "courseId_teamId">
 
 export type MandatoryTrainingOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completedCount?: Prisma.SortOrder
+  activatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   courseId?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
@@ -300,6 +328,8 @@ export type MandatoryTrainingScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"MandatoryTraining"> | string
   dueDate?: Prisma.DateTimeWithAggregatesFilter<"MandatoryTraining"> | Date | string
   completedCount?: Prisma.IntWithAggregatesFilter<"MandatoryTraining"> | number
+  activatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MandatoryTraining"> | Date | string | null
+  createdById?: Prisma.StringNullableWithAggregatesFilter<"MandatoryTraining"> | string | null
   courseId?: Prisma.StringWithAggregatesFilter<"MandatoryTraining"> | string
   teamId?: Prisma.StringWithAggregatesFilter<"MandatoryTraining"> | string
   tenantId?: Prisma.StringWithAggregatesFilter<"MandatoryTraining"> | string
@@ -311,50 +341,64 @@ export type MandatoryTrainingCreateInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutMandatoryTrainingsCreatedInput
   course: Prisma.CourseCreateNestedOneWithoutMandatoryTrainingsInput
   team: Prisma.TeamCreateNestedOneWithoutMandatoryTrainingsInput
   tenant: Prisma.TenantCreateNestedOneWithoutMandatoryTrainingsInput
+  assignments?: Prisma.LearningAssignmentCreateNestedManyWithoutMandatoryTrainingInput
 }
 
 export type MandatoryTrainingUncheckedCreateInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
   courseId: string
   teamId: string
   tenantId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutMandatoryTrainingInput
 }
 
 export type MandatoryTrainingUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutMandatoryTrainingsCreatedNestedInput
   course?: Prisma.CourseUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
   team?: Prisma.TeamUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  assignments?: Prisma.LearningAssignmentUpdateManyWithoutMandatoryTrainingNestedInput
 }
 
 export type MandatoryTrainingUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutMandatoryTrainingNestedInput
 }
 
 export type MandatoryTrainingCreateManyInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
   courseId: string
   teamId: string
   tenantId: string
@@ -366,6 +410,7 @@ export type MandatoryTrainingUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -374,6 +419,8 @@ export type MandatoryTrainingUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -400,6 +447,8 @@ export type MandatoryTrainingCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completedCount?: Prisma.SortOrder
+  activatedAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
@@ -415,6 +464,8 @@ export type MandatoryTrainingMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completedCount?: Prisma.SortOrder
+  activatedAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
@@ -426,6 +477,8 @@ export type MandatoryTrainingMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completedCount?: Prisma.SortOrder
+  activatedAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
@@ -435,6 +488,53 @@ export type MandatoryTrainingMinOrderByAggregateInput = {
 
 export type MandatoryTrainingSumOrderByAggregateInput = {
   completedCount?: Prisma.SortOrder
+}
+
+export type MandatoryTrainingNullableScalarRelationFilter = {
+  is?: Prisma.MandatoryTrainingWhereInput | null
+  isNot?: Prisma.MandatoryTrainingWhereInput | null
+}
+
+export type MandatoryTrainingCreateNestedManyWithoutCreatedByInput = {
+  create?: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutCreatedByInput, Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput> | Prisma.MandatoryTrainingCreateWithoutCreatedByInput[] | Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.MandatoryTrainingCreateOrConnectWithoutCreatedByInput | Prisma.MandatoryTrainingCreateOrConnectWithoutCreatedByInput[]
+  createMany?: Prisma.MandatoryTrainingCreateManyCreatedByInputEnvelope
+  connect?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+}
+
+export type MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput = {
+  create?: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutCreatedByInput, Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput> | Prisma.MandatoryTrainingCreateWithoutCreatedByInput[] | Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.MandatoryTrainingCreateOrConnectWithoutCreatedByInput | Prisma.MandatoryTrainingCreateOrConnectWithoutCreatedByInput[]
+  createMany?: Prisma.MandatoryTrainingCreateManyCreatedByInputEnvelope
+  connect?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+}
+
+export type MandatoryTrainingUpdateManyWithoutCreatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutCreatedByInput, Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput> | Prisma.MandatoryTrainingCreateWithoutCreatedByInput[] | Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.MandatoryTrainingCreateOrConnectWithoutCreatedByInput | Prisma.MandatoryTrainingCreateOrConnectWithoutCreatedByInput[]
+  upsert?: Prisma.MandatoryTrainingUpsertWithWhereUniqueWithoutCreatedByInput | Prisma.MandatoryTrainingUpsertWithWhereUniqueWithoutCreatedByInput[]
+  createMany?: Prisma.MandatoryTrainingCreateManyCreatedByInputEnvelope
+  set?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+  disconnect?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+  delete?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+  connect?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+  update?: Prisma.MandatoryTrainingUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.MandatoryTrainingUpdateWithWhereUniqueWithoutCreatedByInput[]
+  updateMany?: Prisma.MandatoryTrainingUpdateManyWithWhereWithoutCreatedByInput | Prisma.MandatoryTrainingUpdateManyWithWhereWithoutCreatedByInput[]
+  deleteMany?: Prisma.MandatoryTrainingScalarWhereInput | Prisma.MandatoryTrainingScalarWhereInput[]
+}
+
+export type MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutCreatedByInput, Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput> | Prisma.MandatoryTrainingCreateWithoutCreatedByInput[] | Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.MandatoryTrainingCreateOrConnectWithoutCreatedByInput | Prisma.MandatoryTrainingCreateOrConnectWithoutCreatedByInput[]
+  upsert?: Prisma.MandatoryTrainingUpsertWithWhereUniqueWithoutCreatedByInput | Prisma.MandatoryTrainingUpsertWithWhereUniqueWithoutCreatedByInput[]
+  createMany?: Prisma.MandatoryTrainingCreateManyCreatedByInputEnvelope
+  set?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+  disconnect?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+  delete?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+  connect?: Prisma.MandatoryTrainingWhereUniqueInput | Prisma.MandatoryTrainingWhereUniqueInput[]
+  update?: Prisma.MandatoryTrainingUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.MandatoryTrainingUpdateWithWhereUniqueWithoutCreatedByInput[]
+  updateMany?: Prisma.MandatoryTrainingUpdateManyWithWhereWithoutCreatedByInput | Prisma.MandatoryTrainingUpdateManyWithWhereWithoutCreatedByInput[]
+  deleteMany?: Prisma.MandatoryTrainingScalarWhereInput | Prisma.MandatoryTrainingScalarWhereInput[]
 }
 
 export type MandatoryTrainingCreateNestedManyWithoutTenantInput = {
@@ -563,24 +663,114 @@ export type MandatoryTrainingUncheckedUpdateManyWithoutCourseNestedInput = {
   deleteMany?: Prisma.MandatoryTrainingScalarWhereInput | Prisma.MandatoryTrainingScalarWhereInput[]
 }
 
-export type MandatoryTrainingCreateWithoutTenantInput = {
+export type MandatoryTrainingCreateNestedOneWithoutAssignmentsInput = {
+  create?: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutAssignmentsInput, Prisma.MandatoryTrainingUncheckedCreateWithoutAssignmentsInput>
+  connectOrCreate?: Prisma.MandatoryTrainingCreateOrConnectWithoutAssignmentsInput
+  connect?: Prisma.MandatoryTrainingWhereUniqueInput
+}
+
+export type MandatoryTrainingUpdateOneWithoutAssignmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutAssignmentsInput, Prisma.MandatoryTrainingUncheckedCreateWithoutAssignmentsInput>
+  connectOrCreate?: Prisma.MandatoryTrainingCreateOrConnectWithoutAssignmentsInput
+  upsert?: Prisma.MandatoryTrainingUpsertWithoutAssignmentsInput
+  disconnect?: Prisma.MandatoryTrainingWhereInput | boolean
+  delete?: Prisma.MandatoryTrainingWhereInput | boolean
+  connect?: Prisma.MandatoryTrainingWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MandatoryTrainingUpdateToOneWithWhereWithoutAssignmentsInput, Prisma.MandatoryTrainingUpdateWithoutAssignmentsInput>, Prisma.MandatoryTrainingUncheckedUpdateWithoutAssignmentsInput>
+}
+
+export type MandatoryTrainingCreateWithoutCreatedByInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   course: Prisma.CourseCreateNestedOneWithoutMandatoryTrainingsInput
   team: Prisma.TeamCreateNestedOneWithoutMandatoryTrainingsInput
+  tenant: Prisma.TenantCreateNestedOneWithoutMandatoryTrainingsInput
+  assignments?: Prisma.LearningAssignmentCreateNestedManyWithoutMandatoryTrainingInput
+}
+
+export type MandatoryTrainingUncheckedCreateWithoutCreatedByInput = {
+  id?: string
+  dueDate: Date | string
+  completedCount?: number
+  activatedAt?: Date | string | null
+  courseId: string
+  teamId: string
+  tenantId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutMandatoryTrainingInput
+}
+
+export type MandatoryTrainingCreateOrConnectWithoutCreatedByInput = {
+  where: Prisma.MandatoryTrainingWhereUniqueInput
+  create: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutCreatedByInput, Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput>
+}
+
+export type MandatoryTrainingCreateManyCreatedByInputEnvelope = {
+  data: Prisma.MandatoryTrainingCreateManyCreatedByInput | Prisma.MandatoryTrainingCreateManyCreatedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type MandatoryTrainingUpsertWithWhereUniqueWithoutCreatedByInput = {
+  where: Prisma.MandatoryTrainingWhereUniqueInput
+  update: Prisma.XOR<Prisma.MandatoryTrainingUpdateWithoutCreatedByInput, Prisma.MandatoryTrainingUncheckedUpdateWithoutCreatedByInput>
+  create: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutCreatedByInput, Prisma.MandatoryTrainingUncheckedCreateWithoutCreatedByInput>
+}
+
+export type MandatoryTrainingUpdateWithWhereUniqueWithoutCreatedByInput = {
+  where: Prisma.MandatoryTrainingWhereUniqueInput
+  data: Prisma.XOR<Prisma.MandatoryTrainingUpdateWithoutCreatedByInput, Prisma.MandatoryTrainingUncheckedUpdateWithoutCreatedByInput>
+}
+
+export type MandatoryTrainingUpdateManyWithWhereWithoutCreatedByInput = {
+  where: Prisma.MandatoryTrainingScalarWhereInput
+  data: Prisma.XOR<Prisma.MandatoryTrainingUpdateManyMutationInput, Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByInput>
+}
+
+export type MandatoryTrainingScalarWhereInput = {
+  AND?: Prisma.MandatoryTrainingScalarWhereInput | Prisma.MandatoryTrainingScalarWhereInput[]
+  OR?: Prisma.MandatoryTrainingScalarWhereInput[]
+  NOT?: Prisma.MandatoryTrainingScalarWhereInput | Prisma.MandatoryTrainingScalarWhereInput[]
+  id?: Prisma.StringFilter<"MandatoryTraining"> | string
+  dueDate?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
+  completedCount?: Prisma.IntFilter<"MandatoryTraining"> | number
+  activatedAt?: Prisma.DateTimeNullableFilter<"MandatoryTraining"> | Date | string | null
+  createdById?: Prisma.StringNullableFilter<"MandatoryTraining"> | string | null
+  courseId?: Prisma.StringFilter<"MandatoryTraining"> | string
+  teamId?: Prisma.StringFilter<"MandatoryTraining"> | string
+  tenantId?: Prisma.StringFilter<"MandatoryTraining"> | string
+  createdAt?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
+}
+
+export type MandatoryTrainingCreateWithoutTenantInput = {
+  id?: string
+  dueDate: Date | string
+  completedCount?: number
+  activatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutMandatoryTrainingsCreatedInput
+  course: Prisma.CourseCreateNestedOneWithoutMandatoryTrainingsInput
+  team: Prisma.TeamCreateNestedOneWithoutMandatoryTrainingsInput
+  assignments?: Prisma.LearningAssignmentCreateNestedManyWithoutMandatoryTrainingInput
 }
 
 export type MandatoryTrainingUncheckedCreateWithoutTenantInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
   courseId: string
   teamId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutMandatoryTrainingInput
 }
 
 export type MandatoryTrainingCreateOrConnectWithoutTenantInput = {
@@ -609,38 +799,30 @@ export type MandatoryTrainingUpdateManyWithWhereWithoutTenantInput = {
   data: Prisma.XOR<Prisma.MandatoryTrainingUpdateManyMutationInput, Prisma.MandatoryTrainingUncheckedUpdateManyWithoutTenantInput>
 }
 
-export type MandatoryTrainingScalarWhereInput = {
-  AND?: Prisma.MandatoryTrainingScalarWhereInput | Prisma.MandatoryTrainingScalarWhereInput[]
-  OR?: Prisma.MandatoryTrainingScalarWhereInput[]
-  NOT?: Prisma.MandatoryTrainingScalarWhereInput | Prisma.MandatoryTrainingScalarWhereInput[]
-  id?: Prisma.StringFilter<"MandatoryTraining"> | string
-  dueDate?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
-  completedCount?: Prisma.IntFilter<"MandatoryTraining"> | number
-  courseId?: Prisma.StringFilter<"MandatoryTraining"> | string
-  teamId?: Prisma.StringFilter<"MandatoryTraining"> | string
-  tenantId?: Prisma.StringFilter<"MandatoryTraining"> | string
-  createdAt?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"MandatoryTraining"> | Date | string
-}
-
 export type MandatoryTrainingCreateWithoutTeamInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutMandatoryTrainingsCreatedInput
   course: Prisma.CourseCreateNestedOneWithoutMandatoryTrainingsInput
   tenant: Prisma.TenantCreateNestedOneWithoutMandatoryTrainingsInput
+  assignments?: Prisma.LearningAssignmentCreateNestedManyWithoutMandatoryTrainingInput
 }
 
 export type MandatoryTrainingUncheckedCreateWithoutTeamInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
   courseId: string
   tenantId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutMandatoryTrainingInput
 }
 
 export type MandatoryTrainingCreateOrConnectWithoutTeamInput = {
@@ -673,20 +855,26 @@ export type MandatoryTrainingCreateWithoutCourseInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutMandatoryTrainingsCreatedInput
   team: Prisma.TeamCreateNestedOneWithoutMandatoryTrainingsInput
   tenant: Prisma.TenantCreateNestedOneWithoutMandatoryTrainingsInput
+  assignments?: Prisma.LearningAssignmentCreateNestedManyWithoutMandatoryTrainingInput
 }
 
 export type MandatoryTrainingUncheckedCreateWithoutCourseInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
   teamId: string
   tenantId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutMandatoryTrainingInput
 }
 
 export type MandatoryTrainingCreateOrConnectWithoutCourseInput = {
@@ -715,10 +903,130 @@ export type MandatoryTrainingUpdateManyWithWhereWithoutCourseInput = {
   data: Prisma.XOR<Prisma.MandatoryTrainingUpdateManyMutationInput, Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCourseInput>
 }
 
+export type MandatoryTrainingCreateWithoutAssignmentsInput = {
+  id?: string
+  dueDate: Date | string
+  completedCount?: number
+  activatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutMandatoryTrainingsCreatedInput
+  course: Prisma.CourseCreateNestedOneWithoutMandatoryTrainingsInput
+  team: Prisma.TeamCreateNestedOneWithoutMandatoryTrainingsInput
+  tenant: Prisma.TenantCreateNestedOneWithoutMandatoryTrainingsInput
+}
+
+export type MandatoryTrainingUncheckedCreateWithoutAssignmentsInput = {
+  id?: string
+  dueDate: Date | string
+  completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
+  courseId: string
+  teamId: string
+  tenantId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MandatoryTrainingCreateOrConnectWithoutAssignmentsInput = {
+  where: Prisma.MandatoryTrainingWhereUniqueInput
+  create: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutAssignmentsInput, Prisma.MandatoryTrainingUncheckedCreateWithoutAssignmentsInput>
+}
+
+export type MandatoryTrainingUpsertWithoutAssignmentsInput = {
+  update: Prisma.XOR<Prisma.MandatoryTrainingUpdateWithoutAssignmentsInput, Prisma.MandatoryTrainingUncheckedUpdateWithoutAssignmentsInput>
+  create: Prisma.XOR<Prisma.MandatoryTrainingCreateWithoutAssignmentsInput, Prisma.MandatoryTrainingUncheckedCreateWithoutAssignmentsInput>
+  where?: Prisma.MandatoryTrainingWhereInput
+}
+
+export type MandatoryTrainingUpdateToOneWithWhereWithoutAssignmentsInput = {
+  where?: Prisma.MandatoryTrainingWhereInput
+  data: Prisma.XOR<Prisma.MandatoryTrainingUpdateWithoutAssignmentsInput, Prisma.MandatoryTrainingUncheckedUpdateWithoutAssignmentsInput>
+}
+
+export type MandatoryTrainingUpdateWithoutAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutMandatoryTrainingsCreatedNestedInput
+  course?: Prisma.CourseUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  team?: Prisma.TeamUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+}
+
+export type MandatoryTrainingUncheckedUpdateWithoutAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  teamId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MandatoryTrainingCreateManyCreatedByInput = {
+  id?: string
+  dueDate: Date | string
+  completedCount?: number
+  activatedAt?: Date | string | null
+  courseId: string
+  teamId: string
+  tenantId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MandatoryTrainingUpdateWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  course?: Prisma.CourseUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  team?: Prisma.TeamUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  assignments?: Prisma.LearningAssignmentUpdateManyWithoutMandatoryTrainingNestedInput
+}
+
+export type MandatoryTrainingUncheckedUpdateWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  teamId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutMandatoryTrainingNestedInput
+}
+
+export type MandatoryTrainingUncheckedUpdateManyWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  teamId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type MandatoryTrainingCreateManyTenantInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
   courseId: string
   teamId: string
   createdAt?: Date | string
@@ -729,26 +1037,34 @@ export type MandatoryTrainingUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutMandatoryTrainingsCreatedNestedInput
   course?: Prisma.CourseUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
   team?: Prisma.TeamUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  assignments?: Prisma.LearningAssignmentUpdateManyWithoutMandatoryTrainingNestedInput
 }
 
 export type MandatoryTrainingUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutMandatoryTrainingNestedInput
 }
 
 export type MandatoryTrainingUncheckedUpdateManyWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -759,6 +1075,8 @@ export type MandatoryTrainingCreateManyTeamInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
   courseId: string
   tenantId: string
   createdAt?: Date | string
@@ -769,26 +1087,34 @@ export type MandatoryTrainingUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutMandatoryTrainingsCreatedNestedInput
   course?: Prisma.CourseUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  assignments?: Prisma.LearningAssignmentUpdateManyWithoutMandatoryTrainingNestedInput
 }
 
 export type MandatoryTrainingUncheckedUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutMandatoryTrainingNestedInput
 }
 
 export type MandatoryTrainingUncheckedUpdateManyWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -799,6 +1125,8 @@ export type MandatoryTrainingCreateManyCourseInput = {
   id?: string
   dueDate: Date | string
   completedCount?: number
+  activatedAt?: Date | string | null
+  createdById?: string | null
   teamId: string
   tenantId: string
   createdAt?: Date | string
@@ -809,26 +1137,34 @@ export type MandatoryTrainingUpdateWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutMandatoryTrainingsCreatedNestedInput
   team?: Prisma.TeamUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMandatoryTrainingsNestedInput
+  assignments?: Prisma.LearningAssignmentUpdateManyWithoutMandatoryTrainingNestedInput
 }
 
 export type MandatoryTrainingUncheckedUpdateWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutMandatoryTrainingNestedInput
 }
 
 export type MandatoryTrainingUncheckedUpdateManyWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -836,30 +1172,67 @@ export type MandatoryTrainingUncheckedUpdateManyWithoutCourseInput = {
 }
 
 
+/**
+ * Count Type MandatoryTrainingCountOutputType
+ */
+
+export type MandatoryTrainingCountOutputType = {
+  assignments: number
+}
+
+export type MandatoryTrainingCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assignments?: boolean | MandatoryTrainingCountOutputTypeCountAssignmentsArgs
+}
+
+/**
+ * MandatoryTrainingCountOutputType without action
+ */
+export type MandatoryTrainingCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MandatoryTrainingCountOutputType
+   */
+  select?: Prisma.MandatoryTrainingCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MandatoryTrainingCountOutputType without action
+ */
+export type MandatoryTrainingCountOutputTypeCountAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LearningAssignmentWhereInput
+}
+
 
 export type MandatoryTrainingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   dueDate?: boolean
   completedCount?: boolean
+  activatedAt?: boolean
+  createdById?: boolean
   courseId?: boolean
   teamId?: boolean
   tenantId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  createdBy?: boolean | Prisma.MandatoryTraining$createdByArgs<ExtArgs>
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  assignments?: boolean | Prisma.MandatoryTraining$assignmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.MandatoryTrainingCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mandatoryTraining"]>
 
 export type MandatoryTrainingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   dueDate?: boolean
   completedCount?: boolean
+  activatedAt?: boolean
+  createdById?: boolean
   courseId?: boolean
   teamId?: boolean
   tenantId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  createdBy?: boolean | Prisma.MandatoryTraining$createdByArgs<ExtArgs>
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -869,11 +1242,14 @@ export type MandatoryTrainingSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   id?: boolean
   dueDate?: boolean
   completedCount?: boolean
+  activatedAt?: boolean
+  createdById?: boolean
   courseId?: boolean
   teamId?: boolean
   tenantId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  createdBy?: boolean | Prisma.MandatoryTraining$createdByArgs<ExtArgs>
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -883,6 +1259,8 @@ export type MandatoryTrainingSelectScalar = {
   id?: boolean
   dueDate?: boolean
   completedCount?: boolean
+  activatedAt?: boolean
+  createdById?: boolean
   courseId?: boolean
   teamId?: boolean
   tenantId?: boolean
@@ -890,18 +1268,23 @@ export type MandatoryTrainingSelectScalar = {
   updatedAt?: boolean
 }
 
-export type MandatoryTrainingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "dueDate" | "completedCount" | "courseId" | "teamId" | "tenantId" | "createdAt" | "updatedAt", ExtArgs["result"]["mandatoryTraining"]>
+export type MandatoryTrainingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "dueDate" | "completedCount" | "activatedAt" | "createdById" | "courseId" | "teamId" | "tenantId" | "createdAt" | "updatedAt", ExtArgs["result"]["mandatoryTraining"]>
 export type MandatoryTrainingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  createdBy?: boolean | Prisma.MandatoryTraining$createdByArgs<ExtArgs>
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  assignments?: boolean | Prisma.MandatoryTraining$assignmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.MandatoryTrainingCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MandatoryTrainingIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  createdBy?: boolean | Prisma.MandatoryTraining$createdByArgs<ExtArgs>
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }
 export type MandatoryTrainingIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  createdBy?: boolean | Prisma.MandatoryTraining$createdByArgs<ExtArgs>
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -910,14 +1293,18 @@ export type MandatoryTrainingIncludeUpdateManyAndReturn<ExtArgs extends runtime.
 export type $MandatoryTrainingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MandatoryTraining"
   objects: {
+    createdBy: Prisma.$UserPayload<ExtArgs> | null
     course: Prisma.$CoursePayload<ExtArgs>
     team: Prisma.$TeamPayload<ExtArgs>
     tenant: Prisma.$TenantPayload<ExtArgs>
+    assignments: Prisma.$LearningAssignmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     dueDate: Date
     completedCount: number
+    activatedAt: Date | null
+    createdById: string | null
     courseId: string
     teamId: string
     tenantId: string
@@ -1317,9 +1704,11 @@ readonly fields: MandatoryTrainingFieldRefs;
  */
 export interface Prisma__MandatoryTrainingClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  createdBy<T extends Prisma.MandatoryTraining$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MandatoryTraining$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   course<T extends Prisma.CourseDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseDefaultArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   team<T extends Prisma.TeamDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamDefaultArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  assignments<T extends Prisma.MandatoryTraining$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MandatoryTraining$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1352,6 +1741,8 @@ export interface MandatoryTrainingFieldRefs {
   readonly id: Prisma.FieldRef<"MandatoryTraining", 'String'>
   readonly dueDate: Prisma.FieldRef<"MandatoryTraining", 'DateTime'>
   readonly completedCount: Prisma.FieldRef<"MandatoryTraining", 'Int'>
+  readonly activatedAt: Prisma.FieldRef<"MandatoryTraining", 'DateTime'>
+  readonly createdById: Prisma.FieldRef<"MandatoryTraining", 'String'>
   readonly courseId: Prisma.FieldRef<"MandatoryTraining", 'String'>
   readonly teamId: Prisma.FieldRef<"MandatoryTraining", 'String'>
   readonly tenantId: Prisma.FieldRef<"MandatoryTraining", 'String'>
@@ -1755,6 +2146,49 @@ export type MandatoryTrainingDeleteManyArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many MandatoryTrainings to delete.
    */
   limit?: number
+}
+
+/**
+ * MandatoryTraining.createdBy
+ */
+export type MandatoryTraining$createdByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * MandatoryTraining.assignments
+ */
+export type MandatoryTraining$assignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LearningAssignment
+   */
+  select?: Prisma.LearningAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LearningAssignment
+   */
+  omit?: Prisma.LearningAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningAssignmentInclude<ExtArgs> | null
+  where?: Prisma.LearningAssignmentWhereInput
+  orderBy?: Prisma.LearningAssignmentOrderByWithRelationInput | Prisma.LearningAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.LearningAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LearningAssignmentScalarFieldEnum | Prisma.LearningAssignmentScalarFieldEnum[]
 }
 
 /**

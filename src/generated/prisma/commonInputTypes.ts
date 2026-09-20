@@ -535,6 +535,23 @@ export type EnumSubmissionStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumSubmissionStatusFilter<$PrismaModel>
 }
 
+export type EnumAssignmentSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.AssignmentSource | Prisma.EnumAssignmentSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.AssignmentSource[] | Prisma.ListEnumAssignmentSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AssignmentSource[] | Prisma.ListEnumAssignmentSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAssignmentSourceFilter<$PrismaModel> | $Enums.AssignmentSource
+}
+
+export type EnumAssignmentSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AssignmentSource | Prisma.EnumAssignmentSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.AssignmentSource[] | Prisma.ListEnumAssignmentSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AssignmentSource[] | Prisma.ListEnumAssignmentSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAssignmentSourceWithAggregatesFilter<$PrismaModel> | $Enums.AssignmentSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAssignmentSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAssignmentSourceFilter<$PrismaModel>
+}
+
 export type EnumSkillStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.SkillStatus | Prisma.EnumSkillStatusFieldRefInput<$PrismaModel>
   in?: $Enums.SkillStatus[] | Prisma.ListEnumSkillStatusFieldRefInput<$PrismaModel>
@@ -1233,6 +1250,23 @@ export type NestedEnumSubmissionStatusWithAggregatesFilter<$PrismaModel = never>
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumSubmissionStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumSubmissionStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumAssignmentSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.AssignmentSource | Prisma.EnumAssignmentSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.AssignmentSource[] | Prisma.ListEnumAssignmentSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AssignmentSource[] | Prisma.ListEnumAssignmentSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAssignmentSourceFilter<$PrismaModel> | $Enums.AssignmentSource
+}
+
+export type NestedEnumAssignmentSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AssignmentSource | Prisma.EnumAssignmentSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.AssignmentSource[] | Prisma.ListEnumAssignmentSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AssignmentSource[] | Prisma.ListEnumAssignmentSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAssignmentSourceWithAggregatesFilter<$PrismaModel> | $Enums.AssignmentSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAssignmentSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAssignmentSourceFilter<$PrismaModel>
 }
 
 export type NestedEnumSkillStatusFilter<$PrismaModel = never> = {

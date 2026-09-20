@@ -128,6 +128,11 @@ export type AIChat = Prisma.AIChatModel
  */
 export type MandatoryTraining = Prisma.MandatoryTrainingModel
 /**
+ * Model LearningAssignment
+ * 
+ */
+export type LearningAssignment = Prisma.LearningAssignmentModel
+/**
  * Model AdminAuditLog
  * 
  */
