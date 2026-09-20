@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { createCourse } from "@/lib/domain/capability/__test__/fixtures";
 import { createSoloUser, createUserInTenant } from "@/lib/domain/course/__test__/fixtures";
 import {
+  authorizeLessonSummaryAccess,
   authorizeLessonVideoUpload,
   ContentAuthorizationError,
   filterLessonIdsInCourse,
@@ -208,5 +209,67 @@ describe("videoUploader middleware is wired to authorizeLessonVideoUpload", () =
     vi.mocked(auth).mockResolvedValue({ userId: null } as never);
 
     await expect(run("anything")).rejects.toMatchObject({ status: 401 });
+  });
+});
+
+describe("authorizeLessonSummaryAccess", () => {
+  async function publishedLesson(tenantId: string | null, isFree: boolean) {
+    const { tenant, user } = await createTenantUser("INSTRUCTOR");
+    const { course, lesson } = await createCourse(
+      tenantId === null ? tenant.id : tenantId,
+      user.id
+    );
+    await db.course.update({
+      where: { id: course.id },
+      data: { status: "PUBLISHED", tenantId },
+    });
+    await db.lesson.update({ where: { id: lesson.id }, data: { isFree } });
+    return { course, lesson };
+  }
+
+  it("404s a lesson that does not exist", async () => {
+    const { user } = await createTenantUser("STUDENT");
+
+    await expect(authorizeLessonSummaryAccess(user, "nope")).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("grants an enrolled learner the resolved lesson and course ids", async () => {
+    const { tenant, user } = await createTenantUser("STUDENT");
+    const { course, lesson } = await publishedLesson(tenant.id, false);
+    await db.enrollment.create({ data: { userId: user.id, courseId: course.id } });
+
+    await expect(authorizeLessonSummaryAccess(user, lesson.id)).resolves.toEqual({
+      lessonId: lesson.id,
+      courseId: course.id,
+    });
+  });
+
+  it("403s a visible paid lesson without enrollment and 404s a REFUNDED-only hidden one", async () => {
+    const { tenant, user } = await createTenantUser("STUDENT");
+    const { course, lesson } = await publishedLesson(tenant.id, false);
+    await expect(authorizeLessonSummaryAccess(user, lesson.id)).rejects.toMatchObject({
+      status: 403,
+    });
+
+    await db.enrollment.create({
+      data: { userId: user.id, courseId: course.id, status: "REFUNDED" },
+    });
+    await db.lesson.update({ where: { id: lesson.id }, data: { isPublished: false } });
+    await expect(authorizeLessonSummaryAccess(user, lesson.id)).rejects.toMatchObject({
+      status: 404,
+    });
+  });
+
+  it("grants a free lesson only within the caller's tenant or a tenantless course", async () => {
+    const { tenant, user } = await createTenantUser("STUDENT");
+    const own = await publishedLesson(tenant.id, true);
+    const tenantless = await publishedLesson(null, true);
+    const foreign = await publishedLesson((await createTenantUser("STUDENT")).tenant.id, true);
+
+    await expect(authorizeLessonSummaryAccess(user, own.lesson.id)).resolves.toBeDefined();
+    await expect(authorizeLessonSummaryAccess(user, tenantless.lesson.id)).resolves.toBeDefined();
+    await expect(authorizeLessonSummaryAccess(user, foreign.lesson.id)).rejects.toMatchObject({
+      status: 404,
+    });
   });
 });

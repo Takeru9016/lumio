@@ -6,6 +6,7 @@ import {
   createAssignmentSubmission,
   createCourse,
 } from "@/lib/domain/capability/__test__/fixtures";
+import { createUserInTenant } from "@/lib/domain/course/__test__/fixtures";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 
 vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
@@ -36,6 +37,7 @@ vi.mock("@/lib/ratelimit", async () => {
   };
 });
 
+const { generateObject } = await import("ai");
 const { POST } = await import("./route");
 
 // AI quota defaults to the FREE plan's 0 calls/month (see src/constants/plans.ts)
@@ -98,19 +100,98 @@ describe("POST suggest-grade — authorization", () => {
     expect(res.status).toBe(403);
   });
 
-  it("allows SUPER_ADMIN — matches the existing grade route's role semantics", async () => {
+  it("403s an ORG_ADMIN, even one in the course's own tenant", async () => {
     const { tenant, user: instructor } = await createProUser("INSTRUCTOR");
-    const { user: superAdmin } = await createProUser("SUPER_ADMIN");
     const { lesson } = await createCourse(tenant.id, instructor.id);
+    const assignment = await createAssignment(lesson.id);
+    const { user: learner } = await createProUser("STUDENT");
+    const submission = await createAssignmentSubmission(learner.id, assignment.id);
+    const orgAdmin = await createUserInTenant(tenant.id, "ORG_ADMIN");
+    await db.user.update({ where: { id: orgAdmin.id }, data: { plan: "PRO" } });
+
+    vi.mocked(auth).mockResolvedValue({ userId: orgAdmin.clerkId } as never);
+    const res = await POST(req(), paramsFor(assignment.id, submission.id));
+
+    expect(res.status).toBe(403);
+    expect(vi.mocked(generateObject)).not.toHaveBeenCalled();
+  });
+});
+
+describe("POST suggest-grade — SUPER_ADMIN is not authorized to grade", () => {
+  it("403s a SUPER_ADMIN before any LLM call, AIExecution, usage event or quota use", async () => {
+    vi.mocked(generateObject).mockClear();
+    const { tenant, user: instructor } = await createProUser("INSTRUCTOR");
+    const { lesson } = await createCourse(tenant.id, instructor.id);
+    const assignment = await createAssignment(lesson.id);
+    const { user: learner } = await createProUser("STUDENT");
+    const submission = await createAssignmentSubmission(learner.id, assignment.id);
+    const superAdmin = await createUserInTenant(tenant.id, "SUPER_ADMIN");
+    await db.user.update({ where: { id: superAdmin.id }, data: { plan: "PRO" } });
+
+    vi.mocked(auth).mockResolvedValue({ userId: superAdmin.clerkId } as never);
+    const res = await POST(req(), paramsFor(assignment.id, submission.id));
+
+    expect(res.status).toBe(403);
+    expect(vi.mocked(generateObject)).not.toHaveBeenCalled();
+    expect(await db.aIExecution.count({ where: { userId: superAdmin.id } })).toBe(0);
+    expect(await db.aIUsageEvent.count({ where: { userId: superAdmin.id } })).toBe(0);
+    const after = await db.user.findUniqueOrThrow({ where: { id: superAdmin.id } });
+    expect(after.aiCallsUsed).toBe(0);
+  });
+
+  it("leaves the submission, evidence, events and notifications untouched", async () => {
+    const { tenant, user: instructor } = await createProUser("INSTRUCTOR");
+    const { course, lesson } = await createCourse(tenant.id, instructor.id);
+    const skill = await db.skill.create({
+      data: { tenantId: tenant.id, name: "sg", slug: `sg-${Date.now()}` },
+    });
+    await db.courseSkill.create({ data: { courseId: course.id, skillId: skill.id } });
+    const assignment = await createAssignment(lesson.id);
+    const { user: learner } = await createProUser("STUDENT");
+    const submission = await createAssignmentSubmission(learner.id, assignment.id);
+    const superAdmin = await createUserInTenant(tenant.id, "SUPER_ADMIN");
+    await db.user.update({ where: { id: superAdmin.id }, data: { plan: "PRO" } });
+
+    vi.mocked(auth).mockResolvedValue({ userId: superAdmin.clerkId } as never);
+    const res = await POST(req(), paramsFor(assignment.id, submission.id));
+    expect(res.status).toBe(403);
+
+    const reloaded = await db.assignmentSubmission.findUniqueOrThrow({
+      where: { id: submission.id },
+    });
+    expect(reloaded.status).toBe("SUBMITTED");
+    expect(reloaded.score).toBeNull();
+    expect(await db.skillEvidence.count({ where: { userId: learner.id } })).toBe(0);
+    expect(await db.learningEvent.count({ where: { userId: learner.id } })).toBe(0);
+    expect(await db.notification.count({ where: { userId: learner.id } })).toBe(0);
+  });
+
+  it("403s a SUPER_ADMIN even when it is the course's recorded owner, with no LLM call or quota use", async () => {
+    vi.mocked(generateObject).mockClear();
+    const { tenant } = await createProUser("INSTRUCTOR");
+    const superAdmin = await createUserInTenant(tenant.id, "SUPER_ADMIN");
+    await db.user.update({ where: { id: superAdmin.id }, data: { plan: "PRO" } });
+    const { lesson } = await createCourse(tenant.id, superAdmin.id);
     const assignment = await createAssignment(lesson.id);
     const { user: learner } = await createProUser("STUDENT");
     const submission = await createAssignmentSubmission(learner.id, assignment.id);
 
     vi.mocked(auth).mockResolvedValue({ userId: superAdmin.clerkId } as never);
     const res = await POST(req(), paramsFor(assignment.id, submission.id));
-    // SUPER_ADMIN passes the role gate but still fails the instructor-
-    // ownership check (not the owning instructor) — proves the role gate
-    // itself allows SUPER_ADMIN through, exactly like the grade route.
+
+    expect(res.status).toBe(403);
+    expect(vi.mocked(generateObject)).not.toHaveBeenCalled();
+    expect(await db.aIExecution.count({ where: { userId: superAdmin.id } })).toBe(0);
+    const after = await db.user.findUniqueOrThrow({ where: { id: superAdmin.id } });
+    expect(after.aiCallsUsed).toBe(0);
+  });
+
+  it("denies a SUPER_ADMIN at the role gate, before the assignment lookup (no existence probe)", async () => {
+    const { user: superAdmin } = await createProUser("SUPER_ADMIN");
+
+    vi.mocked(auth).mockResolvedValue({ userId: superAdmin.clerkId } as never);
+    const res = await POST(req(), paramsFor("does-not-exist", "nor-this"));
+
     expect(res.status).toBe(403);
   });
 });

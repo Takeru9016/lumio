@@ -48,6 +48,64 @@ export async function resolveLessonChain(lessonId: string): Promise<LessonChain 
 }
 
 /**
+ * Entitlement for reading AI-derived content about a lesson (the summary).
+ * Returns only the resolved ids — callers load content AFTER this passes, so
+ * nothing about a lesson (cached summary, body text, existence) is observable
+ * to an unentitled caller.
+ *
+ * - An ACTIVE or COMPLETED enrollment grants access, but only to lessons a
+ *   learner can actually see: published, not archived, in a non-DRAFT course.
+ *   (An ARCHIVED course stays reachable to enrolled learners, matching the
+ *   lesson player.) A REFUNDED enrollment grants nothing.
+ * - Without an enrollment, a lesson is reachable only when it is published,
+ *   not archived, in a PUBLISHED course that belongs to the caller's tenant or
+ *   to no tenant. Free lessons then pass; anything else that is visible needs
+ *   enrollment (403).
+ * - Everything else — missing, unpublished, archived, draft course, another
+ *   tenant's course — is one indistinguishable 404, so a caller cannot probe
+ *   whether a lesson id exists.
+ *
+ * There is no role-based shortcut: instructors, org admins and super admins
+ * follow the same rules as any other user.
+ */
+export async function authorizeLessonSummaryAccess(
+  user: { id: string; tenantId: string | null },
+  lessonId: string
+): Promise<{ lessonId: string; courseId: string }> {
+  const lesson = await db.lesson.findUnique({
+    where: { id: lessonId },
+    select: {
+      id: true,
+      isFree: true,
+      isPublished: true,
+      isArchived: true,
+      section: { select: { course: { select: { id: true, status: true, tenantId: true } } } },
+    },
+  });
+  if (!lesson) throw new ContentAuthorizationError(404, "Lesson not found");
+
+  const course = lesson.section.course;
+  const granted = { lessonId: lesson.id, courseId: course.id };
+  const lessonVisible = lesson.isPublished && !lesson.isArchived;
+
+  const enrollment = await db.enrollment.findFirst({
+    where: { userId: user.id, courseId: course.id, status: { in: ["ACTIVE", "COMPLETED"] } },
+    select: { id: true },
+  });
+  if (enrollment) {
+    if (lessonVisible && course.status !== "DRAFT") return granted;
+    throw new ContentAuthorizationError(404, "Lesson not found");
+  }
+
+  const tenantCompatible = course.tenantId === null || course.tenantId === user.tenantId;
+  if (!lessonVisible || course.status !== "PUBLISHED" || !tenantCompatible) {
+    throw new ContentAuthorizationError(404, "Lesson not found");
+  }
+  if (lesson.isFree) return granted;
+  throw new ContentAuthorizationError(403, "Not enrolled in this course");
+}
+
+/**
  * An instructor controls a course when they own it AND, if the course is
  * tenant-scoped, they belong to that same tenant. A course with no tenant (a
  * solo, FREE-plan course) is governed by ownership alone — the same rule

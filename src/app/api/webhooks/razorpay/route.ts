@@ -77,32 +77,60 @@ export async function POST(req: Request) {
       });
       if (!subscriber) break;
 
-      await db.$transaction([
-        db.user.update({
+      const subscriptionId = typeof sub?.id === "string" && sub.id ? sub.id : null;
+
+      await db.$transaction(async (tx) => {
+        let recordSubscriptionId = false;
+
+        // Org subscriptions: the whole tenant shares the plan tier, same as the
+        // native change-plan flow (src/app/api/billing/change-plan/route.ts) —
+        // otherwise Tenant.plan stays FREE forever on a tenant's first-ever
+        // subscription, wrongly blocking Enterprise-gated features like SSO.
+        // The tenant row is written first, the lock order change-plan,
+        // create-subscription and the downgrade cron already use.
+        if (subscriber.tenantId) {
+          await tx.tenant.update({
+            where: { id: subscriber.tenantId },
+            data: { plan: rawPlan, seatLimit: seatLimitForPlan(rawPlan) },
+          });
+
+          // Recovery: the downgrade cron clears Tenant.razorpaySubId when it sees
+          // a replacement that has not activated yet, and nothing else writes it
+          // back. Restore it from this verified event, but only into an empty
+          // pointer (compare-and-set on null) so a newer subscription that is
+          // already current is never replaced by a stale or replayed activation.
+          if (subscriptionId) {
+            const { count } = await tx.tenant.updateMany({
+              where: { id: subscriber.tenantId, razorpaySubId: null },
+              data: { razorpaySubId: subscriptionId },
+            });
+            recordSubscriptionId =
+              count === 1 ||
+              (await tx.tenant.count({
+                where: { id: subscriber.tenantId, razorpaySubId: subscriptionId },
+              })) === 1;
+          }
+        }
+
+        await tx.user.update({
           where: { id: subscriber.id },
           data: {
             plan: rawPlan,
             subscriptionStatus: "ACTIVE",
             currentPeriodEnd: toDate(sub?.current_end),
+            // The owner is found by tenant pointer + this id (cancel, reactivate),
+            // so it is recorded only when the tenant's pointer is this subscription.
+            ...(recordSubscriptionId ? { razorpaySubId: subscriptionId } : {}),
           },
-        }),
-        // Org subscriptions: the whole tenant shares the plan tier, same as the
-        // native change-plan flow (src/app/api/billing/change-plan/route.ts) —
-        // otherwise Tenant.plan stays FREE forever on a tenant's first-ever
-        // subscription, wrongly blocking Enterprise-gated features like SSO.
-        ...(subscriber.tenantId
-          ? [
-              db.tenant.update({
-                where: { id: subscriber.tenantId },
-                data: { plan: rawPlan, seatLimit: seatLimitForPlan(rawPlan) },
-              }),
-              db.user.updateMany({
-                where: { tenantId: subscriber.tenantId },
-                data: { plan: rawPlan },
-              }),
-            ]
-          : []),
-      ]);
+        });
+
+        if (subscriber.tenantId) {
+          await tx.user.updateMany({
+            where: { tenantId: subscriber.tenantId },
+            data: { plan: rawPlan },
+          });
+        }
+      });
       break;
     }
 

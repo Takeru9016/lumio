@@ -17,10 +17,11 @@ import { assessmentRatelimit } from "@/lib/ratelimit";
  * a suggestion the instructor may choose to copy into that route's own
  * request body.
  *
- * Authorization mirrors the grade route's existing sequence exactly (same
- * INSTRUCTOR/SUPER_ADMIN role gate, same course-instructorId ownership
- * check) — not re-derived, not widened or narrowed relative to who can
- * already grade this submission.
+ * Authorization mirrors the grade route's sequence exactly (same INSTRUCTOR-only
+ * role gate, same course-instructorId ownership check) — not re-derived, not
+ * widened or narrowed relative to who can grade this submission. SUPER_ADMIN is
+ * denied: it has no tenant-content shortcut, and the ownership check could
+ * never have admitted it.
  *
  * Every identifier (assignmentId, submissionId) comes from the path only.
  * The request body is never read — there is nothing legitimate for a client
@@ -36,7 +37,7 @@ export async function POST(
   if (!guard.ok) return guard.response;
   const { user } = guard;
 
-  if (user.role !== "INSTRUCTOR" && user.role !== "SUPER_ADMIN") {
+  if (user.role !== "INSTRUCTOR") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

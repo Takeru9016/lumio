@@ -1,4 +1,4 @@
-import type { Plan } from "@/generated/prisma/enums";
+import type { Plan, SubscriptionStatus } from "@/generated/prisma/enums";
 
 export type PlanLimits = {
   aiCallsPerMonth: number;
@@ -15,6 +15,20 @@ const UNLIMITED_SEAT_SENTINEL = 1_000_000;
 export function seatLimitForPlan(plan: Plan): number {
   const { maxSeats } = PLAN_LIMITS[plan];
   return Number.isFinite(maxSeats) ? maxSeats : UNLIMITED_SEAT_SENTINEL;
+}
+
+// A subscription in one of these local states is still the organisation's live
+// subscription: create-subscription refuses to replace it and the downgrade cron
+// never downgrades a tenant whose current subscription is in one. A CANCELLED or
+// never-activated (null) subscription is not live.
+const LIVE_SUBSCRIPTION_STATUSES: ReadonlySet<SubscriptionStatus> = new Set([
+  "ACTIVE",
+  "PAST_DUE",
+  "PAUSED",
+]);
+
+export function isLiveSubscriptionStatus(status: SubscriptionStatus | null): boolean {
+  return status !== null && LIVE_SUBSCRIPTION_STATUSES.has(status);
 }
 
 export const PLAN_LIMITS: Record<Plan, PlanLimits> = {

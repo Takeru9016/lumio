@@ -8,6 +8,7 @@ import {
   createSkill,
   mapCourseSkill,
 } from "@/lib/domain/capability/__test__/fixtures";
+import { createUserInTenant } from "@/lib/domain/course/__test__/fixtures";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 import { PUT } from "./route";
 
@@ -36,6 +37,18 @@ function createLearnerInTenant(tenantId: string) {
       role: "STUDENT",
     },
   });
+}
+
+/** A denied grade attempt must leave the submission ungraded and create no
+ * evidence, learning event or notification for the learner. */
+async function expectNothingGraded(submissionId: string, learnerId: string) {
+  const submission = await db.assignmentSubmission.findUnique({ where: { id: submissionId } });
+  expect(submission?.status).toBe("SUBMITTED");
+  expect(submission?.score).toBeNull();
+  expect(submission?.gradedAt).toBeNull();
+  expect(await db.skillEvidence.count({ where: { userId: learnerId } })).toBe(0);
+  expect(await db.learningEvent.count({ where: { userId: learnerId } })).toBe(0);
+  expect(await db.notification.count({ where: { userId: learnerId } })).toBe(0);
 }
 
 afterEach(() => {
@@ -73,19 +86,99 @@ describe("PUT grade — authorization (unchanged, existing behavior)", () => {
     expect(res.status).toBe(403);
   });
 
-  it("still allows SUPER_ADMIN — existing behavior preserved unchanged", async () => {
+  it("does not let an org admin grade, even one in the course's own tenant", async () => {
     const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
-    const { user: superAdmin } = await createTenantUser("SUPER_ADMIN");
-    const { lesson } = await createCourse(tenant.id, instructor.id);
+    const { course, lesson } = await createCourse(tenant.id, instructor.id);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
     const assignment = await createAssignment(lesson.id);
-    const { user: learner } = await createTenantUser("STUDENT");
+    const learner = await createLearnerInTenant(tenant.id);
+    const submission = await createAssignmentSubmission(learner.id, assignment.id);
+    const orgAdmin = await createUserInTenant(tenant.id, "ORG_ADMIN");
+
+    vi.mocked(auth).mockResolvedValue({ userId: orgAdmin.clerkId } as never);
+    const res = await PUT(req({ score: 50 }), paramsFor(assignment.id, submission.id));
+    expect(res.status).toBe(403);
+    await expectNothingGraded(submission.id, learner.id);
+  });
+});
+
+describe("PUT grade — SUPER_ADMIN is not authorized to grade", () => {
+  async function seedSubmission() {
+    const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
+    const { course, lesson } = await createCourse(tenant.id, instructor.id);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const assignment = await createAssignment(lesson.id);
+    const learner = await createLearnerInTenant(tenant.id);
+    const submission = await createAssignmentSubmission(learner.id, assignment.id);
+    return { tenant, instructor, assignment, learner, submission };
+  }
+
+  it("403s a SUPER_ADMIN in the course's tenant and mutates nothing (no grade, evidence, event or notification)", async () => {
+    const { tenant, assignment, learner, submission } = await seedSubmission();
+    const superAdmin = await createUserInTenant(tenant.id, "SUPER_ADMIN");
+
+    vi.mocked(auth).mockResolvedValue({ userId: superAdmin.clerkId } as never);
+    const res = await PUT(req({ score: 50 }), paramsFor(assignment.id, submission.id));
+
+    expect(res.status).toBe(403);
+    await expectNothingGraded(submission.id, learner.id);
+  });
+
+  it("403s a SUPER_ADMIN with no tenant", async () => {
+    const { assignment, learner, submission } = await seedSubmission();
+    const superAdmin = await db.user.create({
+      data: {
+        clerkId: `clerk-sa-${Date.now()}-${Math.random()}`,
+        email: `sa-${Date.now()}-${Math.random()}@example.test`,
+        role: "SUPER_ADMIN",
+      },
+    });
+
+    vi.mocked(auth).mockResolvedValue({ userId: superAdmin.clerkId } as never);
+    const res = await PUT(req({ score: 50 }), paramsFor(assignment.id, submission.id));
+
+    expect(res.status).toBe(403);
+    await expectNothingGraded(submission.id, learner.id);
+  });
+
+  it("403s a SUPER_ADMIN even when it is the course's recorded owner (the role gate alone must hold)", async () => {
+    const { tenant } = await createTenantUser("INSTRUCTOR");
+    const superAdmin = await createUserInTenant(tenant.id, "SUPER_ADMIN");
+    const { course, lesson } = await createCourse(tenant.id, superAdmin.id);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const assignment = await createAssignment(lesson.id);
+    const learner = await createLearnerInTenant(tenant.id);
     const submission = await createAssignmentSubmission(learner.id, assignment.id);
 
     vi.mocked(auth).mockResolvedValue({ userId: superAdmin.clerkId } as never);
     const res = await PUT(req({ score: 50 }), paramsFor(assignment.id, submission.id));
-    // SUPER_ADMIN still fails the instructor-ownership check (not the owning
-    // instructor) — proves the role gate itself did not reject SUPER_ADMIN.
+
     expect(res.status).toBe(403);
+    await expectNothingGraded(submission.id, learner.id);
+  });
+
+  it("denies a SUPER_ADMIN at the role gate, before the assignment lookup (no existence probe)", async () => {
+    const { user: superAdmin } = await createTenantUser("SUPER_ADMIN");
+
+    vi.mocked(auth).mockResolvedValue({ userId: superAdmin.clerkId } as never);
+    const res = await PUT(req({ score: 50 }), paramsFor("does-not-exist", "nor-this"));
+
+    expect(res.status).toBe(403);
+  });
+
+  it("still grades for the owning INSTRUCTOR of the same submission", async () => {
+    const { instructor, assignment, learner, submission } = await seedSubmission();
+
+    vi.mocked(auth).mockResolvedValue({ userId: instructor.clerkId } as never);
+    const res = await PUT(req({ score: 50 }), paramsFor(assignment.id, submission.id));
+
+    expect(res.status).toBe(200);
+    const graded = await db.assignmentSubmission.findUnique({ where: { id: submission.id } });
+    expect(graded?.status).toBe("GRADED");
+    expect(await db.skillEvidence.count({ where: { userId: learner.id } })).toBe(1);
   });
 });
 

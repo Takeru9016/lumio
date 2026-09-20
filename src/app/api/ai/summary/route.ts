@@ -6,6 +6,10 @@ import { openai } from "@/lib/ai/openai";
 import { SUMMARY_SYSTEM_PROMPT } from "@/lib/ai/prompts";
 import { incrementAiUsage } from "@/lib/ai/quota";
 import { db } from "@/lib/db";
+import {
+  authorizeLessonSummaryAccess,
+  ContentAuthorizationError,
+} from "@/lib/domain/course/contentAuthorization";
 import { summaryRatelimit } from "@/lib/ratelimit";
 
 interface SummaryRequestBody {
@@ -37,12 +41,24 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { lessonId } = body;
-  if (!lessonId) {
+  const lessonId = body?.lessonId;
+  if (typeof lessonId !== "string" || lessonId.length === 0) {
     return Response.json({ error: "lessonId is required" }, { status: 400 });
   }
 
-  const lesson = await db.lesson.findFirst({
+  // Entitlement comes first: nothing below — the lesson content, the cached
+  // summary, the LLM call, the write, the quota increment — runs for a caller
+  // who is not entitled to this lesson.
+  try {
+    await authorizeLessonSummaryAccess(user, lessonId);
+  } catch (err) {
+    if (err instanceof ContentAuthorizationError) {
+      return Response.json({ error: err.message }, { status: err.status });
+    }
+    throw err;
+  }
+
+  const lesson = await db.lesson.findUnique({
     where: { id: lessonId },
     select: {
       id: true,
@@ -50,27 +66,11 @@ export async function POST(req: Request) {
       description: true,
       textContent: true,
       type: true,
-      isFree: true,
       aiSummary: true,
-      section: { select: { courseId: true } },
     },
   });
-
   if (!lesson) {
     return Response.json({ error: "Lesson not found" }, { status: 404 });
-  }
-
-  if (!lesson.isFree) {
-    const enrollment = await db.enrollment.findFirst({
-      where: {
-        userId: user.id,
-        courseId: lesson.section.courseId,
-        status: { in: ["ACTIVE", "COMPLETED"] },
-      },
-    });
-    if (!enrollment) {
-      return Response.json({ error: "Not enrolled in this course" }, { status: 403 });
-    }
   }
 
   // Cached — never call the LLM twice for the same lesson.

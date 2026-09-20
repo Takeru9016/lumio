@@ -71,7 +71,7 @@ Authentication is via Clerk v7. Database is Neon PostgreSQL via Prisma 7. Paymen
 - `POST /api/webhooks/razorpay` — subscription events (signature-verified)
 - `POST /api/webhooks/mux` — video processing events
 - `POST /api/uploadthing` — file uploads
-- `GET/POST /api/courses` — course CRUD
+- `POST /api/courses` — course creation (instructors)
 - `POST /api/ai/tutor` — streaming AI tutor (rate-limited, quota-checked)
 - `POST /api/ai/quiz` — AI quiz generation
 - `POST /api/ai/summary` — lesson summary

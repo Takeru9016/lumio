@@ -29,7 +29,9 @@ export async function PUT(
     select: { id: true, role: true },
   });
   if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
-  if (dbUser.role !== "INSTRUCTOR" && dbUser.role !== "SUPER_ADMIN")
+  // Grading is course-owner INSTRUCTOR only. SUPER_ADMIN has no tenant-content
+  // shortcut, and the ownership check below could never have admitted it anyway.
+  if (dbUser.role !== "INSTRUCTOR")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const assignment = await db.assignment.findUnique({

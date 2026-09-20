@@ -7,13 +7,35 @@ import { resend } from "./resend";
 
 const utapi = new UTApi();
 
-function buildCertHtml(params: {
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+/**
+ * Every interpolation below lands in HTML text (or <title>), never in an
+ * attribute, script, style or URL. The learner's name and the instructor's
+ * course title are user-controlled and the file is served as text/html, so
+ * all four values are escaped here at generation time; stored data is
+ * untouched.
+ */
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
+}
+
+export function buildCertHtml(params: {
   certId: string;
   studentName: string;
   courseTitle: string;
   issuedDate: string;
 }): string {
-  const { certId, studentName, courseTitle, issuedDate } = params;
+  const certId = escapeHtml(params.certId);
+  const studentName = escapeHtml(params.studentName);
+  const courseTitle = escapeHtml(params.courseTitle);
+  const issuedDate = escapeHtml(params.issuedDate);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

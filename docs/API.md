@@ -33,7 +33,7 @@
 
 - Guard: `PUBLIC` (verify `x-razorpay-signature` header using HMAC SHA256)
 - Handles:
-  - `subscription.activated` → set `User.subscriptionStatus = ACTIVE`, update `plan`
+  - `subscription.activated` → set `User.subscriptionStatus = ACTIVE`, update `plan`; if the tenant has no current `razorpaySubId` (the downgrade cron clears it for a replacement that had not activated yet), record the event's subscription id on the tenant and the subscriber. A tenant that already has a current subscription id is never overwritten
   - `subscription.charged` → update `currentPeriodEnd`, reset `aiCallsUsed`
   - `subscription.cancelled` → set `subscriptionStatus = CANCELLED`, revert `plan` on `currentPeriodEnd`
   - `payment.failed` → set `subscriptionStatus = PAST_DUE`, send Resend email
@@ -64,12 +64,6 @@
 ---
 
 ## Course Routes
-
-### GET /api/courses
-
-- Guard: `AUTH`
-- Query params: `status`, `instructorId`, `tenantId`, `category`, `page`, `limit`
-- Returns: paginated `Course[]` with `instructor` name, `enrollmentCount`, `sectionCount`
 
 ### POST /api/courses
 
@@ -159,7 +153,12 @@
 
 - Guard: `AUTH`
 - Rate limit: 10 req/min per user
-- Body: `{ lessonId }`
+- Body: `{ lessonId }` (a non-empty string)
+- Entitlement is checked before the cache is read or the model is called:
+  - ACTIVE/COMPLETED enrollment → allowed for a published, non-archived lesson in a non-DRAFT course (a `REFUNDED` enrollment grants nothing)
+  - No enrollment → a free lesson is allowed only if it and its course are published and the course belongs to the caller's tenant or to no tenant; a visible paid lesson → 403 "Not enrolled in this course"
+  - Missing, hidden, unpublished, archived, draft or cross-tenant lessons → identical 404
+  - No role shortcut for `INSTRUCTOR`, `ORG_ADMIN` or `SUPER_ADMIN`
 - Checks `Lesson.aiSummary` — return cached if exists (don't call LLM twice)
 - Uses: `generateText` with `gpt-5.4-mini`
 - Saves result to `Lesson.aiSummary`
@@ -180,9 +179,14 @@
 
 ### POST /api/billing/create-subscription
 
-- Guard: `AUTH`
-- Body: `{ plan: "STARTER" | "PRO" | "ENTERPRISE", seats?: number }`
-- Creates Razorpay subscription using plan ID from env
+- Guard: `ORG_ADMIN` with a tenant (401 unauthenticated, 403 any other role, 400 no organisation)
+- Body: `{ plan: "STARTER" | "PRO" | "ENTERPRISE", seats?: number }` — `seats` must be a whole number from 1 to the plan's seat limit (STARTER 10, PRO 100, ENTERPRISE unlimited); invalid plan or seats → 400, never coerced
+- The tenant and user come from the session, never from the body
+- 409 if the organisation's current subscription is `ACTIVE`, `PAST_DUE` or `PAUSED` (use change-plan); a `CANCELLED` or never-activated subscription may be replaced
+- Creates Razorpay subscription using plan ID from env, with notes `{ userId, plan, tenantId }`
+- Records `Tenant.razorpaySubId` (compare-and-set) and the caller's `User.razorpaySubId` in one transaction; never changes `plan`, `seatLimit` or subscription status (the webhook does, on activation)
+- Replacing a `CANCELLED` subscription leaves the superseded owner's cancellation record untouched; the downgrade cron (`/api/cron/downgrade-subscriptions`) judges it against the tenant's current `razorpaySubId`: a live (`ACTIVE`/`PAST_DUE`/`PAUSED`) replacement keeps the tenant paid, a replacement that never activated is downgraded like any other cancelled subscription
+- Losing a concurrent creation race → 409 and the just-created Razorpay subscription is cancelled
 - Returns: `{ subscriptionId, razorpayKeyId }` — client opens Razorpay modal
 
 ### POST /api/billing/change-plan
@@ -226,7 +230,7 @@
 
 ### PUT /api/assignments/[assignmentId]/submissions/[submissionId]/grade
 
-- Guard: `INSTRUCTOR` (must own the course)
+- Guard: `INSTRUCTOR` (must own the course) — `STUDENT`, `ORG_ADMIN` and `SUPER_ADMIN` get 403, as does a non-owning instructor. `POST /api/ai/assignments/[assignmentId]/submissions/[submissionId]/suggest-grade` applies the same rule before any AI call
 - Body: `{ score, feedback }`
 - Updates `AssignmentSubmission.status = GRADED`, sets score and feedback
 - Returns: updated submission
