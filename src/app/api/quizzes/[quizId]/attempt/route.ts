@@ -155,11 +155,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ quizId:
   const remainingAttempts =
     maxAttempts === null || attemptsUsed === null ? null : Math.max(0, maxAttempts - attemptsUsed);
 
+  // XP is a best-effort reward, not part of the attempt. The attempt is already
+  // committed and has consumed one of the learner's attempts, so a failing XP
+  // write must not turn it into a 500 — on the last allowed attempt the learner
+  // would be told it failed, get no result, and be locked out on retry. The
+  // failure is logged and xpAwarded stays 0, so the response never claims XP that
+  // was not written. Evidence below runs regardless.
   let xpAwarded = 0;
   if (isPassed) {
     const event = isPerfect ? "QUIZ_PERFECT" : "QUIZ_PASS";
-    xpAwarded = XP_EVENTS[event];
-    await awardXP(dbUser.id, event, xpAwarded);
+    try {
+      await awardXP(dbUser.id, event, XP_EVENTS[event]);
+      xpAwarded = XP_EVENTS[event];
+    } catch (err) {
+      console.error(
+        `[quiz-attempt] Failed to award ${event} XP for attempt ${attempt.id}, user ${dbUser.id}`,
+        err
+      );
+    }
   }
 
   // Phase 5 capability loop — additive, best-effort at this boundary (see

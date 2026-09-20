@@ -18,6 +18,20 @@ import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
  */
 vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
 
+// awardXP runs for real (real database) unless a test arms it to fail, which
+// lets the XP-failure tests break exactly one step of the request.
+const xpFault = vi.hoisted(() => ({ error: null as Error | null }));
+vi.mock("@/lib/xp", async (importOriginal) => {
+  const real = await importOriginal<typeof import("@/lib/xp")>();
+  return {
+    ...real,
+    awardXP: (...args: Parameters<typeof real.awardXP>) => {
+      if (xpFault.error) return Promise.reject(xpFault.error);
+      return real.awardXP(...args);
+    },
+  };
+});
+
 const { POST } = await import("./route");
 
 // Distinctive values, so a leak is found by searching the response text.
@@ -29,6 +43,7 @@ const EXPLAIN_TF = "SECRET-EXPLANATION-TF";
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 afterEach(() => {
+  xpFault.error = null;
   vi.restoreAllMocks();
   vi.mocked(auth).mockReset();
 });
@@ -510,5 +525,189 @@ describe("POST /api/quizzes/[quizId]/attempt — quiz evidence", () => {
     // The two historical rows are untouched and no third row was added.
     expect(rows).toHaveLength(2);
     expect(rows.every((row) => row.sourceType === "QuizAttempt")).toBe(true);
+  });
+});
+
+const xpTransactions = (userId: string) => db.xPTransaction.findMany({ where: { userId } });
+const xpTotal = async (userId: string) =>
+  (await db.user.findUniqueOrThrow({ where: { id: userId }, select: { xpTotal: true } })).xpTotal;
+const quizCompletedEvents = (userId: string) =>
+  db.learningEvent.count({ where: { userId, eventType: "QUIZ_COMPLETED" } });
+
+const XP_BOOM = "xp-write-boom-INTERNAL-DETAIL";
+const failXp = () => {
+  xpFault.error = new Error(XP_BOOM);
+  return vi.spyOn(console, "error").mockImplementation(() => {});
+};
+
+describe("POST /api/quizzes/[quizId]/attempt — XP is best-effort", () => {
+  it("an XP failure on an unlimited quiz does not fail the attempt, and evidence is still recorded", async () => {
+    const s = await setup({ maxAttempts: null, skills: 1 });
+    const logged = failXp();
+
+    const res = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toMatchObject({ isPassed: true, score: 100, xpAwarded: 0, answersRevealed: true });
+    expect(await attemptCount(s.student.id, s.quiz.id)).toBe(1);
+    expect(await xpTransactions(s.student.id)).toHaveLength(0);
+    expect(await xpTotal(s.student.id)).toBe(0);
+
+    const rows = await evidenceOf(s.student.id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ sourceType: "Quiz", sourceId: s.quiz.id, score: 100 });
+    const projected = await db.userSkill.findMany({ where: { userId: s.student.id } });
+    expect(projected).toHaveLength(1);
+    expect(projected[0].proficiency).toBe("BEGINNER");
+    expect(await quizCompletedEvents(s.student.id)).toBe(1);
+
+    // Logged once, with enough context to diagnose, and nothing internal in the response.
+    expect(logged).toHaveBeenCalledTimes(1);
+    const [message, error] = logged.mock.calls[0];
+    expect(message).toContain("[quiz-attempt]");
+    expect(message).toContain(body.attemptId);
+    expect(message).toContain(s.student.id);
+    expect(message).not.toContain(KEY_MCQ);
+    expect(error).toBeInstanceOf(Error);
+    expect(JSON.stringify(body)).not.toContain(XP_BOOM);
+  });
+
+  it("with maxAttempts=1, an XP failure does not strand the learner: the result is returned and the attempt is legitimately spent", async () => {
+    const s = await setup({ maxAttempts: 1, skills: 1 });
+    failXp();
+
+    const first = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const firstBody = await first.json();
+
+    expect(first.status).toBe(200);
+    expect(firstBody).toMatchObject({
+      isPassed: true,
+      xpAwarded: 0,
+      attemptsUsed: 1,
+      remainingAttempts: 0,
+      answersRevealed: true,
+    });
+    expect(firstBody.correctAnswers).toHaveLength(3);
+    expect(await attemptCount(s.student.id, s.quiz.id)).toBe(1);
+    expect(await evidenceOf(s.student.id)).toHaveLength(1);
+    expect(await xpTransactions(s.student.id)).toHaveLength(0);
+
+    // A retry is refused because the attempt really was used — and that rejection
+    // gives away nothing, writes nothing and does not try to award XP again.
+    xpFault.error = null;
+    const second = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    const secondBody = await second.json();
+
+    expect(second.status).toBe(403);
+    expect(secondBody).toMatchObject({ attemptsExhausted: true, remainingAttempts: 0 });
+    const text = JSON.stringify(secondBody);
+    for (const secret of [KEY_MCQ, KEY_SHORT, EXPLAIN_MCQ, EXPLAIN_TF, "correctAnswer"]) {
+      expect(text).not.toContain(secret);
+    }
+    expect(await attemptCount(s.student.id, s.quiz.id)).toBe(1);
+    expect(await evidenceOf(s.student.id)).toHaveLength(1);
+    expect(await xpTransactions(s.student.id)).toHaveLength(0);
+  });
+
+  it("an XP failure does not change what is recorded for the outcome", async () => {
+    const withXp = await setup({ skills: 2 });
+    await attempt(withXp.quiz.id, withXp.student.clerkId, passAnswers(withXp));
+
+    const withoutXp = await setup({ skills: 2 });
+    failXp();
+    await attempt(withoutXp.quiz.id, withoutXp.student.clerkId, passAnswers(withoutXp));
+
+    const shape = async (s: typeof withXp) =>
+      (await evidenceOf(s.student.id))
+        .map((row) => [row.type, row.sourceType, row.score, row.verificationStatus])
+        .sort();
+    expect(await shape(withoutXp)).toEqual(await shape(withXp));
+    expect(await shape(withoutXp)).toHaveLength(2);
+    expect(await quizCompletedEvents(withoutXp.student.id)).toBe(
+      await quizCompletedEvents(withXp.student.id)
+    );
+    expect(await xpTransactions(withXp.student.id)).toHaveLength(1);
+    expect(await xpTransactions(withoutXp.student.id)).toHaveLength(0);
+  });
+
+  it("a later passing attempt still earns XP after an earlier XP failure", async () => {
+    const s = await setup({ maxAttempts: null });
+    failXp();
+    await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+    expect(await xpTransactions(s.student.id)).toHaveLength(0);
+
+    xpFault.error = null;
+    const res = await attempt(s.quiz.id, s.student.clerkId, passAnswers(s));
+
+    expect((await res.json()).xpAwarded).toBe(50);
+    expect(await xpTransactions(s.student.id)).toHaveLength(1);
+  });
+
+  it.each([
+    [1, 3],
+    [2, 4],
+  ])(
+    "maxAttempts %i with %i simultaneous requests still holds when every XP award fails",
+    async (limit, total) => {
+      for (let round = 0; round < 3; round += 1) {
+        const s = await setup({ maxAttempts: limit, skills: 1 });
+        failXp();
+
+        const responses = await Promise.all(
+          Array.from({ length: total }, () => attempt(s.quiz.id, s.student.clerkId, passAnswers(s)))
+        );
+
+        const statuses = responses.map((res) => res.status).sort();
+        expect(statuses.filter((status) => status === 200)).toHaveLength(limit);
+        expect(statuses.filter((status) => status === 403)).toHaveLength(total - limit);
+        expect(statuses.filter((status) => status >= 500)).toHaveLength(0);
+        expect(await attemptCount(s.student.id, s.quiz.id)).toBe(limit);
+        expect(await evidenceOf(s.student.id)).toHaveLength(1);
+        expect(await quizCompletedEvents(s.student.id)).toBe(limit);
+        expect(await xpTransactions(s.student.id)).toHaveLength(0);
+      }
+    }
+  );
+});
+
+describe("POST /api/quizzes/[quizId]/attempt — XP when it works", () => {
+  it("a perfect pass awards QUIZ_PERFECT and reports it", async () => {
+    const s = await setup();
+
+    const body = await (await attempt(s.quiz.id, s.student.clerkId, passAnswers(s))).json();
+
+    expect(body.xpAwarded).toBe(50);
+    const rows = await xpTransactions(s.student.id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ event: "QUIZ_PERFECT", amount: 50 });
+    expect(await xpTotal(s.student.id)).toBe(50);
+  });
+
+  it("a passing but imperfect attempt awards QUIZ_PASS", async () => {
+    const s = await setup();
+    await db.quiz.update({ where: { id: s.quiz.id }, data: { passingScore: 50 } });
+
+    const body = await (
+      await attempt(s.quiz.id, s.student.clerkId, [
+        { questionId: s.mcq.id, answer: KEY_MCQ },
+        { questionId: s.trueFalse.id, answer: "false" },
+      ])
+    ).json();
+
+    expect(body).toMatchObject({ isPassed: true, score: 50, xpAwarded: 25 });
+    const rows = await xpTransactions(s.student.id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ event: "QUIZ_PASS", amount: 25 });
+    expect(await xpTotal(s.student.id)).toBe(25);
+  });
+
+  it("a failed attempt awards nothing", async () => {
+    const s = await setup();
+
+    const body = await (await attempt(s.quiz.id, s.student.clerkId, [])).json();
+
+    expect(body.xpAwarded).toBe(0);
+    expect(await xpTransactions(s.student.id)).toHaveLength(0);
   });
 });
