@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { createCourse } from "@/lib/domain/capability/__test__/fixtures";
 import { createSoloUser, createUserInTenant } from "@/lib/domain/course/__test__/fixtures";
@@ -431,5 +432,169 @@ describe("enrollment -> lesson access -> AI summary chain", () => {
     const enrolled = await createUserInTenant(tenant.id, "STUDENT");
     await db.enrollment.create({ data: { userId: enrolled.id, courseId: course.id } });
     expect(await summaryStatus(enrolled, lesson.id)).toBe(200);
+  });
+});
+
+describe("POST /api/courses/[courseId]/enroll — L-1: a course the learner cannot access discloses nothing", () => {
+  async function foreignCourse(overrides: {
+    status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
+    price?: number;
+  }) {
+    const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
+    const { course } = await createCourse(tenant.id, instructor.id);
+    await db.course.update({
+      where: { id: course.id },
+      data: {
+        status: overrides.status ?? "PUBLISHED",
+        price: overrides.price ?? 0,
+        currency: "INR",
+      },
+    });
+    return course;
+  }
+
+  it("answers a foreign-tenant course exactly like an unknown one, whatever its state or price", async () => {
+    const { tenant: myTenant } = await createTenantUser("ORG_ADMIN");
+    const learner = await createUserInTenant(myTenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+    const snapshot = async (res: Response) => ({ status: res.status, body: await res.json() });
+
+    const unknown = await snapshot(await call("no-such-course-slug"));
+    const variants = {
+      "published free": await foreignCourse({}),
+      "published paid": await foreignCourse({ price: 999 }),
+      draft: await foreignCourse({ status: "DRAFT" }),
+      "draft paid": await foreignCourse({ status: "DRAFT", price: 999 }),
+      archived: await foreignCourse({ status: "ARCHIVED" }),
+    };
+
+    expect(unknown).toEqual({ status: 404, body: { error: "Course not found" } });
+    for (const [label, course] of Object.entries(variants)) {
+      expect(
+        await snapshot(await call(course.slug, { razorpayPaymentId: "pay_1" })),
+        label
+      ).toEqual(unknown);
+      expect(await enrollmentCount(learner.id, course.id), label).toBe(0);
+    }
+    expect(fetchPayment).not.toHaveBeenCalled();
+    expect(fetchOrder).not.toHaveBeenCalled();
+  });
+
+  it("keeps the same-tenant behaviour: published free enrolls, draft is 404, paid still demands payment", async () => {
+    const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
+    const learner = await createUserInTenant(tenant.id, "STUDENT");
+    const free = (await createCourse(tenant.id, instructor.id)).course;
+    const draft = (await createCourse(tenant.id, instructor.id)).course;
+    const paid = (await createCourse(tenant.id, instructor.id)).course;
+    await db.course.update({ where: { id: free.id }, data: { status: "PUBLISHED", price: 0 } });
+    await db.course.update({ where: { id: paid.id }, data: { status: "PUBLISHED", price: 499 } });
+    vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+
+    expect((await call(free.slug)).status).toBe(201);
+    expect((await call(draft.slug)).status).toBe(404);
+    expect((await call(paid.slug, {})).status).toBe(400);
+    expect(await enrollmentCount(learner.id, free.id)).toBe(1);
+    expect(await enrollmentCount(learner.id, draft.id)).toBe(0);
+    expect(await enrollmentCount(learner.id, paid.id)).toBe(0);
+  });
+});
+
+describe("POST /api/courses/[courseId]/enroll — L-2: a duplicate-enrollment race is not a 500", () => {
+  async function freeCourse() {
+    const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
+    const learner = await createUserInTenant(tenant.id, "STUDENT");
+    const { course } = await createCourse(tenant.id, instructor.id);
+    await db.course.update({ where: { id: course.id }, data: { status: "PUBLISHED", price: 0 } });
+    return { tenant, learner, course };
+  }
+
+  it("returns the existing 409 when another request wins between the existence check and the insert", async () => {
+    const { learner, course } = await freeCourse();
+    await db.enrollment.create({ data: { userId: learner.id, courseId: course.id } });
+    vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+    // Force the loser's window: the pre-check sees no row, then the insert
+    // collides with the row the winner just created.
+    vi.spyOn(db.enrollment, "findUnique").mockResolvedValueOnce(null);
+
+    const res = await call(course.slug);
+
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({ error: "Already enrolled" });
+    expect(await enrollmentCount(learner.id, course.id)).toBe(1);
+  });
+
+  it("resolves ten truly concurrent requests to one enrollment: one 201, the rest 409, never a throw", async () => {
+    const { learner, course } = await freeCourse();
+    vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+
+    const settled = await Promise.allSettled(Array.from({ length: 10 }, () => call(course.slug)));
+
+    expect(settled.every((r) => r.status === "fulfilled")).toBe(true);
+    const statuses = settled.map((r) => (r.status === "fulfilled" ? r.value.status : 0)).sort();
+    expect(statuses.filter((s) => s === 201)).toHaveLength(1);
+    expect(statuses.filter((s) => s === 409)).toHaveLength(9);
+    expect(await enrollmentCount(learner.id, course.id)).toBe(1);
+  });
+
+  it("a paid-course loser whose payment verified also gets 409, not a 500", async () => {
+    const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
+    const learner = await createUserInTenant(tenant.id, "STUDENT");
+    const { course } = await createCourse(tenant.id, instructor.id);
+    await db.course.update({
+      where: { id: course.id },
+      data: { status: "PUBLISHED", price: 499, currency: "INR" },
+    });
+    await db.enrollment.create({ data: { userId: learner.id, courseId: course.id } });
+    vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+    mockRazorpay({ courseId: course.id, userId: learner.id });
+    vi.spyOn(db.enrollment, "findUnique").mockResolvedValueOnce(null);
+
+    const res = await call(course.slug, { razorpayPaymentId: "pay_1" });
+
+    expect(res.status).toBe(409);
+    expect(await enrollmentCount(learner.id, course.id)).toBe(1);
+  });
+
+  it("does not swallow other failures: a different Prisma error, and a non-Prisma error, still surface", async () => {
+    const { learner, course } = await freeCourse();
+    vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+    const foreignKeyError = new Prisma.PrismaClientKnownRequestError("FK failed", {
+      code: "P2003",
+      clientVersion: "test",
+    });
+    const create = vi.spyOn(db.enrollment, "create");
+
+    create.mockRejectedValueOnce(foreignKeyError as never);
+    await expect(call(course.slug)).rejects.toBe(foreignKeyError);
+
+    create.mockRejectedValueOnce(new Error("connection lost") as never);
+    await expect(call(course.slug)).rejects.toThrow("connection lost");
+
+    expect(await enrollmentCount(learner.id, course.id)).toBe(0);
+  });
+
+  it("a cross-tenant learner racing the same course still gets 404 and no enrollment", async () => {
+    const { learner, course } = await freeCourse();
+    const { tenant: otherTenant } = await createTenantUser("ORG_ADMIN");
+    const outsider = await createUserInTenant(otherTenant.id, "STUDENT");
+    const owner = await db.course.findUniqueOrThrow({ where: { id: course.id } });
+    await db.course.update({
+      where: { id: course.id },
+      data: { tenantId: (await db.user.findUniqueOrThrow({ where: { id: learner.id } })).tenantId },
+    });
+    expect(owner.id).toBe(course.id);
+
+    const results = await Promise.all([
+      (async () => {
+        vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+        return call(course.slug);
+      })(),
+    ]);
+    vi.mocked(auth).mockResolvedValue({ userId: outsider.clerkId } as never);
+    const outsiderRes = await call(course.slug);
+
+    expect(results[0].status).toBe(201);
+    expect(outsiderRes.status).toBe(404);
+    expect(await enrollmentCount(outsider.id, course.id)).toBe(0);
   });
 });

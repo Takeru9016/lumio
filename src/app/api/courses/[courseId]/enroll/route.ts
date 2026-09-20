@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
+import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { canEnrollInCourse } from "@/lib/domain/course/enrollmentAccess";
 import {
@@ -88,16 +89,37 @@ export async function POST(
     }
   }
 
-  const enrollment = await db.enrollment.create({
-    data: { userId: user.id, courseId: course.id },
-    select: {
-      id: true,
-      status: true,
-      userId: true,
-      courseId: true,
-      createdAt: true,
-    },
-  });
+  // The existence check above and this insert are not atomic. If a concurrent
+  // request (a double click, or an organisation assigning this course) created
+  // the row in between, the (userId, courseId) unique index rejects this insert
+  // — which is the same "already enrolled" answer as the check. Only a unique
+  // violation on this one statement is treated that way; it touches a single
+  // table with a single non-primary unique index, so it cannot be mistaken for
+  // another constraint. Any other error still surfaces.
+  let enrollment: {
+    id: string;
+    status: string;
+    userId: string;
+    courseId: string;
+    createdAt: Date;
+  };
+  try {
+    enrollment = await db.enrollment.create({
+      data: { userId: user.id, courseId: course.id },
+      select: {
+        id: true,
+        status: true,
+        userId: true,
+        courseId: true,
+        createdAt: true,
+      },
+    });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return Response.json({ error: "Already enrolled" }, { status: 409 });
+    }
+    throw err;
+  }
 
   // Fire-and-forget — email failure must not roll back the enrollment
   resend.emails

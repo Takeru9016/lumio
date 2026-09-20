@@ -5,6 +5,11 @@ import { db } from "@/lib/db";
 import { computeCapabilityGap } from "@/lib/domain/capability/gaps";
 import { canEnrollInCourse } from "@/lib/domain/course/enrollmentAccess";
 import {
+  isValidDueDate,
+  isValidId,
+  isValidNote,
+} from "@/lib/domain/learning-assignment/inputRules";
+import {
   capabilityGapSourceKey,
   mandatorySourceKey,
   manualSourceKey,
@@ -24,8 +29,6 @@ import { createNotification } from "@/lib/notifications";
 
 type Ctx = AuthContext & { tenantId: string };
 
-const MAX_NOTE_LENGTH = 500;
-
 // Only ORG_ADMIN writes assignments in V1. Instructors, students and super
 // admins are all denied; a super admin is not a tenant actor.
 function authorizeActor(ctx: AuthContext): asserts ctx is Ctx {
@@ -33,8 +36,8 @@ function authorizeActor(ctx: AuthContext): asserts ctx is Ctx {
   requireTenant(ctx);
 }
 
-function isValidDate(value: unknown): value is Date {
-  return value instanceof Date && !Number.isNaN(value.getTime());
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
 type Learner = { id: string; clerkId: string; name: string | null };
@@ -115,6 +118,13 @@ async function assignLearning(
 ): Promise<CreateAssignmentResult> {
   const { userId, courseId, dueDate, buildProvenance } = request;
 
+  // Checked once, here, for every source — including a due date that comes from
+  // a MandatoryTraining row rather than from the caller. Runs before any read
+  // or write so a value the database cannot store never reaches it.
+  if (dueDate !== undefined && dueDate !== null && !isValidDueDate(dueDate)) {
+    return { ok: false, reason: "INVALID_INPUT" };
+  }
+
   // Unknown, cross-tenant, tenantless, deleted and non-student learners are
   // indistinguishable to the caller. ctx.tenantId is a string, so a learner
   // with a null tenant can never match.
@@ -131,6 +141,14 @@ async function assignLearning(
   // The same answer for a missing course and another tenant's course, so a
   // foreign course cannot be probed for.
   if (!course || !canEnrollInCourse(course.tenantId, ctx.tenantId)) {
+    return { ok: false, reason: "COURSE_NOT_FOUND" };
+  }
+  // The open catalogue (no tenant) passes the tenant predicate, so it must not
+  // be allowed to disclose more than "not assignable": the state and price of
+  // a course the actor's tenant does not own are not the actor's to learn.
+  // Only the actor's own tenant's courses get a specific reason.
+  const ownsCourse = course.tenantId === ctx.tenantId;
+  if (!ownsCourse && (course.status !== "PUBLISHED" || course.price > 0)) {
     return { ok: false, reason: "COURSE_NOT_FOUND" };
   }
   if (course.status !== "PUBLISHED") return { ok: false, reason: "COURSE_NOT_PUBLISHED" };
@@ -296,16 +314,16 @@ export async function createManualAssignment(
 ): Promise<CreateAssignmentResult> {
   authorizeActor(ctx);
 
+  if (!isObject(input)) return { ok: false, reason: "INVALID_INPUT" };
   const { userId, courseId, dueDate } = input;
+  if (!isValidId(userId) || !isValidId(courseId)) {
+    return { ok: false, reason: "INVALID_INPUT" };
+  }
+  if (input.note !== undefined && input.note !== null && typeof input.note !== "string") {
+    return { ok: false, reason: "INVALID_INPUT" };
+  }
   const note = typeof input.note === "string" ? input.note.trim() : undefined;
-
-  if (typeof userId !== "string" || typeof courseId !== "string") {
-    return { ok: false, reason: "INVALID_INPUT" };
-  }
-  if (dueDate !== undefined && dueDate !== null && !isValidDate(dueDate)) {
-    return { ok: false, reason: "INVALID_INPUT" };
-  }
-  if (note !== undefined && note.length > MAX_NOTE_LENGTH) {
+  if (note !== undefined && !isValidNote(note)) {
     return { ok: false, reason: "INVALID_INPUT" };
   }
 
@@ -351,8 +369,9 @@ export async function createMandatoryAssignment(
 ): Promise<CreateAssignmentResult> {
   authorizeActor(ctx);
 
+  if (!isObject(input)) return { ok: false, reason: "INVALID_INPUT" };
   const { userId, mandatoryTrainingId } = input;
-  if (typeof userId !== "string" || typeof mandatoryTrainingId !== "string") {
+  if (!isValidId(userId) || !isValidId(mandatoryTrainingId)) {
     return { ok: false, reason: "INVALID_INPUT" };
   }
 
@@ -418,16 +437,9 @@ export async function createCapabilityGapAssignment(
 ): Promise<CreateAssignmentResult> {
   authorizeActor(ctx);
 
+  if (!isObject(input)) return { ok: false, reason: "INVALID_INPUT" };
   const { userId, roleId, skillId, courseId, dueDate } = input;
-  if (
-    typeof userId !== "string" ||
-    typeof roleId !== "string" ||
-    typeof skillId !== "string" ||
-    typeof courseId !== "string"
-  ) {
-    return { ok: false, reason: "INVALID_INPUT" };
-  }
-  if (dueDate !== undefined && dueDate !== null && !isValidDate(dueDate)) {
+  if (!isValidId(userId) || !isValidId(roleId) || !isValidId(skillId) || !isValidId(courseId)) {
     return { ok: false, reason: "INVALID_INPUT" };
   }
 
@@ -499,7 +511,7 @@ export async function cancelAssignment(
 ): Promise<CancelAssignmentResult> {
   authorizeActor(ctx);
 
-  if (typeof assignmentId !== "string") return { ok: false, reason: "ASSIGNMENT_NOT_FOUND" };
+  if (!isValidId(assignmentId)) return { ok: false, reason: "ASSIGNMENT_NOT_FOUND" };
 
   return db.$transaction(async (tx): Promise<CancelAssignmentResult> => {
     const assignment = await tx.learningAssignment.findFirst({
