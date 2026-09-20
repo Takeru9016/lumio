@@ -28,10 +28,12 @@ export type AggregateQuiz = {
 
 export type QuizAvgAggregateOutputType = {
   passingScore: number | null
+  maxAttempts: number | null
 }
 
 export type QuizSumAggregateOutputType = {
   passingScore: number | null
+  maxAttempts: number | null
 }
 
 export type QuizMinAggregateOutputType = {
@@ -39,6 +41,7 @@ export type QuizMinAggregateOutputType = {
   title: string | null
   passingScore: number | null
   isAiGenerated: boolean | null
+  maxAttempts: number | null
   lessonId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -49,6 +52,7 @@ export type QuizMaxAggregateOutputType = {
   title: string | null
   passingScore: number | null
   isAiGenerated: boolean | null
+  maxAttempts: number | null
   lessonId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -59,6 +63,7 @@ export type QuizCountAggregateOutputType = {
   title: number
   passingScore: number
   isAiGenerated: number
+  maxAttempts: number
   lessonId: number
   createdAt: number
   updatedAt: number
@@ -68,10 +73,12 @@ export type QuizCountAggregateOutputType = {
 
 export type QuizAvgAggregateInputType = {
   passingScore?: true
+  maxAttempts?: true
 }
 
 export type QuizSumAggregateInputType = {
   passingScore?: true
+  maxAttempts?: true
 }
 
 export type QuizMinAggregateInputType = {
@@ -79,6 +86,7 @@ export type QuizMinAggregateInputType = {
   title?: true
   passingScore?: true
   isAiGenerated?: true
+  maxAttempts?: true
   lessonId?: true
   createdAt?: true
   updatedAt?: true
@@ -89,6 +97,7 @@ export type QuizMaxAggregateInputType = {
   title?: true
   passingScore?: true
   isAiGenerated?: true
+  maxAttempts?: true
   lessonId?: true
   createdAt?: true
   updatedAt?: true
@@ -99,6 +108,7 @@ export type QuizCountAggregateInputType = {
   title?: true
   passingScore?: true
   isAiGenerated?: true
+  maxAttempts?: true
   lessonId?: true
   createdAt?: true
   updatedAt?: true
@@ -196,6 +206,7 @@ export type QuizGroupByOutputType = {
   title: string
   passingScore: number
   isAiGenerated: boolean
+  maxAttempts: number | null
   lessonId: string
   createdAt: Date
   updatedAt: Date
@@ -229,6 +240,7 @@ export type QuizWhereInput = {
   title?: Prisma.StringFilter<"Quiz"> | string
   passingScore?: Prisma.IntFilter<"Quiz"> | number
   isAiGenerated?: Prisma.BoolFilter<"Quiz"> | boolean
+  maxAttempts?: Prisma.IntNullableFilter<"Quiz"> | number | null
   lessonId?: Prisma.StringFilter<"Quiz"> | string
   createdAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
@@ -242,6 +254,7 @@ export type QuizOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   passingScore?: Prisma.SortOrder
   isAiGenerated?: Prisma.SortOrder
+  maxAttempts?: Prisma.SortOrderInput | Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -259,6 +272,7 @@ export type QuizWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Quiz"> | string
   passingScore?: Prisma.IntFilter<"Quiz"> | number
   isAiGenerated?: Prisma.BoolFilter<"Quiz"> | boolean
+  maxAttempts?: Prisma.IntNullableFilter<"Quiz"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
   lesson?: Prisma.XOR<Prisma.LessonScalarRelationFilter, Prisma.LessonWhereInput>
@@ -271,6 +285,7 @@ export type QuizOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   passingScore?: Prisma.SortOrder
   isAiGenerated?: Prisma.SortOrder
+  maxAttempts?: Prisma.SortOrderInput | Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -289,6 +304,7 @@ export type QuizScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Quiz"> | string
   passingScore?: Prisma.IntWithAggregatesFilter<"Quiz"> | number
   isAiGenerated?: Prisma.BoolWithAggregatesFilter<"Quiz"> | boolean
+  maxAttempts?: Prisma.IntNullableWithAggregatesFilter<"Quiz"> | number | null
   lessonId?: Prisma.StringWithAggregatesFilter<"Quiz"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Quiz"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Quiz"> | Date | string
@@ -299,6 +315,7 @@ export type QuizCreateInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   lesson: Prisma.LessonCreateNestedOneWithoutQuizInput
@@ -311,6 +328,7 @@ export type QuizUncheckedCreateInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   lessonId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -323,6 +341,7 @@ export type QuizUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lesson?: Prisma.LessonUpdateOneRequiredWithoutQuizNestedInput
@@ -335,6 +354,7 @@ export type QuizUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lessonId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -347,6 +367,7 @@ export type QuizCreateManyInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   lessonId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -357,6 +378,7 @@ export type QuizUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -366,6 +388,7 @@ export type QuizUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lessonId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -381,6 +404,7 @@ export type QuizCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   passingScore?: Prisma.SortOrder
   isAiGenerated?: Prisma.SortOrder
+  maxAttempts?: Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -388,6 +412,7 @@ export type QuizCountOrderByAggregateInput = {
 
 export type QuizAvgOrderByAggregateInput = {
   passingScore?: Prisma.SortOrder
+  maxAttempts?: Prisma.SortOrder
 }
 
 export type QuizMaxOrderByAggregateInput = {
@@ -395,6 +420,7 @@ export type QuizMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   passingScore?: Prisma.SortOrder
   isAiGenerated?: Prisma.SortOrder
+  maxAttempts?: Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -405,6 +431,7 @@ export type QuizMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   passingScore?: Prisma.SortOrder
   isAiGenerated?: Prisma.SortOrder
+  maxAttempts?: Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -412,6 +439,7 @@ export type QuizMinOrderByAggregateInput = {
 
 export type QuizSumOrderByAggregateInput = {
   passingScore?: Prisma.SortOrder
+  maxAttempts?: Prisma.SortOrder
 }
 
 export type QuizScalarRelationFilter = {
@@ -484,6 +512,7 @@ export type QuizCreateWithoutLessonInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.QuizQuestionCreateNestedManyWithoutQuizInput
@@ -495,6 +524,7 @@ export type QuizUncheckedCreateWithoutLessonInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.QuizQuestionUncheckedCreateNestedManyWithoutQuizInput
@@ -522,6 +552,7 @@ export type QuizUpdateWithoutLessonInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.QuizQuestionUpdateManyWithoutQuizNestedInput
@@ -533,6 +564,7 @@ export type QuizUncheckedUpdateWithoutLessonInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.QuizQuestionUncheckedUpdateManyWithoutQuizNestedInput
@@ -544,6 +576,7 @@ export type QuizCreateWithoutQuestionsInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   lesson: Prisma.LessonCreateNestedOneWithoutQuizInput
@@ -555,6 +588,7 @@ export type QuizUncheckedCreateWithoutQuestionsInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   lessonId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -582,6 +616,7 @@ export type QuizUpdateWithoutQuestionsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lesson?: Prisma.LessonUpdateOneRequiredWithoutQuizNestedInput
@@ -593,6 +628,7 @@ export type QuizUncheckedUpdateWithoutQuestionsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lessonId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -604,6 +640,7 @@ export type QuizCreateWithoutAttemptsInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   lesson: Prisma.LessonCreateNestedOneWithoutQuizInput
@@ -615,6 +652,7 @@ export type QuizUncheckedCreateWithoutAttemptsInput = {
   title: string
   passingScore?: number
   isAiGenerated?: boolean
+  maxAttempts?: number | null
   lessonId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -642,6 +680,7 @@ export type QuizUpdateWithoutAttemptsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lesson?: Prisma.LessonUpdateOneRequiredWithoutQuizNestedInput
@@ -653,6 +692,7 @@ export type QuizUncheckedUpdateWithoutAttemptsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   passingScore?: Prisma.IntFieldUpdateOperationsInput | number
   isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lessonId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -704,6 +744,7 @@ export type QuizSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   title?: boolean
   passingScore?: boolean
   isAiGenerated?: boolean
+  maxAttempts?: boolean
   lessonId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -718,6 +759,7 @@ export type QuizSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   title?: boolean
   passingScore?: boolean
   isAiGenerated?: boolean
+  maxAttempts?: boolean
   lessonId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -729,6 +771,7 @@ export type QuizSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   title?: boolean
   passingScore?: boolean
   isAiGenerated?: boolean
+  maxAttempts?: boolean
   lessonId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -740,12 +783,13 @@ export type QuizSelectScalar = {
   title?: boolean
   passingScore?: boolean
   isAiGenerated?: boolean
+  maxAttempts?: boolean
   lessonId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type QuizOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "passingScore" | "isAiGenerated" | "lessonId" | "createdAt" | "updatedAt", ExtArgs["result"]["quiz"]>
+export type QuizOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "passingScore" | "isAiGenerated" | "maxAttempts" | "lessonId" | "createdAt" | "updatedAt", ExtArgs["result"]["quiz"]>
 export type QuizInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
   questions?: boolean | Prisma.Quiz$questionsArgs<ExtArgs>
@@ -771,6 +815,7 @@ export type $QuizPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     title: string
     passingScore: number
     isAiGenerated: boolean
+    maxAttempts: number | null
     lessonId: string
     createdAt: Date
     updatedAt: Date
@@ -1204,6 +1249,7 @@ export interface QuizFieldRefs {
   readonly title: Prisma.FieldRef<"Quiz", 'String'>
   readonly passingScore: Prisma.FieldRef<"Quiz", 'Int'>
   readonly isAiGenerated: Prisma.FieldRef<"Quiz", 'Boolean'>
+  readonly maxAttempts: Prisma.FieldRef<"Quiz", 'Int'>
   readonly lessonId: Prisma.FieldRef<"Quiz", 'String'>
   readonly createdAt: Prisma.FieldRef<"Quiz", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Quiz", 'DateTime'>

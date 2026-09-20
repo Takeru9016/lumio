@@ -2,7 +2,11 @@ import { auth } from "@clerk/nextjs/server";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "@/lib/db";
 import { createCourse } from "@/lib/domain/capability/__test__/fixtures";
-import { createUserInTenant } from "@/lib/domain/course/__test__/fixtures";
+import { createSoloUser, createUserInTenant } from "@/lib/domain/course/__test__/fixtures";
+import {
+  authorizeLessonSummaryAccess,
+  ContentAuthorizationError,
+} from "@/lib/domain/course/contentAuthorization";
 import { courseOrderNotes, courseOrderReceipt } from "@/lib/domain/course/paymentVerification";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 
@@ -233,5 +237,199 @@ describe("POST /api/courses/[courseId]/enroll — free course (unchanged)", () =
     expect(res.status).toBe(201);
     expect(fetchPayment).not.toHaveBeenCalled();
     expect(await enrollmentCount(student.id, course.id)).toBe(1);
+  });
+});
+
+describe("POST /api/courses/[courseId]/enroll — tenant isolation", () => {
+  /** A published, free course owned by `tenantId` (null = the open catalogue). */
+  async function publishedCourse(tenantId: string | null, price = 0) {
+    const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
+    const { course, lesson } = await createCourse(tenant.id, instructor.id);
+    await db.course.update({
+      where: { id: course.id },
+      data: { price, currency: "INR", status: "PUBLISHED", tenantId },
+    });
+    return { course, lesson, instructor, ownerTenantId: tenant.id };
+  }
+
+  it("rejects a learner from another tenant: 404, no enrollment, and no Razorpay call", async () => {
+    const { course } = await publishedCourse(null);
+    const owner = await createTenantUser("INSTRUCTOR");
+    await db.course.update({ where: { id: course.id }, data: { tenantId: owner.tenant.id } });
+    const { tenant: otherTenant } = await createTenantUser("ORG_ADMIN");
+    const outsider = await createUserInTenant(otherTenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: outsider.clerkId } as never);
+
+    const res = await call(course.slug);
+
+    expect(res.status).toBe(404);
+    expect(await enrollmentCount(outsider.id, course.id)).toBe(0);
+    expect(fetchPayment).not.toHaveBeenCalled();
+  });
+
+  it("rejects a cross-tenant learner on a PAID course before any payment is verified", async () => {
+    const { course, ownerTenantId } = await publishedCourse(null, 499);
+    await db.course.update({ where: { id: course.id }, data: { tenantId: ownerTenantId } });
+    const { tenant: otherTenant } = await createTenantUser("ORG_ADMIN");
+    const outsider = await createUserInTenant(otherTenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: outsider.clerkId } as never);
+    mockRazorpay({ courseId: course.id, userId: outsider.id });
+
+    const res = await call(course.slug, { razorpayPaymentId: "pay_1" });
+
+    expect(res.status).toBe(404);
+    expect(await enrollmentCount(outsider.id, course.id)).toBe(0);
+    expect(fetchPayment).not.toHaveBeenCalled();
+    expect(fetchOrder).not.toHaveBeenCalled();
+  });
+
+  it("rejects a learner with no tenant from a tenant-owned course", async () => {
+    const { course, ownerTenantId } = await publishedCourse(null);
+    await db.course.update({ where: { id: course.id }, data: { tenantId: ownerTenantId } });
+    const solo = await createSoloUser("STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: solo.clerkId } as never);
+
+    const res = await call(course.slug);
+
+    expect(res.status).toBe(404);
+    expect(await enrollmentCount(solo.id, course.id)).toBe(0);
+  });
+
+  it("still enrolls a learner of the course's own tenant", async () => {
+    const { course, ownerTenantId } = await publishedCourse(null);
+    await db.course.update({ where: { id: course.id }, data: { tenantId: ownerTenantId } });
+    const member = await createUserInTenant(ownerTenantId, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: member.clerkId } as never);
+
+    const res = await call(course.slug);
+
+    expect(res.status).toBe(201);
+    expect(await enrollmentCount(member.id, course.id)).toBe(1);
+  });
+
+  it("still enrolls learners of any tenant, and learners with none, in a tenantless course", async () => {
+    const { course } = await publishedCourse(null);
+    expect((await db.course.findUniqueOrThrow({ where: { id: course.id } })).tenantId).toBeNull();
+    const { tenant: someTenant } = await createTenantUser("ORG_ADMIN");
+    const member = await createUserInTenant(someTenant.id, "STUDENT");
+    const solo = await createSoloUser("STUDENT");
+
+    for (const learner of [member, solo]) {
+      vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+      const res = await call(course.slug);
+      expect(res.status).toBe(201);
+      expect(await enrollmentCount(learner.id, course.id)).toBe(1);
+    }
+  });
+
+  it("leaves an enrollment created before this rule exactly as it was", async () => {
+    const { course, ownerTenantId } = await publishedCourse(null);
+    await db.course.update({ where: { id: course.id }, data: { tenantId: ownerTenantId } });
+    const { tenant: otherTenant } = await createTenantUser("ORG_ADMIN");
+    const legacy = await createUserInTenant(otherTenant.id, "STUDENT");
+    const before = await db.enrollment.create({ data: { userId: legacy.id, courseId: course.id } });
+    vi.mocked(auth).mockResolvedValue({ userId: legacy.clerkId } as never);
+
+    const res = await call(course.slug);
+
+    expect(res.status).toBe(404);
+    expect(await db.enrollment.findUniqueOrThrow({ where: { id: before.id } })).toEqual(before);
+  });
+
+  it("does not change publication rules: an unpublished course stays 404 for its own tenant", async () => {
+    const { course, ownerTenantId } = await publishedCourse(null);
+    await db.course.update({
+      where: { id: course.id },
+      data: { tenantId: ownerTenantId, status: "DRAFT" },
+    });
+    const member = await createUserInTenant(ownerTenantId, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: member.clerkId } as never);
+
+    expect((await call(course.slug)).status).toBe(404);
+    expect(await enrollmentCount(member.id, course.id)).toBe(0);
+  });
+});
+
+describe("enrollment -> lesson access -> AI summary chain", () => {
+  async function tenantCourse(status: "PUBLISHED" | "DRAFT" | "ARCHIVED" = "PUBLISHED") {
+    const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
+    const { course, lesson } = await createCourse(tenant.id, instructor.id);
+    await db.course.update({ where: { id: course.id }, data: { price: 0, status } });
+    return { tenant, course, lesson };
+  }
+
+  const summaryStatus = async (user: { id: string; tenantId: string | null }, lessonId: string) => {
+    try {
+      await authorizeLessonSummaryAccess(user, lessonId);
+      return 200;
+    } catch (err) {
+      if (err instanceof ContentAuthorizationError) return err.status;
+      throw err;
+    }
+  };
+
+  it("a cross-tenant learner cannot reach the lesson summary by trying to enroll", async () => {
+    const { course, lesson } = await tenantCourse();
+    const { tenant: otherTenant } = await createTenantUser("ORG_ADMIN");
+    const outsider = await createUserInTenant(otherTenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: outsider.clerkId } as never);
+
+    const res = await call(course.slug);
+
+    expect(res.status).toBe(404);
+    expect(await summaryStatus(outsider, lesson.id)).toBe(404);
+  });
+
+  it("a same-tenant learner enrolls and can then read the lesson summary", async () => {
+    const { tenant, course, lesson } = await tenantCourse();
+    const member = await createUserInTenant(tenant.id, "STUDENT");
+    // In the tenant but not enrolled: the course is visible, the paid lesson is not.
+    expect(await summaryStatus(member, lesson.id)).toBe(403);
+    vi.mocked(auth).mockResolvedValue({ userId: member.clerkId } as never);
+
+    expect((await call(course.slug)).status).toBe(201);
+
+    expect(await summaryStatus(member, lesson.id)).toBe(200);
+  });
+
+  it("a learner with no tenant enrolls in a tenantless course and reaches its summary", async () => {
+    const { course, lesson } = await tenantCourse();
+    await db.course.update({ where: { id: course.id }, data: { tenantId: null } });
+    const solo = await createSoloUser("STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: solo.clerkId } as never);
+
+    expect((await call(course.slug)).status).toBe(201);
+
+    expect(await summaryStatus(solo, lesson.id)).toBe(200);
+  });
+
+  it("an existing valid enrollment keeps its access", async () => {
+    const { tenant, course, lesson } = await tenantCourse();
+    const member = await createUserInTenant(tenant.id, "STUDENT");
+    await db.enrollment.create({ data: { userId: member.id, courseId: course.id } });
+
+    expect(await summaryStatus(member, lesson.id)).toBe(200);
+  });
+
+  it("an unpublished course cannot be enrolled in, and reaches no summary", async () => {
+    const { tenant, course, lesson } = await tenantCourse("DRAFT");
+    const member = await createUserInTenant(tenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: member.clerkId } as never);
+
+    expect((await call(course.slug)).status).toBe(404);
+
+    expect(await summaryStatus(member, lesson.id)).toBe(404);
+  });
+
+  it("an archived course cannot gain new enrollments, but an existing enrollment keeps access", async () => {
+    const { tenant, course, lesson } = await tenantCourse("ARCHIVED");
+    const newcomer = await createUserInTenant(tenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: newcomer.clerkId } as never);
+    expect((await call(course.slug)).status).toBe(404);
+    expect(await summaryStatus(newcomer, lesson.id)).toBe(404);
+
+    const enrolled = await createUserInTenant(tenant.id, "STUDENT");
+    await db.enrollment.create({ data: { userId: enrolled.id, courseId: course.id } });
+    expect(await summaryStatus(enrolled, lesson.id)).toBe(200);
   });
 });

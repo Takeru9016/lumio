@@ -237,8 +237,9 @@ describe("recordQuizOutcome", () => {
     const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
     expect(evidence).toHaveLength(1);
     expect(evidence[0].type).toBe("QUIZ_SCORE");
-    expect(evidence[0].sourceType).toBe("QuizAttempt");
-    expect(evidence[0].sourceId).toBe("test-attempt-1");
+    // Phase 25: keyed by the quiz, not the attempt, so repeated passes converge.
+    expect(evidence[0].sourceType).toBe("Quiz");
+    expect(evidence[0].sourceId).toBe(quiz.id);
     expect(evidence[0].score).toBe(90);
     expect(evidence[0].verificationStatus).toBe("UNVERIFIED");
 
@@ -278,6 +279,202 @@ describe("recordQuizOutcome", () => {
     });
     expect(events).toHaveLength(1);
     expect(events[0].metadata).toMatchObject({ isPassed: false, score: 20 });
+  });
+
+  it("passing the same quiz again with a new attempt id records no second evidence row", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const quiz = await createQuiz(lesson.id);
+    const outcome = (attemptId: string, score: number) =>
+      recordQuizOutcome({
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        quizId: quiz.id,
+        attemptId,
+        score,
+        isPassed: true,
+        occurredAt: new Date(),
+      });
+
+    await outcome("attempt-a", 75);
+    await outcome("attempt-b", 100);
+    await outcome("attempt-c", 90);
+
+    const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
+    expect(evidence).toHaveLength(1);
+    // The row keeps the score of the pass that created it.
+    expect(evidence[0].score).toBe(75);
+    // Every attempt is still a real, recorded learning event.
+    const events = await db.learningEvent.findMany({
+      where: { userId: learnerCtx.userId, eventType: "QUIZ_COMPLETED" },
+    });
+    expect(events).toHaveLength(3);
+  });
+
+  it("keeps one row per mapped skill, however many passes there are", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skillA = await createSkill(tenant.id);
+    const skillB = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skillA.id);
+    await mapCourseSkill(course.id, skillB.id);
+    const quiz = await createQuiz(lesson.id);
+
+    for (const attemptId of ["a1", "a2", "a3"]) {
+      await recordQuizOutcome({
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        quizId: quiz.id,
+        attemptId,
+        score: 90,
+        isPassed: true,
+        occurredAt: new Date(),
+      });
+    }
+
+    const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
+    expect(evidence).toHaveLength(2);
+    expect(new Set(evidence.map((row) => row.skillId))).toEqual(new Set([skillA.id, skillB.id]));
+  });
+
+  it("concurrent passing outcomes for one learner and quiz produce a single row", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const quiz = await createQuiz(lesson.id);
+
+    await Promise.all(
+      ["c1", "c2", "c3", "c4", "c5"].map((attemptId) =>
+        recordQuizOutcome({
+          tenantId: tenant.id,
+          userId: learnerCtx.userId,
+          quizId: quiz.id,
+          attemptId,
+          score: 90,
+          isPassed: true,
+          occurredAt: new Date(),
+        })
+      )
+    );
+
+    expect(await db.skillEvidence.count({ where: { userId: learnerCtx.userId } })).toBe(1);
+  });
+
+  it("evidence for different quizzes stays separate", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const first = await createCourse(tenant.id, instructorCtx.userId);
+    const second = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(first.course.id, skill.id);
+    await mapCourseSkill(second.course.id, skill.id);
+    const quizA = await createQuiz(first.lesson.id);
+    const quizB = await createQuiz(second.lesson.id);
+
+    for (const quiz of [quizA, quizB]) {
+      await recordQuizOutcome({
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        quizId: quiz.id,
+        attemptId: `attempt-${quiz.id}`,
+        score: 90,
+        isPassed: true,
+        occurredAt: new Date(),
+      });
+    }
+
+    const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
+    expect(evidence.map((row) => row.sourceId).sort()).toEqual([quizA.id, quizB.id].sort());
+  });
+
+  it("does not add a row for a skill the learner already has per-attempt (legacy) quiz evidence for, and leaves historical duplicates alone", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const covered = await createSkill(tenant.id);
+    const fresh = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, covered.id);
+    await mapCourseSkill(course.id, fresh.id);
+    const quiz = await createQuiz(lesson.id);
+    const attempts = await Promise.all(
+      [90, 95].map((score) =>
+        db.quizAttempt.create({
+          data: { userId: learnerCtx.userId, quizId: quiz.id, score, isPassed: true },
+        })
+      )
+    );
+    for (const attempt of attempts) {
+      await db.skillEvidence.create({
+        data: {
+          tenantId: tenant.id,
+          userId: learnerCtx.userId,
+          skillId: covered.id,
+          type: "QUIZ_SCORE",
+          sourceType: "QuizAttempt",
+          sourceId: attempt.id,
+          score: 90,
+        },
+      });
+    }
+
+    await recordQuizOutcome({
+      tenantId: tenant.id,
+      userId: learnerCtx.userId,
+      quizId: quiz.id,
+      attemptId: "a-new-pass",
+      score: 100,
+      isPassed: true,
+      occurredAt: new Date(),
+    });
+
+    const evidence = await db.skillEvidence.findMany({ where: { userId: learnerCtx.userId } });
+    const coveredRows = evidence.filter((row) => row.skillId === covered.id);
+    const freshRows = evidence.filter((row) => row.skillId === fresh.id);
+    // The covered skill keeps its two historical rows and gains none.
+    expect(coveredRows).toHaveLength(2);
+    expect(coveredRows.every((row) => row.sourceType === "QuizAttempt")).toBe(true);
+    // A skill with no earlier quiz evidence gets the new, quiz-keyed row.
+    expect(freshRows).toHaveLength(1);
+    expect(freshRows[0]).toMatchObject({ sourceType: "Quiz", sourceId: quiz.id });
+  });
+
+  it("a passing attempt never changes the projected proficiency after the first", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { course, lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    await mapCourseSkill(course.id, skill.id);
+    const quiz = await createQuiz(lesson.id);
+    const pass = (attemptId: string) =>
+      recordQuizOutcome({
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        quizId: quiz.id,
+        attemptId,
+        score: 90,
+        isPassed: true,
+        occurredAt: new Date(),
+      });
+
+    await pass("p1");
+    const first = await db.userSkill.findUniqueOrThrow({
+      where: { userId_skillId: { userId: learnerCtx.userId, skillId: skill.id } },
+    });
+    await pass("p2");
+    await pass("p3");
+
+    const later = await db.userSkill.findUniqueOrThrow({
+      where: { userId_skillId: { userId: learnerCtx.userId, skillId: skill.id } },
+    });
+    expect(first.proficiency).toBe("BEGINNER");
+    expect(later.proficiency).toBe("BEGINNER");
+    expect(later.lastAssessedAt?.getTime()).toBe(first.lastAssessedAt?.getTime());
   });
 
   it("always emits QUIZ_COMPLETED regardless of pass/fail", async () => {

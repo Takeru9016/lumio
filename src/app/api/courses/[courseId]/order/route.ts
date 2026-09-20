@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
+import { canEnrollInCourse } from "@/lib/domain/course/enrollmentAccess";
 import { courseOrderNotes, courseOrderReceipt } from "@/lib/domain/course/paymentVerification";
 import { razorpay } from "@/lib/razorpay";
 
@@ -18,7 +19,7 @@ export async function POST(
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true, role: true },
+    select: { id: true, role: true, tenantId: true },
   });
 
   if (!user || user.role !== "STUDENT") {
@@ -33,10 +34,18 @@ export async function POST(
       price: true,
       currency: true,
       status: true,
+      tenantId: true,
     },
   });
 
   if (!course || course.status !== "PUBLISHED") {
+    return Response.json({ error: "Course not found" }, { status: 404 });
+  }
+
+  // Same rule as enroll: a payment order for a course the buyer cannot enroll in
+  // would take their money and then be refused at enrollment. Checked before
+  // any Razorpay call.
+  if (!canEnrollInCourse(course.tenantId, user.tenantId)) {
     return Response.json({ error: "Course not found" }, { status: 404 });
   }
 

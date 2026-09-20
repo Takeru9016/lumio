@@ -321,6 +321,7 @@ export const QuizScalarFieldEnum = {
   title: 'title',
   passingScore: 'passingScore',
   isAiGenerated: 'isAiGenerated',
+  maxAttempts: 'maxAttempts',
   lessonId: 'lessonId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

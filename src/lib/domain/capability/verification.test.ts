@@ -230,6 +230,88 @@ describe("verifyEvidence / rejectEvidence — authorization", () => {
     expect(userSkill.proficiency).toBe("INTERMEDIATE");
   });
 
+  it("resolves quiz-keyed QUIZ_SCORE evidence (sourceType Quiz) back to the owning course", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    const quiz = await createQuiz(lesson.id);
+
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        skillId: skill.id,
+        type: "QUIZ_SCORE",
+        sourceType: "Quiz",
+        sourceId: quiz.id,
+        score: 90,
+      },
+    });
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    const userSkill = await verifyEvidence(actorCtx, evidence.id);
+    expect(userSkill.proficiency).toBe("INTERMEDIATE");
+  });
+
+  it("an instructor who does not own the quiz's course cannot verify quiz-keyed evidence", async () => {
+    const { tenant, ctx: ownerCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const { lesson } = await createCourse(tenant.id, ownerCtx.userId);
+    const skill = await createSkill(tenant.id);
+    const quiz = await createQuiz(lesson.id);
+    const otherInstructor = await db.user.create({
+      data: {
+        clerkId: `clerk-other-${Date.now()}`,
+        email: `other-${Date.now()}@example.test`,
+        tenantId: tenant.id,
+        role: "INSTRUCTOR",
+      },
+    });
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        skillId: skill.id,
+        type: "QUIZ_SCORE",
+        sourceType: "Quiz",
+        sourceId: quiz.id,
+        score: 90,
+      },
+    });
+
+    const actorCtx = {
+      userId: otherInstructor.id,
+      clerkId: otherInstructor.clerkId,
+      role: otherInstructor.role,
+      tenantId: tenant.id,
+    };
+    await expect(verifyEvidence(actorCtx, evidence.id)).rejects.toThrow(
+      CapabilityVerificationError
+    );
+  });
+
+  it("quiz-keyed evidence whose quiz no longer exists fails closed", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerCtx } = await createTenantUser("STUDENT");
+    const skill = await createSkill(tenant.id);
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerCtx.userId,
+        skillId: skill.id,
+        type: "QUIZ_SCORE",
+        sourceType: "Quiz",
+        sourceId: "quiz-that-does-not-exist",
+      },
+    });
+
+    const actorCtx = { ...instructorCtx, tenantId: tenant.id };
+    await expect(verifyEvidence(actorCtx, evidence.id)).rejects.toThrow(
+      CapabilityVerificationError
+    );
+  });
+
   it("throws a 404 for a nonexistent evidence id", async () => {
     const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
     const actorCtx = { ...instructorCtx, tenantId: tenant.id };

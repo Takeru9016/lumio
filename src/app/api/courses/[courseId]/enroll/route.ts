@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
+import { canEnrollInCourse } from "@/lib/domain/course/enrollmentAccess";
 import {
   PaymentVerificationError,
   verifyCoursePayment,
@@ -23,7 +24,7 @@ export async function POST(
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true, email: true, name: true, role: true },
+    select: { id: true, email: true, name: true, role: true, tenantId: true },
   });
 
   if (!user || user.role !== "STUDENT") {
@@ -38,10 +39,19 @@ export async function POST(
       price: true,
       currency: true,
       status: true,
+      tenantId: true,
     },
   });
 
   if (!course || course.status !== "PUBLISHED") {
+    return Response.json({ error: "Course not found" }, { status: 404 });
+  }
+
+  // A tenant-owned course is enrollable only by that tenant's members. The same
+  // 404 as an unpublished course, so another organisation's course cannot be
+  // probed for, and checked before the existing-enrollment lookup and payment
+  // verification. A course with no tenant stays open to everyone.
+  if (!canEnrollInCourse(course.tenantId, user.tenantId)) {
     return Response.json({ error: "Course not found" }, { status: 404 });
   }
 

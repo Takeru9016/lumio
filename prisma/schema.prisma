@@ -582,6 +582,11 @@ model Quiz {
   passingScore  Int     @default(70)
   isAiGenerated Boolean @default(false)
 
+  // Most attempts a single learner may make. null = unlimited (every quiz that
+  // existed before this column, and the default). Enforced server-side under a
+  // per-learner-per-quiz lock in the attempt route, never by the client.
+  maxAttempts Int?
+
   lessonId String @unique
   lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
@@ -931,8 +936,11 @@ model SkillEvidence {
   // check alone cannot prevent two concurrent transactions both passing the
   // check under Postgres's default READ COMMITTED isolation. sourceId is
   // nullable in general (see comment above), but every Phase 5 evidence type
-  // (COURSE_COMPLETION -> Course.id, QUIZ_SCORE -> QuizAttempt.id) always
-  // populates it, so this constraint is fully effective for both.
+  // (COURSE_COMPLETION -> Course.id, QUIZ_SCORE -> Quiz.id) always
+  // populates it, so this constraint is fully effective for both. QUIZ_SCORE
+  // used QuizAttempt.id (sourceType "QuizAttempt") before Phase 25; those rows
+  // are historical and still resolve, but new quiz evidence is keyed by the
+  // quiz so a learner has at most one row per quiz and skill.
   @@unique([tenantId, userId, skillId, sourceType, sourceId])
   @@index([tenantId])
   @@index([userId])

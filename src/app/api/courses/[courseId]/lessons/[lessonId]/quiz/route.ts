@@ -20,6 +20,11 @@ const bodySchema = z.object({
   title: z.string().min(1).default("Quiz"),
   passingScore: z.number().int().min(0).max(100).default(70),
   isAiGenerated: z.boolean().optional(),
+  // A whole number of attempts, or null for unlimited. Omitted leaves the quiz's
+  // current setting alone. Zero and negatives are rejected: they would either
+  // lock every learner out or silently mean nothing. The ceiling keeps the value
+  // inside the column's integer range.
+  maxAttempts: z.number().int().min(1).max(1000).nullable().optional(),
   questions: z.array(questionSchema),
 });
 
@@ -93,7 +98,7 @@ export async function POST(
       { status: 400 }
     );
 
-  const { title, passingScore, isAiGenerated, questions } = parsed.data;
+  const { title, passingScore, isAiGenerated, maxAttempts, questions } = parsed.data;
 
   const quiz = await db.quiz.upsert({
     where: { lessonId },
@@ -102,13 +107,17 @@ export async function POST(
       title,
       passingScore,
       isAiGenerated: isAiGenerated ?? false,
+      maxAttempts: maxAttempts ?? null,
     },
     // Only overwrite the AI flag when the caller sends it, so a manual re-save
-    // never clears a quiz's AI-generated provenance.
+    // never clears a quiz's AI-generated provenance. maxAttempts follows the same
+    // rule: a re-save that omits it keeps the limit, while an explicit null
+    // removes it.
     update: {
       title,
       passingScore,
       ...(isAiGenerated !== undefined ? { isAiGenerated } : {}),
+      ...(maxAttempts !== undefined ? { maxAttempts } : {}),
     },
   });
 

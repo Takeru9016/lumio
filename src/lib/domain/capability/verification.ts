@@ -30,8 +30,11 @@ type ResolvedSourceCourse = {
  * production writer (src/lib/domain/capability/outcomes.ts) resolves to
  * exactly one Course:
  *   COURSE_COMPLETION: sourceType="Course", sourceId is the Course id directly.
- *   QUIZ_SCORE: sourceType="QuizAttempt", sourceId -> QuizAttempt.quizId ->
- *     Quiz.lessonId -> Lesson.sectionId -> Section.courseId -> Course.
+ *   QUIZ_SCORE: sourceType="Quiz", sourceId -> Quiz.lessonId ->
+ *     Lesson.sectionId -> Section.courseId -> Course. (Phase 25 — quiz evidence
+ *     is keyed by the quiz.) Evidence written before Phase 25 has
+ *     sourceType="QuizAttempt", sourceId -> QuizAttempt.quizId -> the same
+ *     Quiz chain; those historical rows still resolve.
  *   ASSESSMENT: sourceType="AssignmentSubmission", sourceId ->
  *     AssignmentSubmission.assignmentId -> Assignment.lessonId ->
  *     Lesson.sectionId -> Section.courseId -> Course. (Phase 20 — this branch
@@ -53,6 +56,26 @@ export async function resolveSourceCourse(evidence: {
       where: { id: evidence.sourceId },
       select: { id: true, instructorId: true, tenantId: true, title: true },
     });
+  }
+
+  if (evidence.sourceType === "Quiz") {
+    const quiz = await db.quiz.findUnique({
+      where: { id: evidence.sourceId },
+      select: {
+        lesson: {
+          select: {
+            section: {
+              select: {
+                course: {
+                  select: { id: true, instructorId: true, tenantId: true, title: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    return quiz?.lesson.section.course ?? null;
   }
 
   if (evidence.sourceType === "QuizAttempt") {

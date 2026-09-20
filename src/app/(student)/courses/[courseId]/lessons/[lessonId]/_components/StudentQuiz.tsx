@@ -20,6 +20,8 @@ export interface QuizData {
   title: string;
   passingScore: number;
   isAiGenerated: boolean;
+  /** Most attempts a learner may make; null means unlimited. */
+  maxAttempts: number | null;
   questions: StudentQuestion[];
 }
 
@@ -35,11 +37,22 @@ interface AttemptResult {
   score: number;
   isPassed: boolean;
   xpAwarded: number;
-  correctAnswers: {
+  /** Attempts left after this one; null when the quiz has no limit. */
+  remainingAttempts: number | null;
+  /**
+   * True only after a passing attempt or once the attempt budget is spent. The
+   * server withholds the answer key otherwise, so `correctAnswers` is absent.
+   */
+  answersRevealed: boolean;
+  correctAnswers?: {
     questionId: string;
     correctAnswer: string;
     explanation: string | null;
   }[];
+}
+
+interface AttemptsExhaustedResponse {
+  attemptsExhausted?: boolean;
 }
 
 type QuizPhase = "idle" | "taking" | "results";
@@ -67,6 +80,9 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attempts, setAttempts] = useState<AttemptSummary[]>(initialAttempts);
+  // Set when the server refuses an attempt because the budget is already spent
+  // (e.g. used up in another tab), so the screen stops offering another try.
+  const [serverExhausted, setServerExhausted] = useState(false);
 
   useEffect(() => {
     if (!result || result.xpAwarded === 0) return;
@@ -89,6 +105,10 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
 
   const { questions } = quiz;
   const totalQ = questions.length;
+  const attemptsExhausted =
+    serverExhausted || (quiz.maxAttempts !== null && attempts.length >= quiz.maxAttempts);
+  const attemptsLeft =
+    quiz.maxAttempts === null ? null : Math.max(0, quiz.maxAttempts - attempts.length);
 
   if (totalQ === 0) {
     return (
@@ -113,6 +133,15 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
           })),
         }),
       });
+      if (res.status === 403) {
+        const body = (await res.json().catch(() => null)) as AttemptsExhaustedResponse | null;
+        if (body?.attemptsExhausted) {
+          setServerExhausted(true);
+          setPhase("idle");
+          toast.error({ title: "You've used all your attempts for this quiz." });
+          return;
+        }
+      }
       if (!res.ok) throw new Error();
       const data = (await res.json()) as AttemptResult;
       setResult(data);
@@ -157,16 +186,39 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
               </div>
               <p className="text-sm text-text-muted mt-0.5">
                 {totalQ} question{totalQ !== 1 ? "s" : ""} · Passing score {quiz.passingScore}%
+                {quiz.maxAttempts !== null && (
+                  <>
+                    {" "}
+                    · {quiz.maxAttempts} attempt{quiz.maxAttempts !== 1 ? "s" : ""} allowed
+                  </>
+                )}
               </p>
             </div>
             <button
               type="button"
               onClick={startQuiz}
-              className="shrink-0 px-4 py-2 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-dark transition-colors"
+              disabled={attemptsExhausted}
+              className="shrink-0 px-4 py-2 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-dark disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {attempts.length > 0 ? "Try again" : "Start Quiz"}
+              {attemptsExhausted
+                ? "No attempts left"
+                : attempts.length > 0
+                  ? "Try again"
+                  : "Start Quiz"}
             </button>
           </div>
+
+          {attemptsExhausted ? (
+            <p className="mt-3 text-xs text-text-muted">
+              You have used all {quiz.maxAttempts ?? attempts.length} attempts for this quiz.
+            </p>
+          ) : (
+            attemptsLeft !== null && (
+              <p className="mt-3 text-xs text-text-muted">
+                {attemptsLeft} attempt{attemptsLeft !== 1 ? "s" : ""} remaining
+              </p>
+            )
+          )}
 
           {bestScore !== null && (
             <div className="mt-4 pt-4 border-t border-border">
@@ -337,7 +389,8 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
   // ─── Results ──────────────────────────────────────────────────────────────
 
   if (phase === "results" && result) {
-    const correctMap = new Map(result.correctAnswers.map((ca) => [ca.questionId, ca]));
+    const correctMap = new Map((result.correctAnswers ?? []).map((ca) => [ca.questionId, ca]));
+    const canTryAgain = result.remainingAttempts === null || result.remainingAttempts > 0;
 
     return (
       <div className="space-y-4">
@@ -356,7 +409,20 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
             <p className="text-sm font-medium text-text-secondary">+{result.xpAwarded} XP earned</p>
           )}
           <p className="text-xs text-text-muted mt-1">Passing score: {quiz.passingScore}%</p>
+          {result.remainingAttempts !== null && (
+            <p className="text-xs text-text-muted mt-1">
+              {result.remainingAttempts > 0
+                ? `${result.remainingAttempts} attempt${result.remainingAttempts !== 1 ? "s" : ""} remaining`
+                : "You have used all your attempts"}
+            </p>
+          )}
         </div>
+
+        {!result.answersRevealed && (
+          <p className="text-xs text-text-muted text-center">
+            The correct answers are shown once you pass or use your last attempt.
+          </p>
+        )}
 
         {/* Question review */}
         <div className="space-y-2">
@@ -364,13 +430,19 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
             const studentAns = answers[q.id] ?? "";
             const correctInfo = correctMap.get(q.id);
             const isShortAnswer = q.type === "SHORT_ANSWER";
-            const isCorrect = !isShortAnswer && studentAns === correctInfo?.correctAnswer;
+            const revealed = result.answersRevealed && correctInfo !== undefined;
+            const isCorrect =
+              revealed && !isShortAnswer && studentAns === correctInfo?.correctAnswer;
 
             return (
               <div
                 key={q.id}
                 className={`bg-surface-1 border rounded-lg p-4 ${
-                  isShortAnswer ? "border-border" : isCorrect ? "border-success" : "border-danger"
+                  !revealed || isShortAnswer
+                    ? "border-border"
+                    : isCorrect
+                      ? "border-success"
+                      : "border-danger"
                 }`}
               >
                 <div className="flex items-start gap-2.5">
@@ -378,6 +450,8 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
                     <span className="mt-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded bg-surface-3 text-text-muted shrink-0">
                       Manual
                     </span>
+                  ) : !revealed ? (
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-border shrink-0" />
                   ) : isCorrect ? (
                     <CheckCircle2 size={16} className="mt-0.5 text-success shrink-0" />
                   ) : (
@@ -393,12 +467,12 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
                         {studentAns ? displayAnswer(studentAns, q) : "(not answered)"}
                       </span>
                     </p>
-                    {!isShortAnswer && !isCorrect && correctInfo && (
+                    {revealed && !isShortAnswer && !isCorrect && correctInfo && (
                       <p className="text-xs text-success mt-0.5">
                         Correct: {displayAnswer(correctInfo.correctAnswer, q)}
                       </p>
                     )}
-                    {correctInfo?.explanation && (
+                    {revealed && correctInfo?.explanation && (
                       <p className="text-xs text-text-muted mt-1 italic">
                         {correctInfo.explanation}
                       </p>
@@ -410,17 +484,19 @@ export function StudentQuiz({ quiz, initialAttempts, onComplete }: StudentQuizPr
           })}
         </div>
 
-        {/* Try again */}
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={startQuiz}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-border rounded-md text-text-primary hover:bg-surface-2 transition-colors"
-          >
-            <RotateCcw size={13} />
-            Try again
-          </button>
-        </div>
+        {/* Try again — only while the attempt budget allows it */}
+        {canTryAgain && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={startQuiz}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-border rounded-md text-text-primary hover:bg-surface-2 transition-colors"
+            >
+              <RotateCcw size={13} />
+              Try again
+            </button>
+          </div>
+        )}
       </div>
     );
   }

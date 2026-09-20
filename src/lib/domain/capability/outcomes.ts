@@ -297,11 +297,59 @@ export type QuizOutcomeParams = {
 };
 
 /**
+ * Skills for which this learner already holds quiz evidence written before
+ * Phase 25, when each passing attempt got its own row keyed by the attempt id
+ * (sourceType "QuizAttempt"). Those rows are historical and are never touched;
+ * this only lets a later pass recognise that the learner already has quiz
+ * evidence for the skill, so the "one row per learner, quiz and skill" rule
+ * holds across the change instead of adding one more row to a learner who
+ * already has several. Legacy rows are never written any more, so this set
+ * cannot grow and needs no concurrency protection.
+ */
+async function skillsWithLegacyQuizEvidence(params: {
+  tenantId: string;
+  userId: string;
+  quizId: string;
+  skillIds: string[];
+}): Promise<Set<string>> {
+  const { tenantId, userId, quizId, skillIds } = params;
+  if (skillIds.length === 0) return new Set();
+
+  const attempts = await db.quizAttempt.findMany({
+    where: { userId, quizId },
+    select: { id: true },
+  });
+  if (attempts.length === 0) return new Set();
+
+  const rows = await db.skillEvidence.findMany({
+    where: {
+      tenantId,
+      userId,
+      sourceType: "QuizAttempt",
+      sourceId: { in: attempts.map((attempt) => attempt.id) },
+      skillId: { in: skillIds },
+    },
+    select: { skillId: true },
+  });
+  return new Set(rows.map((row) => row.skillId));
+}
+
+/**
  * The single entry point the quiz-attempt route calls. QUIZ_COMPLETED is
  * always emitted (pass or fail); SkillEvidence is only ever created when
  * `isPassed` — a failed quiz is a real, recorded learning event with
  * deliberately zero capability-state effect (no negative/degrading
  * evidence — no product requirement establishes what that would even mean).
+ *
+ * Quiz evidence is keyed by the QUIZ, not the attempt (sourceType "Quiz",
+ * sourceId = quizId; tenant, learner and skill are already part of the unique
+ * key). However many attempts a learner passes, there is at most one QUIZ_SCORE
+ * row per learner, quiz and skill: the first pass creates it and every later
+ * pass hits the same unique constraint (P2002 -> a benign no-op inside
+ * recordSkillEvidenceOutcome), which is also what makes concurrent passing
+ * attempts safe. The row keeps the score of the pass that created it. The
+ * attempt itself is still recorded (QuizAttempt, and the per-attempt
+ * QUIZ_COMPLETED LearningEvent).
  */
 export async function recordQuizOutcome(params: QuizOutcomeParams): Promise<void> {
   const { tenantId, userId, quizId, attemptId, score, isPassed, occurredAt } = params;
@@ -324,14 +372,21 @@ export async function recordQuizOutcome(params: QuizOutcomeParams): Promise<void
       try {
         assertSameTenant(tenantId, [{ tenantId: course.tenantId ?? "", label: "Course" }]);
         const mappings = await resolveValidCourseSkillMappings(tenantId, course.id);
+        const legacy = await skillsWithLegacyQuizEvidence({
+          tenantId,
+          userId,
+          quizId,
+          skillIds: mappings.map((mapping) => mapping.skillId),
+        });
         for (const mapping of mappings) {
+          if (legacy.has(mapping.skillId)) continue;
           await recordSkillEvidenceOutcome({
             tenantId,
             userId,
             skillId: mapping.skillId,
             type: "QUIZ_SCORE",
-            sourceType: "QuizAttempt",
-            sourceId: attemptId,
+            sourceType: "Quiz",
+            sourceId: quizId,
             score,
             occurredAt,
           });

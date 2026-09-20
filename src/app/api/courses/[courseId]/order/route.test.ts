@@ -51,3 +51,67 @@ describe("POST /api/courses/[courseId]/order", () => {
     });
   });
 });
+
+describe("POST /api/courses/[courseId]/order — tenant isolation", () => {
+  async function paidTenantCourse() {
+    const { tenant, user: instructor } = await createTenantUser("INSTRUCTOR");
+    const { course } = await createCourse(tenant.id, instructor.id);
+    await db.course.update({
+      where: { id: course.id },
+      data: { price: 499, currency: "INR", status: "PUBLISHED" },
+    });
+    return { tenant, course };
+  }
+
+  const order = (slug: string) =>
+    POST(new Request("http://localhost/x", { method: "POST" }) as never, {
+      params: Promise.resolve({ courseId: slug }),
+    });
+
+  it("does not create a payment order for a learner who cannot enroll in the course", async () => {
+    const { course } = await paidTenantCourse();
+    const { tenant: otherTenant } = await createTenantUser("ORG_ADMIN");
+    const outsider = await createUserInTenant(otherTenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: outsider.clerkId } as never);
+
+    const res = await order(course.slug);
+
+    expect(res.status).toBe(404);
+    expect(createOrder).not.toHaveBeenCalled();
+  });
+
+  it("does not create a payment order for a learner with no tenant on a tenant-owned course", async () => {
+    const { course } = await paidTenantCourse();
+    const solo = await db.user.create({
+      data: {
+        clerkId: `clerk-solo-${Date.now()}`,
+        email: `solo-${Date.now()}@example.test`,
+        role: "STUDENT",
+      },
+    });
+    vi.mocked(auth).mockResolvedValue({ userId: solo.clerkId } as never);
+
+    expect((await order(course.slug)).status).toBe(404);
+    expect(createOrder).not.toHaveBeenCalled();
+  });
+
+  it("still creates the order for a learner of the course's own tenant", async () => {
+    const { tenant, course } = await paidTenantCourse();
+    const member = await createUserInTenant(tenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: member.clerkId } as never);
+
+    expect((await order(course.slug)).status).toBe(200);
+    expect(createOrder).toHaveBeenCalledTimes(1);
+  });
+
+  it("still creates the order for anyone on a tenantless course", async () => {
+    const { course } = await paidTenantCourse();
+    await db.course.update({ where: { id: course.id }, data: { tenantId: null } });
+    const { tenant: otherTenant } = await createTenantUser("ORG_ADMIN");
+    const learner = await createUserInTenant(otherTenant.id, "STUDENT");
+    vi.mocked(auth).mockResolvedValue({ userId: learner.clerkId } as never);
+
+    expect((await order(course.slug)).status).toBe(200);
+    expect(createOrder).toHaveBeenCalledTimes(1);
+  });
+});

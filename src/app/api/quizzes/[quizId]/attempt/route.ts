@@ -15,6 +15,34 @@ const bodySchema = z.object({
   ),
 });
 
+type QuizQuestionRow = { id: string; type: string; correctAnswer: string };
+
+function gradeAnswers(questions: QuizQuestionRow[], answerMap: Map<string, string>) {
+  let scoreable = 0;
+  let correct = 0;
+  const answerRows: { questionId: string; answer: string; isCorrect: boolean }[] = [];
+
+  for (const q of questions) {
+    const studentAnswer = answerMap.get(q.id) ?? "";
+
+    if (q.type === "SHORT_ANSWER") {
+      answerRows.push({ questionId: q.id, answer: studentAnswer, isCorrect: false });
+      continue;
+    }
+
+    scoreable++;
+    const isCorrect = studentAnswer === q.correctAnswer;
+    if (isCorrect) correct++;
+    answerRows.push({ questionId: q.id, answer: studentAnswer, isCorrect });
+  }
+
+  return {
+    answerRows,
+    score: scoreable === 0 ? 0 : Math.round((correct / scoreable) * 100),
+    isPerfect: scoreable > 0 && correct === scoreable,
+  };
+}
+
 export async function POST(req: Request, { params }: { params: Promise<{ quizId: string }> }) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,6 +60,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ quizId:
     select: {
       id: true,
       passingScore: true,
+      maxAttempts: true,
       lesson: {
         select: { section: { select: { courseId: true } } },
       },
@@ -61,42 +90,70 @@ export async function POST(req: Request, { params }: { params: Promise<{ quizId:
 
   const { answers } = parsed.data;
   const answerMap = new Map(answers.map((a) => [a.questionId, a.answer]));
+  const { maxAttempts } = quiz;
 
-  let scoreable = 0;
-  let correct = 0;
-  const answerRows: {
-    questionId: string;
-    answer: string;
-    isCorrect: boolean;
-  }[] = [];
+  // The attempt limit is enforced here, not in the client. "Count attempts, then
+  // insert" is not safe on its own: two simultaneous requests can both count
+  // below the limit and both insert. So a limited quiz takes a row lock on THIS
+  // learner's enrollment before counting. Concurrent attempts by the same
+  // learner queue on that lock, and under READ COMMITTED each one then counts
+  // the attempts the previous one committed — so at most `maxAttempts` are ever
+  // accepted. The lock is per learner (a different learner's attempts never
+  // wait on it) and is held only for the count and the insert; grading is
+  // in-memory and everything else (XP, evidence) runs after it is released. A
+  // quiz with no limit has nothing to protect and takes no lock.
+  const result = await db.$transaction(async (tx) => {
+    let attemptsUsedBefore: number | null = null;
 
-  for (const q of quiz.questions) {
-    const studentAnswer = answerMap.get(q.id) ?? "";
-
-    if (q.type === "SHORT_ANSWER") {
-      answerRows.push({ questionId: q.id, answer: studentAnswer, isCorrect: false });
-      continue;
+    if (maxAttempts !== null) {
+      await tx.$queryRaw`SELECT id FROM "Enrollment" WHERE id = ${enrollment.id} FOR UPDATE`;
+      attemptsUsedBefore = await tx.quizAttempt.count({
+        where: { userId: dbUser.id, quizId: quiz.id },
+      });
+      if (attemptsUsedBefore >= maxAttempts) {
+        return { exhausted: true as const, attemptsUsed: attemptsUsedBefore };
+      }
     }
 
-    scoreable++;
-    const isCorrect = studentAnswer === q.correctAnswer;
-    if (isCorrect) correct++;
-    answerRows.push({ questionId: q.id, answer: studentAnswer, isCorrect });
+    const graded = gradeAnswers(quiz.questions, answerMap);
+    const isPassed = graded.score >= quiz.passingScore;
+
+    const attempt = await tx.quizAttempt.create({
+      data: {
+        userId: dbUser.id,
+        quizId: quiz.id,
+        score: graded.score,
+        isPassed,
+        answers: { create: graded.answerRows },
+      },
+    });
+
+    return {
+      exhausted: false as const,
+      attempt,
+      score: graded.score,
+      isPassed,
+      isPerfect: graded.isPerfect,
+      attemptsUsed: attemptsUsedBefore === null ? null : attemptsUsedBefore + 1,
+    };
+  });
+
+  if (result.exhausted) {
+    return NextResponse.json(
+      {
+        error: "Maximum attempts reached",
+        attemptsExhausted: true,
+        maxAttempts,
+        attemptsUsed: result.attemptsUsed,
+        remainingAttempts: 0,
+      },
+      { status: 403 }
+    );
   }
 
-  const score = scoreable === 0 ? 0 : Math.round((correct / scoreable) * 100);
-  const isPassed = score >= quiz.passingScore;
-  const isPerfect = scoreable > 0 && correct === scoreable;
-
-  const attempt = await db.quizAttempt.create({
-    data: {
-      userId: dbUser.id,
-      quizId: quiz.id,
-      score,
-      isPassed,
-      answers: { create: answerRows },
-    },
-  });
+  const { attempt, score, isPassed, isPerfect, attemptsUsed } = result;
+  const remainingAttempts =
+    maxAttempts === null || attemptsUsed === null ? null : Math.max(0, maxAttempts - attemptsUsed);
 
   let xpAwarded = 0;
   if (isPassed) {
@@ -120,15 +177,31 @@ export async function POST(req: Request, { params }: { params: Promise<{ quizId:
     });
   }
 
+  // The answer key is only ever released when it can no longer help the learner
+  // pass: after a passing attempt, or once the attempt budget is spent. A failed
+  // attempt with attempts left (or on an unlimited quiz) gets the result and the
+  // remaining budget, nothing that reveals an answer — not correctAnswer, not the
+  // explanation, and no per-question correctness. The response is authoritative;
+  // nothing hidden is sent to the client.
+  const answersRevealed = isPassed || remainingAttempts === 0;
+
   return NextResponse.json({
     attemptId: attempt.id,
     score,
     isPassed,
     xpAwarded,
-    correctAnswers: quiz.questions.map((q) => ({
-      questionId: q.id,
-      correctAnswer: q.correctAnswer,
-      explanation: q.explanation,
-    })),
+    maxAttempts,
+    attemptsUsed,
+    remainingAttempts,
+    answersRevealed,
+    ...(answersRevealed
+      ? {
+          correctAnswers: quiz.questions.map((q) => ({
+            questionId: q.id,
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation,
+          })),
+        }
+      : {}),
   });
 }
