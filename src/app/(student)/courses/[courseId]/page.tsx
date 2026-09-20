@@ -5,6 +5,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { AiBadge } from "@/components";
+import { CourseAssignmentContext } from "@/components/learning-assignment/CourseAssignmentContext";
+import { getCourseAssignmentContext } from "@/lib/course-assignment-context";
 import { db } from "@/lib/db";
 import { EnrollButton } from "./_components/EnrollButton";
 
@@ -28,7 +30,7 @@ export default async function CourseDetailPage({
   const [dbUser, course] = await Promise.all([
     db.user.findUnique({
       where: { clerkId: userId },
-      select: { id: true, email: true, name: true },
+      select: { id: true, email: true, name: true, tenantId: true, role: true },
     }),
     db.course.findUnique({
       where: { slug: courseId },
@@ -75,13 +77,19 @@ export default async function CourseDetailPage({
   if (!dbUser) redirect("/sign-in");
   if (!course || course.status === "DRAFT") notFound();
 
-  const enrollment = await db.enrollment.findUnique({
-    where: { userId_courseId: { userId: dbUser.id, courseId: course.id } },
-    select: {
-      id: true,
-      status: true,
-    },
-  });
+  const [enrollment, assignment] = await Promise.all([
+    db.enrollment.findUnique({
+      where: { userId_courseId: { userId: dbUser.id, courseId: course.id } },
+      select: {
+        id: true,
+        status: true,
+      },
+    }),
+    getCourseAssignmentContext(
+      { userId: dbUser.id, clerkId: userId, tenantId: dbUser.tenantId, role: dbUser.role },
+      course.id
+    ),
+  ]);
 
   const isEnrolled = !!enrollment;
 
@@ -179,6 +187,13 @@ export default async function CourseDetailPage({
               <span>{course.sections.length} sections</span>
               <span>{course._count.enrollments} students</span>
             </div>
+
+            {assignment && (
+              <CourseAssignmentContext
+                assignment={assignment}
+                progressPercent={isEnrolled ? progress : undefined}
+              />
+            )}
 
             <div className="mt-auto pt-2 space-y-3">
               {isEnrolled && (

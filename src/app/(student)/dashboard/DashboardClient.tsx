@@ -4,9 +4,10 @@ import { BookOpen, ChevronDown, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { EmptyState } from "@/components";
+import { AssignedLearning } from "@/components/learning-assignment/AssignedLearning";
 
 interface ContinueLearningItem {
   courseSlug: string;
@@ -62,6 +63,16 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const [showCompleted, setShowCompleted] = useState(false);
 
+  // The same percentages the "Continue learning" cards below show, so an
+  // assigned course can never display a different figure from the list.
+  const progressBySlug = useMemo(
+    () =>
+      new Map(
+        [...continueLearning, ...completedCourses].map((c) => [c.courseSlug, c.progress] as const)
+      ),
+    [continueLearning, completedCourses]
+  );
+
   const stats = [
     { icon: BookOpen, label: "Enrolled courses", value: enrolledCount.toString() },
     { icon: TrendingUp, label: "Avg completion", value: `${avgCompletion}%` },
@@ -91,6 +102,10 @@ export function DashboardClient({
         >
           View your skill profile →
         </Link>
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <AssignedLearning progressBySlug={progressBySlug} />
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

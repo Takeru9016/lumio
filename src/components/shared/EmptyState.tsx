@@ -7,6 +7,7 @@ interface EmptyStateProps {
   ctaLabel?: string;
   ctaHref?: string;
   onCta?: () => void;
+  compact?: boolean;
 }
 
 export function EmptyState({
@@ -16,9 +17,12 @@ export function EmptyState({
   ctaLabel,
   ctaHref,
   onCta,
+  compact = false,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div
+      className={`flex flex-col items-center justify-center text-center ${compact ? "px-4 py-6" : "py-16"}`}
+    >
       {icon && <div className="text-4xl mb-3">{icon}</div>}
       <h3 className="text-base font-semibold text-text-primary mb-1">{title}</h3>
       <p className="text-sm text-text-muted mb-4 max-w-xs">{description}</p>

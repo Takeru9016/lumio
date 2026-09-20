@@ -47,6 +47,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       </ErrorBoundary>
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopNav
+          navRole="STUDENT"
           showAiBadge
           currentStreak={user.currentStreak}
           initialUnreadCount={unreadCount}

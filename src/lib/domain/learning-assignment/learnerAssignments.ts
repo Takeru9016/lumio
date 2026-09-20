@@ -117,6 +117,44 @@ function compareAssignments(a: LearnerAssignment, b: LearnerAssignment): number 
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
 
+const ASSIGNMENT_SELECT = {
+  id: true,
+  courseId: true,
+  source: true,
+  reason: true,
+  dueDate: true,
+  cancelledAt: true,
+  createdAt: true,
+  course: { select: { title: true, slug: true } },
+} as const;
+
+type StatusFacts = { enrollmentStatus: EnrollmentStatus | null; hasLessonProgress: boolean };
+
+// The one place a stored row becomes what a learner is shown, so the collection
+// read and the single-course read can never disagree about status or reason.
+function toLearnerAssignment(row: AssignmentRow, facts: StatusFacts, now: Date): LearnerAssignment {
+  const base = {
+    id: row.id,
+    courseId: row.courseId,
+    courseTitle: row.course.title,
+    courseSlug: row.course.slug,
+    dueDate: row.dueDate,
+    createdAt: row.createdAt,
+    status: deriveAssignmentStatus({
+      cancelledAt: row.cancelledAt,
+      dueDate: row.dueDate,
+      enrollmentStatus: facts.enrollmentStatus,
+      hasLessonProgress: facts.hasLessonProgress,
+      now,
+    }),
+  };
+  return {
+    ...base,
+    source: row.source,
+    reason: projectReason(row.source, row.reason),
+  } as LearnerAssignment;
+}
+
 /**
  * The signed-in learner's own assignments.
  *
@@ -151,16 +189,7 @@ export async function getLearnerAssignments(
       cancelledAt: null,
       user: { deletedAt: null },
     },
-    select: {
-      id: true,
-      courseId: true,
-      source: true,
-      reason: true,
-      dueDate: true,
-      cancelledAt: true,
-      createdAt: true,
-      course: { select: { title: true, slug: true } },
-    },
+    select: ASSIGNMENT_SELECT,
   });
   if (rows.length === 0) return [];
 
@@ -185,28 +214,71 @@ export async function getLearnerAssignments(
   );
   const startedCourseIds = new Set(startedCourses.map((c) => c.id));
 
-  const assignments = rows.map((row): LearnerAssignment => {
-    const base = {
-      id: row.id,
-      courseId: row.courseId,
-      courseTitle: row.course.title,
-      courseSlug: row.course.slug,
-      dueDate: row.dueDate,
-      createdAt: row.createdAt,
-      status: deriveAssignmentStatus({
-        cancelledAt: row.cancelledAt,
-        dueDate: row.dueDate,
+  const assignments = rows.map((row) =>
+    toLearnerAssignment(
+      row,
+      {
         enrollmentStatus: enrollmentStatusByCourse.get(row.courseId) ?? null,
         hasLessonProgress: startedCourseIds.has(row.courseId),
-        now,
-      }),
-    };
-    return {
-      ...base,
-      source: row.source,
-      reason: projectReason(row.source, row.reason),
-    } as LearnerAssignment;
-  });
+      },
+      now
+    )
+  );
 
   return assignments.sort(compareAssignments);
+}
+
+/**
+ * The signed-in learner's assignment for one course, or null. This is what a
+ * course page needs; it must not load the learner's whole collection and pick
+ * one in JavaScript, so `courseId` is part of the database predicate alongside
+ * `userId` and `tenantId`. Everything else (cancelled rows are excluded, status
+ * is derived by `deriveAssignmentStatus`, the reason is the same learner-facing
+ * projection, the same ordering picks between several assignments for the
+ * course) is shared with `getLearnerAssignments` through `toLearnerAssignment`
+ * and `compareAssignments`, so the two can never show different answers.
+ *
+ * Bounded work: the assignments for this one course (a handful at most, one
+ * per source), then this learner's single enrollment row for it and whether
+ * they have any progress in it. No per-row lookups, and no dependence on how
+ * many assignments the learner has in other courses.
+ */
+export async function getLearnerCourseAssignment(
+  ctx: AuthContext,
+  courseId: string,
+  now: Date = new Date()
+): Promise<LearnerAssignment | null> {
+  requireRole(ctx, ["STUDENT"]);
+  requireTenant(ctx);
+
+  const rows: AssignmentRow[] = await db.learningAssignment.findMany({
+    where: {
+      userId: ctx.userId,
+      tenantId: ctx.tenantId,
+      courseId,
+      cancelledAt: null,
+      user: { deletedAt: null },
+    },
+    select: ASSIGNMENT_SELECT,
+  });
+  if (rows.length === 0) return null;
+
+  const [enrollment, progress] = await Promise.all([
+    db.enrollment.findUnique({
+      where: { userId_courseId: { userId: ctx.userId, courseId } },
+      select: { status: true },
+    }),
+    // The same "started" predicate the write path and the collection read use.
+    db.lessonProgress.findFirst({
+      where: { userId: ctx.userId, lesson: { section: { courseId } } },
+      select: { id: true },
+    }),
+  ]);
+
+  const facts: StatusFacts = {
+    enrollmentStatus: enrollment?.status ?? null,
+    hasLessonProgress: progress !== null,
+  };
+  const [first] = rows.map((row) => toLearnerAssignment(row, facts, now)).sort(compareAssignments);
+  return first ?? null;
 }
