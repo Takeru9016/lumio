@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { generateCertificate } from "@/lib/certificate";
 import { db } from "@/lib/db";
 import { recordCourseCompletionOutcome } from "@/lib/domain/capability/outcomes";
+import { reconcileCourseCompletionEvidence } from "@/lib/domain/capability/reconciliation";
 import { recordMandatoryTrainingCompletion } from "@/lib/mandatory-training";
 import { updateStreak } from "@/lib/streak";
 import { awardXP, XP_EVENTS } from "@/lib/xp";
@@ -78,6 +79,30 @@ export async function POST(
   let courseCompleted = false;
   let courseXpEarned = 0;
 
+  // Capability evidence has its own failure boundary (Phase 24). Its write is
+  // idempotent, so a failure here is recorded and rethrown only AFTER the
+  // unrelated completion side effects have run — and, symmetrically, a failing
+  // XP/certificate/email step can no longer stop the evidence, because the
+  // evidence is written first. Retrying the request is always safe: the
+  // enrollment gate keeps XP/certificate/training exactly-once, and the loser
+  // path below reconciles any evidence a previous attempt did not persist.
+  let evidenceFailure: unknown = null;
+  let evidenceAttempted = false;
+  const guardEvidence = async (write: () => Promise<unknown>) => {
+    evidenceAttempted = true;
+    try {
+      await write();
+    } catch (err) {
+      evidenceFailure = err;
+      console.error(
+        `[capability] Course-completion evidence failed for course ${course.id}, user ${dbUser.id} — it is idempotent and is reconciled on the next attempt`,
+        err
+      );
+    }
+  };
+  const reconcileEvidence = (tenantId: string) =>
+    reconcileCourseCompletionEvidence({ tenantId, userId: dbUser.id, courseId: course.id });
+
   const allPublishedLessons = await db.lesson.findMany({
     where: { section: { courseId: course.id }, isPublished: true, isArchived: false },
     select: { quiz: { select: { id: true } } },
@@ -116,31 +141,52 @@ export async function POST(
       const wonCompletionTransition = count === 1;
 
       if (wonCompletionTransition) {
-        await Promise.all([
+        // Phase 5 capability loop — tenant-gated like every other V2 write:
+        // a FREE-plan user (no tenant) has no capability tracking.
+        if (dbUser.tenantId) {
+          const tenantId = dbUser.tenantId;
+          await guardEvidence(() =>
+            recordCourseCompletionOutcome({
+              tenantId,
+              userId: dbUser.id,
+              courseId: course.id,
+              enrollmentId: enrollment.id,
+              completedAt,
+            })
+          );
+        }
+
+        // Same effects and same failure behavior as before (the first failure
+        // is rethrown), but every effect is allowed to finish first. Promise.all
+        // would answer on the first rejection and leave the others running
+        // after the response, where a retry could overlap them.
+        const sideEffects = await Promise.allSettled([
           awardXP(dbUser.id, "COURSE_COMPLETE", XP_EVENTS.COURSE_COMPLETE),
           generateCertificate(dbUser.id, course.id),
           recordMandatoryTrainingCompletion(dbUser.id, course.id),
         ]);
+        const failed = sideEffects.find((result) => result.status === "rejected");
+        if (failed) throw failed.reason;
         courseXpEarned = XP_EVENTS.COURSE_COMPLETE;
-
-        // Phase 5 capability loop — additive, best-effort at this boundary
-        // (see src/lib/domain/capability/outcomes.ts): never throws, never
-        // affects this response. Tenant-gated like every other V2 write —
-        // a FREE-plan user (no tenant) has no capability tracking.
-        if (dbUser.tenantId) {
-          await recordCourseCompletionOutcome({
-            tenantId: dbUser.tenantId,
-            userId: dbUser.id,
-            courseId: course.id,
-            enrollmentId: enrollment.id,
-            completedAt,
-          });
-        }
       } else {
+        if (dbUser.tenantId) {
+          const tenantId = dbUser.tenantId;
+          await guardEvidence(() => reconcileEvidence(tenantId));
+        }
         await generateCertificate(dbUser.id, course.id);
       }
     }
   }
+
+  // An enrollment that is already COMPLETED keeps its completion evidence
+  // even when this request did not itself complete the course (for example a
+  // lesson was added after completion, or an earlier attempt failed).
+  if (!evidenceAttempted && dbUser.tenantId && enrollment.status === "COMPLETED") {
+    const tenantId = dbUser.tenantId;
+    await guardEvidence(() => reconcileEvidence(tenantId));
+  }
+
+  if (evidenceFailure) throw evidenceFailure;
 
   return NextResponse.json({
     xpEarned: isFirstCompletion ? XP_EVENTS.LESSON_COMPLETE : 0,

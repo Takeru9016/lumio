@@ -280,14 +280,19 @@ describe("Historical evidence rules (Phase 22 locked contract)", () => {
     expect(evidence).toHaveLength(1);
   });
 
-  it("Scenario B — mapping after completion: no historical evidence is created retroactively", async () => {
+  // Phase 24 superseded the original "never retroactive" rule for learners whose
+  // enrollment is COMPLETED (see reconciliation.test.ts — late mapping now
+  // reconciles them). What still holds, and is asserted here, is that a
+  // mapping never invents evidence for an enrollment that is not COMPLETED.
+  it("Scenario B — mapping after an outcome that never completed the enrollment creates no evidence", async () => {
     const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
     const { ctx: learnerCtx } = await createTenantUser("STUDENT");
     const { course } = await createCourse(tenant.id, instructorCtx.userId);
     const skill = await createSkill(tenant.id);
     const enrollment = await enroll(learnerCtx.userId, course.id);
 
-    // Completion happens BEFORE the skill is ever mapped.
+    // The outcome is recorded BEFORE the skill is ever mapped, and the
+    // enrollment itself is still ACTIVE (never transitioned to COMPLETED).
     await recordCourseCompletionOutcome({
       tenantId: tenant.id,
       userId: learnerCtx.userId,

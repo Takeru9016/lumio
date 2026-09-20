@@ -233,7 +233,13 @@ Implements the loop `Learning → Evidence → Capability` (`src/lib/domain/capa
   `POST /api/courses/[courseId]/lessons/[lessonId]/complete`; `recordQuizOutcome()` wired into
   `POST /api/quizzes/[quizId]/attempt`. Both are additive, tenant-gated (no `tenantId` → no
   capability tracking, matching every other V2 write), and never affect the route's existing
-  response shape or status behavior.
+  response shape or status behavior. *(Amended by Phase 24 for course completion only: the
+  completion route now writes the evidence first, in its own failure boundary, so an XP/
+  certificate/email/training failure cannot lose it; a genuine evidence failure is no longer
+  swallowed — it is logged and rethrown after the other side effects, and is safe to retry
+  because `reconcileCourseCompletionEvidence()` (`reconciliation.ts`) idempotently creates any
+  missing evidence. Adding a `CourseSkill` also reconciles already-COMPLETED same-tenant
+  learners for that skill. Quiz/assignment outcomes are unchanged.)*
 - **SkillEvidence** — deterministic creation from `CourseSkill` mappings on course completion and
   quiz pass; DB-enforced idempotency via a real unique constraint (`tenantId, userId, skillId,
   sourceType, sourceId` — not an application-level check-then-insert, which cannot close the race

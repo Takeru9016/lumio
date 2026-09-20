@@ -24,8 +24,11 @@ import { emitLearningEvent } from "@/lib/domain/learning-events/emit";
  * and this is treated as a benign, idempotent no-op: the winning concurrent
  * transaction already created the evidence AND projected UserSkill for it,
  * atomically, in its own call to this same function.
+ *
+ * Resolves `true` when this call created the evidence, `false` when it
+ * already existed (the idempotent no-op above).
  */
-async function recordSkillEvidenceOutcome(params: {
+export async function recordSkillEvidenceOutcome(params: {
   tenantId: string;
   userId: string;
   skillId: string;
@@ -34,7 +37,7 @@ async function recordSkillEvidenceOutcome(params: {
   sourceId: string;
   score?: number;
   occurredAt: Date;
-}): Promise<void> {
+}): Promise<boolean> {
   const { tenantId, userId, skillId, type, sourceType, sourceId, score, occurredAt } = params;
   try {
     await db.$transaction(async (tx) => {
@@ -52,9 +55,10 @@ async function recordSkillEvidenceOutcome(params: {
       });
       await projectUserSkill(tx, { tenantId, userId, skillId, changeTimestamp: occurredAt });
     });
+    return true;
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      return;
+      return false;
     }
     throw err;
   }
@@ -69,7 +73,7 @@ async function recordSkillEvidenceOutcome(params: {
  * trusted into evidence creation, and never allowed to block the other,
  * valid mappings for the same course.
  */
-async function resolveValidCourseSkillMappings(
+export async function resolveValidCourseSkillMappings(
   tenantId: string,
   courseId: string
 ): Promise<{ skillId: string }[]> {
@@ -93,6 +97,138 @@ async function resolveValidCourseSkillMappings(
   return valid;
 }
 
+export type CourseCompletionEvidenceParams = {
+  tenantId: string;
+  userId: string;
+  courseId: string;
+  occurredAt: Date;
+  /**
+   * Restricts recording to these skills — used when a single new CourseSkill
+   * is being reconciled. Omitted means every valid mapping of the course.
+   */
+  skillIds?: string[];
+};
+
+export type CourseCompletionEvidenceResult = {
+  created: number;
+  alreadyPresent: number;
+  /** Why nothing was attempted, when that is a deliberate skip rather than a failure. */
+  skipped: "course-not-found" | "tenant-mismatch" | null;
+};
+
+/**
+ * One or more skills' evidence writes failed for a reason other than the
+ * benign duplicate (P2002). Thrown only after every mapped skill has been
+ * attempted, so one failing skill never blocks the others. The write is
+ * idempotent, so the fix for this error is simply to run it again — see
+ * reconciliation.ts.
+ */
+export class CourseCompletionEvidenceError extends Error {
+  constructor(
+    public courseId: string,
+    public userId: string,
+    public failures: { skillId: string; error: unknown }[]
+  ) {
+    super(
+      `Failed to record course-completion evidence for course ${courseId}, user ${userId} (skills: ${failures
+        .map((f) => f.skillId)
+        .join(", ")})`,
+      { cause: failures[0]?.error }
+    );
+    this.name = "CourseCompletionEvidenceError";
+  }
+}
+
+/**
+ * Records COURSE_COMPLETION evidence for a learner's completion of a course.
+ * This is the single evidence-writing routine shared by the live completion
+ * path (recordCourseCompletionOutcome) and reconciliation.ts, so both produce
+ * byte-identical evidence and are protected by the same
+ * [tenantId, userId, skillId, sourceType, sourceId] unique constraint.
+ *
+ * It does NOT check that the enrollment is COMPLETED — callers own that
+ * proof (the completion route's atomic transition, or reconciliation's
+ * explicit enrollment check). It does enforce the tenant boundary, skips
+ * cross-tenant CourseSkill mappings, and — unlike the original catch-all —
+ * lets genuine failures surface instead of swallowing them.
+ */
+export async function recordCourseCompletionEvidence(
+  params: CourseCompletionEvidenceParams
+): Promise<CourseCompletionEvidenceResult> {
+  const { tenantId, userId, courseId, occurredAt, skillIds } = params;
+
+  const course = await db.course.findUnique({
+    where: { id: courseId },
+    select: { id: true, tenantId: true },
+  });
+  if (!course) return { created: 0, alreadyPresent: 0, skipped: "course-not-found" };
+
+  try {
+    assertSameTenant(tenantId, [{ tenantId: course.tenantId ?? "", label: "Course" }]);
+  } catch (err) {
+    if (err instanceof KnowledgeAccessError) {
+      console.warn(`[capability] Skipping evidence for course ${courseId}: tenant mismatch`, err);
+      return { created: 0, alreadyPresent: 0, skipped: "tenant-mismatch" };
+    }
+    throw err;
+  }
+
+  const validMappings = await resolveValidCourseSkillMappings(tenantId, course.id);
+  const mappings = skillIds
+    ? validMappings.filter((mapping) => skillIds.includes(mapping.skillId))
+    : validMappings;
+
+  // Skip the write for evidence that is already there so a repeated call
+  // (every completion request on an already-completed course reconciles) does
+  // not issue a doomed INSERT per skill. This is an optimization only — the
+  // unique constraint, handled as P2002 below, remains the actual guarantee
+  // for concurrent callers.
+  const existing =
+    mappings.length === 0
+      ? []
+      : await db.skillEvidence.findMany({
+          where: {
+            tenantId,
+            userId,
+            sourceType: "Course",
+            sourceId: course.id,
+            skillId: { in: mappings.map((mapping) => mapping.skillId) },
+          },
+          select: { skillId: true },
+        });
+  const alreadyRecorded = new Set(existing.map((row) => row.skillId));
+
+  let created = 0;
+  let alreadyPresent = 0;
+  const failures: { skillId: string; error: unknown }[] = [];
+
+  for (const mapping of mappings) {
+    if (alreadyRecorded.has(mapping.skillId)) {
+      alreadyPresent += 1;
+      continue;
+    }
+    try {
+      const wasCreated = await recordSkillEvidenceOutcome({
+        tenantId,
+        userId,
+        skillId: mapping.skillId,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        occurredAt,
+      });
+      if (wasCreated) created += 1;
+      else alreadyPresent += 1;
+    } catch (error) {
+      failures.push({ skillId: mapping.skillId, error });
+    }
+  }
+
+  if (failures.length > 0) throw new CourseCompletionEvidenceError(course.id, userId, failures);
+
+  return { created, alreadyPresent, skipped: null };
+}
+
 export type CourseCompletionOutcomeParams = {
   tenantId: string;
   userId: string;
@@ -102,53 +238,32 @@ export type CourseCompletionOutcomeParams = {
 };
 
 /**
- * The single entry point the course-completion route calls. Owns both
- * outputs of the Phase 5 architecture (see docs/V2_AI_ARCHITECTURE.md,
- * "AI Course Creator" for the analogous READ/GENERATE-vs-application-WRITE
- * separation pattern this mirrors):
+ * The entry point the course-completion route calls once it has won the
+ * atomic enrollment transition. Owns both outputs of the Phase 5
+ * architecture (see docs/V2_AI_ARCHITECTURE.md, "AI Course Creator" for the
+ * analogous READ/GENERATE-vs-application-WRITE separation pattern this
+ * mirrors):
  *
  *   Trusted outcome -> SkillEvidence -> UserSkill   (atomic, per skill)
  *   Trusted outcome -> LearningEvent                (best-effort, after)
  *
- * Never throws on a LearningEvent failure — the caller (the completion
- * route) must not have its response affected by this function's evidence or
- * event-emission behavior beyond having called it.
+ * A LearningEvent failure is logged and never thrown. An evidence failure is
+ * different (Phase 24): it is no longer swallowed — the LearningEvent is
+ * still attempted, then the evidence error is rethrown so the caller can
+ * isolate it from unrelated completion side effects and surface it. The
+ * evidence write is idempotent and reconcilable, so a rethrown failure is
+ * always safe to retry (reconciliation.ts).
  */
 export async function recordCourseCompletionOutcome(
   params: CourseCompletionOutcomeParams
 ): Promise<void> {
   const { tenantId, userId, courseId, enrollmentId, completedAt } = params;
 
-  const course = await db.course.findUnique({
-    where: { id: courseId },
-    select: { id: true, tenantId: true },
-  });
-
-  if (course) {
-    try {
-      assertSameTenant(tenantId, [{ tenantId: course.tenantId ?? "", label: "Course" }]);
-      const mappings = await resolveValidCourseSkillMappings(tenantId, courseId);
-      for (const mapping of mappings) {
-        await recordSkillEvidenceOutcome({
-          tenantId,
-          userId,
-          skillId: mapping.skillId,
-          type: "COURSE_COMPLETION",
-          sourceType: "Course",
-          sourceId: course.id,
-          occurredAt: completedAt,
-        });
-      }
-    } catch (err) {
-      if (err instanceof KnowledgeAccessError) {
-        console.warn(`[capability] Skipping evidence for course ${courseId}: tenant mismatch`, err);
-      } else {
-        console.error(
-          `[capability] Failed to record course-completion evidence for ${courseId}`,
-          err
-        );
-      }
-    }
+  let evidenceFailure: unknown = null;
+  try {
+    await recordCourseCompletionEvidence({ tenantId, userId, courseId, occurredAt: completedAt });
+  } catch (err) {
+    evidenceFailure = err;
   }
 
   try {
@@ -167,6 +282,8 @@ export async function recordCourseCompletionOutcome(
       err
     );
   }
+
+  if (evidenceFailure) throw evidenceFailure;
 }
 
 export type QuizOutcomeParams = {

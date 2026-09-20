@@ -1,6 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import type { AuthContext } from "@/lib/auth/context";
 import { db } from "@/lib/db";
+import { reconcileCompletedLearnersForCourseSkill } from "@/lib/domain/capability/reconciliation";
 
 export class CourseSkillManagementError extends Error {
   constructor(
@@ -90,6 +91,14 @@ export async function listCourseSkills(
  * course with no tenant (a FREE-plan solo course) has no valid Skill to map
  * — there is no tenant-scoped Skill catalog to check against — so it always
  * 404s rather than querying with a null tenant filter.
+ *
+ * Phase 24: once the mapping exists, learners who had ALREADY completed the
+ * course get the completion evidence they would have received had the skill
+ * been mapped earlier (only this skill, only COMPLETED same-tenant
+ * enrollments — see reconciliation.ts). The mapping is committed first and
+ * is never rolled back or failed by the backfill: a backfill failure is
+ * logged with the affected learners and is recoverable, because the write is
+ * idempotent and each learner's next completion request reconciles again.
  */
 export async function addCourseSkill(
   ctx: AuthContext,
@@ -117,6 +126,19 @@ export async function addCourseSkill(
       throw new CourseSkillManagementError(409, "This skill is already mapped to this course");
     }
     throw err;
+  }
+
+  try {
+    await reconcileCompletedLearnersForCourseSkill({
+      tenantId: course.tenantId,
+      courseId: course.id,
+      skillId: skill.id,
+    });
+  } catch (err) {
+    console.error(
+      `[capability] Completion-evidence backfill failed after mapping skill ${skill.id} to course ${course.id}`,
+      err
+    );
   }
 
   return { skillId: skill.id, skillName: skill.name, skillDescription: skill.description };
