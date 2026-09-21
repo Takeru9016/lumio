@@ -391,6 +391,7 @@ export type UserWhereInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentListRelationFilter
   learningAssignmentsCancelled?: Prisma.LearningAssignmentListRelationFilter
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingListRelationFilter
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteListRelationFilter
   userSkills?: Prisma.UserSkillListRelationFilter
   userJobRoles?: Prisma.UserJobRoleListRelationFilter
   skillEvidence?: Prisma.SkillEvidenceListRelationFilter
@@ -445,6 +446,7 @@ export type UserOrderByWithRelationInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentOrderByRelationAggregateInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentOrderByRelationAggregateInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingOrderByRelationAggregateInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteOrderByRelationAggregateInput
   userSkills?: Prisma.UserSkillOrderByRelationAggregateInput
   userJobRoles?: Prisma.UserJobRoleOrderByRelationAggregateInput
   skillEvidence?: Prisma.SkillEvidenceOrderByRelationAggregateInput
@@ -502,6 +504,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   learningAssignmentsMade?: Prisma.LearningAssignmentListRelationFilter
   learningAssignmentsCancelled?: Prisma.LearningAssignmentListRelationFilter
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingListRelationFilter
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteListRelationFilter
   userSkills?: Prisma.UserSkillListRelationFilter
   userJobRoles?: Prisma.UserJobRoleListRelationFilter
   skillEvidence?: Prisma.SkillEvidenceListRelationFilter
@@ -615,6 +618,7 @@ export type UserCreateInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -668,6 +672,7 @@ export type UserUncheckedCreateInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -721,6 +726,7 @@ export type UserUpdateInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -774,6 +780,7 @@ export type UserUncheckedUpdateInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -1374,6 +1381,22 @@ export type UserUpdateOneWithoutSkillEvidenceVerifiedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSkillEvidenceVerifiedInput, Prisma.UserUpdateWithoutSkillEvidenceVerifiedInput>, Prisma.UserUncheckedUpdateWithoutSkillEvidenceVerifiedInput>
 }
 
+export type UserCreateNestedOneWithoutCoursePrerequisitesCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCoursePrerequisitesCreatedInput, Prisma.UserUncheckedCreateWithoutCoursePrerequisitesCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCoursePrerequisitesCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCoursePrerequisitesCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCoursePrerequisitesCreatedInput, Prisma.UserUncheckedCreateWithoutCoursePrerequisitesCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCoursePrerequisitesCreatedInput
+  upsert?: Prisma.UserUpsertWithoutCoursePrerequisitesCreatedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCoursePrerequisitesCreatedInput, Prisma.UserUpdateWithoutCoursePrerequisitesCreatedInput>, Prisma.UserUncheckedUpdateWithoutCoursePrerequisitesCreatedInput>
+}
+
 export type UserCreateNestedOneWithoutKnowledgeAccessInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutKnowledgeAccessInput, Prisma.UserUncheckedCreateWithoutKnowledgeAccessInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutKnowledgeAccessInput
@@ -1487,6 +1510,7 @@ export type UserCreateWithoutTenantInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -1539,6 +1563,7 @@ export type UserUncheckedCreateWithoutTenantInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -1646,6 +1671,7 @@ export type UserCreateWithoutTeamMembersInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -1698,6 +1724,7 @@ export type UserUncheckedCreateWithoutTeamMembersInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -1766,6 +1793,7 @@ export type UserUpdateWithoutTeamMembersInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -1818,6 +1846,7 @@ export type UserUncheckedUpdateWithoutTeamMembersInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -1870,6 +1899,7 @@ export type UserCreateWithoutInvitationsSentInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -1922,6 +1952,7 @@ export type UserUncheckedCreateWithoutInvitationsSentInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -1990,6 +2021,7 @@ export type UserUpdateWithoutInvitationsSentInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -2042,6 +2074,7 @@ export type UserUncheckedUpdateWithoutInvitationsSentInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -2094,6 +2127,7 @@ export type UserCreateWithoutNotificationsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -2146,6 +2180,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -2214,6 +2249,7 @@ export type UserUpdateWithoutNotificationsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -2266,6 +2302,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -2318,6 +2355,7 @@ export type UserCreateWithoutOrgRequestsMadeInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -2370,6 +2408,7 @@ export type UserUncheckedCreateWithoutOrgRequestsMadeInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -2427,6 +2466,7 @@ export type UserCreateWithoutOrgRequestsResolvedInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -2479,6 +2519,7 @@ export type UserUncheckedCreateWithoutOrgRequestsResolvedInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -2547,6 +2588,7 @@ export type UserUpdateWithoutOrgRequestsMadeInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -2599,6 +2641,7 @@ export type UserUncheckedUpdateWithoutOrgRequestsMadeInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -2662,6 +2705,7 @@ export type UserUpdateWithoutOrgRequestsResolvedInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -2714,6 +2758,7 @@ export type UserUncheckedUpdateWithoutOrgRequestsResolvedInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -2766,6 +2811,7 @@ export type UserCreateWithoutCoursesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -2818,6 +2864,7 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -2886,6 +2933,7 @@ export type UserUpdateWithoutCoursesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -2938,6 +2986,7 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -2990,6 +3039,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -3042,6 +3092,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -3110,6 +3161,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -3162,6 +3214,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -3214,6 +3267,7 @@ export type UserCreateWithoutLessonProgressInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -3266,6 +3320,7 @@ export type UserUncheckedCreateWithoutLessonProgressInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -3334,6 +3389,7 @@ export type UserUpdateWithoutLessonProgressInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -3386,6 +3442,7 @@ export type UserUncheckedUpdateWithoutLessonProgressInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -3438,6 +3495,7 @@ export type UserCreateWithoutQuizAttemptsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -3490,6 +3548,7 @@ export type UserUncheckedCreateWithoutQuizAttemptsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -3558,6 +3617,7 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -3610,6 +3670,7 @@ export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -3662,6 +3723,7 @@ export type UserCreateWithoutSubmissionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -3714,6 +3776,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -3782,6 +3845,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -3834,6 +3898,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -3886,6 +3951,7 @@ export type UserCreateWithoutXpTransactionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -3938,6 +4004,7 @@ export type UserUncheckedCreateWithoutXpTransactionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -4006,6 +4073,7 @@ export type UserUpdateWithoutXpTransactionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -4058,6 +4126,7 @@ export type UserUncheckedUpdateWithoutXpTransactionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -4110,6 +4179,7 @@ export type UserCreateWithoutCertificatesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -4162,6 +4232,7 @@ export type UserUncheckedCreateWithoutCertificatesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -4230,6 +4301,7 @@ export type UserUpdateWithoutCertificatesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -4282,6 +4354,7 @@ export type UserUncheckedUpdateWithoutCertificatesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -4334,6 +4407,7 @@ export type UserCreateWithoutAiChatsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -4386,6 +4460,7 @@ export type UserUncheckedCreateWithoutAiChatsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -4454,6 +4529,7 @@ export type UserUpdateWithoutAiChatsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -4506,6 +4582,7 @@ export type UserUncheckedUpdateWithoutAiChatsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -4558,6 +4635,7 @@ export type UserCreateWithoutMandatoryTrainingsCreatedInput = {
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutUserInput
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -4610,6 +4688,7 @@ export type UserUncheckedCreateWithoutMandatoryTrainingsCreatedInput = {
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutUserInput
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -4678,6 +4757,7 @@ export type UserUpdateWithoutMandatoryTrainingsCreatedInput = {
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutUserNestedInput
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -4730,6 +4810,7 @@ export type UserUncheckedUpdateWithoutMandatoryTrainingsCreatedInput = {
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutUserNestedInput
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -4782,6 +4863,7 @@ export type UserCreateWithoutLearningAssignmentsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -4834,6 +4916,7 @@ export type UserUncheckedCreateWithoutLearningAssignmentsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -4891,6 +4974,7 @@ export type UserCreateWithoutLearningAssignmentsMadeInput = {
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutUserInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -4943,6 +5027,7 @@ export type UserUncheckedCreateWithoutLearningAssignmentsMadeInput = {
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutUserInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -5000,6 +5085,7 @@ export type UserCreateWithoutLearningAssignmentsCancelledInput = {
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutUserInput
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -5052,6 +5138,7 @@ export type UserUncheckedCreateWithoutLearningAssignmentsCancelledInput = {
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutUserInput
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -5120,6 +5207,7 @@ export type UserUpdateWithoutLearningAssignmentsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -5172,6 +5260,7 @@ export type UserUncheckedUpdateWithoutLearningAssignmentsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -5235,6 +5324,7 @@ export type UserUpdateWithoutLearningAssignmentsMadeInput = {
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutUserNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -5287,6 +5377,7 @@ export type UserUncheckedUpdateWithoutLearningAssignmentsMadeInput = {
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutUserNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -5350,6 +5441,7 @@ export type UserUpdateWithoutLearningAssignmentsCancelledInput = {
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutUserNestedInput
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -5402,6 +5494,7 @@ export type UserUncheckedUpdateWithoutLearningAssignmentsCancelledInput = {
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutUserNestedInput
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -5454,6 +5547,7 @@ export type UserCreateWithoutAdminAuditLogsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -5506,6 +5600,7 @@ export type UserUncheckedCreateWithoutAdminAuditLogsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -5574,6 +5669,7 @@ export type UserUpdateWithoutAdminAuditLogsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -5626,6 +5722,7 @@ export type UserUncheckedUpdateWithoutAdminAuditLogsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -5679,6 +5776,7 @@ export type UserCreateWithoutUserJobRolesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
   skillEvidenceVerified?: Prisma.SkillEvidenceCreateNestedManyWithoutVerifiedByInput
@@ -5731,6 +5829,7 @@ export type UserUncheckedCreateWithoutUserJobRolesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutVerifiedByInput
@@ -5799,6 +5898,7 @@ export type UserUpdateWithoutUserJobRolesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUpdateManyWithoutVerifiedByNestedInput
@@ -5851,6 +5951,7 @@ export type UserUncheckedUpdateWithoutUserJobRolesInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutVerifiedByNestedInput
@@ -5903,6 +6004,7 @@ export type UserCreateWithoutUserSkillsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
   skillEvidenceVerified?: Prisma.SkillEvidenceCreateNestedManyWithoutVerifiedByInput
@@ -5955,6 +6057,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutVerifiedByInput
@@ -6023,6 +6126,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUpdateManyWithoutVerifiedByNestedInput
@@ -6075,6 +6179,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutVerifiedByNestedInput
@@ -6127,6 +6232,7 @@ export type UserCreateWithoutSkillEvidenceInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidenceVerified?: Prisma.SkillEvidenceCreateNestedManyWithoutVerifiedByInput
@@ -6179,6 +6285,7 @@ export type UserUncheckedCreateWithoutSkillEvidenceInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutVerifiedByInput
@@ -6236,6 +6343,7 @@ export type UserCreateWithoutSkillEvidenceVerifiedInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -6288,6 +6396,7 @@ export type UserUncheckedCreateWithoutSkillEvidenceVerifiedInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -6356,6 +6465,7 @@ export type UserUpdateWithoutSkillEvidenceInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUpdateManyWithoutVerifiedByNestedInput
@@ -6408,6 +6518,7 @@ export type UserUncheckedUpdateWithoutSkillEvidenceInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutVerifiedByNestedInput
@@ -6471,6 +6582,7 @@ export type UserUpdateWithoutSkillEvidenceVerifiedInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -6523,9 +6635,238 @@ export type UserUncheckedUpdateWithoutSkillEvidenceVerifiedInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
+  aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutUserNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutUserNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCoursePrerequisitesCreatedInput = {
+  id?: string
+  clerkId: string
+  email: string
+  name?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.Role
+  plan?: $Enums.Plan
+  aiCallsUsed?: number
+  aiQuotaResetAt?: Date | string
+  xpTotal?: number
+  currentStreak?: number
+  longestStreak?: number
+  lastActiveDate?: Date | string | null
+  razorpayCustomerId?: string | null
+  razorpaySubId?: string | null
+  subscriptionStatus?: $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.TenantCreateNestedOneWithoutUsersInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseCreateNestedManyWithoutInstructorInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  submissions?: Prisma.AssignmentSubmissionCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
+  aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
+  adminAuditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  invitationsSent?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgRequestsMade?: Prisma.OrgRequestCreateNestedManyWithoutRequesterInput
+  orgRequestsResolved?: Prisma.OrgRequestCreateNestedManyWithoutResolvedByInput
+  learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutUserInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
+  skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceCreateNestedManyWithoutVerifiedByInput
+  aiConversations?: Prisma.AIConversationCreateNestedManyWithoutUserInput
+  aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutUserInput
+  aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutUserInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCoursePrerequisitesCreatedInput = {
+  id?: string
+  clerkId: string
+  email: string
+  name?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.Role
+  plan?: $Enums.Plan
+  aiCallsUsed?: number
+  aiQuotaResetAt?: Date | string
+  xpTotal?: number
+  currentStreak?: number
+  longestStreak?: number
+  lastActiveDate?: Date | string | null
+  razorpayCustomerId?: string | null
+  razorpaySubId?: string | null
+  subscriptionStatus?: $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
+  tenantId?: string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutInstructorInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  submissions?: Prisma.AssignmentSubmissionUncheckedCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
+  aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
+  adminAuditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  invitationsSent?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgRequestsMade?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutRequesterInput
+  orgRequestsResolved?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutResolvedByInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutUserInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutVerifiedByInput
+  aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutUserInput
+  aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutUserInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutUserInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCoursePrerequisitesCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCoursePrerequisitesCreatedInput, Prisma.UserUncheckedCreateWithoutCoursePrerequisitesCreatedInput>
+}
+
+export type UserUpsertWithoutCoursePrerequisitesCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCoursePrerequisitesCreatedInput, Prisma.UserUncheckedUpdateWithoutCoursePrerequisitesCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCoursePrerequisitesCreatedInput, Prisma.UserUncheckedCreateWithoutCoursePrerequisitesCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCoursePrerequisitesCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCoursePrerequisitesCreatedInput, Prisma.UserUncheckedUpdateWithoutCoursePrerequisitesCreatedInput>
+}
+
+export type UserUpdateWithoutCoursePrerequisitesCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  aiCallsUsed?: Prisma.IntFieldUpdateOperationsInput | number
+  aiQuotaResetAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  xpTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  currentStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  longestStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  razorpayCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneWithoutUsersNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutInstructorNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.AssignmentSubmissionUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
+  aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
+  adminAuditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  invitationsSent?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgRequestsMade?: Prisma.OrgRequestUpdateManyWithoutRequesterNestedInput
+  orgRequestsResolved?: Prisma.OrgRequestUpdateManyWithoutResolvedByNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutUserNestedInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUpdateManyWithoutVerifiedByNestedInput
+  aiConversations?: Prisma.AIConversationUpdateManyWithoutUserNestedInput
+  aiExecutions?: Prisma.AIExecutionUpdateManyWithoutUserNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutUserNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCoursePrerequisitesCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  aiCallsUsed?: Prisma.IntFieldUpdateOperationsInput | number
+  aiQuotaResetAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  xpTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  currentStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  longestStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  razorpayCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutInstructorNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.AssignmentSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
+  aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
+  adminAuditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invitationsSent?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgRequestsMade?: Prisma.OrgRequestUncheckedUpdateManyWithoutRequesterNestedInput
+  orgRequestsResolved?: Prisma.OrgRequestUncheckedUpdateManyWithoutResolvedByNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutVerifiedByNestedInput
   aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutUserNestedInput
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutUserNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutUserNestedInput
@@ -6575,6 +6916,7 @@ export type UserCreateWithoutKnowledgeAccessInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -6627,6 +6969,7 @@ export type UserUncheckedCreateWithoutKnowledgeAccessInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -6695,6 +7038,7 @@ export type UserUpdateWithoutKnowledgeAccessInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -6747,6 +7091,7 @@ export type UserUncheckedUpdateWithoutKnowledgeAccessInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -6799,6 +7144,7 @@ export type UserCreateWithoutAiConversationsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -6851,6 +7197,7 @@ export type UserUncheckedCreateWithoutAiConversationsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -6919,6 +7266,7 @@ export type UserUpdateWithoutAiConversationsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -6971,6 +7319,7 @@ export type UserUncheckedUpdateWithoutAiConversationsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -7023,6 +7372,7 @@ export type UserCreateWithoutAiExecutionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -7075,6 +7425,7 @@ export type UserUncheckedCreateWithoutAiExecutionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -7143,6 +7494,7 @@ export type UserUpdateWithoutAiExecutionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -7195,6 +7547,7 @@ export type UserUncheckedUpdateWithoutAiExecutionsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -7247,6 +7600,7 @@ export type UserCreateWithoutAiUsageEventsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -7299,6 +7653,7 @@ export type UserUncheckedCreateWithoutAiUsageEventsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -7367,6 +7722,7 @@ export type UserUpdateWithoutAiUsageEventsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -7419,6 +7775,7 @@ export type UserUncheckedUpdateWithoutAiUsageEventsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -7471,6 +7828,7 @@ export type UserCreateWithoutLearningEventsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
@@ -7523,6 +7881,7 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
@@ -7591,6 +7950,7 @@ export type UserUpdateWithoutLearningEventsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -7643,6 +8003,7 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -7719,6 +8080,7 @@ export type UserUpdateWithoutTenantInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
@@ -7771,6 +8133,7 @@ export type UserUncheckedUpdateWithoutTenantInput = {
   learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
   mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
   skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
@@ -7831,6 +8194,7 @@ export type UserCountOutputType = {
   learningAssignmentsMade: number
   learningAssignmentsCancelled: number
   mandatoryTrainingsCreated: number
+  coursePrerequisitesCreated: number
   userSkills: number
   userJobRoles: number
   skillEvidence: number
@@ -7861,6 +8225,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   learningAssignmentsMade?: boolean | UserCountOutputTypeCountLearningAssignmentsMadeArgs
   learningAssignmentsCancelled?: boolean | UserCountOutputTypeCountLearningAssignmentsCancelledArgs
   mandatoryTrainingsCreated?: boolean | UserCountOutputTypeCountMandatoryTrainingsCreatedArgs
+  coursePrerequisitesCreated?: boolean | UserCountOutputTypeCountCoursePrerequisitesCreatedArgs
   userSkills?: boolean | UserCountOutputTypeCountUserSkillsArgs
   userJobRoles?: boolean | UserCountOutputTypeCountUserJobRolesArgs
   skillEvidence?: boolean | UserCountOutputTypeCountSkillEvidenceArgs
@@ -8011,6 +8376,13 @@ export type UserCountOutputTypeCountMandatoryTrainingsCreatedArgs<ExtArgs extend
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountCoursePrerequisitesCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CoursePrerequisiteWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountUserSkillsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.UserSkillWhereInput
 }
@@ -8115,6 +8487,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   learningAssignmentsMade?: boolean | Prisma.User$learningAssignmentsMadeArgs<ExtArgs>
   learningAssignmentsCancelled?: boolean | Prisma.User$learningAssignmentsCancelledArgs<ExtArgs>
   mandatoryTrainingsCreated?: boolean | Prisma.User$mandatoryTrainingsCreatedArgs<ExtArgs>
+  coursePrerequisitesCreated?: boolean | Prisma.User$coursePrerequisitesCreatedArgs<ExtArgs>
   userSkills?: boolean | Prisma.User$userSkillsArgs<ExtArgs>
   userJobRoles?: boolean | Prisma.User$userJobRolesArgs<ExtArgs>
   skillEvidence?: boolean | Prisma.User$skillEvidenceArgs<ExtArgs>
@@ -8228,6 +8601,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   learningAssignmentsMade?: boolean | Prisma.User$learningAssignmentsMadeArgs<ExtArgs>
   learningAssignmentsCancelled?: boolean | Prisma.User$learningAssignmentsCancelledArgs<ExtArgs>
   mandatoryTrainingsCreated?: boolean | Prisma.User$mandatoryTrainingsCreatedArgs<ExtArgs>
+  coursePrerequisitesCreated?: boolean | Prisma.User$coursePrerequisitesCreatedArgs<ExtArgs>
   userSkills?: boolean | Prisma.User$userSkillsArgs<ExtArgs>
   userJobRoles?: boolean | Prisma.User$userJobRolesArgs<ExtArgs>
   skillEvidence?: boolean | Prisma.User$skillEvidenceArgs<ExtArgs>
@@ -8268,6 +8642,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     learningAssignmentsMade: Prisma.$LearningAssignmentPayload<ExtArgs>[]
     learningAssignmentsCancelled: Prisma.$LearningAssignmentPayload<ExtArgs>[]
     mandatoryTrainingsCreated: Prisma.$MandatoryTrainingPayload<ExtArgs>[]
+    coursePrerequisitesCreated: Prisma.$CoursePrerequisitePayload<ExtArgs>[]
     userSkills: Prisma.$UserSkillPayload<ExtArgs>[]
     userJobRoles: Prisma.$UserJobRolePayload<ExtArgs>[]
     skillEvidence: Prisma.$SkillEvidencePayload<ExtArgs>[]
@@ -8715,6 +9090,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   learningAssignmentsMade<T extends Prisma.User$learningAssignmentsMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$learningAssignmentsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   learningAssignmentsCancelled<T extends Prisma.User$learningAssignmentsCancelledArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$learningAssignmentsCancelledArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mandatoryTrainingsCreated<T extends Prisma.User$mandatoryTrainingsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mandatoryTrainingsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MandatoryTrainingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  coursePrerequisitesCreated<T extends Prisma.User$coursePrerequisitesCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$coursePrerequisitesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CoursePrerequisitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userSkills<T extends Prisma.User$userSkillsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userSkillsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userJobRoles<T extends Prisma.User$userJobRolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userJobRolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserJobRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   skillEvidence<T extends Prisma.User$skillEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$skillEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -9625,6 +10001,30 @@ export type User$mandatoryTrainingsCreatedArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   distinct?: Prisma.MandatoryTrainingScalarFieldEnum | Prisma.MandatoryTrainingScalarFieldEnum[]
+}
+
+/**
+ * User.coursePrerequisitesCreated
+ */
+export type User$coursePrerequisitesCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CoursePrerequisite
+   */
+  select?: Prisma.CoursePrerequisiteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CoursePrerequisite
+   */
+  omit?: Prisma.CoursePrerequisiteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CoursePrerequisiteInclude<ExtArgs> | null
+  where?: Prisma.CoursePrerequisiteWhereInput
+  orderBy?: Prisma.CoursePrerequisiteOrderByWithRelationInput | Prisma.CoursePrerequisiteOrderByWithRelationInput[]
+  cursor?: Prisma.CoursePrerequisiteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CoursePrerequisiteScalarFieldEnum | Prisma.CoursePrerequisiteScalarFieldEnum[]
 }
 
 /**

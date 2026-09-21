@@ -266,6 +266,9 @@ model User {
   learningAssignmentsCancelled LearningAssignment[] @relation("LearningAssignmentCanceller")
   mandatoryTrainingsCreated    MandatoryTraining[]  @relation("MandatoryTrainingCreator")
 
+  // Course prerequisites (Phase 29.1) — additive
+  coursePrerequisitesCreated CoursePrerequisite[]
+
   // V2 — additive, no existing record requires these
   userSkills            UserSkill[]
   userJobRoles          UserJobRole[]
@@ -475,6 +478,12 @@ model Course {
   certificates       Certificate[]
 
   learningAssignments LearningAssignment[]
+
+  // Phase 29.1 — additive; a course with no rows here has no prerequisites.
+  // `prerequisites` are the courses this one requires; `requiredByCourses` are
+  // the courses that require this one.
+  prerequisites     CoursePrerequisite[] @relation("CoursePrerequisites")
+  requiredByCourses CoursePrerequisite[] @relation("CourseAsPrerequisite")
 
   // V2 — additive; existing courses are valid with zero skills mapped
   skills CourseSkill[]
@@ -1063,6 +1072,37 @@ model CourseSkill {
 
   @@unique([courseId, skillId])
   @@index([skillId])
+}
+
+// ============================================================
+// COURSE PREREQUISITES (Phase 29.1)
+// ============================================================
+
+// "Course `courseId` requires course `prerequisiteCourseId`": a hard, course-to-
+// course prerequisite. A learner satisfies it by holding a COMPLETED Enrollment
+// on the prerequisite course; nothing about that is stored here.
+//
+// Tenant scope is inherited through the two courses (like CourseSkill) rather
+// than copied into a column that could drift. The domain
+// (src/lib/domain/course/prerequisites.ts) is the authority for the rules the
+// database cannot express: both courses must belong to the same non-null
+// tenant, an edge may not close a cycle, and a course has at most 5
+// prerequisites. All writes take the tenant row lock so those checks cannot race.
+// An edge is never deleted because a course is archived: whether it still binds
+// is decided when it is read.
+model CoursePrerequisite {
+  id                   String   @id @default(cuid())
+  courseId             String
+  prerequisiteCourseId String
+  createdById          String?
+  createdAt            DateTime @default(now())
+
+  course             Course @relation("CoursePrerequisites", fields: [courseId], references: [id], onDelete: Cascade)
+  prerequisiteCourse Course @relation("CourseAsPrerequisite", fields: [prerequisiteCourseId], references: [id], onDelete: Cascade)
+  createdBy          User?  @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([courseId, prerequisiteCourseId])
+  @@index([prerequisiteCourseId])
 }
 
 // ============================================================

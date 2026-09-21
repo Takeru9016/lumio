@@ -178,6 +178,11 @@ export type SkillEvidence = Prisma.SkillEvidenceModel
  */
 export type CourseSkill = Prisma.CourseSkillModel
 /**
+ * Model CoursePrerequisite
+ * 
+ */
+export type CoursePrerequisite = Prisma.CoursePrerequisiteModel
+/**
  * Model KnowledgeSource
  * 
  */

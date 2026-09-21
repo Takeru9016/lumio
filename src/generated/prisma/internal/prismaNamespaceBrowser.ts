@@ -83,6 +83,7 @@ export const ModelName = {
   UserSkill: 'UserSkill',
   SkillEvidence: 'SkillEvidence',
   CourseSkill: 'CourseSkill',
+  CoursePrerequisite: 'CoursePrerequisite',
   KnowledgeSource: 'KnowledgeSource',
   KnowledgeDocument: 'KnowledgeDocument',
   KnowledgeAccess: 'KnowledgeAccess',
@@ -597,6 +598,17 @@ export const CourseSkillScalarFieldEnum = {
 } as const
 
 export type CourseSkillScalarFieldEnum = (typeof CourseSkillScalarFieldEnum)[keyof typeof CourseSkillScalarFieldEnum]
+
+
+export const CoursePrerequisiteScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  prerequisiteCourseId: 'prerequisiteCourseId',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type CoursePrerequisiteScalarFieldEnum = (typeof CoursePrerequisiteScalarFieldEnum)[keyof typeof CoursePrerequisiteScalarFieldEnum]
 
 
 export const KnowledgeSourceScalarFieldEnum = {

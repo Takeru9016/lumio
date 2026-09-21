@@ -416,6 +416,7 @@ export const ModelName = {
   UserSkill: 'UserSkill',
   SkillEvidence: 'SkillEvidence',
   CourseSkill: 'CourseSkill',
+  CoursePrerequisite: 'CoursePrerequisite',
   KnowledgeSource: 'KnowledgeSource',
   KnowledgeDocument: 'KnowledgeDocument',
   KnowledgeAccess: 'KnowledgeAccess',
@@ -442,7 +443,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "learningAssignment" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "courseSkill" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
+    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "learningAssignment" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "courseSkill" | "coursePrerequisite" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2814,6 +2815,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CoursePrerequisite: {
+      payload: Prisma.$CoursePrerequisitePayload<ExtArgs>
+      fields: Prisma.CoursePrerequisiteFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CoursePrerequisiteFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CoursePrerequisiteFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>
+        }
+        findFirst: {
+          args: Prisma.CoursePrerequisiteFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CoursePrerequisiteFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>
+        }
+        findMany: {
+          args: Prisma.CoursePrerequisiteFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>[]
+        }
+        create: {
+          args: Prisma.CoursePrerequisiteCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>
+        }
+        createMany: {
+          args: Prisma.CoursePrerequisiteCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CoursePrerequisiteCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>[]
+        }
+        delete: {
+          args: Prisma.CoursePrerequisiteDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>
+        }
+        update: {
+          args: Prisma.CoursePrerequisiteUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>
+        }
+        deleteMany: {
+          args: Prisma.CoursePrerequisiteDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CoursePrerequisiteUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CoursePrerequisiteUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>[]
+        }
+        upsert: {
+          args: Prisma.CoursePrerequisiteUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CoursePrerequisitePayload>
+        }
+        aggregate: {
+          args: Prisma.CoursePrerequisiteAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCoursePrerequisite>
+        }
+        groupBy: {
+          args: Prisma.CoursePrerequisiteGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CoursePrerequisiteGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CoursePrerequisiteCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CoursePrerequisiteCountAggregateOutputType> | number
+        }
+      }
+    }
     KnowledgeSource: {
       payload: Prisma.$KnowledgeSourcePayload<ExtArgs>
       fields: Prisma.KnowledgeSourceFieldRefs
@@ -4154,6 +4229,17 @@ export const CourseSkillScalarFieldEnum = {
 export type CourseSkillScalarFieldEnum = (typeof CourseSkillScalarFieldEnum)[keyof typeof CourseSkillScalarFieldEnum]
 
 
+export const CoursePrerequisiteScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  prerequisiteCourseId: 'prerequisiteCourseId',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type CoursePrerequisiteScalarFieldEnum = (typeof CoursePrerequisiteScalarFieldEnum)[keyof typeof CoursePrerequisiteScalarFieldEnum]
+
+
 export const KnowledgeSourceScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -4935,6 +5021,7 @@ export type GlobalOmitConfig = {
   userSkill?: Prisma.UserSkillOmit
   skillEvidence?: Prisma.SkillEvidenceOmit
   courseSkill?: Prisma.CourseSkillOmit
+  coursePrerequisite?: Prisma.CoursePrerequisiteOmit
   knowledgeSource?: Prisma.KnowledgeSourceOmit
   knowledgeDocument?: Prisma.KnowledgeDocumentOmit
   knowledgeAccess?: Prisma.KnowledgeAccessOmit
