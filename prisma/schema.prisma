@@ -60,6 +60,15 @@ enum EnrollmentStatus {
   REFUNDED
 }
 
+// A learning path's own lifecycle (Phase 29.3): deliberately not CourseStatus, so
+// the two can evolve separately. Transitions are decided by the domain
+// (src/lib/domain/learning-path/lifecycle.ts), not by the database.
+enum LearningPathStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 enum SubmissionStatus {
   SUBMITTED
   GRADED
@@ -269,6 +278,9 @@ model User {
   // Course prerequisites (Phase 29.1) — additive
   coursePrerequisitesCreated CoursePrerequisite[]
 
+  // Learning paths (Phase 29.3) — additive
+  learningPathsCreated LearningPath[] @relation("LearningPathCreator")
+
   // V2 — additive, no existing record requires these
   userSkills            UserSkill[]
   userJobRoles          UserJobRole[]
@@ -325,6 +337,9 @@ model Tenant {
   orgRequests        OrgRequest[]
 
   learningAssignments LearningAssignment[]
+
+  // Learning paths (Phase 29.3) — additive
+  learningPaths LearningPath[]
 
   // V2 — additive, no existing record requires these
   skillCategories    SkillCategory[]
@@ -484,6 +499,9 @@ model Course {
   // the courses that require this one.
   prerequisites     CoursePrerequisite[] @relation("CoursePrerequisites")
   requiredByCourses CoursePrerequisite[] @relation("CourseAsPrerequisite")
+
+  // Phase 29.3 — additive; a course in no path has no rows here.
+  learningPathCourses LearningPathCourse[]
 
   // V2 — additive; existing courses are valid with zero skills mapped
   skills CourseSkill[]
@@ -1103,6 +1121,64 @@ model CoursePrerequisite {
 
   @@unique([courseId, prerequisiteCourseId])
   @@index([prerequisiteCourseId])
+}
+
+// ============================================================
+// LEARNING PATHS (Phase 29.3)
+// ============================================================
+
+// An ordered, tenant-owned collection of courses: a way to present several
+// existing courses as one journey. It is an organising layer only. There is no
+// path enrollment, progress, evidence or assignment: what a learner has done
+// stays on their course Enrollments, and any progress through a path is derived
+// from those when it is read, never stored here.
+//
+// `tenantId` is required: a path is never tenantless. It, `createdById` and
+// `status` are set by the server from the authenticated actor and are never
+// taken from a request. The rules the database cannot express live in
+// src/lib/domain/learning-path/.
+model LearningPath {
+  id          String             @id @default(cuid())
+  tenantId    String
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      LearningPathStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdById String?
+  createdBy   User?              @relation("LearningPathCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  courses LearningPathCourse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status, createdAt])
+}
+
+// One course's place in one path. `position` is advisory: it is what the path
+// recommends, never a prerequisite, and nothing in enrollment, payment or
+// assignment reads it. CoursePrerequisite stays the only thing that gates a course.
+//
+// Tenant scope is inherited through the path and the course (like CourseSkill and
+// CoursePrerequisite) rather than copied into a column that could drift; the
+// domain requires both to belong to the same non-null tenant. `position` is
+// 1..n as the domain writes it, but it is deliberately NOT unique per path: a
+// reorder renumbers rows inside one transaction and a unique index would trip on
+// the intermediate states. Readers must tolerate gaps and ties.
+model LearningPathCourse {
+  id       String       @id @default(cuid())
+  pathId   String
+  path     LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  courseId String
+  course   Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  position Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([pathId, courseId])
+  @@index([pathId, position])
+  @@index([courseId])
 }
 
 // ============================================================

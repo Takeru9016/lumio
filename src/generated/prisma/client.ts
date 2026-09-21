@@ -207,6 +207,16 @@ export type CourseSkill = Prisma.CourseSkillModel
  */
 export type CoursePrerequisite = Prisma.CoursePrerequisiteModel
 /**
+ * Model LearningPath
+ * 
+ */
+export type LearningPath = Prisma.LearningPathModel
+/**
+ * Model LearningPathCourse
+ * 
+ */
+export type LearningPathCourse = Prisma.LearningPathCourseModel
+/**
  * Model KnowledgeSource
  * 
  */

@@ -664,6 +664,23 @@ export type EnumEvidenceVerificationStatusWithAggregatesFilter<$PrismaModel = ne
   _max?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel>
 }
 
+export type EnumLearningPathStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.LearningPathStatus | Prisma.EnumLearningPathStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLearningPathStatusFilter<$PrismaModel> | $Enums.LearningPathStatus
+}
+
+export type EnumLearningPathStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LearningPathStatus | Prisma.EnumLearningPathStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLearningPathStatusWithAggregatesFilter<$PrismaModel> | $Enums.LearningPathStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLearningPathStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLearningPathStatusFilter<$PrismaModel>
+}
+
 export type EnumKnowledgeSourceTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.KnowledgeSourceType | Prisma.EnumKnowledgeSourceTypeFieldRefInput<$PrismaModel>
   in?: $Enums.KnowledgeSourceType[] | Prisma.ListEnumKnowledgeSourceTypeFieldRefInput<$PrismaModel>
@@ -1368,6 +1385,23 @@ export type NestedEnumEvidenceVerificationStatusWithAggregatesFilter<$PrismaMode
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumLearningPathStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.LearningPathStatus | Prisma.EnumLearningPathStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLearningPathStatusFilter<$PrismaModel> | $Enums.LearningPathStatus
+}
+
+export type NestedEnumLearningPathStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LearningPathStatus | Prisma.EnumLearningPathStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLearningPathStatusWithAggregatesFilter<$PrismaModel> | $Enums.LearningPathStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLearningPathStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLearningPathStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumKnowledgeSourceTypeFilter<$PrismaModel = never> = {

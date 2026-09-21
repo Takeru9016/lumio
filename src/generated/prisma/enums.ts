@@ -77,6 +77,15 @@ export const EnrollmentStatus = {
 export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus]
 
 
+export const LearningPathStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type LearningPathStatus = (typeof LearningPathStatus)[keyof typeof LearningPathStatus]
+
+
 export const SubmissionStatus = {
   SUBMITTED: 'SUBMITTED',
   GRADED: 'GRADED',

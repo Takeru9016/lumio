@@ -308,6 +308,7 @@ export type TenantWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   orgRequests?: Prisma.OrgRequestListRelationFilter
   learningAssignments?: Prisma.LearningAssignmentListRelationFilter
+  learningPaths?: Prisma.LearningPathListRelationFilter
   skillCategories?: Prisma.SkillCategoryListRelationFilter
   skills?: Prisma.SkillListRelationFilter
   jobRoles?: Prisma.JobRoleListRelationFilter
@@ -348,6 +349,7 @@ export type TenantOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   orgRequests?: Prisma.OrgRequestOrderByRelationAggregateInput
   learningAssignments?: Prisma.LearningAssignmentOrderByRelationAggregateInput
+  learningPaths?: Prisma.LearningPathOrderByRelationAggregateInput
   skillCategories?: Prisma.SkillCategoryOrderByRelationAggregateInput
   skills?: Prisma.SkillOrderByRelationAggregateInput
   jobRoles?: Prisma.JobRoleOrderByRelationAggregateInput
@@ -391,6 +393,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   orgRequests?: Prisma.OrgRequestListRelationFilter
   learningAssignments?: Prisma.LearningAssignmentListRelationFilter
+  learningPaths?: Prisma.LearningPathListRelationFilter
   skillCategories?: Prisma.SkillCategoryListRelationFilter
   skills?: Prisma.SkillListRelationFilter
   jobRoles?: Prisma.JobRoleListRelationFilter
@@ -475,6 +478,7 @@ export type TenantCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -515,6 +519,7 @@ export type TenantUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -555,6 +560,7 @@ export type TenantUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -595,6 +601,7 @@ export type TenantUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -939,6 +946,20 @@ export type TenantUpdateOneRequiredWithoutSkillEvidenceNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutSkillEvidenceInput, Prisma.TenantUpdateWithoutSkillEvidenceInput>, Prisma.TenantUncheckedUpdateWithoutSkillEvidenceInput>
 }
 
+export type TenantCreateNestedOneWithoutLearningPathsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutLearningPathsInput, Prisma.TenantUncheckedCreateWithoutLearningPathsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutLearningPathsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutLearningPathsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutLearningPathsInput, Prisma.TenantUncheckedCreateWithoutLearningPathsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutLearningPathsInput
+  upsert?: Prisma.TenantUpsertWithoutLearningPathsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutLearningPathsInput, Prisma.TenantUpdateWithoutLearningPathsInput>, Prisma.TenantUncheckedUpdateWithoutLearningPathsInput>
+}
+
 export type TenantCreateNestedOneWithoutKnowledgeSourcesInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutKnowledgeSourcesInput, Prisma.TenantUncheckedCreateWithoutKnowledgeSourcesInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutKnowledgeSourcesInput
@@ -1074,6 +1095,7 @@ export type TenantCreateWithoutUsersInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -1113,6 +1135,7 @@ export type TenantUncheckedCreateWithoutUsersInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1168,6 +1191,7 @@ export type TenantUpdateWithoutUsersInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -1207,6 +1231,7 @@ export type TenantUncheckedUpdateWithoutUsersInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1246,6 +1271,7 @@ export type TenantCreateWithoutTeamsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -1285,6 +1311,7 @@ export type TenantUncheckedCreateWithoutTeamsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1340,6 +1367,7 @@ export type TenantUpdateWithoutTeamsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -1379,6 +1407,7 @@ export type TenantUncheckedUpdateWithoutTeamsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1418,6 +1447,7 @@ export type TenantCreateWithoutInvitationsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -1457,6 +1487,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1512,6 +1543,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -1551,6 +1583,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1590,6 +1623,7 @@ export type TenantCreateWithoutNotificationsInput = {
   invitations?: Prisma.InvitationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -1629,6 +1663,7 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1684,6 +1719,7 @@ export type TenantUpdateWithoutNotificationsInput = {
   invitations?: Prisma.InvitationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -1723,6 +1759,7 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1762,6 +1799,7 @@ export type TenantCreateWithoutOrgRequestsInput = {
   invitations?: Prisma.InvitationCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -1801,6 +1839,7 @@ export type TenantUncheckedCreateWithoutOrgRequestsInput = {
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1856,6 +1895,7 @@ export type TenantUpdateWithoutOrgRequestsInput = {
   invitations?: Prisma.InvitationUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -1895,6 +1935,7 @@ export type TenantUncheckedUpdateWithoutOrgRequestsInput = {
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1934,6 +1975,7 @@ export type TenantCreateWithoutCoursesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -1973,6 +2015,7 @@ export type TenantUncheckedCreateWithoutCoursesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -2028,6 +2071,7 @@ export type TenantUpdateWithoutCoursesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -2067,6 +2111,7 @@ export type TenantUncheckedUpdateWithoutCoursesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -2106,6 +2151,7 @@ export type TenantCreateWithoutMandatoryTrainingsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -2145,6 +2191,7 @@ export type TenantUncheckedCreateWithoutMandatoryTrainingsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -2200,6 +2247,7 @@ export type TenantUpdateWithoutMandatoryTrainingsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -2239,6 +2287,7 @@ export type TenantUncheckedUpdateWithoutMandatoryTrainingsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -2278,6 +2327,7 @@ export type TenantCreateWithoutLearningAssignmentsInput = {
   invitations?: Prisma.InvitationCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -2317,6 +2367,7 @@ export type TenantUncheckedCreateWithoutLearningAssignmentsInput = {
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutTenantInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -2372,6 +2423,7 @@ export type TenantUpdateWithoutLearningAssignmentsInput = {
   invitations?: Prisma.InvitationUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -2411,6 +2463,7 @@ export type TenantUncheckedUpdateWithoutLearningAssignmentsInput = {
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutTenantNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -2451,6 +2504,7 @@ export type TenantCreateWithoutSkillCategoriesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutTenantInput
@@ -2490,6 +2544,7 @@ export type TenantUncheckedCreateWithoutSkillCategoriesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -2545,6 +2600,7 @@ export type TenantUpdateWithoutSkillCategoriesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutTenantNestedInput
@@ -2584,6 +2640,7 @@ export type TenantUncheckedUpdateWithoutSkillCategoriesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -2623,6 +2680,7 @@ export type TenantCreateWithoutSkillsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutTenantInput
@@ -2662,6 +2720,7 @@ export type TenantUncheckedCreateWithoutSkillsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -2717,6 +2776,7 @@ export type TenantUpdateWithoutSkillsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutTenantNestedInput
@@ -2756,6 +2816,7 @@ export type TenantUncheckedUpdateWithoutSkillsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -2795,6 +2856,7 @@ export type TenantCreateWithoutJobRolesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutTenantInput
@@ -2834,6 +2896,7 @@ export type TenantUncheckedCreateWithoutJobRolesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -2889,6 +2952,7 @@ export type TenantUpdateWithoutJobRolesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutTenantNestedInput
@@ -2928,6 +2992,7 @@ export type TenantUncheckedUpdateWithoutJobRolesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -2967,6 +3032,7 @@ export type TenantCreateWithoutUserJobRolesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -3006,6 +3072,7 @@ export type TenantUncheckedCreateWithoutUserJobRolesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -3061,6 +3128,7 @@ export type TenantUpdateWithoutUserJobRolesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -3100,6 +3168,7 @@ export type TenantUncheckedUpdateWithoutUserJobRolesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -3139,6 +3208,7 @@ export type TenantCreateWithoutUserSkillsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -3178,6 +3248,7 @@ export type TenantUncheckedCreateWithoutUserSkillsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -3233,6 +3304,7 @@ export type TenantUpdateWithoutUserSkillsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -3272,6 +3344,7 @@ export type TenantUncheckedUpdateWithoutUserSkillsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -3311,6 +3384,7 @@ export type TenantCreateWithoutSkillEvidenceInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -3350,6 +3424,7 @@ export type TenantUncheckedCreateWithoutSkillEvidenceInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -3405,6 +3480,7 @@ export type TenantUpdateWithoutSkillEvidenceInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -3444,11 +3520,188 @@ export type TenantUncheckedUpdateWithoutSkillEvidenceInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
   userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutTenantNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
+  aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
+  aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutLearningPathsInput = {
+  id?: string
+  name: string
+  slug: string
+  logoUrl?: string | null
+  brandColor?: string | null
+  customDomain?: string | null
+  plan?: $Enums.Plan
+  seatLimit?: number
+  seatCount?: number
+  razorpaySubId?: string | null
+  samlEnabled?: boolean
+  samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserCreateNestedManyWithoutTenantInput
+  teams?: Prisma.TeamCreateNestedManyWithoutTenantInput
+  courses?: Prisma.CourseCreateNestedManyWithoutTenantInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
+  orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
+  learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
+  skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
+  jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
+  userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutTenantInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutTenantInput
+  skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutTenantInput
+  knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
+  knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
+  aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
+  aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
+  aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutLearningPathsInput = {
+  id?: string
+  name: string
+  slug: string
+  logoUrl?: string | null
+  brandColor?: string | null
+  customDomain?: string | null
+  plan?: $Enums.Plan
+  seatLimit?: number
+  seatCount?: number
+  razorpaySubId?: string | null
+  samlEnabled?: boolean
+  samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutTenantInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutTenantInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
+  orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
+  jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutTenantInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutTenantInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
+  aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
+  aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutLearningPathsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutLearningPathsInput, Prisma.TenantUncheckedCreateWithoutLearningPathsInput>
+}
+
+export type TenantUpsertWithoutLearningPathsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutLearningPathsInput, Prisma.TenantUncheckedUpdateWithoutLearningPathsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutLearningPathsInput, Prisma.TenantUncheckedCreateWithoutLearningPathsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutLearningPathsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutLearningPathsInput, Prisma.TenantUncheckedUpdateWithoutLearningPathsInput>
+}
+
+export type TenantUpdateWithoutLearningPathsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  seatLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  seatCount?: Prisma.IntFieldUpdateOperationsInput | number
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUpdateManyWithoutTenantNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutTenantNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutTenantNestedInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
+  orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
+  jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
+  userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutTenantNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutTenantNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutTenantNestedInput
+  knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
+  aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
+  aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutLearningPathsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  seatLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  seatCount?: Prisma.IntFieldUpdateOperationsInput | number
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutTenantNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutTenantNestedInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
+  orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
+  jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutTenantNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutTenantNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
   knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
@@ -3483,6 +3736,7 @@ export type TenantCreateWithoutKnowledgeSourcesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -3522,6 +3776,7 @@ export type TenantUncheckedCreateWithoutKnowledgeSourcesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -3577,6 +3832,7 @@ export type TenantUpdateWithoutKnowledgeSourcesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -3616,6 +3872,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeSourcesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -3655,6 +3912,7 @@ export type TenantCreateWithoutKnowledgeDocumentsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -3694,6 +3952,7 @@ export type TenantUncheckedCreateWithoutKnowledgeDocumentsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -3749,6 +4008,7 @@ export type TenantUpdateWithoutKnowledgeDocumentsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -3788,6 +4048,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeDocumentsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -3827,6 +4088,7 @@ export type TenantCreateWithoutKnowledgeAccessInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -3866,6 +4128,7 @@ export type TenantUncheckedCreateWithoutKnowledgeAccessInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -3921,6 +4184,7 @@ export type TenantUpdateWithoutKnowledgeAccessInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -3960,6 +4224,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeAccessInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -3999,6 +4264,7 @@ export type TenantCreateWithoutKnowledgeChunksInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -4038,6 +4304,7 @@ export type TenantUncheckedCreateWithoutKnowledgeChunksInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -4093,6 +4360,7 @@ export type TenantUpdateWithoutKnowledgeChunksInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -4132,6 +4400,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeChunksInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -4171,6 +4440,7 @@ export type TenantCreateWithoutAiConversationsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -4210,6 +4480,7 @@ export type TenantUncheckedCreateWithoutAiConversationsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -4265,6 +4536,7 @@ export type TenantUpdateWithoutAiConversationsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -4304,6 +4576,7 @@ export type TenantUncheckedUpdateWithoutAiConversationsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -4343,6 +4616,7 @@ export type TenantCreateWithoutAiExecutionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -4382,6 +4656,7 @@ export type TenantUncheckedCreateWithoutAiExecutionsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -4437,6 +4712,7 @@ export type TenantUpdateWithoutAiExecutionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -4476,6 +4752,7 @@ export type TenantUncheckedUpdateWithoutAiExecutionsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -4515,6 +4792,7 @@ export type TenantCreateWithoutAiUsageEventsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -4554,6 +4832,7 @@ export type TenantUncheckedCreateWithoutAiUsageEventsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -4609,6 +4888,7 @@ export type TenantUpdateWithoutAiUsageEventsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -4648,6 +4928,7 @@ export type TenantUncheckedUpdateWithoutAiUsageEventsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -4687,6 +4968,7 @@ export type TenantCreateWithoutLearningEventsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
@@ -4726,6 +5008,7 @@ export type TenantUncheckedCreateWithoutLearningEventsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
   orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
   skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
   jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
@@ -4781,6 +5064,7 @@ export type TenantUpdateWithoutLearningEventsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
@@ -4820,6 +5104,7 @@ export type TenantUncheckedUpdateWithoutLearningEventsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
   orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
   learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
   skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
   jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -4849,6 +5134,7 @@ export type TenantCountOutputType = {
   notifications: number
   orgRequests: number
   learningAssignments: number
+  learningPaths: number
   skillCategories: number
   skills: number
   jobRoles: number
@@ -4874,6 +5160,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   notifications?: boolean | TenantCountOutputTypeCountNotificationsArgs
   orgRequests?: boolean | TenantCountOutputTypeCountOrgRequestsArgs
   learningAssignments?: boolean | TenantCountOutputTypeCountLearningAssignmentsArgs
+  learningPaths?: boolean | TenantCountOutputTypeCountLearningPathsArgs
   skillCategories?: boolean | TenantCountOutputTypeCountSkillCategoriesArgs
   skills?: boolean | TenantCountOutputTypeCountSkillsArgs
   jobRoles?: boolean | TenantCountOutputTypeCountJobRolesArgs
@@ -4954,6 +5241,13 @@ export type TenantCountOutputTypeCountOrgRequestsArgs<ExtArgs extends runtime.Ty
  */
 export type TenantCountOutputTypeCountLearningAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LearningAssignmentWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountLearningPathsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LearningPathWhereInput
 }
 
 /**
@@ -5079,6 +5373,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   notifications?: boolean | Prisma.Tenant$notificationsArgs<ExtArgs>
   orgRequests?: boolean | Prisma.Tenant$orgRequestsArgs<ExtArgs>
   learningAssignments?: boolean | Prisma.Tenant$learningAssignmentsArgs<ExtArgs>
+  learningPaths?: boolean | Prisma.Tenant$learningPathsArgs<ExtArgs>
   skillCategories?: boolean | Prisma.Tenant$skillCategoriesArgs<ExtArgs>
   skills?: boolean | Prisma.Tenant$skillsArgs<ExtArgs>
   jobRoles?: boolean | Prisma.Tenant$jobRolesArgs<ExtArgs>
@@ -5160,6 +5455,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   notifications?: boolean | Prisma.Tenant$notificationsArgs<ExtArgs>
   orgRequests?: boolean | Prisma.Tenant$orgRequestsArgs<ExtArgs>
   learningAssignments?: boolean | Prisma.Tenant$learningAssignmentsArgs<ExtArgs>
+  learningPaths?: boolean | Prisma.Tenant$learningPathsArgs<ExtArgs>
   skillCategories?: boolean | Prisma.Tenant$skillCategoriesArgs<ExtArgs>
   skills?: boolean | Prisma.Tenant$skillsArgs<ExtArgs>
   jobRoles?: boolean | Prisma.Tenant$jobRolesArgs<ExtArgs>
@@ -5190,6 +5486,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     orgRequests: Prisma.$OrgRequestPayload<ExtArgs>[]
     learningAssignments: Prisma.$LearningAssignmentPayload<ExtArgs>[]
+    learningPaths: Prisma.$LearningPathPayload<ExtArgs>[]
     skillCategories: Prisma.$SkillCategoryPayload<ExtArgs>[]
     skills: Prisma.$SkillPayload<ExtArgs>[]
     jobRoles: Prisma.$JobRolePayload<ExtArgs>[]
@@ -5623,6 +5920,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   notifications<T extends Prisma.Tenant$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orgRequests<T extends Prisma.Tenant$orgRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$orgRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   learningAssignments<T extends Prisma.Tenant$learningAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$learningAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  learningPaths<T extends Prisma.Tenant$learningPathsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$learningPathsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningPathPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   skillCategories<T extends Prisma.Tenant$skillCategoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$skillCategoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   skills<T extends Prisma.Tenant$skillsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$skillsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobRoles<T extends Prisma.Tenant$jobRolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$jobRolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -6263,6 +6561,30 @@ export type Tenant$learningAssignmentsArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.LearningAssignmentScalarFieldEnum | Prisma.LearningAssignmentScalarFieldEnum[]
+}
+
+/**
+ * Tenant.learningPaths
+ */
+export type Tenant$learningPathsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LearningPath
+   */
+  select?: Prisma.LearningPathSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LearningPath
+   */
+  omit?: Prisma.LearningPathOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
+  where?: Prisma.LearningPathWhereInput
+  orderBy?: Prisma.LearningPathOrderByWithRelationInput | Prisma.LearningPathOrderByWithRelationInput[]
+  cursor?: Prisma.LearningPathWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LearningPathScalarFieldEnum | Prisma.LearningPathScalarFieldEnum[]
 }
 
 /**
