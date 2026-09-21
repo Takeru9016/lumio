@@ -27,6 +27,11 @@ const moduleSources = () =>
     .filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts"))
     .map((f) => ({ file: f, text: readFileSync(path.join(MODULE_DIR, f), "utf8") }));
 
+// The one file that reads and writes the database. Everything else is pure, and
+// the checks that forbid a database client or a Prisma call apply to it alone.
+const DATABASE_BACKED = ["paths.ts"];
+const pureSources = () => moduleSources().filter((s) => !DATABASE_BACKED.includes(s.file));
+
 describe("the learning path domain stands apart from enrollment, prerequisites and everything else", () => {
   it("has source files to inspect", () => {
     expect(moduleSources().map((s) => s.file)).toEqual(
@@ -35,8 +40,10 @@ describe("the learning path domain stands apart from enrollment, prerequisites a
         "constants.ts",
         "inputRules.ts",
         "lifecycle.ts",
+        "listing.ts",
         "membership.ts",
         "ordering.ts",
+        "paths.ts",
         "progress.ts",
         "publishability.ts",
         "types.ts",
@@ -45,7 +52,6 @@ describe("the learning path domain stands apart from enrollment, prerequisites a
   });
 
   it.each([
-    ["the database client", /@\/lib\/db/],
     [
       "the prerequisite module and its gate",
       /course\/prerequisites|assertCoursePrerequisitesMet|getUnmetPrerequisites/,
@@ -56,14 +62,39 @@ describe("the learning path domain stands apart from enrollment, prerequisites a
     ["capability and evidence", /domain\/capability|SkillEvidence|skillEvidence/],
     ["enrollment access or payment", /enrollmentAccess|paymentVerification|razorpay/i],
     ["prerequisite rows", /coursePrerequisite|CoursePrerequisite/],
-    [
-      "Prisma client calls",
-      /\.(create|update|delete|upsert|findMany|findFirst|findUnique|\$transaction|\$queryRaw)\(/,
-    ],
-  ])("imports or touches no %s", (_name, pattern) => {
+    ["AI", /lib\/ai|openai|streamText|generateText|@ai-sdk/i],
+  ])("imports or touches no %s, in any file of the module", (_name, pattern) => {
     for (const { file, text } of moduleSources()) {
       expect(text.match(pattern), `${file} must not match ${pattern}`).toBeNull();
     }
+  });
+
+  it.each([
+    ["the database client", /@\/lib\/db/],
+    [
+      "Prisma client calls",
+      /\.(create|update|delete|upsert|findMany|findFirst|findUnique|\$transaction|\$queryRaw|\$executeRaw)\(/,
+    ],
+    ["raw SQL", /\$queryRaw|\$executeRaw/],
+  ])("imports or touches no %s, in any file but the database-backed one", (_name, pattern) => {
+    for (const { file, text } of pureSources()) {
+      expect(text.match(pattern), `${file} must not match ${pattern}`).toBeNull();
+    }
+  });
+
+  it("the database-backed file reads and writes only paths, memberships, and the courses and lessons it inspects", () => {
+    const source = moduleSources().find((s) => s.file === "paths.ts")?.text ?? "";
+    const delegates = new Set(
+      [...source.matchAll(/\b(?:db|tx|client)\.([a-zA-Z]+)\.[a-zA-Z]+\(/g)].map((m) => m[1])
+    );
+    expect([...delegates].sort()).toEqual(
+      ["course", "learningPath", "learningPathCourse", "section"].sort()
+    );
+
+    const tables = new Set(
+      [...source.matchAll(/(?:FROM|UPDATE|INTO)\s+"([A-Za-z]+)"/g)].map((m) => m[1])
+    );
+    expect([...tables].sort()).toEqual(["LearningPath", "LearningPathCourse"]);
   });
 });
 

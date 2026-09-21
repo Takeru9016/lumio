@@ -1,4 +1,5 @@
 import type { AuthContext } from "@/lib/auth/context";
+import { isValidId } from "@/lib/domain/learning-assignment/inputRules";
 import {
   LEARNING_PATH_DESCRIPTION_MAX_LENGTH,
   LEARNING_PATH_TITLE_MAX_LENGTH,
@@ -126,4 +127,25 @@ export function buildNewPath(ctx: AuthContext, input: unknown): NewLearningPath 
     description,
     status: "DRAFT",
   };
+}
+
+/** Body of "add a course": the course to add and nothing else, in particular no position. */
+export function parseAddCourseInput(input: unknown): { courseId: string } {
+  if (!isPlainBody(input)) throw fail.invalid("Invalid request");
+  assertOnlyKeys(input, ["courseId"]);
+  if (!isValidId(input.courseId)) throw fail.invalid("A course is required");
+  return { courseId: input.courseId };
+}
+
+/**
+ * Body of "reorder": the complete ordered list of course ids and nothing else. The
+ * list itself is checked against the path's current members by `planReorder`; only
+ * its presence is required here. A client never names a position.
+ */
+export function parseReorderInput(input: unknown): { courseIds: unknown } {
+  if (!isPlainBody(input)) throw fail.invalid("Invalid request");
+  assertOnlyKeys(input, ["courseIds"]);
+  if (!("courseIds" in input))
+    throw fail.invalid("Send every course in the path, in the order you want");
+  return { courseIds: input.courseIds };
 }

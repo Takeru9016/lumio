@@ -6,3 +6,7 @@
 export const LEARNING_PATH_MAX_COURSES = 20;
 export const LEARNING_PATH_TITLE_MAX_LENGTH = 100;
 export const LEARNING_PATH_DESCRIPTION_MAX_LENGTH = 1000;
+
+/** How many paths one page of the admin list holds by default, and the most it may hold. */
+export const LEARNING_PATH_PAGE_SIZE = 50;
+export const LEARNING_PATH_PAGE_MAX = 200;
