@@ -411,6 +411,84 @@ export async function getUnmetPrerequisites(
     .map((p) => ({ slug: p.slug, title: p.title }));
 }
 
+export type PrerequisiteStanding = "NONE" | "MET" | "UNMET";
+
+/**
+ * Where `userId` stands on the prerequisites of every course in `courseIds`, in a
+ * fixed three queries however many courses there are (Phase 29.3.3, for reading a
+ * learning path). It is `getUnmetPrerequisites` for many courses at once and says
+ * the same thing per course:
+ *
+ * - NONE: no enforceable prerequisite (no edges, or only retired ones)
+ * - MET: it has enforceable prerequisites and the learner's Enrollment on each is
+ *   COMPLETED
+ * - UNMET: at least one enforceable prerequisite is not completed (ACTIVE,
+ *   REFUNDED and no enrollment all count as not completed)
+ *
+ * `tenantId` is the learner's own. A course outside it has no prerequisites to
+ * enforce, so it is NONE, exactly as for `getUnmetPrerequisites`, and an edge to a
+ * prerequisite of another tenant is ignored. Enforceability is
+ * `isEnforceablePrerequisite`, not a second reading of it. Read-only, and every
+ * requested id is in the result.
+ */
+export async function getPrerequisiteStandings(
+  client: Client,
+  params: { userId: string; tenantId: string; courseIds: readonly string[] }
+): Promise<Map<string, PrerequisiteStanding>> {
+  const { userId, tenantId } = params;
+  const standings = new Map<string, PrerequisiteStanding>(
+    params.courseIds.map((id) => [id, "NONE"])
+  );
+  if (!isValidId(userId) || !tenantId || standings.size === 0) return standings;
+
+  const edges = await client.coursePrerequisite.findMany({
+    where: {
+      courseId: { in: [...standings.keys()] },
+      course: { tenantId },
+      prerequisiteCourse: { tenantId },
+    },
+    select: {
+      courseId: true,
+      prerequisiteCourseId: true,
+      prerequisiteCourse: { select: { status: true } },
+    },
+  });
+  if (edges.length === 0) return standings;
+
+  const prerequisiteIds = [...new Set(edges.map((e) => e.prerequisiteCourseId))];
+  const withLessons = await client.section.findMany({
+    where: {
+      courseId: { in: prerequisiteIds },
+      lessons: { some: { isPublished: true, isArchived: false } },
+    },
+    select: { courseId: true },
+  });
+  const hasLessons = new Set(withLessons.map((s) => s.courseId));
+  const enforceable = edges.filter((e) =>
+    isEnforceablePrerequisite({
+      status: e.prerequisiteCourse.status,
+      hasPublishedLessons: hasLessons.has(e.prerequisiteCourseId),
+    })
+  );
+  if (enforceable.length === 0) return standings;
+
+  const completed = await client.enrollment.findMany({
+    where: {
+      userId,
+      courseId: { in: [...new Set(enforceable.map((e) => e.prerequisiteCourseId))] },
+      status: "COMPLETED",
+    },
+    select: { courseId: true },
+  });
+  const done = new Set(completed.map((e) => e.courseId));
+
+  for (const edge of enforceable) {
+    if (!done.has(edge.prerequisiteCourseId)) standings.set(edge.courseId, "UNMET");
+    else if (standings.get(edge.courseId) === "NONE") standings.set(edge.courseId, "MET");
+  }
+  return standings;
+}
+
 export type PrerequisiteState = "COMPLETED" | "REQUIRED" | "NON_ENFORCEABLE";
 
 /**
