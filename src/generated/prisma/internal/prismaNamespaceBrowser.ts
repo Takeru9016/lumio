@@ -462,6 +462,10 @@ export const LearningAssignmentScalarFieldEnum = {
   assignedById: 'assignedById',
   cancelledAt: 'cancelledAt',
   cancelledById: 'cancelledById',
+  lastCancelledAt: 'lastCancelledAt',
+  lastCancelledById: 'lastCancelledById',
+  lastCancelledByName: 'lastCancelledByName',
+  cancellationCount: 'cancellationCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

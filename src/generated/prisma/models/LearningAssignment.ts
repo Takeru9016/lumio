@@ -20,8 +20,18 @@ export type LearningAssignmentModel = runtime.Types.Result.DefaultSelection<Pris
 
 export type AggregateLearningAssignment = {
   _count: LearningAssignmentCountAggregateOutputType | null
+  _avg: LearningAssignmentAvgAggregateOutputType | null
+  _sum: LearningAssignmentSumAggregateOutputType | null
   _min: LearningAssignmentMinAggregateOutputType | null
   _max: LearningAssignmentMaxAggregateOutputType | null
+}
+
+export type LearningAssignmentAvgAggregateOutputType = {
+  cancellationCount: number | null
+}
+
+export type LearningAssignmentSumAggregateOutputType = {
+  cancellationCount: number | null
 }
 
 export type LearningAssignmentMinAggregateOutputType = {
@@ -36,6 +46,10 @@ export type LearningAssignmentMinAggregateOutputType = {
   assignedById: string | null
   cancelledAt: Date | null
   cancelledById: string | null
+  lastCancelledAt: Date | null
+  lastCancelledById: string | null
+  lastCancelledByName: string | null
+  cancellationCount: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -52,6 +66,10 @@ export type LearningAssignmentMaxAggregateOutputType = {
   assignedById: string | null
   cancelledAt: Date | null
   cancelledById: string | null
+  lastCancelledAt: Date | null
+  lastCancelledById: string | null
+  lastCancelledByName: string | null
+  cancellationCount: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -69,11 +87,23 @@ export type LearningAssignmentCountAggregateOutputType = {
   assignedById: number
   cancelledAt: number
   cancelledById: number
+  lastCancelledAt: number
+  lastCancelledById: number
+  lastCancelledByName: number
+  cancellationCount: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type LearningAssignmentAvgAggregateInputType = {
+  cancellationCount?: true
+}
+
+export type LearningAssignmentSumAggregateInputType = {
+  cancellationCount?: true
+}
 
 export type LearningAssignmentMinAggregateInputType = {
   id?: true
@@ -87,6 +117,10 @@ export type LearningAssignmentMinAggregateInputType = {
   assignedById?: true
   cancelledAt?: true
   cancelledById?: true
+  lastCancelledAt?: true
+  lastCancelledById?: true
+  lastCancelledByName?: true
+  cancellationCount?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -103,6 +137,10 @@ export type LearningAssignmentMaxAggregateInputType = {
   assignedById?: true
   cancelledAt?: true
   cancelledById?: true
+  lastCancelledAt?: true
+  lastCancelledById?: true
+  lastCancelledByName?: true
+  cancellationCount?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -120,6 +158,10 @@ export type LearningAssignmentCountAggregateInputType = {
   assignedById?: true
   cancelledAt?: true
   cancelledById?: true
+  lastCancelledAt?: true
+  lastCancelledById?: true
+  lastCancelledByName?: true
+  cancellationCount?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -163,6 +205,18 @@ export type LearningAssignmentAggregateArgs<ExtArgs extends runtime.Types.Extens
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: LearningAssignmentAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: LearningAssignmentSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: LearningAssignmentMinAggregateInputType
@@ -193,6 +247,8 @@ export type LearningAssignmentGroupByArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   _count?: LearningAssignmentCountAggregateInputType | true
+  _avg?: LearningAssignmentAvgAggregateInputType
+  _sum?: LearningAssignmentSumAggregateInputType
   _min?: LearningAssignmentMinAggregateInputType
   _max?: LearningAssignmentMaxAggregateInputType
 }
@@ -210,9 +266,15 @@ export type LearningAssignmentGroupByOutputType = {
   assignedById: string | null
   cancelledAt: Date | null
   cancelledById: string | null
+  lastCancelledAt: Date | null
+  lastCancelledById: string | null
+  lastCancelledByName: string | null
+  cancellationCount: number
   createdAt: Date
   updatedAt: Date
   _count: LearningAssignmentCountAggregateOutputType | null
+  _avg: LearningAssignmentAvgAggregateOutputType | null
+  _sum: LearningAssignmentSumAggregateOutputType | null
   _min: LearningAssignmentMinAggregateOutputType | null
   _max: LearningAssignmentMaxAggregateOutputType | null
 }
@@ -248,6 +310,10 @@ export type LearningAssignmentWhereInput = {
   assignedById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"LearningAssignment"> | Date | string | null
   cancelledById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  lastCancelledAt?: Prisma.DateTimeNullableFilter<"LearningAssignment"> | Date | string | null
+  lastCancelledById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  lastCancelledByName?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  cancellationCount?: Prisma.IntFilter<"LearningAssignment"> | number
   createdAt?: Prisma.DateTimeFilter<"LearningAssignment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LearningAssignment"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -271,6 +337,10 @@ export type LearningAssignmentOrderByWithRelationInput = {
   assignedById?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastCancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastCancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastCancelledByName?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancellationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -298,6 +368,10 @@ export type LearningAssignmentWhereUniqueInput = Prisma.AtLeast<{
   assignedById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"LearningAssignment"> | Date | string | null
   cancelledById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  lastCancelledAt?: Prisma.DateTimeNullableFilter<"LearningAssignment"> | Date | string | null
+  lastCancelledById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  lastCancelledByName?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  cancellationCount?: Prisma.IntFilter<"LearningAssignment"> | number
   createdAt?: Prisma.DateTimeFilter<"LearningAssignment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LearningAssignment"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -321,11 +395,17 @@ export type LearningAssignmentOrderByWithAggregationInput = {
   assignedById?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastCancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastCancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastCancelledByName?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancellationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.LearningAssignmentCountOrderByAggregateInput
+  _avg?: Prisma.LearningAssignmentAvgOrderByAggregateInput
   _max?: Prisma.LearningAssignmentMaxOrderByAggregateInput
   _min?: Prisma.LearningAssignmentMinOrderByAggregateInput
+  _sum?: Prisma.LearningAssignmentSumOrderByAggregateInput
 }
 
 export type LearningAssignmentScalarWhereWithAggregatesInput = {
@@ -344,6 +424,10 @@ export type LearningAssignmentScalarWhereWithAggregatesInput = {
   assignedById?: Prisma.StringNullableWithAggregatesFilter<"LearningAssignment"> | string | null
   cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LearningAssignment"> | Date | string | null
   cancelledById?: Prisma.StringNullableWithAggregatesFilter<"LearningAssignment"> | string | null
+  lastCancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LearningAssignment"> | Date | string | null
+  lastCancelledById?: Prisma.StringNullableWithAggregatesFilter<"LearningAssignment"> | string | null
+  lastCancelledByName?: Prisma.StringNullableWithAggregatesFilter<"LearningAssignment"> | string | null
+  cancellationCount?: Prisma.IntWithAggregatesFilter<"LearningAssignment"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"LearningAssignment"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LearningAssignment"> | Date | string
 }
@@ -355,6 +439,10 @@ export type LearningAssignmentCreateInput = {
   reason: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Date | string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutLearningAssignmentsInput
@@ -378,6 +466,10 @@ export type LearningAssignmentUncheckedCreateInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -389,6 +481,10 @@ export type LearningAssignmentUpdateInput = {
   reason?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutLearningAssignmentsNestedInput
@@ -412,6 +508,10 @@ export type LearningAssignmentUncheckedUpdateInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -429,6 +529,10 @@ export type LearningAssignmentCreateManyInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -440,6 +544,10 @@ export type LearningAssignmentUpdateManyMutationInput = {
   reason?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -457,6 +565,10 @@ export type LearningAssignmentUncheckedUpdateManyInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -491,8 +603,16 @@ export type LearningAssignmentCountOrderByAggregateInput = {
   assignedById?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelledById?: Prisma.SortOrder
+  lastCancelledAt?: Prisma.SortOrder
+  lastCancelledById?: Prisma.SortOrder
+  lastCancelledByName?: Prisma.SortOrder
+  cancellationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type LearningAssignmentAvgOrderByAggregateInput = {
+  cancellationCount?: Prisma.SortOrder
 }
 
 export type LearningAssignmentMaxOrderByAggregateInput = {
@@ -507,6 +627,10 @@ export type LearningAssignmentMaxOrderByAggregateInput = {
   assignedById?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelledById?: Prisma.SortOrder
+  lastCancelledAt?: Prisma.SortOrder
+  lastCancelledById?: Prisma.SortOrder
+  lastCancelledByName?: Prisma.SortOrder
+  cancellationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -523,8 +647,16 @@ export type LearningAssignmentMinOrderByAggregateInput = {
   assignedById?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelledById?: Prisma.SortOrder
+  lastCancelledAt?: Prisma.SortOrder
+  lastCancelledById?: Prisma.SortOrder
+  lastCancelledByName?: Prisma.SortOrder
+  cancellationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type LearningAssignmentSumOrderByAggregateInput = {
+  cancellationCount?: Prisma.SortOrder
 }
 
 export type LearningAssignmentCreateNestedManyWithoutUserInput = {
@@ -790,6 +922,10 @@ export type LearningAssignmentCreateWithoutUserInput = {
   reason: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Date | string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutLearningAssignmentsInput
@@ -811,6 +947,10 @@ export type LearningAssignmentUncheckedCreateWithoutUserInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -832,6 +972,10 @@ export type LearningAssignmentCreateWithoutAssignedByInput = {
   reason: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Date | string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutLearningAssignmentsInput
@@ -853,6 +997,10 @@ export type LearningAssignmentUncheckedCreateWithoutAssignedByInput = {
   mandatoryTrainingId?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -874,6 +1022,10 @@ export type LearningAssignmentCreateWithoutCancelledByInput = {
   reason: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Date | string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutLearningAssignmentsInput
@@ -895,6 +1047,10 @@ export type LearningAssignmentUncheckedCreateWithoutCancelledByInput = {
   mandatoryTrainingId?: string | null
   assignedById?: string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -941,6 +1097,10 @@ export type LearningAssignmentScalarWhereInput = {
   assignedById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"LearningAssignment"> | Date | string | null
   cancelledById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  lastCancelledAt?: Prisma.DateTimeNullableFilter<"LearningAssignment"> | Date | string | null
+  lastCancelledById?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  lastCancelledByName?: Prisma.StringNullableFilter<"LearningAssignment"> | string | null
+  cancellationCount?: Prisma.IntFilter<"LearningAssignment"> | number
   createdAt?: Prisma.DateTimeFilter<"LearningAssignment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LearningAssignment"> | Date | string
 }
@@ -984,6 +1144,10 @@ export type LearningAssignmentCreateWithoutTenantInput = {
   reason: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Date | string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutLearningAssignmentsInput
@@ -1005,6 +1169,10 @@ export type LearningAssignmentUncheckedCreateWithoutTenantInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1042,6 +1210,10 @@ export type LearningAssignmentCreateWithoutCourseInput = {
   reason: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Date | string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutLearningAssignmentsInput
@@ -1063,6 +1235,10 @@ export type LearningAssignmentUncheckedCreateWithoutCourseInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1100,6 +1276,10 @@ export type LearningAssignmentCreateWithoutMandatoryTrainingInput = {
   reason: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Date | string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutLearningAssignmentsInput
@@ -1121,6 +1301,10 @@ export type LearningAssignmentUncheckedCreateWithoutMandatoryTrainingInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1163,6 +1347,10 @@ export type LearningAssignmentCreateManyUserInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1179,6 +1367,10 @@ export type LearningAssignmentCreateManyAssignedByInput = {
   mandatoryTrainingId?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1195,6 +1387,10 @@ export type LearningAssignmentCreateManyCancelledByInput = {
   mandatoryTrainingId?: string | null
   assignedById?: string | null
   cancelledAt?: Date | string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1206,6 +1402,10 @@ export type LearningAssignmentUpdateWithoutUserInput = {
   reason?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutLearningAssignmentsNestedInput
@@ -1227,6 +1427,10 @@ export type LearningAssignmentUncheckedUpdateWithoutUserInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1243,6 +1447,10 @@ export type LearningAssignmentUncheckedUpdateManyWithoutUserInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1254,6 +1462,10 @@ export type LearningAssignmentUpdateWithoutAssignedByInput = {
   reason?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutLearningAssignmentsNestedInput
@@ -1275,6 +1487,10 @@ export type LearningAssignmentUncheckedUpdateWithoutAssignedByInput = {
   mandatoryTrainingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1291,6 +1507,10 @@ export type LearningAssignmentUncheckedUpdateManyWithoutAssignedByInput = {
   mandatoryTrainingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1302,6 +1522,10 @@ export type LearningAssignmentUpdateWithoutCancelledByInput = {
   reason?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutLearningAssignmentsNestedInput
@@ -1323,6 +1547,10 @@ export type LearningAssignmentUncheckedUpdateWithoutCancelledByInput = {
   mandatoryTrainingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1339,6 +1567,10 @@ export type LearningAssignmentUncheckedUpdateManyWithoutCancelledByInput = {
   mandatoryTrainingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1355,6 +1587,10 @@ export type LearningAssignmentCreateManyTenantInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1366,6 +1602,10 @@ export type LearningAssignmentUpdateWithoutTenantInput = {
   reason?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutLearningAssignmentsNestedInput
@@ -1387,6 +1627,10 @@ export type LearningAssignmentUncheckedUpdateWithoutTenantInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1403,6 +1647,10 @@ export type LearningAssignmentUncheckedUpdateManyWithoutTenantInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1419,6 +1667,10 @@ export type LearningAssignmentCreateManyCourseInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1430,6 +1682,10 @@ export type LearningAssignmentUpdateWithoutCourseInput = {
   reason?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutLearningAssignmentsNestedInput
@@ -1451,6 +1707,10 @@ export type LearningAssignmentUncheckedUpdateWithoutCourseInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1467,6 +1727,10 @@ export type LearningAssignmentUncheckedUpdateManyWithoutCourseInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1483,6 +1747,10 @@ export type LearningAssignmentCreateManyMandatoryTrainingInput = {
   assignedById?: string | null
   cancelledAt?: Date | string | null
   cancelledById?: string | null
+  lastCancelledAt?: Date | string | null
+  lastCancelledById?: string | null
+  lastCancelledByName?: string | null
+  cancellationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1494,6 +1762,10 @@ export type LearningAssignmentUpdateWithoutMandatoryTrainingInput = {
   reason?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutLearningAssignmentsNestedInput
@@ -1515,6 +1787,10 @@ export type LearningAssignmentUncheckedUpdateWithoutMandatoryTrainingInput = {
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1531,6 +1807,10 @@ export type LearningAssignmentUncheckedUpdateManyWithoutMandatoryTrainingInput =
   assignedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastCancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCancelledByName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1550,6 +1830,10 @@ export type LearningAssignmentSelect<ExtArgs extends runtime.Types.Extensions.In
   assignedById?: boolean
   cancelledAt?: boolean
   cancelledById?: boolean
+  lastCancelledAt?: boolean
+  lastCancelledById?: boolean
+  lastCancelledByName?: boolean
+  cancellationCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1573,6 +1857,10 @@ export type LearningAssignmentSelectCreateManyAndReturn<ExtArgs extends runtime.
   assignedById?: boolean
   cancelledAt?: boolean
   cancelledById?: boolean
+  lastCancelledAt?: boolean
+  lastCancelledById?: boolean
+  lastCancelledByName?: boolean
+  cancellationCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1596,6 +1884,10 @@ export type LearningAssignmentSelectUpdateManyAndReturn<ExtArgs extends runtime.
   assignedById?: boolean
   cancelledAt?: boolean
   cancelledById?: boolean
+  lastCancelledAt?: boolean
+  lastCancelledById?: boolean
+  lastCancelledByName?: boolean
+  cancellationCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1619,11 +1911,15 @@ export type LearningAssignmentSelectScalar = {
   assignedById?: boolean
   cancelledAt?: boolean
   cancelledById?: boolean
+  lastCancelledAt?: boolean
+  lastCancelledById?: boolean
+  lastCancelledByName?: boolean
+  cancellationCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type LearningAssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "userId" | "courseId" | "source" | "sourceKey" | "reason" | "dueDate" | "mandatoryTrainingId" | "assignedById" | "cancelledAt" | "cancelledById" | "createdAt" | "updatedAt", ExtArgs["result"]["learningAssignment"]>
+export type LearningAssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "userId" | "courseId" | "source" | "sourceKey" | "reason" | "dueDate" | "mandatoryTrainingId" | "assignedById" | "cancelledAt" | "cancelledById" | "lastCancelledAt" | "lastCancelledById" | "lastCancelledByName" | "cancellationCount" | "createdAt" | "updatedAt", ExtArgs["result"]["learningAssignment"]>
 export type LearningAssignmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1672,6 +1968,10 @@ export type $LearningAssignmentPayload<ExtArgs extends runtime.Types.Extensions.
     assignedById: string | null
     cancelledAt: Date | null
     cancelledById: string | null
+    lastCancelledAt: Date | null
+    lastCancelledById: string | null
+    lastCancelledByName: string | null
+    cancellationCount: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["learningAssignment"]>
@@ -2115,6 +2415,10 @@ export interface LearningAssignmentFieldRefs {
   readonly assignedById: Prisma.FieldRef<"LearningAssignment", 'String'>
   readonly cancelledAt: Prisma.FieldRef<"LearningAssignment", 'DateTime'>
   readonly cancelledById: Prisma.FieldRef<"LearningAssignment", 'String'>
+  readonly lastCancelledAt: Prisma.FieldRef<"LearningAssignment", 'DateTime'>
+  readonly lastCancelledById: Prisma.FieldRef<"LearningAssignment", 'String'>
+  readonly lastCancelledByName: Prisma.FieldRef<"LearningAssignment", 'String'>
+  readonly cancellationCount: Prisma.FieldRef<"LearningAssignment", 'Int'>
   readonly createdAt: Prisma.FieldRef<"LearningAssignment", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"LearningAssignment", 'DateTime'>
 }

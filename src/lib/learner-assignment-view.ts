@@ -7,7 +7,7 @@ type LiveStatus = Exclude<AssignmentStatus, "CANCELLED">;
 
 const LIVE_STATUSES: readonly LiveStatus[] = ["ASSIGNED", "STARTED", "OVERDUE", "COMPLETED"];
 
-const PROFICIENCY_LABELS: Record<string, string> = {
+export const PROFICIENCY_LABELS: Record<string, string> = {
   NONE: "none",
   BEGINNER: "beginner",
   INTERMEDIATE: "intermediate",

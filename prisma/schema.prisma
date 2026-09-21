@@ -833,9 +833,22 @@ model LearningAssignment {
   assignedById String?
   assignedBy   User?   @relation("LearningAssignmentAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
 
+  // CURRENT cancellation state: non-null exactly while the assignment is
+  // cancelled, and cleared by reactivation. Status derivation and the learner
+  // read depend on this meaning, so it never carries history.
   cancelledAt   DateTime?
   cancelledById String?
   cancelledBy   User?     @relation("LearningAssignmentCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
+
+  // HISTORY of the most recent cancellation, written at cancel time and never
+  // cleared (reactivation leaves it alone; a later cancellation overwrites it).
+  // The actor is a snapshot (id and name as they were), like `reason`, so it
+  // survives that admin being deleted. `cancellationCount` is how many times
+  // this assignment has been cancelled.
+  lastCancelledAt     DateTime?
+  lastCancelledById   String?
+  lastCancelledByName String?
+  cancellationCount   Int       @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

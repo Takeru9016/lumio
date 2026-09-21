@@ -45,6 +45,7 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
       </ErrorBoundary>
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopNav
+          navRole="ORG_ADMIN"
           currentStreak={user.currentStreak}
           logoUrl={tenant?.logoUrl ?? null}
           initialUnreadCount={unreadCount}

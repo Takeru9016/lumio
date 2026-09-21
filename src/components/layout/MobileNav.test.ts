@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import { DESKTOP_MEDIA_QUERY, MobileNav } from "./MobileNav";
 import { getActiveHref, ROLE_NAV_ITEMS } from "./navItems";
 
-const render = (props: { role: "STUDENT" | "INSTRUCTOR"; defaultOpen?: boolean }) =>
+const render = (props: { role: "STUDENT" | "INSTRUCTOR" | "ORG_ADMIN"; defaultOpen?: boolean }) =>
   renderToStaticMarkup(createElement(MobileNav, props));
 
 describe("navItems — the one list both navigations read", () => {
@@ -118,6 +118,42 @@ describe("MobileNav — closes when the sidebar takes over", () => {
   it("is controlled: it still renders open from defaultOpen and closed by default", () => {
     expect(render({ role: "STUDENT", defaultOpen: true })).toContain('role="dialog"');
     expect(render({ role: "STUDENT" })).not.toContain('role="dialog"');
+  });
+});
+
+describe("organisation admin navigation (Phase 28.5)", () => {
+  it("gives an org admin an Assignments entry pointing at /org/assignments", () => {
+    const item = ROLE_NAV_ITEMS.ORG_ADMIN.find((i) => i.href === "/org/assignments");
+
+    expect(item?.label).toBe("Assignments");
+  });
+
+  it("does not add it to any other role's navigation", () => {
+    for (const role of ["STUDENT", "INSTRUCTOR", "SUPER_ADMIN"] as const) {
+      expect(
+        ROLE_NAV_ITEMS[role].map((i) => i.href),
+        role
+      ).not.toContain("/org/assignments");
+    }
+  });
+
+  it("marks it active on the page and on its filtered URLs' path", () => {
+    expect(getActiveHref(ROLE_NAV_ITEMS.ORG_ADMIN, "/org/assignments")).toBe("/org/assignments");
+  });
+
+  it("the mobile menu offers it too, so the admin workflow is not desktop-only", () => {
+    const html = renderToStaticMarkup(
+      createElement(MobileNav, { role: "ORG_ADMIN", defaultOpen: true })
+    );
+
+    expect(html).toContain('href="/org/assignments"');
+    expect(html).toContain(">Assignments<");
+  });
+
+  it("the org layout turns the mobile menu on", () => {
+    const layout = readFileSync(path.resolve(__dirname, "../../app/(org)/layout.tsx"), "utf8");
+
+    expect(layout).toContain('navRole="ORG_ADMIN"');
   });
 });
 

@@ -33,7 +33,7 @@ function DialogContent({
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity focus:outline-none">
+        <DialogPrimitive.Close className="absolute right-1 top-1 inline-flex h-11 w-11 items-center justify-center rounded-md opacity-70 hover:opacity-100 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
           <X size={16} />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
@@ -48,7 +48,7 @@ function DialogTitle({
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={`text-base font-semibold text-text-primary mb-4 pr-6 ${className ?? ""}`}
+      className={`text-base font-semibold text-text-primary mb-4 pr-10 ${className ?? ""}`}
       {...props}
     />
   );

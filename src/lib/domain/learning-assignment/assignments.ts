@@ -27,11 +27,11 @@ import type {
 } from "@/lib/domain/learning-assignment/types";
 import { createNotification } from "@/lib/notifications";
 
-type Ctx = AuthContext & { tenantId: string };
+export type Ctx = AuthContext & { tenantId: string };
 
 // Only ORG_ADMIN writes assignments in V1. Instructors, students and super
 // admins are all denied; a super admin is not a tenant actor.
-function authorizeActor(ctx: AuthContext): asserts ctx is Ctx {
+export function authorizeActor(ctx: AuthContext): asserts ctx is Ctx {
   requireRole(ctx, ["ORG_ADMIN"]);
   requireTenant(ctx);
 }
@@ -213,7 +213,9 @@ async function assignLearning(
         outcome = "existing";
         if (assignment.cancelledAt !== null) {
           // Reactivation keeps identity and the original provenance; only the
-          // cancellation fields (and an explicitly supplied due date) change.
+          // CURRENT cancellation state (and an explicitly supplied due date)
+          // changes. The cancellation history (lastCancelled*, cancellationCount)
+          // is deliberately left alone: it is what records that this happened.
           const reactivated = await tx.learningAssignment.updateMany({
             where: { id: assignment.id, cancelledAt: { not: null } },
             data: {
@@ -531,9 +533,25 @@ export async function cancelAssignment(
       return { ok: false, reason: "ASSIGNMENT_COMPLETED" };
     }
 
+    // The history is written only by the call whose conditional update actually
+    // flips the row (count === 1), in the same statement as the current state, so
+    // a racing duplicate cancellation cannot record a second one. The actor's name
+    // is snapshotted because cancelledById is cleared if that admin is deleted.
+    const canceller = await tx.user.findUnique({
+      where: { id: ctx.userId },
+      select: { name: true },
+    });
+    const cancelledAt = new Date();
     const updated = await tx.learningAssignment.updateMany({
       where: { id: assignment.id, tenantId: ctx.tenantId, cancelledAt: null },
-      data: { cancelledAt: new Date(), cancelledById: ctx.userId },
+      data: {
+        cancelledAt,
+        cancelledById: ctx.userId,
+        lastCancelledAt: cancelledAt,
+        lastCancelledById: ctx.userId,
+        lastCancelledByName: canceller?.name ?? null,
+        cancellationCount: { increment: 1 },
+      },
     });
     const current = await tx.learningAssignment.findUniqueOrThrow({
       where: { id: assignment.id },

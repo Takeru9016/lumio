@@ -1,19 +1,20 @@
-import { CircleCheck, CircleDashed, CircleDot, Clock, type LucideIcon } from "lucide-react";
+import { Ban, CircleCheck, CircleDashed, CircleDot, Clock, type LucideIcon } from "lucide-react";
 
-import type { AssignmentView } from "@/lib/learner-assignment-view";
+import type { AssignmentStatus } from "@/lib/domain/learning-assignment/status";
 
 // Colour is never the only signal: every status has its own icon and its own
 // word. Tokens follow the existing status badges (overdue = danger,
 // completed = success, an open item = brand / info).
-const STATUS_STYLES: Record<AssignmentView["status"], { icon: LucideIcon; className: string }> = {
+const STATUS_STYLES: Record<AssignmentStatus, { icon: LucideIcon; className: string }> = {
   ASSIGNED: { icon: CircleDashed, className: "bg-brand-light text-brand" },
   STARTED: { icon: CircleDot, className: "bg-info-bg text-info" },
   OVERDUE: { icon: Clock, className: "bg-danger-bg text-danger" },
   COMPLETED: { icon: CircleCheck, className: "bg-success-bg text-success" },
+  CANCELLED: { icon: Ban, className: "bg-surface-3 text-text-muted" },
 };
 
 interface AssignmentStatusBadgeProps {
-  status: AssignmentView["status"];
+  status: AssignmentStatus;
   label: string;
 }
 
