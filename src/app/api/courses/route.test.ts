@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { db } from "@/lib/db";
 import { createCourse } from "@/lib/domain/capability/__test__/fixtures";
+import { createSoloUser } from "@/lib/domain/course/__test__/fixtures";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 import * as route from "./route";
 
@@ -100,7 +101,7 @@ describe("POST /api/courses — creation (regression)", () => {
   });
 
   it("ignores client-supplied instructorId, tenantId, status, slug and publishedAt", async () => {
-    const { user } = await createTenantUser("INSTRUCTOR");
+    const { tenant, user } = await createTenantUser("INSTRUCTOR");
     const { tenant: otherTenant, user: otherInstructor } = await createTenantUser("INSTRUCTOR");
     vi.mocked(auth).mockResolvedValue({ userId: user.clerkId } as never);
 
@@ -119,10 +120,75 @@ describe("POST /api/courses — creation (regression)", () => {
     const created = await res.json();
     const stored = await db.course.findUniqueOrThrow({ where: { id: created.id } });
     expect(stored.instructorId).toBe(user.id);
-    expect(stored.tenantId).toBeNull();
+    expect(stored.tenantId).toBe(tenant.id);
+    expect(stored.tenantId).not.toBe(otherTenant.id);
     expect(stored.status).toBe("DRAFT");
     expect(stored.publishedAt).toBeNull();
     expect(stored.slug).not.toBe("attacker-chosen-slug");
     expect(await db.course.count({ where: { instructorId: otherInstructor.id } })).toBe(0);
+  });
+});
+
+describe("POST /api/courses — tenant ownership (Phase 29.0)", () => {
+  it("a course created by a tenant instructor belongs to that instructor's tenant", async () => {
+    const { tenant, user } = await createTenantUser("INSTRUCTOR");
+    vi.mocked(auth).mockResolvedValue({ userId: user.clerkId } as never);
+
+    const res = await route.POST(post({ title: "Tenant-owned course" }));
+
+    expect(res.status).toBe(201);
+    const created = await res.json();
+    expect(created.tenantId).toBe(tenant.id);
+    const stored = await db.course.findUniqueOrThrow({ where: { id: created.id } });
+    expect(stored.tenantId).toBe(tenant.id);
+  });
+
+  it("a forged tenantId never assigns ownership to another tenant", async () => {
+    const { tenant, user } = await createTenantUser("INSTRUCTOR");
+    const { tenant: victim } = await createTenantUser("INSTRUCTOR");
+    vi.mocked(auth).mockResolvedValue({ userId: user.clerkId } as never);
+
+    const res = await route.POST(post({ title: "Forged tenant", tenantId: victim.id }));
+
+    expect(res.status).toBe(201);
+    const stored = await db.course.findUniqueOrThrow({ where: { id: (await res.json()).id } });
+    expect(stored.tenantId).toBe(tenant.id);
+    expect(await db.course.count({ where: { tenantId: victim.id } })).toBe(0);
+  });
+
+  it("a solo instructor with no tenant still creates a tenantless course, and a forged tenantId does not change that", async () => {
+    const solo = await createSoloUser("INSTRUCTOR");
+    const { tenant: victim } = await createTenantUser("INSTRUCTOR");
+    vi.mocked(auth).mockResolvedValue({ userId: solo.clerkId } as never);
+
+    const res = await route.POST(post({ title: "Solo course", tenantId: victim.id }));
+
+    expect(res.status).toBe(201);
+    const stored = await db.course.findUniqueOrThrow({ where: { id: (await res.json()).id } });
+    expect(stored.instructorId).toBe(solo.id);
+    expect(stored.tenantId).toBeNull();
+    expect(await db.course.count({ where: { tenantId: victim.id } })).toBe(0);
+  });
+
+  it("does not touch a course that already exists: earlier tenantless courses stay as they are", async () => {
+    const { tenant, user } = await createTenantUser("INSTRUCTOR");
+    const existing = await db.course.create({
+      data: {
+        title: "Legacy",
+        slug: `legacy-${Date.now()}`,
+        instructorId: user.id,
+        tenantId: null,
+      },
+    });
+    await db.user.update({ where: { id: user.id }, data: { plan: "PRO" } });
+    vi.mocked(auth).mockResolvedValue({ userId: user.clerkId } as never);
+
+    const res = await route.POST(post({ title: "Newer course" }));
+
+    expect(res.status).toBe(201);
+    expect((await res.json()).tenantId).toBe(tenant.id);
+    const reloaded = await db.course.findUniqueOrThrow({ where: { id: existing.id } });
+    expect(reloaded.tenantId).toBeNull();
+    expect(reloaded.updatedAt.getTime()).toBe(existing.updatedAt.getTime());
   });
 });

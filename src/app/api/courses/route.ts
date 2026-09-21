@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { id: true, role: true, plan: true },
+    select: { id: true, role: true, plan: true, tenantId: true },
   });
   if (!user) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
@@ -61,6 +61,10 @@ export async function POST(req: NextRequest) {
       price: price ?? 0,
       currency: currency ?? "INR",
       instructorId: user.id,
+      // From the authenticated user's own row, never the request body (the
+      // schema above does not accept it). A solo instructor has no tenant, so
+      // their course stays tenantless, as before.
+      tenantId: user.tenantId,
     },
   });
 
