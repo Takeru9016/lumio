@@ -37,6 +37,30 @@ export async function readJsonBody(req: Request): Promise<unknown> {
   }
 }
 
+/**
+ * The body of a lifecycle request must be empty or an empty JSON object. A status,
+ * a timestamp or anything else in it is INVALID_INPUT, not ignored, so a request
+ * cannot appear to choose what a lifecycle route decides for itself.
+ */
+export async function readEmptyBody(req: Request): Promise<void> {
+  const text = await req.text().catch(() => {
+    throw fail.invalid("Invalid request");
+  });
+  if (text.trim() === "") return;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw fail.invalid("Invalid request");
+  }
+  const isEmptyObject =
+    typeof parsed === "object" &&
+    parsed !== null &&
+    !Array.isArray(parsed) &&
+    Object.keys(parsed).length === 0;
+  if (!isEmptyObject) throw fail.invalid("This request takes no fields");
+}
+
 // A record (not a switch) so a new LearningPathErrorCode is a compile error here.
 const STATUS = {
   INVALID_INPUT: 400,

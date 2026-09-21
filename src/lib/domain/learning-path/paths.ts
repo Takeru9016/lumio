@@ -15,7 +15,7 @@ import {
   parseReorderInput,
   parseUpdatePathInput,
 } from "@/lib/domain/learning-path/inputRules";
-import { assertPathEditable } from "@/lib/domain/learning-path/lifecycle";
+import { assertPathEditable, assertTransition } from "@/lib/domain/learning-path/lifecycle";
 import { encodeCursor, parseListQuery } from "@/lib/domain/learning-path/listing";
 import { assertCourseMayJoin, assertCourseMayLeave } from "@/lib/domain/learning-path/membership";
 import {
@@ -25,6 +25,7 @@ import {
   positionsAfterRemoval,
   sortMembers,
 } from "@/lib/domain/learning-path/ordering";
+import { assertPublishable } from "@/lib/domain/learning-path/publishability";
 import { fail, type PublishBlockReason } from "@/lib/domain/learning-path/types";
 
 /**
@@ -104,7 +105,7 @@ function pathIdOrNotFound(pathId: unknown): string {
   return pathId;
 }
 
-type LockedPath = { id: string; status: LearningPathStatus };
+type LockedPath = { id: string; status: LearningPathStatus; title: string };
 
 /**
  * Takes the path's row lock and returns its status as it stands now. Only a path
@@ -114,7 +115,7 @@ type LockedPath = { id: string; status: LearningPathStatus };
  */
 async function lockPath(tx: Client, pathId: string, tenantId: string): Promise<LockedPath> {
   const rows = await tx.$queryRaw<LockedPath[]>`
-    SELECT id, status FROM "LearningPath"
+    SELECT id, status, title FROM "LearningPath"
     WHERE id = ${pathId} AND "tenantId" = ${tenantId}
     FOR UPDATE`;
   const path = rows[0];
@@ -454,6 +455,75 @@ export async function reorderLearningPath(
 
     await writePositions(tx, path.id, plan);
     await touch(tx, path.id);
+    return loadDetail(tx, path.id, actor.tenantId);
+  });
+}
+
+/**
+ * Publishes a DRAFT path, or republishes an ARCHIVED one (Phase 29.3.2).
+ *
+ * The transition is checked against the status found under the path lock, and
+ * whether the path may be published is decided from the courses and lessons as
+ * they are right after that lock, never from anything read earlier: a course that
+ * was archived, unpublished or emptied a moment ago blocks the publish, and the
+ * path stays as it was. Republishing repeats the whole check, so nothing about the
+ * path's earlier life is trusted. The check itself is `assertPublishable`.
+ *
+ * It sets `publishedAt` to now (the request cannot name a time), and never adds,
+ * removes or reorders a course: an unpublishable path is refused, not repaired.
+ */
+export async function publishLearningPath(
+  ctx: AuthContext,
+  pathId: unknown
+): Promise<AdminPathDetail> {
+  const actor = assertPathManager(ctx);
+  const id = pathIdOrNotFound(pathId);
+
+  return db.$transaction(async (tx) => {
+    const path = await lockPath(tx, id, actor.tenantId);
+    assertTransition(path.status, "PUBLISHED");
+
+    const members = await loadMembers(tx, path.id);
+    const withLessons = await coursesWithPublishedLessons(
+      tx,
+      members.map((m) => m.courseId)
+    );
+    assertPublishable({
+      title: path.title,
+      tenantId: actor.tenantId,
+      courses: sortMembers(members).map((m) => factsOf(m.course, withLessons)),
+    });
+
+    const now = new Date();
+    await tx.learningPath.update({
+      where: { id: path.id },
+      data: { status: "PUBLISHED", publishedAt: now, updatedAt: now },
+    });
+    return loadDetail(tx, path.id, actor.tenantId);
+  });
+}
+
+/**
+ * Archives a DRAFT or PUBLISHED path. A draft is archived whether or not it could
+ * be published (an empty one included), and an already ARCHIVED path is refused as
+ * an invalid transition. Only the status (and `updatedAt`) change: the courses, their
+ * order, the description, the creator and `publishedAt` all stay as they were.
+ */
+export async function archiveLearningPath(
+  ctx: AuthContext,
+  pathId: unknown
+): Promise<AdminPathDetail> {
+  const actor = assertPathManager(ctx);
+  const id = pathIdOrNotFound(pathId);
+
+  return db.$transaction(async (tx) => {
+    const path = await lockPath(tx, id, actor.tenantId);
+    assertTransition(path.status, "ARCHIVED");
+
+    await tx.learningPath.update({
+      where: { id: path.id },
+      data: { status: "ARCHIVED", updatedAt: new Date() },
+    });
     return loadDetail(tx, path.id, actor.tenantId);
   });
 }
