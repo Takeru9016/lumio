@@ -1,9 +1,14 @@
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
+import { prerequisitesNotMetResponse } from "@/lib/course-prerequisite-api";
 import { db } from "@/lib/db";
 import { canEnrollInCourse } from "@/lib/domain/course/enrollmentAccess";
 import { courseOrderNotes, courseOrderReceipt } from "@/lib/domain/course/paymentVerification";
+import {
+  assertCoursePrerequisitesMet,
+  PrerequisitesNotMetError,
+} from "@/lib/domain/course/prerequisites";
 import { razorpay } from "@/lib/razorpay";
 
 export async function POST(
@@ -59,6 +64,15 @@ export async function POST(
 
   if (existing) {
     return Response.json({ error: "Already enrolled" }, { status: 409 });
+  }
+
+  // A learner who cannot enroll must not cause a payment order to exist: the
+  // prerequisites are decided before anything is sent to Razorpay.
+  try {
+    await assertCoursePrerequisitesMet(db, { userId: user.id, courseId: course.id });
+  } catch (err) {
+    if (err instanceof PrerequisitesNotMetError) return prerequisitesNotMetResponse(err);
+    throw err;
   }
 
   // Receipt/notes are the trusted record enroll/route.ts verifies a payment

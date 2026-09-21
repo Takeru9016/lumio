@@ -87,7 +87,7 @@ export async function POST(req: Request) {
       note: body.note,
     } as ManualAssignmentInput);
 
-    if (!result.ok) return skipResponse(result.reason);
+    if (!result.ok) return skipResponse(result.reason, result.prerequisites);
 
     return Response.json(
       { outcome: result.outcome, status: result.status, assignment: { id: result.assignment.id } },

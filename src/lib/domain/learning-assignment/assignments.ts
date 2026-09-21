@@ -5,6 +5,10 @@ import { db } from "@/lib/db";
 import { computeCapabilityGap } from "@/lib/domain/capability/gaps";
 import { canEnrollInCourse } from "@/lib/domain/course/enrollmentAccess";
 import {
+  assertCoursePrerequisitesMet,
+  PrerequisitesNotMetError,
+} from "@/lib/domain/course/prerequisites";
+import {
   isValidDueDate,
   isValidId,
   isValidNote,
@@ -77,7 +81,10 @@ type TxResult = {
 // callback would COMMIT whatever had already been written (e.g. the
 // enrollment), so every skip that can happen after a write rolls back instead.
 class AssignmentRollback extends Error {
-  constructor(public skip: AssignmentSkipReason) {
+  constructor(
+    public skip: AssignmentSkipReason,
+    public prerequisites?: { courseId: string; slug: string; title: string }[]
+  ) {
     super(skip);
     this.name = "AssignmentRollback";
   }
@@ -105,7 +112,8 @@ function formatDueDate(dueDate: Date): string {
  *   -> learner (same tenant, active STUDENT, not deleted)
  *   -> course (canEnrollInCourse, PUBLISHED, free)
  *   -> source-specific provenance
- *   -> one transaction: idempotent enrollment, then idempotent assignment
+ *   -> one transaction: prerequisite gate (only when no enrollment exists yet),
+ *      then idempotent enrollment, then idempotent assignment
  *   -> best-effort, idempotent notification after the commit
  *
  * Idempotency is decided by the database, never by a read-then-write: both
@@ -164,6 +172,31 @@ async function assignLearning(
   let txResult: TxResult;
   try {
     txResult = await db.$transaction(async (tx): Promise<TxResult> => {
+      const existingEnrollment = await tx.enrollment.findUnique({
+        where: { userId_courseId: { userId: learner.id, courseId: course.id } },
+        select: { status: true },
+      });
+      // A refund revoked this learner's access. Assignment must not silently
+      // restore it, and must not answer as if prerequisites were the problem.
+      if (existingEnrollment?.status === "REFUNDED")
+        throw new AssignmentRollback("ENROLLMENT_REFUNDED");
+
+      // Prerequisites bind the creation of an enrollment, and only that: a learner
+      // who already has one (ACTIVE or COMPLETED) keeps their access when a
+      // prerequisite is added later. The gate runs before the enrollment write, so a
+      // learner who has not met them never gets a row, not even an uncommitted one.
+      // Concurrent calls each run it themselves and none reaches a write.
+      if (existingEnrollment === null) {
+        try {
+          await assertCoursePrerequisitesMet(tx, { userId: learner.id, courseId: course.id });
+        } catch (error) {
+          if (error instanceof PrerequisitesNotMetError) {
+            throw new AssignmentRollback("PREREQUISITES_NOT_MET", error.prerequisites);
+          }
+          throw error;
+        }
+      }
+
       const insertedEnrollment = await tx.enrollment.createMany({
         data: [{ userId: learner.id, courseId: course.id }],
         skipDuplicates: true,
@@ -172,8 +205,7 @@ async function assignLearning(
         where: { userId_courseId: { userId: learner.id, courseId: course.id } },
         select: { id: true, status: true },
       });
-      // A refund revoked this learner's access. Assignment must not silently
-      // restore it.
+      // A refund that committed between the read above and the insert.
       if (enrollment.status === "REFUNDED") throw new AssignmentRollback("ENROLLMENT_REFUNDED");
 
       const insertedAssignment = await tx.learningAssignment.createMany({
@@ -251,7 +283,13 @@ async function assignLearning(
       };
     });
   } catch (error) {
-    if (error instanceof AssignmentRollback) return { ok: false, reason: error.skip };
+    if (error instanceof AssignmentRollback) {
+      return {
+        ok: false,
+        reason: error.skip,
+        ...(error.prerequisites ? { prerequisites: error.prerequisites } : {}),
+      };
+    }
     throw error;
   }
 

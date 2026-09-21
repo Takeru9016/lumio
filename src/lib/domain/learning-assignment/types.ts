@@ -60,7 +60,10 @@ export type AssignmentSkipReason =
   | "LEARNER_NOT_IN_TEAM"
   | "GAP_NOT_FOUND"
   | "GAP_ALREADY_MET"
-  | "COURSE_DOES_NOT_ADDRESS_SKILL";
+  | "COURSE_DOES_NOT_ADDRESS_SKILL"
+  // The learner has not completed every enforceable prerequisite of the course
+  // and has no enrollment yet (Phase 29.2). No enrollment or assignment is created.
+  | "PREREQUISITES_NOT_MET";
 
 export type AssignmentOutcome =
   // A new assignment row was inserted.
@@ -85,7 +88,12 @@ export type CreateAssignmentResult =
       // or failed to insert.
       notificationCreated: boolean;
     }
-  | { ok: false; reason: AssignmentSkipReason };
+  | {
+      ok: false;
+      reason: AssignmentSkipReason;
+      // Only for PREREQUISITES_NOT_MET: the prerequisites that remain.
+      prerequisites?: { courseId: string; slug: string; title: string }[];
+    };
 
 export type CancelAssignmentResult =
   | {

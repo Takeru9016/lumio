@@ -27,7 +27,8 @@ export type CoursePrerequisiteErrorCode =
   | "COURSE_ARCHIVED"
   | "DUPLICATE"
   | "CYCLE"
-  | "LIMIT_REACHED";
+  | "LIMIT_REACHED"
+  | "PREREQUISITES_NOT_MET";
 
 /** Prose never names an id, a tenant or a database message. */
 export class CoursePrerequisiteError extends Error {
@@ -408,4 +409,112 @@ export async function getUnmetPrerequisites(
   return enforceable
     .filter((p) => !done.has(p.prerequisiteCourseId))
     .map((p) => ({ slug: p.slug, title: p.title }));
+}
+
+export type PrerequisiteState = "COMPLETED" | "REQUIRED" | "NON_ENFORCEABLE";
+
+/**
+ * One prerequisite as the learner viewing the course sees it. A prerequisite that
+ * is COMPLETED or REQUIRED is a live, same-tenant course the learner can reach or
+ * has already taken, so it carries its own id, slug and title. A NON_ENFORCEABLE one
+ * (a draft, an archived course, or one with nothing to complete, and which the
+ * learner has not completed) carries nothing but its status: it can be an unreleased
+ * course, and the learner has no business learning what it is called. Nothing here
+ * says who else has or has not completed anything.
+ */
+export type LearnerPrerequisiteStatus =
+  | { courseId: string; slug: string; title: string; status: "COMPLETED" | "REQUIRED" }
+  | { status: "NON_ENFORCEABLE" };
+
+/**
+ * Every prerequisite of `courseId` with where `userId` stands on it:
+ *
+ * - COMPLETED: the learner's own Enrollment on it is COMPLETED. This wins over
+ *   everything, so a prerequisite completed and later archived stays satisfied.
+ * - REQUIRED: it is enforceable (a PUBLISHED course with a published,
+ *   non-archived lesson) and not completed. It blocks.
+ * - NON_ENFORCEABLE: it is not completed and cannot bind (a retired or unreachable
+ *   prerequisite). It is not a waiver: it is the same for every learner. It is
+ *   returned as `{ status }` alone, with no id, slug or title.
+ *
+ * Only the learner's own Enrollment is read. A learner with no tenant, or a course
+ * outside the learner's tenant, has no prerequisites: they only exist between
+ * courses of one tenant, and a prerequisite of another tenant is never returned.
+ * Read-only, and a fixed five queries however many prerequisites there are.
+ */
+export async function getLearnerPrerequisiteStatuses(
+  client: Client,
+  params: { userId: string; courseId: string }
+): Promise<LearnerPrerequisiteStatus[]> {
+  const { userId, courseId } = params;
+  if (!isValidId(userId) || !isValidId(courseId)) return [];
+
+  const user = await client.user.findUnique({ where: { id: userId }, select: { tenantId: true } });
+  if (!user?.tenantId) return [];
+
+  const course = await client.course.findFirst({
+    where: { id: courseId, tenantId: user.tenantId },
+    select: { id: true },
+  });
+  if (!course) return [];
+
+  const prerequisites = await loadPrerequisiteCourses(client, course.id, user.tenantId);
+  if (prerequisites.length === 0) return [];
+
+  const completed = await client.enrollment.findMany({
+    where: {
+      userId,
+      courseId: { in: prerequisites.map((p) => p.prerequisiteCourseId) },
+      status: "COMPLETED",
+    },
+    select: { courseId: true },
+  });
+  const done = new Set(completed.map((e) => e.courseId));
+
+  return prerequisites.map((p): LearnerPrerequisiteStatus => {
+    const named = { courseId: p.prerequisiteCourseId, slug: p.slug, title: p.title };
+    if (done.has(p.prerequisiteCourseId)) return { ...named, status: "COMPLETED" };
+    if (p.enforceable) return { ...named, status: "REQUIRED" };
+    return { status: "NON_ENFORCEABLE" };
+  });
+}
+
+/** What a caller is told about a prerequisite that still blocks. */
+export type UnmetPrerequisiteCourse = { courseId: string; slug: string; title: string };
+
+/**
+ * Thrown by `assertCoursePrerequisitesMet`. It is a CoursePrerequisiteError like
+ * the others (status 409, code PREREQUISITES_NOT_MET), so callers can tell it from
+ * NOT_FOUND, FORBIDDEN, COURSE_ARCHIVED and every payment or assignment error, and
+ * it carries the prerequisites that remain.
+ */
+export class PrerequisitesNotMetError extends CoursePrerequisiteError {
+  constructor(public prerequisites: UnmetPrerequisiteCourse[]) {
+    super(409, "PREREQUISITES_NOT_MET", "Complete the prerequisite courses first");
+    this.name = "PrerequisitesNotMetError";
+  }
+}
+
+/**
+ * The gate every route into a NEW enrollment goes through (Phase 29.2): direct
+ * enrollment, the payment order that precedes a paid enrollment, and assignment.
+ * It passes only when every enforceable prerequisite of `courseId` is completed
+ * by `userId`, and otherwise throws PrerequisitesNotMetError listing the ones
+ * that are not. A retired (non-enforceable) prerequisite never blocks.
+ *
+ * It decides nothing about an enrollment that already exists: callers apply it
+ * where an Enrollment would be created, so someone already enrolled keeps their
+ * access when a prerequisite is added later. Read-only; it takes `db` or a
+ * transaction and returns the full statuses when it passes.
+ */
+export async function assertCoursePrerequisitesMet(
+  client: Client,
+  params: { userId: string; courseId: string }
+): Promise<LearnerPrerequisiteStatus[]> {
+  const statuses = await getLearnerPrerequisiteStatuses(client, params);
+  const required = statuses.flatMap((s) =>
+    s.status === "REQUIRED" ? [{ courseId: s.courseId, slug: s.slug, title: s.title }] : []
+  );
+  if (required.length > 0) throw new PrerequisitesNotMetError(required);
+  return statuses;
 }

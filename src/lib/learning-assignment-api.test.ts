@@ -21,6 +21,7 @@ const ALL_SKIP_REASONS: AssignmentSkipReason[] = [
   "GAP_NOT_FOUND",
   "GAP_ALREADY_MET",
   "COURSE_DOES_NOT_ADDRESS_SKILL",
+  "PREREQUISITES_NOT_MET",
 ];
 
 describe("parseDueDateInput", () => {
@@ -109,6 +110,19 @@ describe("skipResponse", () => {
     expect(status("COURSE_REQUIRES_PAYMENT")).toBe(422);
     expect(status("ENROLLMENT_REFUNDED")).toBe(409);
     expect(status("ASSIGNMENT_CONFLICT")).toBe(409);
+    expect(status("PREREQUISITES_NOT_MET")).toBe(409);
+  });
+
+  it("the prerequisite refusal carries its machine-readable code and the remaining prerequisites only when given them", async () => {
+    const remaining = [{ courseId: "c1", slug: "intro", title: "Intro" }];
+
+    const withDetails = await skipResponse("PREREQUISITES_NOT_MET", remaining).json();
+    const without = await skipResponse("PREREQUISITES_NOT_MET").json();
+    const other = await skipResponse("COURSE_NOT_FOUND", remaining).json();
+
+    expect(withDetails).toMatchObject({ code: "PREREQUISITES_NOT_MET", prerequisites: remaining });
+    expect(Object.keys(without)).toEqual(["error"]);
+    expect(Object.keys(other)).toEqual(["error"]);
   });
 });
 

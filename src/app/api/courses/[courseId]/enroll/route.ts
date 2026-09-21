@@ -2,12 +2,17 @@ import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
 import { Prisma } from "@/generated/prisma/client";
+import { prerequisitesNotMetResponse } from "@/lib/course-prerequisite-api";
 import { db } from "@/lib/db";
 import { canEnrollInCourse } from "@/lib/domain/course/enrollmentAccess";
 import {
   PaymentVerificationError,
   verifyCoursePayment,
 } from "@/lib/domain/course/paymentVerification";
+import {
+  assertCoursePrerequisitesMet,
+  PrerequisitesNotMetError,
+} from "@/lib/domain/course/prerequisites";
 import { EnrollmentEmail } from "@/lib/emails/enrollment";
 import { razorpay } from "@/lib/razorpay";
 import { resend } from "@/lib/resend";
@@ -62,6 +67,15 @@ export async function POST(
 
   if (existing) {
     return Response.json({ error: "Already enrolled" }, { status: 409 });
+  }
+
+  // Prerequisites bind a NEW enrollment only (an existing one, above, keeps its
+  // access), and are decided before any payment is verified or row is written.
+  try {
+    await assertCoursePrerequisitesMet(db, { userId: user.id, courseId: course.id });
+  } catch (err) {
+    if (err instanceof PrerequisitesNotMetError) return prerequisitesNotMetResponse(err);
+    throw err;
   }
 
   let body: { razorpayPaymentId?: string } = {};

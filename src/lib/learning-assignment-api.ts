@@ -41,10 +41,22 @@ const SKIP_RESPONSES = {
   GAP_NOT_FOUND: { status: 400, message: GENERIC_INVALID },
   GAP_ALREADY_MET: { status: 400, message: GENERIC_INVALID },
   COURSE_DOES_NOT_ADDRESS_SKILL: { status: 400, message: GENERIC_INVALID },
+  PREREQUISITES_NOT_MET: {
+    status: 409,
+    message: "This learner hasn't completed the prerequisite courses for that course yet.",
+  },
 } satisfies Record<AssignmentSkipReason, { status: number; message: string }>;
 
-export function skipResponse(reason: AssignmentSkipReason): Response {
+export function skipResponse(
+  reason: AssignmentSkipReason,
+  prerequisites?: { courseId: string; slug: string; title: string }[]
+): Response {
   const { status, message } = SKIP_RESPONSES[reason];
+  // The machine-readable code and the remaining prerequisites accompany only the
+  // prerequisite refusal, and only when the caller has them.
+  if (reason === "PREREQUISITES_NOT_MET" && prerequisites) {
+    return Response.json({ error: message, code: reason, prerequisites }, { status });
+  }
   return Response.json({ error: message }, { status });
 }
 
