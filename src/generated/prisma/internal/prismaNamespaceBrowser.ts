@@ -82,6 +82,7 @@ export const ModelName = {
   UserJobRole: 'UserJobRole',
   UserSkill: 'UserSkill',
   SkillEvidence: 'SkillEvidence',
+  SkillProficiencyEvent: 'SkillProficiencyEvent',
   CourseSkill: 'CourseSkill',
   CoursePrerequisite: 'CoursePrerequisite',
   LearningPath: 'LearningPath',
@@ -563,6 +564,9 @@ export const UserSkillScalarFieldEnum = {
   confidence: 'confidence',
   status: 'status',
   lastAssessedAt: 'lastAssessedAt',
+  evidenceConfidence: 'evidenceConfidence',
+  eventSeq: 'eventSeq',
+  policyVersion: 'policyVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -585,11 +589,41 @@ export const SkillEvidenceScalarFieldEnum = {
   verificationStatus: 'verificationStatus',
   verifiedById: 'verifiedById',
   verifiedAt: 'verifiedAt',
+  occurredAt: 'occurredAt',
+  validUntil: 'validUntil',
+  state: 'state',
+  revision: 'revision',
+  scorePercent: 'scorePercent',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type SkillEvidenceScalarFieldEnum = (typeof SkillEvidenceScalarFieldEnum)[keyof typeof SkillEvidenceScalarFieldEnum]
+
+
+export const SkillProficiencyEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  skillId: 'skillId',
+  seq: 'seq',
+  cause: 'cause',
+  evidenceId: 'evidenceId',
+  evidenceRevision: 'evidenceRevision',
+  actorId: 'actorId',
+  actorRole: 'actorRole',
+  reason: 'reason',
+  previousProficiency: 'previousProficiency',
+  newProficiency: 'newProficiency',
+  previousConfidence: 'previousConfidence',
+  newConfidence: 'newConfidence',
+  policyVersion: 'policyVersion',
+  contributing: 'contributing',
+  occurredAt: 'occurredAt',
+  recordedAt: 'recordedAt'
+} as const
+
+export type SkillProficiencyEventScalarFieldEnum = (typeof SkillProficiencyEventScalarFieldEnum)[keyof typeof SkillProficiencyEventScalarFieldEnum]
 
 
 export const CourseSkillScalarFieldEnum = {

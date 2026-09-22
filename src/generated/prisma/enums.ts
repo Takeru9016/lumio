@@ -190,6 +190,42 @@ export const EvidenceVerificationStatus = {
 export type EvidenceVerificationStatus = (typeof EvidenceVerificationStatus)[keyof typeof EvidenceVerificationStatus]
 
 
+export const EvidenceState = {
+  ACTIVE: 'ACTIVE',
+  SUPERSEDED: 'SUPERSEDED',
+  EXPIRED: 'EXPIRED',
+  REVOKED: 'REVOKED'
+} as const
+
+export type EvidenceState = (typeof EvidenceState)[keyof typeof EvidenceState]
+
+
+export const EvidenceConfidence = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH'
+} as const
+
+export type EvidenceConfidence = (typeof EvidenceConfidence)[keyof typeof EvidenceConfidence]
+
+
+export const ProficiencyEventCause = {
+  BASELINE: 'BASELINE',
+  EVIDENCE_ADDED: 'EVIDENCE_ADDED',
+  EVIDENCE_VERIFIED: 'EVIDENCE_VERIFIED',
+  VERIFICATION_REVOKED: 'VERIFICATION_REVOKED',
+  EVIDENCE_REJECTED: 'EVIDENCE_REJECTED',
+  EVIDENCE_REOPENED: 'EVIDENCE_REOPENED',
+  EVIDENCE_EXPIRED: 'EVIDENCE_EXPIRED',
+  EVIDENCE_SUPERSEDED: 'EVIDENCE_SUPERSEDED',
+  EVIDENCE_REVOKED: 'EVIDENCE_REVOKED',
+  EVIDENCE_REINSTATED: 'EVIDENCE_REINSTATED',
+  RECALCULATED: 'RECALCULATED'
+} as const
+
+export type ProficiencyEventCause = (typeof ProficiencyEventCause)[keyof typeof ProficiencyEventCause]
+
+
 export const KnowledgeSourceType = {
   COURSE: 'COURSE',
   LESSON: 'LESSON',

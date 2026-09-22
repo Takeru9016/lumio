@@ -3,6 +3,7 @@ import type { AuthContext } from "@/lib/auth/context";
 import { db } from "@/lib/db";
 import { computeCapabilityGap } from "@/lib/domain/capability/gaps";
 import { PROFICIENCY_ORDER } from "@/lib/domain/capability/proficiencyOrder";
+import { isAssessable } from "@/lib/domain/capability/proficiencyPolicy";
 
 type Ctx = AuthContext & { tenantId: string };
 
@@ -74,7 +75,13 @@ export async function getRecommendedLearning(
   roleId?: string
 ): Promise<RecommendedLearning> {
   const { gaps } = await computeCapabilityGap(ctx, roleId);
-  const unmetGaps = gaps.filter((g) => !g.met);
+  // Phase 30 G1 guard (pre-flight audit §8, contract D7): a gap whose
+  // required level the current policy can never grant anyone
+  // (isAssessable) is never recommended — recommending it would rank as
+  // maximum severity and could never be closed by enrolling in anything.
+  // `computeCapabilityGap`/`gap.met` are unchanged; this only narrows what
+  // gets ranked here.
+  const unmetGaps = gaps.filter((g) => !g.met && isAssessable(g.requiredProficiency));
   if (unmetGaps.length === 0) {
     return { recommendations: [] };
   }

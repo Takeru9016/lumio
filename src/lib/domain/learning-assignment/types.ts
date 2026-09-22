@@ -60,6 +60,10 @@ export type AssignmentSkipReason =
   | "LEARNER_NOT_IN_TEAM"
   | "GAP_NOT_FOUND"
   | "GAP_ALREADY_MET"
+  // Phase 30 G1 guard: the gap's required proficiency is above what the
+  // current capability policy can ever grant anyone — see
+  // src/lib/domain/capability/proficiencyPolicy.ts's isAssessable.
+  | "GAP_NOT_ASSESSABLE"
   | "COURSE_DOES_NOT_ADDRESS_SKILL"
   // The learner has not completed every enforceable prerequisite of the course
   // and has no enrollment yet (Phase 29.2). No enrollment or assignment is created.

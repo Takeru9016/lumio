@@ -415,6 +415,7 @@ export const ModelName = {
   UserJobRole: 'UserJobRole',
   UserSkill: 'UserSkill',
   SkillEvidence: 'SkillEvidence',
+  SkillProficiencyEvent: 'SkillProficiencyEvent',
   CourseSkill: 'CourseSkill',
   CoursePrerequisite: 'CoursePrerequisite',
   LearningPath: 'LearningPath',
@@ -445,7 +446,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "learningAssignment" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "courseSkill" | "coursePrerequisite" | "learningPath" | "learningPathCourse" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
+    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "learningAssignment" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "skillProficiencyEvent" | "courseSkill" | "coursePrerequisite" | "learningPath" | "learningPathCourse" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2743,6 +2744,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SkillProficiencyEvent: {
+      payload: Prisma.$SkillProficiencyEventPayload<ExtArgs>
+      fields: Prisma.SkillProficiencyEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SkillProficiencyEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SkillProficiencyEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>
+        }
+        findFirst: {
+          args: Prisma.SkillProficiencyEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SkillProficiencyEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>
+        }
+        findMany: {
+          args: Prisma.SkillProficiencyEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>[]
+        }
+        create: {
+          args: Prisma.SkillProficiencyEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>
+        }
+        createMany: {
+          args: Prisma.SkillProficiencyEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SkillProficiencyEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>[]
+        }
+        delete: {
+          args: Prisma.SkillProficiencyEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>
+        }
+        update: {
+          args: Prisma.SkillProficiencyEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.SkillProficiencyEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SkillProficiencyEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SkillProficiencyEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.SkillProficiencyEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillProficiencyEventPayload>
+        }
+        aggregate: {
+          args: Prisma.SkillProficiencyEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSkillProficiencyEvent>
+        }
+        groupBy: {
+          args: Prisma.SkillProficiencyEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SkillProficiencyEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SkillProficiencyEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SkillProficiencyEventCountAggregateOutputType> | number
+        }
+      }
+    }
     CourseSkill: {
       payload: Prisma.$CourseSkillPayload<ExtArgs>
       fields: Prisma.CourseSkillFieldRefs
@@ -4340,6 +4415,9 @@ export const UserSkillScalarFieldEnum = {
   confidence: 'confidence',
   status: 'status',
   lastAssessedAt: 'lastAssessedAt',
+  evidenceConfidence: 'evidenceConfidence',
+  eventSeq: 'eventSeq',
+  policyVersion: 'policyVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4362,11 +4440,41 @@ export const SkillEvidenceScalarFieldEnum = {
   verificationStatus: 'verificationStatus',
   verifiedById: 'verifiedById',
   verifiedAt: 'verifiedAt',
+  occurredAt: 'occurredAt',
+  validUntil: 'validUntil',
+  state: 'state',
+  revision: 'revision',
+  scorePercent: 'scorePercent',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type SkillEvidenceScalarFieldEnum = (typeof SkillEvidenceScalarFieldEnum)[keyof typeof SkillEvidenceScalarFieldEnum]
+
+
+export const SkillProficiencyEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  skillId: 'skillId',
+  seq: 'seq',
+  cause: 'cause',
+  evidenceId: 'evidenceId',
+  evidenceRevision: 'evidenceRevision',
+  actorId: 'actorId',
+  actorRole: 'actorRole',
+  reason: 'reason',
+  previousProficiency: 'previousProficiency',
+  newProficiency: 'newProficiency',
+  previousConfidence: 'previousConfidence',
+  newConfidence: 'newConfidence',
+  policyVersion: 'policyVersion',
+  contributing: 'contributing',
+  occurredAt: 'occurredAt',
+  recordedAt: 'recordedAt'
+} as const
+
+export type SkillProficiencyEventScalarFieldEnum = (typeof SkillProficiencyEventScalarFieldEnum)[keyof typeof SkillProficiencyEventScalarFieldEnum]
 
 
 export const CourseSkillScalarFieldEnum = {
@@ -4931,6 +5039,20 @@ export type ListEnumSkillProficiencyFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'EvidenceConfidence'
+ */
+export type EnumEvidenceConfidenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EvidenceConfidence'>
+    
+
+
+/**
+ * Reference to a field of type 'EvidenceConfidence[]'
+ */
+export type ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EvidenceConfidence[]'>
+    
+
+
+/**
  * Reference to a field of type 'EvidenceType'
  */
 export type EnumEvidenceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EvidenceType'>
@@ -4955,6 +5077,34 @@ export type EnumEvidenceVerificationStatusFieldRefInput<$PrismaModel> = FieldRef
  * Reference to a field of type 'EvidenceVerificationStatus[]'
  */
 export type ListEnumEvidenceVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EvidenceVerificationStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EvidenceState'
+ */
+export type EnumEvidenceStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EvidenceState'>
+    
+
+
+/**
+ * Reference to a field of type 'EvidenceState[]'
+ */
+export type ListEnumEvidenceStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EvidenceState[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProficiencyEventCause'
+ */
+export type EnumProficiencyEventCauseFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProficiencyEventCause'>
+    
+
+
+/**
+ * Reference to a field of type 'ProficiencyEventCause[]'
+ */
+export type ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProficiencyEventCause[]'>
     
 
 
@@ -5210,6 +5360,7 @@ export type GlobalOmitConfig = {
   userJobRole?: Prisma.UserJobRoleOmit
   userSkill?: Prisma.UserSkillOmit
   skillEvidence?: Prisma.SkillEvidenceOmit
+  skillProficiencyEvent?: Prisma.SkillProficiencyEventOmit
   courseSkill?: Prisma.CourseSkillOmit
   coursePrerequisite?: Prisma.CoursePrerequisiteOmit
   learningPath?: Prisma.LearningPathOmit

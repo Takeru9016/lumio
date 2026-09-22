@@ -28,10 +28,14 @@ export type AggregateUserSkill = {
 
 export type UserSkillAvgAggregateOutputType = {
   confidence: number | null
+  eventSeq: number | null
+  policyVersion: number | null
 }
 
 export type UserSkillSumAggregateOutputType = {
   confidence: number | null
+  eventSeq: number | null
+  policyVersion: number | null
 }
 
 export type UserSkillMinAggregateOutputType = {
@@ -44,6 +48,9 @@ export type UserSkillMinAggregateOutputType = {
   confidence: number | null
   status: $Enums.SkillStatus | null
   lastAssessedAt: Date | null
+  evidenceConfidence: $Enums.EvidenceConfidence | null
+  eventSeq: number | null
+  policyVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,6 +65,9 @@ export type UserSkillMaxAggregateOutputType = {
   confidence: number | null
   status: $Enums.SkillStatus | null
   lastAssessedAt: Date | null
+  evidenceConfidence: $Enums.EvidenceConfidence | null
+  eventSeq: number | null
+  policyVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +82,9 @@ export type UserSkillCountAggregateOutputType = {
   confidence: number
   status: number
   lastAssessedAt: number
+  evidenceConfidence: number
+  eventSeq: number
+  policyVersion: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -80,10 +93,14 @@ export type UserSkillCountAggregateOutputType = {
 
 export type UserSkillAvgAggregateInputType = {
   confidence?: true
+  eventSeq?: true
+  policyVersion?: true
 }
 
 export type UserSkillSumAggregateInputType = {
   confidence?: true
+  eventSeq?: true
+  policyVersion?: true
 }
 
 export type UserSkillMinAggregateInputType = {
@@ -96,6 +113,9 @@ export type UserSkillMinAggregateInputType = {
   confidence?: true
   status?: true
   lastAssessedAt?: true
+  evidenceConfidence?: true
+  eventSeq?: true
+  policyVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -110,6 +130,9 @@ export type UserSkillMaxAggregateInputType = {
   confidence?: true
   status?: true
   lastAssessedAt?: true
+  evidenceConfidence?: true
+  eventSeq?: true
+  policyVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -124,6 +147,9 @@ export type UserSkillCountAggregateInputType = {
   confidence?: true
   status?: true
   lastAssessedAt?: true
+  evidenceConfidence?: true
+  eventSeq?: true
+  policyVersion?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -225,6 +251,9 @@ export type UserSkillGroupByOutputType = {
   confidence: number | null
   status: $Enums.SkillStatus
   lastAssessedAt: Date | null
+  evidenceConfidence: $Enums.EvidenceConfidence | null
+  eventSeq: number
+  policyVersion: number | null
   createdAt: Date
   updatedAt: Date
   _count: UserSkillCountAggregateOutputType | null
@@ -262,6 +291,9 @@ export type UserSkillWhereInput = {
   confidence?: Prisma.IntNullableFilter<"UserSkill"> | number | null
   status?: Prisma.EnumSkillStatusFilter<"UserSkill"> | $Enums.SkillStatus
   lastAssessedAt?: Prisma.DateTimeNullableFilter<"UserSkill"> | Date | string | null
+  evidenceConfidence?: Prisma.EnumEvidenceConfidenceNullableFilter<"UserSkill"> | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFilter<"UserSkill"> | number
+  policyVersion?: Prisma.IntNullableFilter<"UserSkill"> | number | null
   createdAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -280,6 +312,9 @@ export type UserSkillOrderByWithRelationInput = {
   confidence?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   lastAssessedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  evidenceConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  eventSeq?: Prisma.SortOrder
+  policyVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -302,6 +337,9 @@ export type UserSkillWhereUniqueInput = Prisma.AtLeast<{
   confidence?: Prisma.IntNullableFilter<"UserSkill"> | number | null
   status?: Prisma.EnumSkillStatusFilter<"UserSkill"> | $Enums.SkillStatus
   lastAssessedAt?: Prisma.DateTimeNullableFilter<"UserSkill"> | Date | string | null
+  evidenceConfidence?: Prisma.EnumEvidenceConfidenceNullableFilter<"UserSkill"> | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFilter<"UserSkill"> | number
+  policyVersion?: Prisma.IntNullableFilter<"UserSkill"> | number | null
   createdAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -320,6 +358,9 @@ export type UserSkillOrderByWithAggregationInput = {
   confidence?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   lastAssessedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  evidenceConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  eventSeq?: Prisma.SortOrder
+  policyVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserSkillCountOrderByAggregateInput
@@ -342,6 +383,9 @@ export type UserSkillScalarWhereWithAggregatesInput = {
   confidence?: Prisma.IntNullableWithAggregatesFilter<"UserSkill"> | number | null
   status?: Prisma.EnumSkillStatusWithAggregatesFilter<"UserSkill"> | $Enums.SkillStatus
   lastAssessedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"UserSkill"> | Date | string | null
+  evidenceConfidence?: Prisma.EnumEvidenceConfidenceNullableWithAggregatesFilter<"UserSkill"> | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntWithAggregatesFilter<"UserSkill"> | number
+  policyVersion?: Prisma.IntNullableWithAggregatesFilter<"UserSkill"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserSkill"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UserSkill"> | Date | string
 }
@@ -353,6 +397,9 @@ export type UserSkillCreateInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutUserSkillsInput
@@ -371,6 +418,9 @@ export type UserSkillUncheckedCreateInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserSkillInput
@@ -383,6 +433,9 @@ export type UserSkillUpdateInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutUserSkillsNestedInput
@@ -401,6 +454,9 @@ export type UserSkillUncheckedUpdateInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserSkillNestedInput
@@ -416,6 +472,9 @@ export type UserSkillCreateManyInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -427,6 +486,9 @@ export type UserSkillUpdateManyMutationInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -441,6 +503,9 @@ export type UserSkillUncheckedUpdateManyInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -470,12 +535,17 @@ export type UserSkillCountOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastAssessedAt?: Prisma.SortOrder
+  evidenceConfidence?: Prisma.SortOrder
+  eventSeq?: Prisma.SortOrder
+  policyVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserSkillAvgOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
+  eventSeq?: Prisma.SortOrder
+  policyVersion?: Prisma.SortOrder
 }
 
 export type UserSkillMaxOrderByAggregateInput = {
@@ -488,6 +558,9 @@ export type UserSkillMaxOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastAssessedAt?: Prisma.SortOrder
+  evidenceConfidence?: Prisma.SortOrder
+  eventSeq?: Prisma.SortOrder
+  policyVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -502,12 +575,17 @@ export type UserSkillMinOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastAssessedAt?: Prisma.SortOrder
+  evidenceConfidence?: Prisma.SortOrder
+  eventSeq?: Prisma.SortOrder
+  policyVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserSkillSumOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
+  eventSeq?: Prisma.SortOrder
+  policyVersion?: Prisma.SortOrder
 }
 
 export type UserSkillNullableScalarRelationFilter = {
@@ -645,6 +723,10 @@ export type NullableEnumSkillProficiencyFieldUpdateOperationsInput = {
   set?: $Enums.SkillProficiency | null
 }
 
+export type NullableEnumEvidenceConfidenceFieldUpdateOperationsInput = {
+  set?: $Enums.EvidenceConfidence | null
+}
+
 export type UserSkillCreateNestedOneWithoutEvidenceInput = {
   create?: Prisma.XOR<Prisma.UserSkillCreateWithoutEvidenceInput, Prisma.UserSkillUncheckedCreateWithoutEvidenceInput>
   connectOrCreate?: Prisma.UserSkillCreateOrConnectWithoutEvidenceInput
@@ -668,6 +750,9 @@ export type UserSkillCreateWithoutUserInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutUserSkillsInput
@@ -684,6 +769,9 @@ export type UserSkillUncheckedCreateWithoutUserInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserSkillInput
@@ -728,6 +816,9 @@ export type UserSkillScalarWhereInput = {
   confidence?: Prisma.IntNullableFilter<"UserSkill"> | number | null
   status?: Prisma.EnumSkillStatusFilter<"UserSkill"> | $Enums.SkillStatus
   lastAssessedAt?: Prisma.DateTimeNullableFilter<"UserSkill"> | Date | string | null
+  evidenceConfidence?: Prisma.EnumEvidenceConfidenceNullableFilter<"UserSkill"> | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFilter<"UserSkill"> | number
+  policyVersion?: Prisma.IntNullableFilter<"UserSkill"> | number | null
   createdAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
 }
@@ -739,6 +830,9 @@ export type UserSkillCreateWithoutTenantInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutUserSkillsInput
@@ -755,6 +849,9 @@ export type UserSkillUncheckedCreateWithoutTenantInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserSkillInput
@@ -793,6 +890,9 @@ export type UserSkillCreateWithoutSkillInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutUserSkillsInput
@@ -809,6 +909,9 @@ export type UserSkillUncheckedCreateWithoutSkillInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   evidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserSkillInput
@@ -847,6 +950,9 @@ export type UserSkillCreateWithoutEvidenceInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutUserSkillsInput
@@ -864,6 +970,9 @@ export type UserSkillUncheckedCreateWithoutEvidenceInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -891,6 +1000,9 @@ export type UserSkillUpdateWithoutEvidenceInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutUserSkillsNestedInput
@@ -908,6 +1020,9 @@ export type UserSkillUncheckedUpdateWithoutEvidenceInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -921,6 +1036,9 @@ export type UserSkillCreateManyUserInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -932,6 +1050,9 @@ export type UserSkillUpdateWithoutUserInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutUserSkillsNestedInput
@@ -948,6 +1069,9 @@ export type UserSkillUncheckedUpdateWithoutUserInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserSkillNestedInput
@@ -962,6 +1086,9 @@ export type UserSkillUncheckedUpdateManyWithoutUserInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -975,6 +1102,9 @@ export type UserSkillCreateManyTenantInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -986,6 +1116,9 @@ export type UserSkillUpdateWithoutTenantInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutUserSkillsNestedInput
@@ -1002,6 +1135,9 @@ export type UserSkillUncheckedUpdateWithoutTenantInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserSkillNestedInput
@@ -1016,6 +1152,9 @@ export type UserSkillUncheckedUpdateManyWithoutTenantInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1029,6 +1168,9 @@ export type UserSkillCreateManySkillInput = {
   confidence?: number | null
   status?: $Enums.SkillStatus
   lastAssessedAt?: Date | string | null
+  evidenceConfidence?: $Enums.EvidenceConfidence | null
+  eventSeq?: number
+  policyVersion?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1040,6 +1182,9 @@ export type UserSkillUpdateWithoutSkillInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutUserSkillsNestedInput
@@ -1056,6 +1201,9 @@ export type UserSkillUncheckedUpdateWithoutSkillInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserSkillNestedInput
@@ -1070,6 +1218,9 @@ export type UserSkillUncheckedUpdateManyWithoutSkillInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumSkillStatusFieldUpdateOperationsInput | $Enums.SkillStatus
   lastAssessedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidenceConfidence?: Prisma.NullableEnumEvidenceConfidenceFieldUpdateOperationsInput | $Enums.EvidenceConfidence | null
+  eventSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  policyVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1115,6 +1266,9 @@ export type UserSkillSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   confidence?: boolean
   status?: boolean
   lastAssessedAt?: boolean
+  evidenceConfidence?: boolean
+  eventSeq?: boolean
+  policyVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1134,6 +1288,9 @@ export type UserSkillSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   confidence?: boolean
   status?: boolean
   lastAssessedAt?: boolean
+  evidenceConfidence?: boolean
+  eventSeq?: boolean
+  policyVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1151,6 +1308,9 @@ export type UserSkillSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   confidence?: boolean
   status?: boolean
   lastAssessedAt?: boolean
+  evidenceConfidence?: boolean
+  eventSeq?: boolean
+  policyVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1168,11 +1328,14 @@ export type UserSkillSelectScalar = {
   confidence?: boolean
   status?: boolean
   lastAssessedAt?: boolean
+  evidenceConfidence?: boolean
+  eventSeq?: boolean
+  policyVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserSkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "userId" | "skillId" | "proficiency" | "targetProficiency" | "confidence" | "status" | "lastAssessedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["userSkill"]>
+export type UserSkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "userId" | "skillId" | "proficiency" | "targetProficiency" | "confidence" | "status" | "lastAssessedAt" | "evidenceConfidence" | "eventSeq" | "policyVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["userSkill"]>
 export type UserSkillInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1209,6 +1372,9 @@ export type $UserSkillPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     confidence: number | null
     status: $Enums.SkillStatus
     lastAssessedAt: Date | null
+    evidenceConfidence: $Enums.EvidenceConfidence | null
+    eventSeq: number
+    policyVersion: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["userSkill"]>
@@ -1647,6 +1813,9 @@ export interface UserSkillFieldRefs {
   readonly confidence: Prisma.FieldRef<"UserSkill", 'Int'>
   readonly status: Prisma.FieldRef<"UserSkill", 'SkillStatus'>
   readonly lastAssessedAt: Prisma.FieldRef<"UserSkill", 'DateTime'>
+  readonly evidenceConfidence: Prisma.FieldRef<"UserSkill", 'EvidenceConfidence'>
+  readonly eventSeq: Prisma.FieldRef<"UserSkill", 'Int'>
+  readonly policyVersion: Prisma.FieldRef<"UserSkill", 'Int'>
   readonly createdAt: Prisma.FieldRef<"UserSkill", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UserSkill", 'DateTime'>
 }

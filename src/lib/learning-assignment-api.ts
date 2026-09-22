@@ -40,6 +40,7 @@ const SKIP_RESPONSES = {
   LEARNER_NOT_IN_TEAM: { status: 400, message: GENERIC_INVALID },
   GAP_NOT_FOUND: { status: 400, message: GENERIC_INVALID },
   GAP_ALREADY_MET: { status: 400, message: GENERIC_INVALID },
+  GAP_NOT_ASSESSABLE: { status: 400, message: GENERIC_INVALID },
   COURSE_DOES_NOT_ADDRESS_SKILL: { status: 400, message: GENERIC_INVALID },
   PREREQUISITES_NOT_MET: {
     status: 409,

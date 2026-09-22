@@ -518,7 +518,10 @@ describe("getLearnerAssignments — gap assignment sanity", () => {
   it("keeps two skill-gap assignments for one course as two rows", async () => {
     const s = await createScenario();
     const { role, skill } = await createRoleWithSkill({ tenantId: s.tenant.id });
-    const secondSkill = await addSkillToRole(role.id, s.tenant.id, "ADVANCED");
+    // BEGINNER, not ADVANCED: this test is about two skills producing two
+    // rows, not about the required level — Phase 30's G1 guard skips
+    // creation for a required level the capability policy can never grant.
+    const secondSkill = await addSkillToRole(role.id, s.tenant.id, "BEGINNER");
     await assignRole(s.tenant.id, s.learner.user.id, role.id);
     await mapCourseToSkill(s.course.id, skill.id);
     await mapCourseToSkill(s.course.id, secondSkill.id);

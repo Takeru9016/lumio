@@ -19,6 +19,45 @@ async function publish(courseId: string) {
   await db.course.update({ where: { id: courseId }, data: { status: "PUBLISHED" } });
 }
 
+describe("getRecommendedLearning — Phase 30 G1 guard (pre-flight audit §8)", () => {
+  it("an unmet gap whose required level the policy can never grant is never recommended, even as the only gap and with a mapped published course", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx } = await createTenantUser("STUDENT");
+    const skill = await createSkill(tenant.id);
+    const role = await createJobRole(tenant.id);
+    await createRoleSkill(role.id, skill.id, "EXPERT");
+    await createUserJobRole(tenant.id, ctx.userId, role.id);
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    await mapCourseSkill(course.id, skill.id);
+    await publish(course.id);
+
+    const result = await getRecommendedLearning({ ...ctx, tenantId: tenant.id });
+
+    expect(result.recommendations).toEqual([]);
+  });
+
+  it("an assessable gap is still recommended alongside an unassessable one — the guard narrows, it doesn't silence everything", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx } = await createTenantUser("STUDENT");
+    const unassessableSkill = await createSkill(tenant.id);
+    const assessableSkill = await createSkill(tenant.id);
+    const role = await createJobRole(tenant.id);
+    await createRoleSkill(role.id, unassessableSkill.id, "ADVANCED");
+    await createRoleSkill(role.id, assessableSkill.id, "BEGINNER");
+    await createUserJobRole(tenant.id, ctx.userId, role.id);
+    const { course: unassessableCourse } = await createCourse(tenant.id, instructorCtx.userId);
+    const { course: assessableCourse } = await createCourse(tenant.id, instructorCtx.userId);
+    await mapCourseSkill(unassessableCourse.id, unassessableSkill.id);
+    await mapCourseSkill(assessableCourse.id, assessableSkill.id);
+    await publish(unassessableCourse.id);
+    await publish(assessableCourse.id);
+
+    const result = await getRecommendedLearning({ ...ctx, tenantId: tenant.id });
+
+    expect(result.recommendations.map((r) => r.courseId)).toEqual([assessableCourse.id]);
+  });
+});
+
 describe("getRecommendedLearning — capability", () => {
   it("no primary role -> empty recommendations", async () => {
     const { tenant, ctx } = await createTenantUser();
@@ -257,9 +296,12 @@ describe("getRecommendedLearning — multi-skill aggregation", () => {
     const skillLow = await createSkill(tenant.id);
     const skillHigh = await createSkill(tenant.id);
     const role = await createJobRole(tenant.id);
-    // severity: low = INTERMEDIATE(2) - NONE(0) = 2; high = EXPERT(4) - NONE(0) = 4
-    await createRoleSkill(role.id, skillLow.id, "INTERMEDIATE");
-    await createRoleSkill(role.id, skillHigh.id, "EXPERT");
+    // severity: low = BEGINNER(1) - NONE(0) = 1; high = INTERMEDIATE(2) - NONE(0) = 2
+    // (INTERMEDIATE is the highest level Policy 1 can ever grant — Phase 30's
+    // G1 guard excludes any required level above it from recommendations
+    // entirely, so this test uses the two distinct severities that remain.)
+    await createRoleSkill(role.id, skillLow.id, "BEGINNER");
+    await createRoleSkill(role.id, skillHigh.id, "INTERMEDIATE");
     await createUserJobRole(tenant.id, ctx.userId, role.id);
     const { course } = await createCourse(tenant.id, instructorCtx.userId);
     await mapCourseSkill(course.id, skillLow.id);
@@ -297,13 +339,16 @@ describe("getRecommendedLearning — multi-skill aggregation", () => {
 });
 
 describe("getRecommendedLearning — ranking", () => {
-  it("higher severity ranks first: NONE->EXPERT (severity 4) beats BEGINNER->INTERMEDIATE (severity 1)", async () => {
+  it("higher severity ranks first: NONE->INTERMEDIATE (severity 2) beats BEGINNER->INTERMEDIATE (severity 1)", async () => {
     const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
     const { ctx } = await createTenantUser("STUDENT");
     const skillA = await createSkill(tenant.id);
     const skillB = await createSkill(tenant.id);
     const role = await createJobRole(tenant.id);
-    await createRoleSkill(role.id, skillA.id, "EXPERT"); // gap A: NONE -> EXPERT = 4
+    // INTERMEDIATE, not EXPERT: INTERMEDIATE is the highest level Policy 1
+    // can ever grant, and severity is capped at that ceiling for the same
+    // reason the G1 guard excludes anything above it from recommendations.
+    await createRoleSkill(role.id, skillA.id, "INTERMEDIATE"); // gap A: NONE -> INTERMEDIATE = 2
     await createRoleSkill(role.id, skillB.id, "INTERMEDIATE");
     await createUserJobRole(tenant.id, ctx.userId, role.id);
     await db.userSkill.create({
@@ -409,7 +454,7 @@ describe("getRecommendedLearning — ranking", () => {
     const skillB = await createSkill(tenant.id);
     const role = await createJobRole(tenant.id);
     await createRoleSkill(role.id, skillA.id, "INTERMEDIATE");
-    await createRoleSkill(role.id, skillB.id, "EXPERT");
+    await createRoleSkill(role.id, skillB.id, "BEGINNER"); // not EXPERT — unassessable, excluded by the G1 guard
     await createUserJobRole(tenant.id, ctx.userId, role.id);
     const { course: courseA } = await createCourse(tenant.id, instructorCtx.userId);
     const { course: courseB } = await createCourse(tenant.id, instructorCtx.userId);
@@ -433,13 +478,20 @@ describe("getRecommendedLearning — ranking", () => {
     const role = await createJobRole(tenant.id);
     await createUserJobRole(tenant.id, ctx.userId, role.id);
 
-    const proficiencies: Array<"BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT"> = [
+    // Two candidates tied at the lowest reachable severity (BEGINNER, 1) and
+    // four at the highest reachable severity (INTERMEDIATE, 2) — not
+    // ADVANCED/EXPERT, which Phase 30's G1 guard now excludes entirely
+    // (INTERMEDIATE is the highest level Policy 1 can ever grant). Six
+    // candidates in, cap to 5, so exactly one of the two tied-lowest is
+    // dropped — the same shape this test always exercised, using only
+    // severities that remain assessable.
+    const proficiencies: Array<"BEGINNER" | "INTERMEDIATE"> = [
       "BEGINNER",
       "BEGINNER",
       "INTERMEDIATE",
       "INTERMEDIATE",
-      "ADVANCED",
-      "EXPERT",
+      "INTERMEDIATE",
+      "INTERMEDIATE",
     ];
     const courses: { id: string }[] = [];
     for (const [i, proficiency] of proficiencies.entries()) {

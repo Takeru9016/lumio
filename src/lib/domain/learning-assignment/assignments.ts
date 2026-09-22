@@ -3,6 +3,7 @@ import type { AssignmentSource } from "@/generated/prisma/enums";
 import { type AuthContext, requireRole, requireTenant } from "@/lib/auth/context";
 import { db } from "@/lib/db";
 import { computeCapabilityGap } from "@/lib/domain/capability/gaps";
+import { isAssessable } from "@/lib/domain/capability/proficiencyPolicy";
 import { canEnrollInCourse } from "@/lib/domain/course/enrollmentAccess";
 import {
   assertCoursePrerequisitesMet,
@@ -501,6 +502,11 @@ export async function createCapabilityGapAssignment(
       const gap = gaps.find((g) => g.skillId === skillId);
       if (!role || !gap) return { skip: "GAP_NOT_FOUND" };
       if (gap.met) return { skip: "GAP_ALREADY_MET" };
+      // Phase 30 G1 guard (pre-flight audit §8, contract D7): never create an
+      // assignment aimed at a required level the current policy can never
+      // grant anyone — it could never reach GAP_ALREADY_MET. `gap.met` and
+      // every other skip reason above/below are unchanged.
+      if (!isAssessable(gap.requiredProficiency)) return { skip: "GAP_NOT_ASSESSABLE" };
 
       // Tenant-strict, unlike the enrollment predicate: a gap is closed by
       // one of this tenant's own courses, matching the recommendation engine.

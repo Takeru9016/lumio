@@ -145,6 +145,50 @@ enum EvidenceVerificationStatus {
   REJECTED
 }
 
+// ---- Phase 30: Capability/Proficiency V2 foundation ------------------
+// Schema-only in 30.1 — see docs/PHASE_30_CAPABILITY_PROFICIENCY_V2_CONTRACT.md.
+// No runtime path writes these enums' fields yet; V1's calculation
+// (src/lib/domain/capability/proficiency.ts) remains authoritative until
+// Phase 30.2 completes reconciliation and cutover.
+
+// Whether a SkillEvidence row is currently in force — distinct from
+// verificationStatus (trust) and from "contributes" (state + verification +
+// validUntil combined, computed in code, never stored). Every existing row
+// and every row Phase 30.1 code still creates defaults to ACTIVE, matching
+// the V1 interpretation that everything that exists today is in force.
+enum EvidenceState {
+  ACTIVE // in force; may contribute
+  SUPERSEDED // replaced by a newer assessed-level row for the same learner and skill (Phase 30.8)
+  EXPIRED // past its own validUntil (Phase 30.3 cron)
+  REVOKED // administratively withdrawn, with a reason (Phase 30.3)
+}
+
+// Derived qualifier of a projected proficiency level — never an input to the
+// level itself. Computed, not requested; nothing writes this in Phase 30.1.
+enum EvidenceConfidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// Why one SkillProficiencyEvent row exists. No runtime path creates events in
+// Phase 30.1; this enum exists so the table's shape is reviewed before Phase
+// 30.2 starts writing to it, not so it can be reviewed for the first time
+// alongside the locking change.
+enum ProficiencyEventCause {
+  BASELINE // one-time Phase 30.2 backfill row for a pre-existing UserSkill
+  EVIDENCE_ADDED
+  EVIDENCE_VERIFIED
+  VERIFICATION_REVOKED
+  EVIDENCE_REJECTED
+  EVIDENCE_REOPENED
+  EVIDENCE_EXPIRED
+  EVIDENCE_SUPERSEDED
+  EVIDENCE_REVOKED
+  EVIDENCE_REINSTATED
+  RECALCULATED
+}
+
 // ---- V2: Knowledge ---------------------------------------------
 
 enum KnowledgeSourceType {
@@ -292,6 +336,10 @@ model User {
   learningEvents        LearningEvent[]
   knowledgeAccess       KnowledgeAccess[]
 
+  // Phase 30 — schema only; no runtime path creates these rows in 30.1.
+  proficiencyEvents      SkillProficiencyEvent[]
+  proficiencyEventsActed SkillProficiencyEvent[] @relation("ProficiencyEventActor")
+
   deletedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -356,6 +404,9 @@ model Tenant {
   aiExecutions       AIExecution[]
   aiUsageEvents      AIUsageEvent[]
   learningEvents     LearningEvent[]
+
+  // Phase 30 — schema only; no runtime path creates these rows in 30.1.
+  proficiencyEvents SkillProficiencyEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -940,15 +991,24 @@ model Skill {
   categoryId String?
   category   SkillCategory? @relation(fields: [categoryId], references: [id])
 
-  roleSkills RoleSkill[]
-  userSkills UserSkill[]
-  evidence   SkillEvidence[]
-  courses    CourseSkill[]
+  roleSkills        RoleSkill[]
+  userSkills        UserSkill[]
+  evidence          SkillEvidence[]
+  courses           CourseSkill[]
+  proficiencyEvents SkillProficiencyEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, slug])
+  // Phase 30 — the FK target for UserSkill's composite tenant-consistency
+  // constraint (contract §H8; pre-flight audit §5/§24: this is the one
+  // relationship the audit found clean and safe to constrain now, unlike
+  // SkillEvidence-vs-User/Skill and UserSkill-vs-User, which are gated on a
+  // production data re-run first and are NOT added in 30.1). Redundant with
+  // the existing single-column `id` primary key but required by Postgres as
+  // the unique target a two-column foreign key references.
+  @@unique([id, tenantId])
   @@index([tenantId])
   @@index([categoryId])
 }
@@ -1020,6 +1080,22 @@ model UserSkill {
   status            SkillStatus       @default(ACTIVE)
   lastAssessedAt    DateTime?
 
+  // Phase 30 — additive V2 projection metadata. Schema only in 30.1: not
+  // populated for existing rows, and no runtime path writes them yet — V1's
+  // full recompute (proficiency.ts) remains the only writer of `proficiency`
+  // and `lastAssessedAt` above until Phase 30.2 cutover. See contract §D/§F.
+  //
+  // evidenceConfidence: derived qualifier of `proficiency`, null until a
+  //   versioned policy run (30.3) computes it; never an input to `proficiency`.
+  // eventSeq: the highest SkillProficiencyEvent.seq recorded for this
+  //   (user, skill) so far. 0 means "no V2 event exists yet" — the correct,
+  //   neutral value for every row until Phase 30.2's baseline backfill runs.
+  // policyVersion: which policy version last produced this projection; null
+  //   means "never computed under a versioned policy" (every pre-30.2 row).
+  evidenceConfidence EvidenceConfidence?
+  eventSeq           Int                 @default(0)
+  policyVersion      Int?
+
   evidence SkillEvidence[]
 
   createdAt DateTime @default(now())
@@ -1058,6 +1134,46 @@ model SkillEvidence {
   verifiedBy         User?                      @relation("SkillEvidenceVerifier", fields: [verifiedById], references: [id])
   verifiedAt         DateTime?
 
+  // Phase 30 — additive. Schema only in 30.1: not populated for existing or
+  // newly-written rows (the existing writers in outcomes.ts/verification.ts
+  // are unchanged), and not read by `ceilingFor`/`projectUserSkill` yet.
+  // See contract §B/§16; pre-flight audit §6/§16 for the exact semantics
+  // and why each is nullable rather than backfilled now.
+  //
+  // occurredAt: when the underlying event actually happened (e.g.
+  //   Enrollment.completedAt for a course completion) — never migration time,
+  //   never silently `createdAt`. Nullable until Phase 30.2's backfill
+  //   establishes it for every row; new rows stay null until that writer
+  //   change also happens in 30.2, not here.
+  // validUntil: explicit expiry only (certifications, some assessments).
+  //   Null means "does not expire" — the correct value for every current
+  //   evidence type, none of which has an expiry concept.
+  // state: current standing — ACTIVE, SUPERSEDED, EXPIRED or REVOKED.
+  //   Distinct from `verificationStatus` (trust) and from "contributes"
+  //   (computed in code from state + verificationStatus + validUntil,
+  //   never stored). Defaults to ACTIVE, the correct interpretation for
+  //   every row that exists today — "exists" and "is currently valid" and
+  //   "contributes to current proficiency" are three different questions;
+  //   this column answers only the second, together with validUntil.
+  // revision: optimistic-concurrency token for THIS row's own standing
+  //   (verificationStatus + state), incremented on every audited transition
+  //   of the row (Phase 30.3's verify/reject/unverify/revoke/reinstate).
+  //   Not a generic version counter and not the same thing as
+  //   SkillProficiencyEvent.seq, which orders the *projection's* history
+  //   across many rows for one (user, skill) — this token guards concurrent
+  //   writes to one evidence row. Starts at 0; nothing increments it yet.
+  // scorePercent: a 0-100 normalised snapshot of `score` (quiz: score
+  //   itself; assignment: score/maxScore), for analytics comparability
+  //   across evidence types. Never affects `proficiency`. Not backfilled or
+  //   written in 30.1.
+  occurredAt   DateTime?
+  validUntil   DateTime?
+  state        EvidenceState @default(ACTIVE)
+  revision     Int           @default(0)
+  scorePercent Float?
+
+  proficiencyEvents SkillProficiencyEvent[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1076,6 +1192,75 @@ model SkillEvidence {
   @@index([userId])
   @@index([skillId])
   @@index([sourceType, sourceId])
+}
+
+// Append-only history of every UserSkill projection change (contract §F).
+// Schema only in Phase 30.1 — nothing writes to this table yet; it exists so
+// Phase 30.2's recomputeUserSkill can write to a table whose shape has
+// already been reviewed, not so it can be reviewed for the first time under
+// deadline pressure alongside the locking change. Every field below is
+// exactly what a projection-change transaction already has in hand at write
+// time — nothing here requires a second read (contract §F11).
+model SkillProficiencyEvent {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillId  String
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  // Per-(userId, skillId) total order, assigned inside the same row lock
+  // recomputeUserSkill takes on UserSkill (Phase 30.2) — not derived from
+  // recordedAt, because two events for the same skill can share a
+  // millisecond under real concurrency (pre-flight audit §17). Gap-free by
+  // construction once writes begin.
+  seq Int
+
+  cause ProficiencyEventCause
+
+  // The evidence row this transition acted on, and the revision it
+  // produced — both null for BASELINE and RECALCULATED, which are not about
+  // one evidence row.
+  evidenceId       String?
+  evidence         SkillEvidence? @relation(fields: [evidenceId], references: [id], onDelete: SetNull)
+  evidenceRevision Int?
+
+  // Null when the system acted (e.g. the expiry cron); never null for a
+  // human transition (verify/reject/revoke/reinstate).
+  actorId   String?
+  actor     User?   @relation("ProficiencyEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorRole Role?
+
+  // Required for revoke/reinstate; optional elsewhere.
+  reason String?
+
+  previousProficiency SkillProficiency?
+  newProficiency      SkillProficiency
+
+  previousConfidence EvidenceConfidence?
+  newConfidence      EvidenceConfidence?
+
+  // The policy version that produced newProficiency/newConfidence — see
+  // UserSkill.policyVersion.
+  policyVersion Int
+
+  // The evidence supporting newProficiency at the time of this event:
+  // [{evidenceId, type, verificationStatus, grant}]. Ids and enums only,
+  // never free text — same discipline as SkillEvidence.metadata.
+  contributing Json?
+
+  // Business time: when the underlying cause actually happened (can be
+  // backdated by a backfill). Distinct from recordedAt, which is when this
+  // row was written (contract §F9).
+  occurredAt DateTime
+  recordedAt DateTime @default(now())
+
+  @@unique([userId, skillId, seq])
+  @@unique([evidenceId, evidenceRevision])
+  @@index([tenantId, skillId, recordedAt])
+  @@index([tenantId, userId, skillId, recordedAt])
+  @@index([tenantId, cause, recordedAt])
 }
 
 // Skills developed by a course. Tenant scope is inherited through `course`.

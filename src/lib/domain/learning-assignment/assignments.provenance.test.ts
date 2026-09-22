@@ -334,7 +334,10 @@ describe("CAPABILITY_GAP provenance", () => {
 
   it("keeps two skill gaps closed by the same course as two separate assignments", async () => {
     const { tenant, admin, learner, course, role, skill } = await gapScenario();
-    const secondSkill = await addSkillToRole(role.id, tenant.id, "ADVANCED");
+    // BEGINNER, not ADVANCED: this test is about two skills producing two
+    // rows, not about the required level — Phase 30's G1 guard (below) skips
+    // creation for a required level the capability policy can never grant.
+    const secondSkill = await addSkillToRole(role.id, tenant.id, "BEGINNER");
     await mapCourseToSkill(course.id, secondSkill.id);
 
     const a = await createCapabilityGapAssignment(admin.ctx, {
@@ -446,6 +449,21 @@ describe("CAPABILITY_GAP provenance", () => {
     expect(result).toEqual({ ok: false, reason: "GAP_NOT_FOUND" });
   });
 
+  it("Phase 30 G1 guard: rejects a gap whose required level the capability policy can never grant, and creates nothing", async () => {
+    const { admin, learner, course, role, skill } = await gapScenario({ required: "ADVANCED" });
+
+    const result = await createCapabilityGapAssignment(admin.ctx, {
+      userId: learner.user.id,
+      roleId: role.id,
+      skillId: skill.id,
+      courseId: course.id,
+    });
+
+    expect(result).toEqual({ ok: false, reason: "GAP_NOT_ASSESSABLE" });
+    expect(await db.learningAssignment.count({ where: { userId: learner.user.id } })).toBe(0);
+    expect(await db.enrollment.count({ where: { userId: learner.user.id } })).toBe(0);
+  });
+
   it("rejects a gap the learner has already closed", async () => {
     const { tenant, admin, learner, course, role, skill } = await gapScenario();
     await setUserSkill(tenant.id, learner.user.id, skill.id, "ADVANCED");
@@ -542,8 +560,12 @@ describe("CAPABILITY_GAP provenance", () => {
   });
 
   it("ignores client-supplied provenance and proficiency claims", async () => {
+    // INTERMEDIATE, not ADVANCED: the point of this test is that the forged
+    // claims below are ignored in favour of the real, recomputed values —
+    // that holds independent of the required level, and ADVANCED would now
+    // be skipped entirely by Phase 30's G1 guard before reaching this check.
     const { admin, learner, course, role, skill } = await gapScenario({
-      required: "ADVANCED",
+      required: "INTERMEDIATE",
       current: "BEGINNER",
     });
 
@@ -564,7 +586,7 @@ describe("CAPABILITY_GAP provenance", () => {
     expect(result.assignment.source).toBe("CAPABILITY_GAP");
     expect(result.assignment.sourceKey).toBe(`gap:${role.id}:${skill.id}`);
     expect(result.assignment.reason).toMatchObject({
-      requiredProficiency: "ADVANCED",
+      requiredProficiency: "INTERMEDIATE",
       currentProficiency: "BEGINNER",
     });
   });

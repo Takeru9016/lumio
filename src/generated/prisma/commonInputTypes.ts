@@ -593,6 +593,13 @@ export type EnumSkillProficiencyNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumSkillProficiencyNullableFilter<$PrismaModel> | $Enums.SkillProficiency | null
 }
 
+export type EnumEvidenceConfidenceNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceConfidence | Prisma.EnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EvidenceConfidence[] | Prisma.ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EvidenceConfidence[] | Prisma.ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEvidenceConfidenceNullableFilter<$PrismaModel> | $Enums.EvidenceConfidence | null
+}
+
 export type EnumSkillProficiencyNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.SkillProficiency | Prisma.EnumSkillProficiencyFieldRefInput<$PrismaModel> | null
   in?: $Enums.SkillProficiency[] | Prisma.ListEnumSkillProficiencyFieldRefInput<$PrismaModel> | null
@@ -601,6 +608,16 @@ export type EnumSkillProficiencyNullableWithAggregatesFilter<$PrismaModel = neve
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumSkillProficiencyNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumSkillProficiencyNullableFilter<$PrismaModel>
+}
+
+export type EnumEvidenceConfidenceNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceConfidence | Prisma.EnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EvidenceConfidence[] | Prisma.ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EvidenceConfidence[] | Prisma.ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEvidenceConfidenceNullableWithAggregatesFilter<$PrismaModel> | $Enums.EvidenceConfidence | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEvidenceConfidenceNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEvidenceConfidenceNullableFilter<$PrismaModel>
 }
 
 export type EnumEvidenceTypeFilter<$PrismaModel = never> = {
@@ -626,6 +643,13 @@ export type EnumEvidenceVerificationStatusFilter<$PrismaModel = never> = {
   in?: $Enums.EvidenceVerificationStatus[] | Prisma.ListEnumEvidenceVerificationStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.EvidenceVerificationStatus[] | Prisma.ListEnumEvidenceVerificationStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel> | $Enums.EvidenceVerificationStatus
+}
+
+export type EnumEvidenceStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceState | Prisma.EnumEvidenceStateFieldRefInput<$PrismaModel>
+  in?: $Enums.EvidenceState[] | Prisma.ListEnumEvidenceStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EvidenceState[] | Prisma.ListEnumEvidenceStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEvidenceStateFilter<$PrismaModel> | $Enums.EvidenceState
 }
 
 export type EnumEvidenceTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -662,6 +686,50 @@ export type EnumEvidenceVerificationStatusWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel>
+}
+
+export type EnumEvidenceStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceState | Prisma.EnumEvidenceStateFieldRefInput<$PrismaModel>
+  in?: $Enums.EvidenceState[] | Prisma.ListEnumEvidenceStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EvidenceState[] | Prisma.ListEnumEvidenceStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEvidenceStateWithAggregatesFilter<$PrismaModel> | $Enums.EvidenceState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEvidenceStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEvidenceStateFilter<$PrismaModel>
+}
+
+export type EnumProficiencyEventCauseFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProficiencyEventCause | Prisma.EnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  in?: $Enums.ProficiencyEventCause[] | Prisma.ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProficiencyEventCause[] | Prisma.ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProficiencyEventCauseFilter<$PrismaModel> | $Enums.ProficiencyEventCause
+}
+
+export type EnumRoleNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel> | $Enums.Role | null
+}
+
+export type EnumProficiencyEventCauseWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProficiencyEventCause | Prisma.EnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  in?: $Enums.ProficiencyEventCause[] | Prisma.ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProficiencyEventCause[] | Prisma.ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProficiencyEventCauseWithAggregatesFilter<$PrismaModel> | $Enums.ProficiencyEventCause
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProficiencyEventCauseFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProficiencyEventCauseFilter<$PrismaModel>
+}
+
+export type EnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel> | $Enums.Role | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
 }
 
 export type EnumLearningPathStatusFilter<$PrismaModel = never> = {
@@ -1327,6 +1395,13 @@ export type NestedEnumSkillProficiencyNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumSkillProficiencyNullableFilter<$PrismaModel> | $Enums.SkillProficiency | null
 }
 
+export type NestedEnumEvidenceConfidenceNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceConfidence | Prisma.EnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EvidenceConfidence[] | Prisma.ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EvidenceConfidence[] | Prisma.ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEvidenceConfidenceNullableFilter<$PrismaModel> | $Enums.EvidenceConfidence | null
+}
+
 export type NestedEnumSkillProficiencyNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.SkillProficiency | Prisma.EnumSkillProficiencyFieldRefInput<$PrismaModel> | null
   in?: $Enums.SkillProficiency[] | Prisma.ListEnumSkillProficiencyFieldRefInput<$PrismaModel> | null
@@ -1335,6 +1410,16 @@ export type NestedEnumSkillProficiencyNullableWithAggregatesFilter<$PrismaModel 
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumSkillProficiencyNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumSkillProficiencyNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumEvidenceConfidenceNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceConfidence | Prisma.EnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EvidenceConfidence[] | Prisma.ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EvidenceConfidence[] | Prisma.ListEnumEvidenceConfidenceFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEvidenceConfidenceNullableWithAggregatesFilter<$PrismaModel> | $Enums.EvidenceConfidence | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEvidenceConfidenceNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEvidenceConfidenceNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumEvidenceTypeFilter<$PrismaModel = never> = {
@@ -1349,6 +1434,13 @@ export type NestedEnumEvidenceVerificationStatusFilter<$PrismaModel = never> = {
   in?: $Enums.EvidenceVerificationStatus[] | Prisma.ListEnumEvidenceVerificationStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.EvidenceVerificationStatus[] | Prisma.ListEnumEvidenceVerificationStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel> | $Enums.EvidenceVerificationStatus
+}
+
+export type NestedEnumEvidenceStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceState | Prisma.EnumEvidenceStateFieldRefInput<$PrismaModel>
+  in?: $Enums.EvidenceState[] | Prisma.ListEnumEvidenceStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EvidenceState[] | Prisma.ListEnumEvidenceStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEvidenceStateFilter<$PrismaModel> | $Enums.EvidenceState
 }
 
 export type NestedEnumEvidenceTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -1385,6 +1477,50 @@ export type NestedEnumEvidenceVerificationStatusWithAggregatesFilter<$PrismaMode
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEvidenceVerificationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumEvidenceStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceState | Prisma.EnumEvidenceStateFieldRefInput<$PrismaModel>
+  in?: $Enums.EvidenceState[] | Prisma.ListEnumEvidenceStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EvidenceState[] | Prisma.ListEnumEvidenceStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEvidenceStateWithAggregatesFilter<$PrismaModel> | $Enums.EvidenceState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEvidenceStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEvidenceStateFilter<$PrismaModel>
+}
+
+export type NestedEnumProficiencyEventCauseFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProficiencyEventCause | Prisma.EnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  in?: $Enums.ProficiencyEventCause[] | Prisma.ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProficiencyEventCause[] | Prisma.ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProficiencyEventCauseFilter<$PrismaModel> | $Enums.ProficiencyEventCause
+}
+
+export type NestedEnumRoleNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel> | $Enums.Role | null
+}
+
+export type NestedEnumProficiencyEventCauseWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProficiencyEventCause | Prisma.EnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  in?: $Enums.ProficiencyEventCause[] | Prisma.ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProficiencyEventCause[] | Prisma.ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProficiencyEventCauseWithAggregatesFilter<$PrismaModel> | $Enums.ProficiencyEventCause
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProficiencyEventCauseFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProficiencyEventCauseFilter<$PrismaModel>
+}
+
+export type NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel> | $Enums.Role | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumLearningPathStatusFilter<$PrismaModel = never> = {

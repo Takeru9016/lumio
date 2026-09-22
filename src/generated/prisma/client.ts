@@ -197,6 +197,11 @@ export type UserSkill = Prisma.UserSkillModel
  */
 export type SkillEvidence = Prisma.SkillEvidenceModel
 /**
+ * Model SkillProficiencyEvent
+ * 
+ */
+export type SkillProficiencyEvent = Prisma.SkillProficiencyEventModel
+/**
  * Model CourseSkill
  * 
  */
