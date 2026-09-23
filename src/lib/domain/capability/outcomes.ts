@@ -41,7 +41,7 @@ export async function recordSkillEvidenceOutcome(params: {
   const { tenantId, userId, skillId, type, sourceType, sourceId, score, occurredAt } = params;
   try {
     await db.$transaction(async (tx) => {
-      await tx.skillEvidence.create({
+      const created = await tx.skillEvidence.create({
         data: {
           tenantId,
           userId,
@@ -51,9 +51,24 @@ export async function recordSkillEvidenceOutcome(params: {
           sourceId,
           score,
           verificationStatus: "UNVERIFIED",
+          // Phase 30.2 — the business-time occurrence, already in hand as
+          // `occurredAt` (contract §B9/§6): stored on the row itself now, not
+          // just passed through to the projection, so confidence's freshness
+          // check (proficiencyPolicy.ts's `isFresh`) has it for every new row
+          // going forward. Historical rows without it are Phase 30.2's
+          // backfill's job (capabilityBackfill.ts), not this writer's.
+          occurredAt,
         },
       });
-      await projectUserSkill(tx, { tenantId, userId, skillId, changeTimestamp: occurredAt });
+      await projectUserSkill(tx, {
+        tenantId,
+        userId,
+        skillId,
+        changeTimestamp: occurredAt,
+        cause: "EVIDENCE_ADDED",
+        evidenceId: created.id,
+        evidenceRevision: created.revision,
+      });
     });
     return true;
   } catch (err) {

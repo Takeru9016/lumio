@@ -7,26 +7,25 @@ import type {
 import { compareProficiency, maxProficiency } from "@/lib/domain/capability/proficiencyOrder";
 
 /**
- * The V2 capability policy — Phase 30.1 foundation only
- * (docs/PHASE_30_CAPABILITY_PROFICIENCY_V2_CONTRACT.md §C/§D).
+ * The V2 capability policy (docs/PHASE_30_CAPABILITY_PROFICIENCY_V2_CONTRACT.md §C/§D).
  *
  * Pure and deterministic: no Prisma import, no database read, no AI call, no
  * request/auth context. Every function here takes plain values and returns a
  * plain value — callers own fetching the rows and writing the result.
  *
  * This module implements Policy 1 only — the V1-compatible policy defined in
- * contract §C2, reproducing `src/lib/domain/capability/proficiency.ts`'s
- * existing `ceilingFor` exactly (verificationStatus-only, type-agnostic; no
- * ADVANCED/EXPERT; no score influence; no recency decay). It is NOT wired
- * into any runtime path yet — `proficiency.ts` remains the sole writer of
- * `UserSkill.proficiency` until Phase 30.2 completes reconciliation and
- * cutover (contract §H). Policy 2's type-aware grant table (§C3) — which
- * makes MANAGER_ASSESSMENT/CERTIFICATION evidence contribute, and is what
- * eventually raises `MAX_GRANTABLE_LEVEL` past INTERMEDIATE — is Phase
- * 30.3/30.8's addition, deliberately not built here.
+ * contract §C2, matching V1's original (Phase 5) `ceilingFor` exactly
+ * (verificationStatus-only, type-agnostic; no ADVANCED/EXPERT; no score
+ * influence; no recency decay). As of Phase 30.2 this IS the live runtime
+ * policy: `proficiency.ts`'s canonical recompute calls straight into these
+ * functions (reconciliation proof: docs/PHASE_30.2_IMPLEMENTATION.md,
+ * docs/PHASE_30.2_RECONCILIATION.json). Policy 2's type-aware grant table
+ * (§C3) — which makes MANAGER_ASSESSMENT/CERTIFICATION evidence contribute,
+ * and is what eventually raises `MAX_GRANTABLE_LEVEL` past INTERMEDIATE — is
+ * Phase 30.3/30.8's addition, deliberately not built here.
  */
 
-/** The current policy version this module implements. Not yet written anywhere. */
+/** The current policy version this module implements. Written to every UserSkill/SkillProficiencyEvent row `proficiency.ts`'s canonical recompute touches (Phase 30.2). */
 export const CURRENT_POLICY_VERSION = 1;
 
 /** The three questions contract §B keeps separate — never conflated. */
@@ -88,8 +87,14 @@ export function doesEvidenceContribute(evidence: EvidenceStanding, asOf: Date): 
  * The level a learner's evidence set projects to (the pure core of what
  * `proficiency.ts`'s `projectUserSkill` does against the database). Order-
  * independent by construction (folds through `maxProficiency`), matching
- * V1's own guarantee. Not called by any runtime path in 30.1 — Phase 30.2
- * is what wires a DB read into this function and a locked write back out.
+ * V1's own guarantee. Not called directly by the runtime recompute — which
+ * needs its own intermediate `contributing` array for confidence and the
+ * event snapshot, so it composes `doesEvidenceContribute`/`ceilingFor`/
+ * `maxProficiency` itself (Phase 30.2) rather than through this wrapper —
+ * but exercises the exact same policy functions this composes. Kept as the
+ * simplest possible spec of "what should the level be," proven equivalent
+ * to the runtime path by `proficiencyPolicy.test.ts` and the reconciliation
+ * proof (docs/PHASE_30.2_RECONCILIATION.json).
  */
 export function projectProficiency(
   evidence: readonly EvidenceStanding[],

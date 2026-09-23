@@ -1,0 +1,40 @@
+{
+  "databaseTarget": "lumio_test (local Postgres 17)",
+  "capabilityBearingTenants": 16908,
+  "reconciliationPass1PreBackfill": {
+    "tenants": 16908,
+    "total": 19504,
+    "exactMatch": 16198,
+    "fixtureOnly": 2771,
+    "explainableLegacy": 535,
+    "unexplained": 0
+  },
+  "backfillPass1": {
+    "tenants": 16908,
+    "rowsConsidered": 9,
+    "rowsBaselined": 0,
+    "rowsAlreadyBaselined": 0,
+    "evidenceOccurredAtFilled": 0,
+    "evidenceScorePercentFilled": 0,
+    "failures": 9
+  },
+  "backfillPass2Idempotency": {
+    "tenants": 16908,
+    "rowsConsidered": 9,
+    "rowsBaselined": 0,
+    "rowsAlreadyBaselined": 0,
+    "evidenceOccurredAtFilled": 0,
+    "evidenceScorePercentFilled": 0,
+    "failures": 9
+  },
+  "reconciliationPass2PostBackfill": {
+    "tenants": 16908,
+    "total": 19504,
+    "exactMatch": 16198,
+    "fixtureOnly": 2771,
+    "explainableLegacy": 535,
+    "unexplained": 0
+  },
+  "unexplainedSamplePreBackfill": [],
+  "generatedAt": "2026-09-23T16:04:22.328Z"
+}

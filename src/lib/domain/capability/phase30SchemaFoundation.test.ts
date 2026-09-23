@@ -6,13 +6,18 @@ import { recordSkillEvidenceOutcome } from "@/lib/domain/capability/outcomes";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 
 /**
- * Phase 30.1 — schema foundation only (no runtime wiring). These tests prove
- * the migration is additive and inert: existing writers are untouched,
- * every new column defaults to the migration-safe neutral value the
- * contract specifies, no history event is ever written by a V1 code path,
- * and the one approved composite tenant FK actually rejects what it's meant
- * to reject. See docs/PHASE_30_CAPABILITY_PROFICIENCY_V2_CONTRACT.md,
- * docs/PHASE_30_CAPABILITY_PROFICIENCY_V2_PREFLIGHT.md §5/§19/§24.
+ * Phase 30.1 proved the migration additive and the schema inert (no runtime
+ * path wrote the new columns or the event table yet). Phase 30.2 activates
+ * the writers that 30.1 deliberately left untouched — three assertions below
+ * changed accordingly, from "still null/zero/absent" to the actual value the
+ * now-active canonical recompute (`proficiency.ts`) produces. This is the
+ * intentional behavior 30.2 exists to add, not a regression; the assertions
+ * are still real and still fail if the new behavior breaks (e.g. `revision`,
+ * the deprecated-column round-trip and the composite FK checks below are
+ * completely unchanged and still prove exactly what they proved in 30.1).
+ * See docs/PHASE_30_CAPABILITY_PROFICIENCY_V2_CONTRACT.md,
+ * docs/PHASE_30_CAPABILITY_PROFICIENCY_V2_PREFLIGHT.md §5/§19/§24,
+ * docs/PHASE_30.2_IMPLEMENTATION.md §7.
  */
 
 afterAll(async () => {
@@ -20,9 +25,10 @@ afterAll(async () => {
 });
 
 describe("SkillEvidence — additive columns", () => {
-  it("a row written by the real production writer gets the migration-safe neutral defaults, untouched by that writer", async () => {
+  it("a row written by the real production writer gets the migration-safe neutral defaults, and (Phase 30.2) its own occurredAt", async () => {
     const { tenant, ctx } = await createTenantUser("STUDENT");
     const skill = await createSkill(tenant.id);
+    const occurredAt = new Date();
 
     const created = await recordSkillEvidenceOutcome({
       tenantId: tenant.id,
@@ -31,7 +37,7 @@ describe("SkillEvidence — additive columns", () => {
       type: "MANUAL",
       sourceType: "Manual",
       sourceId: "phase-30-foundation-test",
-      occurredAt: new Date(),
+      occurredAt,
     });
     expect(created).toBe(true);
 
@@ -40,7 +46,9 @@ describe("SkillEvidence — additive columns", () => {
     });
     expect(row.state).toBe("ACTIVE");
     expect(row.revision).toBe(0);
-    expect(row.occurredAt).toBeNull();
+    // Phase 30.2: the writer now stores the occurrence it already receives
+    // as a parameter (outcomes.ts) — was null-by-inertness through 30.1.
+    expect(row.occurredAt?.getTime()).toBe(occurredAt.getTime());
     expect(row.validUntil).toBeNull();
     expect(row.scorePercent).toBeNull();
   });
@@ -72,7 +80,7 @@ describe("SkillEvidence — additive columns", () => {
 });
 
 describe("UserSkill — additive columns", () => {
-  it("a row projected by the real production writer gets the migration-safe neutral defaults", async () => {
+  it("a row projected by the real production writer gets the Phase 30.2 projection metadata, V1 proficiency unchanged", async () => {
     const { tenant, ctx } = await createTenantUser("STUDENT");
     const skill = await createSkill(tenant.id);
 
@@ -91,10 +99,11 @@ describe("UserSkill — additive columns", () => {
     });
     // V1 behavior unchanged: still projects to BEGINNER for unverified evidence.
     expect(userSkill.proficiency).toBe("BEGINNER");
-    // New V2 columns: untouched by the unmodified writer.
-    expect(userSkill.eventSeq).toBe(0);
-    expect(userSkill.evidenceConfidence).toBeNull();
-    expect(userSkill.policyVersion).toBeNull();
+    // Phase 30.2: the canonical recompute now writes these on every real
+    // transition — 0/null/null was the 30.1 "nothing wired in yet" state.
+    expect(userSkill.eventSeq).toBe(1);
+    expect(userSkill.evidenceConfidence).toBe("LOW");
+    expect(userSkill.policyVersion).toBe(1);
   });
 
   it("the pre-existing deprecated columns still accept a write — nothing was dropped", async () => {
@@ -146,8 +155,8 @@ describe("UserSkill — additive columns", () => {
   });
 });
 
-describe("SkillProficiencyEvent — schema exists, nothing writes to it yet", () => {
-  it("no V1 production writer (course completion evidence) creates a row here", async () => {
+describe("SkillProficiencyEvent — schema exists; Phase 30.2 activates the writer", () => {
+  it("the evidence writer's projection change (Phase 30.2) creates exactly one EVIDENCE_ADDED row here", async () => {
     const { tenant, ctx } = await createTenantUser("STUDENT");
     const skill = await createSkill(tenant.id);
 
@@ -161,10 +170,17 @@ describe("SkillProficiencyEvent — schema exists, nothing writes to it yet", ()
       occurredAt: new Date(),
     });
 
-    const count = await db.skillProficiencyEvent.count({
+    const events = await db.skillProficiencyEvent.findMany({
       where: { tenantId: tenant.id, userId: ctx.userId, skillId: skill.id },
     });
-    expect(count).toBe(0);
+    // Through 30.1 this was 0 — no writer called the (then-inert) recompute
+    // with event-writing behavior. 30.2 wires it in: first evidence on a
+    // fresh skill is a real transition (no projection -> BEGINNER).
+    expect(events).toHaveLength(1);
+    expect(events[0].cause).toBe("EVIDENCE_ADDED");
+    expect(events[0].previousProficiency).toBeNull();
+    expect(events[0].newProficiency).toBe("BEGINNER");
+    expect(events[0].seq).toBe(1);
   });
 
   it("the table's shape supports every field the contract's history questions need, and its uniqueness constraints hold", async () => {

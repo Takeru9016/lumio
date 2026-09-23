@@ -191,12 +191,25 @@ async function setEvidenceVerificationStatus(
   await authorizeVerificationActor(actor, evidence);
 
   return db.$transaction(async (tx) => {
-    await tx.skillEvidence.update({
+    // Phase 30.2 — `revision` is incremented on every audited transition of
+    // this row (schema comment, prisma/schema.prisma), and
+    // SkillProficiencyEvent's `[evidenceId, evidenceRevision]` unique
+    // constraint (shipped in 30.1) depends on it actually moving: without
+    // this increment, verify-then-reject on the same evidence row would
+    // stamp two events at revision 0 and the reject's event insert would
+    // fail its own unique constraint — a real collision this repo's own
+    // tests exercise (verification.test.ts's verify-then-reject cases).
+    const updatedEvidence = await tx.skillEvidence.update({
       where: { id: evidenceId },
       data:
         status === "VERIFIED"
-          ? { verificationStatus: "VERIFIED", verifiedById: actor.userId, verifiedAt: new Date() }
-          : { verificationStatus: "REJECTED" },
+          ? {
+              verificationStatus: "VERIFIED",
+              verifiedById: actor.userId,
+              verifiedAt: new Date(),
+              revision: { increment: 1 },
+            }
+          : { verificationStatus: "REJECTED", revision: { increment: 1 } },
     });
 
     return projectUserSkill(tx, {
@@ -204,6 +217,11 @@ async function setEvidenceVerificationStatus(
       userId: evidence.userId,
       skillId: evidence.skillId,
       changeTimestamp: new Date(),
+      cause: status === "VERIFIED" ? "EVIDENCE_VERIFIED" : "EVIDENCE_REJECTED",
+      evidenceId,
+      evidenceRevision: updatedEvidence.revision,
+      actorId: actor.userId,
+      actorRole: actor.role,
     });
   });
 }
