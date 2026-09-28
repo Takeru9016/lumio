@@ -259,6 +259,64 @@ describe("confidenceFor — contract §D1/§D2", () => {
     ];
     expect(confidenceFor("BEGINNER", rows, asOf)).toBe("LOW");
   });
+
+  // Phase 30.3 (docs/PHASE_30.3_DISCOVERY.md §6) — a consequence of
+  // confidenceFor's own definition once Policy 1's two-value grant table
+  // (ceilingFor: VERIFIED -> INTERMEDIATE, else -> BEGINNER) is substituted
+  // in: `supporting` at INTERMEDIATE is always entirely VERIFIED rows, and
+  // `supporting` at BEGINNER is always entirely non-VERIFIED rows. Locked
+  // here as an explicit invariant so it breaks loudly, not silently, the
+  // moment a type-aware grant table changes what ceilingFor can return.
+  it("under Policy 1: HIGH is reachable only from INTERMEDIATE, never BEGINNER", () => {
+    const fresh = {
+      verificationStatus: "UNVERIFIED" as const,
+      state: "ACTIVE" as const,
+      validUntil: null,
+      type: "COURSE_COMPLETION" as const,
+      occurredAt: asOf,
+    };
+    // BEGINNER's supporting set is by construction non-VERIFIED (UNVERIFIED
+    // grants BEGINNER under ceilingFor) — confidenceFor's HIGH branch
+    // requires a VERIFIED-or-assessed row, which cannot exist in this set.
+    expect(confidenceFor("BEGINNER", [fresh], asOf)).not.toBe("HIGH");
+  });
+
+  it("under Policy 1: LOW is reachable only from BEGINNER, never INTERMEDIATE", () => {
+    const verified = {
+      verificationStatus: "VERIFIED" as const,
+      state: "ACTIVE" as const,
+      validUntil: null,
+      type: "COURSE_COMPLETION" as const,
+      occurredAt: new Date(asOf.getTime() - (CONFIDENCE_FRESHNESS_WINDOW_DAYS + 1) * DAY_MS),
+    };
+    // INTERMEDIATE's supporting set is by construction entirely VERIFIED —
+    // confidenceFor's LOW branch requires no VERIFIED row and fewer than 2
+    // distinct unverified types, which cannot hold for an all-VERIFIED set
+    // (the stale-VERIFIED branch always yields at least MEDIUM).
+    expect(confidenceFor("INTERMEDIATE", [verified], asOf)).not.toBe("LOW");
+  });
+
+  it("a future-dated occurredAt is treated as fresh (accepted, not clamped — docs/PHASE_30.3_DISCOVERY.md §6)", () => {
+    const futureDated = {
+      verificationStatus: "VERIFIED" as const,
+      state: "ACTIVE" as const,
+      validUntil: null,
+      type: "COURSE_COMPLETION" as const,
+      occurredAt: new Date(asOf.getTime() + DAY_MS),
+    };
+    expect(confidenceFor("INTERMEDIATE", [futureDated], asOf)).toBe("HIGH");
+  });
+
+  it("validUntil in the future means fresh REGARDLESS of occurredAt's own age (docs/PHASE_30.3_DISCOVERY.md §8)", () => {
+    const oldButStillValid = {
+      verificationStatus: "VERIFIED" as const,
+      state: "ACTIVE" as const,
+      validUntil: new Date(asOf.getTime() + DAY_MS),
+      type: "CERTIFICATION" as const,
+      occurredAt: new Date(asOf.getTime() - (CONFIDENCE_FRESHNESS_WINDOW_DAYS + 3650) * DAY_MS),
+    };
+    expect(confidenceFor("INTERMEDIATE", [oldButStillValid], asOf)).toBe("HIGH");
+  });
 });
 
 describe("MAX_GRANTABLE_LEVEL / isAssessable — pre-flight audit §8's G1 guard primitive", () => {

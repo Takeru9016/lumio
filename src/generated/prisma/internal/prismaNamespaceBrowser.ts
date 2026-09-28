@@ -83,6 +83,7 @@ export const ModelName = {
   UserSkill: 'UserSkill',
   SkillEvidence: 'SkillEvidence',
   SkillProficiencyEvent: 'SkillProficiencyEvent',
+  EvidenceStandingEvent: 'EvidenceStandingEvent',
   CourseSkill: 'CourseSkill',
   CoursePrerequisite: 'CoursePrerequisite',
   LearningPath: 'LearningPath',
@@ -624,6 +625,29 @@ export const SkillProficiencyEventScalarFieldEnum = {
 } as const
 
 export type SkillProficiencyEventScalarFieldEnum = (typeof SkillProficiencyEventScalarFieldEnum)[keyof typeof SkillProficiencyEventScalarFieldEnum]
+
+
+export const EvidenceStandingEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  skillId: 'skillId',
+  evidenceId: 'evidenceId',
+  evidenceRevision: 'evidenceRevision',
+  action: 'action',
+  actorId: 'actorId',
+  actorRole: 'actorRole',
+  actorName: 'actorName',
+  reason: 'reason',
+  previousVerificationStatus: 'previousVerificationStatus',
+  newVerificationStatus: 'newVerificationStatus',
+  previousState: 'previousState',
+  newState: 'newState',
+  occurredAt: 'occurredAt',
+  recordedAt: 'recordedAt'
+} as const
+
+export type EvidenceStandingEventScalarFieldEnum = (typeof EvidenceStandingEventScalarFieldEnum)[keyof typeof EvidenceStandingEventScalarFieldEnum]
 
 
 export const CourseSkillScalarFieldEnum = {

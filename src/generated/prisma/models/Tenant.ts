@@ -324,6 +324,7 @@ export type TenantWhereInput = {
   aiUsageEvents?: Prisma.AIUsageEventListRelationFilter
   learningEvents?: Prisma.LearningEventListRelationFilter
   proficiencyEvents?: Prisma.SkillProficiencyEventListRelationFilter
+  standingEvents?: Prisma.EvidenceStandingEventListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -366,6 +367,7 @@ export type TenantOrderByWithRelationInput = {
   aiUsageEvents?: Prisma.AIUsageEventOrderByRelationAggregateInput
   learningEvents?: Prisma.LearningEventOrderByRelationAggregateInput
   proficiencyEvents?: Prisma.SkillProficiencyEventOrderByRelationAggregateInput
+  standingEvents?: Prisma.EvidenceStandingEventOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -411,6 +413,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   aiUsageEvents?: Prisma.AIUsageEventListRelationFilter
   learningEvents?: Prisma.LearningEventListRelationFilter
   proficiencyEvents?: Prisma.SkillProficiencyEventListRelationFilter
+  standingEvents?: Prisma.EvidenceStandingEventListRelationFilter
 }, "id" | "slug" | "customDomain">
 
 export type TenantOrderByWithAggregationInput = {
@@ -497,6 +500,7 @@ export type TenantCreateInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -539,6 +543,7 @@ export type TenantUncheckedCreateInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -581,6 +586,7 @@ export type TenantUpdateInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -623,6 +629,7 @@ export type TenantUncheckedUpdateInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -967,6 +974,20 @@ export type TenantUpdateOneRequiredWithoutProficiencyEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutProficiencyEventsInput, Prisma.TenantUpdateWithoutProficiencyEventsInput>, Prisma.TenantUncheckedUpdateWithoutProficiencyEventsInput>
 }
 
+export type TenantCreateNestedOneWithoutStandingEventsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutStandingEventsInput, Prisma.TenantUncheckedCreateWithoutStandingEventsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutStandingEventsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutStandingEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutStandingEventsInput, Prisma.TenantUncheckedCreateWithoutStandingEventsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutStandingEventsInput
+  upsert?: Prisma.TenantUpsertWithoutStandingEventsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutStandingEventsInput, Prisma.TenantUpdateWithoutStandingEventsInput>, Prisma.TenantUncheckedUpdateWithoutStandingEventsInput>
+}
+
 export type TenantCreateNestedOneWithoutLearningPathsInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutLearningPathsInput, Prisma.TenantUncheckedCreateWithoutLearningPathsInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutLearningPathsInput
@@ -1132,6 +1153,7 @@ export type TenantCreateWithoutUsersInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutUsersInput = {
@@ -1173,6 +1195,7 @@ export type TenantUncheckedCreateWithoutUsersInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutUsersInput = {
@@ -1230,6 +1253,7 @@ export type TenantUpdateWithoutUsersInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutUsersInput = {
@@ -1271,6 +1295,7 @@ export type TenantUncheckedUpdateWithoutUsersInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTeamsInput = {
@@ -1312,6 +1337,7 @@ export type TenantCreateWithoutTeamsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTeamsInput = {
@@ -1353,6 +1379,7 @@ export type TenantUncheckedCreateWithoutTeamsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTeamsInput = {
@@ -1410,6 +1437,7 @@ export type TenantUpdateWithoutTeamsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTeamsInput = {
@@ -1451,6 +1479,7 @@ export type TenantUncheckedUpdateWithoutTeamsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInvitationsInput = {
@@ -1492,6 +1521,7 @@ export type TenantCreateWithoutInvitationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInvitationsInput = {
@@ -1533,6 +1563,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInvitationsInput = {
@@ -1590,6 +1621,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInvitationsInput = {
@@ -1631,6 +1663,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutNotificationsInput = {
@@ -1672,6 +1705,7 @@ export type TenantCreateWithoutNotificationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutNotificationsInput = {
@@ -1713,6 +1747,7 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutNotificationsInput = {
@@ -1770,6 +1805,7 @@ export type TenantUpdateWithoutNotificationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutNotificationsInput = {
@@ -1811,6 +1847,7 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrgRequestsInput = {
@@ -1852,6 +1889,7 @@ export type TenantCreateWithoutOrgRequestsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrgRequestsInput = {
@@ -1893,6 +1931,7 @@ export type TenantUncheckedCreateWithoutOrgRequestsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrgRequestsInput = {
@@ -1950,6 +1989,7 @@ export type TenantUpdateWithoutOrgRequestsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrgRequestsInput = {
@@ -1991,6 +2031,7 @@ export type TenantUncheckedUpdateWithoutOrgRequestsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCoursesInput = {
@@ -2032,6 +2073,7 @@ export type TenantCreateWithoutCoursesInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCoursesInput = {
@@ -2073,6 +2115,7 @@ export type TenantUncheckedCreateWithoutCoursesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCoursesInput = {
@@ -2130,6 +2173,7 @@ export type TenantUpdateWithoutCoursesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCoursesInput = {
@@ -2171,6 +2215,7 @@ export type TenantUncheckedUpdateWithoutCoursesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMandatoryTrainingsInput = {
@@ -2212,6 +2257,7 @@ export type TenantCreateWithoutMandatoryTrainingsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMandatoryTrainingsInput = {
@@ -2253,6 +2299,7 @@ export type TenantUncheckedCreateWithoutMandatoryTrainingsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMandatoryTrainingsInput = {
@@ -2310,6 +2357,7 @@ export type TenantUpdateWithoutMandatoryTrainingsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMandatoryTrainingsInput = {
@@ -2351,6 +2399,7 @@ export type TenantUncheckedUpdateWithoutMandatoryTrainingsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutLearningAssignmentsInput = {
@@ -2392,6 +2441,7 @@ export type TenantCreateWithoutLearningAssignmentsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutLearningAssignmentsInput = {
@@ -2433,6 +2483,7 @@ export type TenantUncheckedCreateWithoutLearningAssignmentsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutLearningAssignmentsInput = {
@@ -2490,6 +2541,7 @@ export type TenantUpdateWithoutLearningAssignmentsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutLearningAssignmentsInput = {
@@ -2531,6 +2583,7 @@ export type TenantUncheckedUpdateWithoutLearningAssignmentsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSkillCategoriesInput = {
@@ -2572,6 +2625,7 @@ export type TenantCreateWithoutSkillCategoriesInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSkillCategoriesInput = {
@@ -2613,6 +2667,7 @@ export type TenantUncheckedCreateWithoutSkillCategoriesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSkillCategoriesInput = {
@@ -2670,6 +2725,7 @@ export type TenantUpdateWithoutSkillCategoriesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSkillCategoriesInput = {
@@ -2711,6 +2767,7 @@ export type TenantUncheckedUpdateWithoutSkillCategoriesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSkillsInput = {
@@ -2752,6 +2809,7 @@ export type TenantCreateWithoutSkillsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSkillsInput = {
@@ -2793,6 +2851,7 @@ export type TenantUncheckedCreateWithoutSkillsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSkillsInput = {
@@ -2850,6 +2909,7 @@ export type TenantUpdateWithoutSkillsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSkillsInput = {
@@ -2891,6 +2951,7 @@ export type TenantUncheckedUpdateWithoutSkillsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutJobRolesInput = {
@@ -2932,6 +2993,7 @@ export type TenantCreateWithoutJobRolesInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutJobRolesInput = {
@@ -2973,6 +3035,7 @@ export type TenantUncheckedCreateWithoutJobRolesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutJobRolesInput = {
@@ -3030,6 +3093,7 @@ export type TenantUpdateWithoutJobRolesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutJobRolesInput = {
@@ -3071,6 +3135,7 @@ export type TenantUncheckedUpdateWithoutJobRolesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutUserJobRolesInput = {
@@ -3112,6 +3177,7 @@ export type TenantCreateWithoutUserJobRolesInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutUserJobRolesInput = {
@@ -3153,6 +3219,7 @@ export type TenantUncheckedCreateWithoutUserJobRolesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutUserJobRolesInput = {
@@ -3210,6 +3277,7 @@ export type TenantUpdateWithoutUserJobRolesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutUserJobRolesInput = {
@@ -3251,6 +3319,7 @@ export type TenantUncheckedUpdateWithoutUserJobRolesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutUserSkillsInput = {
@@ -3292,6 +3361,7 @@ export type TenantCreateWithoutUserSkillsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutUserSkillsInput = {
@@ -3333,6 +3403,7 @@ export type TenantUncheckedCreateWithoutUserSkillsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutUserSkillsInput = {
@@ -3390,6 +3461,7 @@ export type TenantUpdateWithoutUserSkillsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutUserSkillsInput = {
@@ -3431,6 +3503,7 @@ export type TenantUncheckedUpdateWithoutUserSkillsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSkillEvidenceInput = {
@@ -3472,6 +3545,7 @@ export type TenantCreateWithoutSkillEvidenceInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSkillEvidenceInput = {
@@ -3513,6 +3587,7 @@ export type TenantUncheckedCreateWithoutSkillEvidenceInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSkillEvidenceInput = {
@@ -3570,6 +3645,7 @@ export type TenantUpdateWithoutSkillEvidenceInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSkillEvidenceInput = {
@@ -3611,6 +3687,7 @@ export type TenantUncheckedUpdateWithoutSkillEvidenceInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutProficiencyEventsInput = {
@@ -3652,6 +3729,7 @@ export type TenantCreateWithoutProficiencyEventsInput = {
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutProficiencyEventsInput = {
@@ -3693,6 +3771,7 @@ export type TenantUncheckedCreateWithoutProficiencyEventsInput = {
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutProficiencyEventsInput = {
@@ -3750,6 +3829,7 @@ export type TenantUpdateWithoutProficiencyEventsInput = {
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutProficiencyEventsInput = {
@@ -3791,6 +3871,191 @@ export type TenantUncheckedUpdateWithoutProficiencyEventsInput = {
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutStandingEventsInput = {
+  id?: string
+  name: string
+  slug: string
+  logoUrl?: string | null
+  brandColor?: string | null
+  customDomain?: string | null
+  plan?: $Enums.Plan
+  seatLimit?: number
+  seatCount?: number
+  razorpaySubId?: string | null
+  samlEnabled?: boolean
+  samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserCreateNestedManyWithoutTenantInput
+  teams?: Prisma.TeamCreateNestedManyWithoutTenantInput
+  courses?: Prisma.CourseCreateNestedManyWithoutTenantInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutTenantInput
+  orgRequests?: Prisma.OrgRequestCreateNestedManyWithoutTenantInput
+  learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathCreateNestedManyWithoutTenantInput
+  skillCategories?: Prisma.SkillCategoryCreateNestedManyWithoutTenantInput
+  skills?: Prisma.SkillCreateNestedManyWithoutTenantInput
+  jobRoles?: Prisma.JobRoleCreateNestedManyWithoutTenantInput
+  userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutTenantInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutTenantInput
+  skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutTenantInput
+  knowledgeSources?: Prisma.KnowledgeSourceCreateNestedManyWithoutTenantInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentCreateNestedManyWithoutTenantInput
+  knowledgeChunks?: Prisma.KnowledgeChunkCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutTenantInput
+  aiConversations?: Prisma.AIConversationCreateNestedManyWithoutTenantInput
+  aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
+  aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutStandingEventsInput = {
+  id?: string
+  name: string
+  slug: string
+  logoUrl?: string | null
+  brandColor?: string | null
+  customDomain?: string | null
+  plan?: $Enums.Plan
+  seatLimit?: number
+  seatCount?: number
+  razorpaySubId?: string | null
+  samlEnabled?: boolean
+  samlMetadataUrl?: string | null
+  suspendedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutTenantInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutTenantInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutTenantInput
+  orgRequests?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutTenantInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutTenantInput
+  learningPaths?: Prisma.LearningPathUncheckedCreateNestedManyWithoutTenantInput
+  skillCategories?: Prisma.SkillCategoryUncheckedCreateNestedManyWithoutTenantInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutTenantInput
+  jobRoles?: Prisma.JobRoleUncheckedCreateNestedManyWithoutTenantInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutTenantInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutTenantInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeSources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUncheckedCreateNestedManyWithoutTenantInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutTenantInput
+  aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutTenantInput
+  aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutStandingEventsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutStandingEventsInput, Prisma.TenantUncheckedCreateWithoutStandingEventsInput>
+}
+
+export type TenantUpsertWithoutStandingEventsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutStandingEventsInput, Prisma.TenantUncheckedUpdateWithoutStandingEventsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutStandingEventsInput, Prisma.TenantUncheckedCreateWithoutStandingEventsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutStandingEventsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutStandingEventsInput, Prisma.TenantUncheckedUpdateWithoutStandingEventsInput>
+}
+
+export type TenantUpdateWithoutStandingEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  seatLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  seatCount?: Prisma.IntFieldUpdateOperationsInput | number
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUpdateManyWithoutTenantNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutTenantNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutTenantNestedInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutTenantNestedInput
+  orgRequests?: Prisma.OrgRequestUpdateManyWithoutTenantNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUpdateManyWithoutTenantNestedInput
+  skillCategories?: Prisma.SkillCategoryUpdateManyWithoutTenantNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutTenantNestedInput
+  jobRoles?: Prisma.JobRoleUpdateManyWithoutTenantNestedInput
+  userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutTenantNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutTenantNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutTenantNestedInput
+  knowledgeSources?: Prisma.KnowledgeSourceUpdateManyWithoutTenantNestedInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUpdateManyWithoutTenantNestedInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutTenantNestedInput
+  aiConversations?: Prisma.AIConversationUpdateManyWithoutTenantNestedInput
+  aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutStandingEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  seatLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  seatCount?: Prisma.IntFieldUpdateOperationsInput | number
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  samlEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  samlMetadataUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutTenantNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutTenantNestedInput
+  mandatoryTrainings?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutTenantNestedInput
+  orgRequests?: Prisma.OrgRequestUncheckedUpdateManyWithoutTenantNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutTenantNestedInput
+  learningPaths?: Prisma.LearningPathUncheckedUpdateManyWithoutTenantNestedInput
+  skillCategories?: Prisma.SkillCategoryUncheckedUpdateManyWithoutTenantNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutTenantNestedInput
+  jobRoles?: Prisma.JobRoleUncheckedUpdateManyWithoutTenantNestedInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutTenantNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutTenantNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeSources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeDocuments?: Prisma.KnowledgeDocumentUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeChunks?: Prisma.KnowledgeChunkUncheckedUpdateManyWithoutTenantNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutTenantNestedInput
+  aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutTenantNestedInput
+  aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutLearningPathsInput = {
@@ -3832,6 +4097,7 @@ export type TenantCreateWithoutLearningPathsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutLearningPathsInput = {
@@ -3873,6 +4139,7 @@ export type TenantUncheckedCreateWithoutLearningPathsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutLearningPathsInput = {
@@ -3930,6 +4197,7 @@ export type TenantUpdateWithoutLearningPathsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutLearningPathsInput = {
@@ -3971,6 +4239,7 @@ export type TenantUncheckedUpdateWithoutLearningPathsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutKnowledgeSourcesInput = {
@@ -4012,6 +4281,7 @@ export type TenantCreateWithoutKnowledgeSourcesInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutKnowledgeSourcesInput = {
@@ -4053,6 +4323,7 @@ export type TenantUncheckedCreateWithoutKnowledgeSourcesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutKnowledgeSourcesInput = {
@@ -4110,6 +4381,7 @@ export type TenantUpdateWithoutKnowledgeSourcesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutKnowledgeSourcesInput = {
@@ -4151,6 +4423,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeSourcesInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutKnowledgeDocumentsInput = {
@@ -4192,6 +4465,7 @@ export type TenantCreateWithoutKnowledgeDocumentsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutKnowledgeDocumentsInput = {
@@ -4233,6 +4507,7 @@ export type TenantUncheckedCreateWithoutKnowledgeDocumentsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutKnowledgeDocumentsInput = {
@@ -4290,6 +4565,7 @@ export type TenantUpdateWithoutKnowledgeDocumentsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutKnowledgeDocumentsInput = {
@@ -4331,6 +4607,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeDocumentsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutKnowledgeAccessInput = {
@@ -4372,6 +4649,7 @@ export type TenantCreateWithoutKnowledgeAccessInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutKnowledgeAccessInput = {
@@ -4413,6 +4691,7 @@ export type TenantUncheckedCreateWithoutKnowledgeAccessInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutKnowledgeAccessInput = {
@@ -4470,6 +4749,7 @@ export type TenantUpdateWithoutKnowledgeAccessInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutKnowledgeAccessInput = {
@@ -4511,6 +4791,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeAccessInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutKnowledgeChunksInput = {
@@ -4552,6 +4833,7 @@ export type TenantCreateWithoutKnowledgeChunksInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutKnowledgeChunksInput = {
@@ -4593,6 +4875,7 @@ export type TenantUncheckedCreateWithoutKnowledgeChunksInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutKnowledgeChunksInput = {
@@ -4650,6 +4933,7 @@ export type TenantUpdateWithoutKnowledgeChunksInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutKnowledgeChunksInput = {
@@ -4691,6 +4975,7 @@ export type TenantUncheckedUpdateWithoutKnowledgeChunksInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAiConversationsInput = {
@@ -4732,6 +5017,7 @@ export type TenantCreateWithoutAiConversationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAiConversationsInput = {
@@ -4773,6 +5059,7 @@ export type TenantUncheckedCreateWithoutAiConversationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAiConversationsInput = {
@@ -4830,6 +5117,7 @@ export type TenantUpdateWithoutAiConversationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAiConversationsInput = {
@@ -4871,6 +5159,7 @@ export type TenantUncheckedUpdateWithoutAiConversationsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAiExecutionsInput = {
@@ -4912,6 +5201,7 @@ export type TenantCreateWithoutAiExecutionsInput = {
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAiExecutionsInput = {
@@ -4953,6 +5243,7 @@ export type TenantUncheckedCreateWithoutAiExecutionsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAiExecutionsInput = {
@@ -5010,6 +5301,7 @@ export type TenantUpdateWithoutAiExecutionsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAiExecutionsInput = {
@@ -5051,6 +5343,7 @@ export type TenantUncheckedUpdateWithoutAiExecutionsInput = {
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAiUsageEventsInput = {
@@ -5092,6 +5385,7 @@ export type TenantCreateWithoutAiUsageEventsInput = {
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAiUsageEventsInput = {
@@ -5133,6 +5427,7 @@ export type TenantUncheckedCreateWithoutAiUsageEventsInput = {
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAiUsageEventsInput = {
@@ -5190,6 +5485,7 @@ export type TenantUpdateWithoutAiUsageEventsInput = {
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAiUsageEventsInput = {
@@ -5231,6 +5527,7 @@ export type TenantUncheckedUpdateWithoutAiUsageEventsInput = {
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutLearningEventsInput = {
@@ -5272,6 +5569,7 @@ export type TenantCreateWithoutLearningEventsInput = {
   aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutLearningEventsInput = {
@@ -5313,6 +5611,7 @@ export type TenantUncheckedCreateWithoutLearningEventsInput = {
   aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutTenantInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutTenantInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutTenantInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutLearningEventsInput = {
@@ -5370,6 +5669,7 @@ export type TenantUpdateWithoutLearningEventsInput = {
   aiExecutions?: Prisma.AIExecutionUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutLearningEventsInput = {
@@ -5411,6 +5711,7 @@ export type TenantUncheckedUpdateWithoutLearningEventsInput = {
   aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutTenantNestedInput
   aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutTenantNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutTenantNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -5443,6 +5744,7 @@ export type TenantCountOutputType = {
   aiUsageEvents: number
   learningEvents: number
   proficiencyEvents: number
+  standingEvents: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5470,6 +5772,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   aiUsageEvents?: boolean | TenantCountOutputTypeCountAiUsageEventsArgs
   learningEvents?: boolean | TenantCountOutputTypeCountLearningEventsArgs
   proficiencyEvents?: boolean | TenantCountOutputTypeCountProficiencyEventsArgs
+  standingEvents?: boolean | TenantCountOutputTypeCountStandingEventsArgs
 }
 
 /**
@@ -5650,6 +5953,13 @@ export type TenantCountOutputTypeCountProficiencyEventsArgs<ExtArgs extends runt
   where?: Prisma.SkillProficiencyEventWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountStandingEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EvidenceStandingEventWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -5691,6 +6001,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   aiUsageEvents?: boolean | Prisma.Tenant$aiUsageEventsArgs<ExtArgs>
   learningEvents?: boolean | Prisma.Tenant$learningEventsArgs<ExtArgs>
   proficiencyEvents?: boolean | Prisma.Tenant$proficiencyEventsArgs<ExtArgs>
+  standingEvents?: boolean | Prisma.Tenant$standingEventsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -5774,6 +6085,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   aiUsageEvents?: boolean | Prisma.Tenant$aiUsageEventsArgs<ExtArgs>
   learningEvents?: boolean | Prisma.Tenant$learningEventsArgs<ExtArgs>
   proficiencyEvents?: boolean | Prisma.Tenant$proficiencyEventsArgs<ExtArgs>
+  standingEvents?: boolean | Prisma.Tenant$standingEventsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -5806,6 +6118,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     aiUsageEvents: Prisma.$AIUsageEventPayload<ExtArgs>[]
     learningEvents: Prisma.$LearningEventPayload<ExtArgs>[]
     proficiencyEvents: Prisma.$SkillProficiencyEventPayload<ExtArgs>[]
+    standingEvents: Prisma.$EvidenceStandingEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -6241,6 +6554,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   aiUsageEvents<T extends Prisma.Tenant$aiUsageEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$aiUsageEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIUsageEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   learningEvents<T extends Prisma.Tenant$learningEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$learningEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   proficiencyEvents<T extends Prisma.Tenant$proficiencyEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$proficiencyEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillProficiencyEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  standingEvents<T extends Prisma.Tenant$standingEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$standingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EvidenceStandingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7251,6 +7565,30 @@ export type Tenant$proficiencyEventsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.SkillProficiencyEventScalarFieldEnum | Prisma.SkillProficiencyEventScalarFieldEnum[]
+}
+
+/**
+ * Tenant.standingEvents
+ */
+export type Tenant$standingEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EvidenceStandingEvent
+   */
+  select?: Prisma.EvidenceStandingEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EvidenceStandingEvent
+   */
+  omit?: Prisma.EvidenceStandingEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EvidenceStandingEventInclude<ExtArgs> | null
+  where?: Prisma.EvidenceStandingEventWhereInput
+  orderBy?: Prisma.EvidenceStandingEventOrderByWithRelationInput | Prisma.EvidenceStandingEventOrderByWithRelationInput[]
+  cursor?: Prisma.EvidenceStandingEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EvidenceStandingEventScalarFieldEnum | Prisma.EvidenceStandingEventScalarFieldEnum[]
 }
 
 /**

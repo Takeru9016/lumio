@@ -1,7 +1,10 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
-import { createCourse, createSkill } from "@/lib/domain/capability/__test__/fixtures";
-import { backfillTenant } from "@/lib/domain/capability/capabilityBackfill";
+import { createCourse, createQuiz, createSkill } from "@/lib/domain/capability/__test__/fixtures";
+import {
+  backfillTenant,
+  remediateOccurredAtMisattribution,
+} from "@/lib/domain/capability/capabilityBackfill";
 import { projectUserSkill } from "@/lib/domain/capability/proficiency";
 import { createTenantUser } from "@/lib/domain/knowledge/__test__/fixtures";
 
@@ -80,6 +83,27 @@ const settledWithin = (promise: Promise<unknown>, ms: number) =>
     ),
     new Promise<boolean>((resolve) => setTimeout(() => resolve(false), ms)),
   ]);
+
+function holdSkillEvidenceLock(
+  evidenceId: string,
+  whileLocked: (tx: Tx) => Promise<void> = async () => {}
+) {
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let locked: () => void = () => {};
+  const isLocked = new Promise<void>((resolve) => {
+    locked = resolve;
+  });
+  const done = db.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "SkillEvidence" WHERE id = ${evidenceId} FOR UPDATE`;
+    locked();
+    await gate;
+    await whileLocked(tx);
+  });
+  return { isLocked, release, done };
+}
 
 describe("backfillTenant — baseline event semantics (task §15)", () => {
   it("writes one BASELINE event whose newProficiency is the EXISTING stored value, previousProficiency null", async () => {
@@ -492,3 +516,746 @@ describe("backfillTenant — tenant isolation (task §21)", () => {
 // work against a 5s test timeout, not a meaningful unit of test coverage.
 // It was exercised for real, once, directly (not via vitest) to produce
 // this phase's actual backfill numbers — see docs/PHASE_30.2_IMPLEMENTATION.md.
+
+// Phase 30.3 — D24 (docs/PHASE_30.3_DISCOVERY.md §1): the pre-30.3 backfill
+// resolved occurredAt by course/quiz id alone, with no learner filter, so a
+// Map keyed only by courseId/quizId could assign one learner's completion or
+// pass timestamp to a different learner's evidence on the same course/quiz.
+// These tests prove the fix: every lookup is scoped to (tenantId, userId,
+// sourceId), never source id alone.
+describe("backfillTenant — D24: occurredAt is scoped to the evidence's own learner (docs/PHASE_30.3_DISCOVERY.md §1)", () => {
+  it("two learners completing the SAME course at different times each get their OWN completedAt, never a classmate's", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    const completedAtB = new Date("2026-03-22T14:30:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtB,
+      },
+    });
+    const evidenceA = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+      },
+    });
+    const evidenceB = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerB.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+      },
+    });
+    await preExistingUserSkill({
+      tenantId: tenant.id,
+      userId: learnerA.userId,
+      skillId: skill.id,
+      proficiency: "BEGINNER",
+    });
+    await preExistingUserSkill({
+      tenantId: tenant.id,
+      userId: learnerB.userId,
+      skillId: skill.id,
+      proficiency: "BEGINNER",
+    });
+
+    await backfillTenant(tenant.id);
+
+    const updatedA = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidenceA.id } });
+    const updatedB = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidenceB.id } });
+    expect(updatedA.occurredAt?.getTime()).toBe(completedAtA.getTime());
+    expect(updatedB.occurredAt?.getTime()).toBe(completedAtB.getTime());
+  });
+
+  it("two learners passing the SAME quiz at different times each get their OWN attempt's completedAt, never each other's", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { lesson } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+    const quiz = await createQuiz(lesson.id);
+
+    const passedAtA = new Date("2026-02-01T08:00:00Z");
+    const passedAtB = new Date("2026-05-19T16:45:00Z");
+    await db.quizAttempt.create({
+      data: {
+        userId: learnerA.userId,
+        quizId: quiz.id,
+        score: 90,
+        isPassed: true,
+        completedAt: passedAtA,
+      },
+    });
+    await db.quizAttempt.create({
+      data: {
+        userId: learnerB.userId,
+        quizId: quiz.id,
+        score: 80,
+        isPassed: true,
+        completedAt: passedAtB,
+      },
+    });
+    const evidenceA = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "QUIZ_SCORE",
+        sourceType: "Quiz",
+        sourceId: quiz.id,
+        verificationStatus: "UNVERIFIED",
+        score: 90,
+      },
+    });
+    const evidenceB = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerB.userId,
+        skillId: skill.id,
+        type: "QUIZ_SCORE",
+        sourceType: "Quiz",
+        sourceId: quiz.id,
+        verificationStatus: "UNVERIFIED",
+        score: 80,
+      },
+    });
+    await preExistingUserSkill({
+      tenantId: tenant.id,
+      userId: learnerA.userId,
+      skillId: skill.id,
+      proficiency: "BEGINNER",
+    });
+    await preExistingUserSkill({
+      tenantId: tenant.id,
+      userId: learnerB.userId,
+      skillId: skill.id,
+      proficiency: "BEGINNER",
+    });
+
+    await backfillTenant(tenant.id);
+
+    const updatedA = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidenceA.id } });
+    const updatedB = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidenceB.id } });
+    expect(updatedA.occurredAt?.getTime()).toBe(passedAtA.getTime());
+    expect(updatedB.occurredAt?.getTime()).toBe(passedAtB.getTime());
+  });
+
+  it("a foreign-tenant course sharing no real relationship to the evidence's tenant never supplies its enrollment's timestamp", async () => {
+    const { tenant: tenantA, ctx: learnerA } = await createTenantUser("STUDENT");
+    const { tenant: tenantB, ctx: instructorB } = await createTenantUser("INSTRUCTOR");
+    const { course: courseB } = await createCourse(tenantB.id, instructorB.userId);
+    const skill = await createSkill(tenantA.id);
+
+    // tenantB's own learner genuinely completed courseB — a real enrollment
+    // that must never leak into tenantA's evidence resolution.
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: courseB.id,
+        status: "COMPLETED",
+        completedAt: new Date("2026-04-01T00:00:00Z"),
+      },
+    });
+
+    // A malformed/cross-tenant evidence row in tenantA, pointing at tenantB's
+    // course — the same shape the pre-flight audit's cross-tenant fixtures
+    // use to prove a defense holds (docs/PHASE_30_CAPABILITY_PROFICIENCY_V2_PREFLIGHT.md §5).
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenantA.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: courseB.id,
+        verificationStatus: "UNVERIFIED",
+      },
+    });
+    await preExistingUserSkill({
+      tenantId: tenantA.id,
+      userId: learnerA.userId,
+      skillId: skill.id,
+      proficiency: "BEGINNER",
+    });
+
+    await backfillTenant(tenantA.id);
+
+    const updated = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidence.id } });
+    // Never tenantB's enrollment timestamp — falls back to the evidence's own createdAt.
+    expect(updated.occurredAt?.getTime()).not.toBe(new Date("2026-04-01T00:00:00Z").getTime());
+    expect(updated.occurredAt?.getTime()).toBe(evidence.createdAt.getTime());
+  });
+
+  it("running the fill twice is idempotent even with multiple learners sharing one course", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: new Date("2026-01-10T09:00:00Z"),
+      },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: new Date("2026-03-22T14:30:00Z"),
+      },
+    });
+    await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+      },
+    });
+    await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerB.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+      },
+    });
+    await preExistingUserSkill({
+      tenantId: tenant.id,
+      userId: learnerA.userId,
+      skillId: skill.id,
+      proficiency: "BEGINNER",
+    });
+    await preExistingUserSkill({
+      tenantId: tenant.id,
+      userId: learnerB.userId,
+      skillId: skill.id,
+      proficiency: "BEGINNER",
+    });
+
+    const first = await backfillTenant(tenant.id);
+    expect(first.evidenceOccurredAtFilled).toBe(2);
+    const second = await backfillTenant(tenant.id);
+    expect(second.evidenceOccurredAtFilled).toBe(0);
+    expect(second.rowsConsidered).toBe(0);
+  });
+});
+
+describe("remediateOccurredAtMisattribution — D24 remediation (docs/PHASE_30.3_DISCOVERY.md §1, §34 D24)", () => {
+  it("the CAS guard: a genuine concurrent write to occurredAt WHILE remediation is blocked on the row lock survives untouched — remediation backs off rather than overwriting it", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    const completedAtB = new Date("2026-03-22T14:30:00Z");
+    const thirdPartyValue = new Date("2030-01-01T00:00:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtB,
+      },
+    });
+    // Misattributed: learner A's evidence carries learner B's completedAt —
+    // classifies as repairable (matches another learner's candidate).
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+        occurredAt: completedAtB,
+      },
+    });
+
+    // The "concurrent write" happens INSIDE the holder's own transaction
+    // (which already holds the lock) right before it releases — the only
+    // way to perform a real write to a FOR-UPDATE-locked row without
+    // deadlocking against the very lock this test is exercising.
+    const holder = holdSkillEvidenceLock(evidence.id, async (tx) => {
+      await tx.skillEvidence.update({
+        where: { id: evidence.id },
+        data: { occurredAt: thirdPartyValue },
+      });
+    });
+    await holder.isLocked;
+
+    const remediation = remediateOccurredAtMisattribution(tenant.id);
+    // Remediation's own read/classify phase doesn't need the lock, but its
+    // per-row repair transaction does — it must genuinely block here.
+    expect(await settledWithin(remediation, 150)).toBe(false);
+
+    holder.release();
+    await holder.done;
+    const report = await remediation;
+
+    // Remediation must NOT have overwritten the concurrent write — its
+    // classification (based on the pre-lock read) is stale by the time it
+    // acquires the lock, and the CAS re-check must catch that.
+    expect(report.repaired).toBe(0);
+    const row = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidence.id } });
+    expect(row.occurredAt?.getTime()).toBe(thirdPartyValue.getTime());
+  });
+
+  it("repairs a demonstrably misattributed occurredAt: evidence carries a DIFFERENT learner's completedAt for the same course", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    const completedAtB = new Date("2026-03-22T14:30:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtB,
+      },
+    });
+    // Simulates the pre-30.3 bug's output directly: learner A's evidence was
+    // already (wrongly) filled with learner B's completedAt.
+    const evidenceA = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+        occurredAt: completedAtB,
+      },
+    });
+
+    const report = await remediateOccurredAtMisattribution(tenant.id);
+    expect(report.repaired).toBe(1);
+    expect(report.ambiguous).toBe(0);
+
+    const repaired = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidenceA.id } });
+    expect(repaired.occurredAt?.getTime()).toBe(completedAtA.getTime());
+  });
+
+  it("preserves a correctly attributed occurredAt untouched", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+        occurredAt: completedAtA,
+      },
+    });
+
+    const report = await remediateOccurredAtMisattribution(tenant.id);
+    expect(report.repaired).toBe(0);
+
+    const unchanged = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidence.id } });
+    expect(unchanged.occurredAt?.getTime()).toBe(completedAtA.getTime());
+  });
+
+  it("never fabricates a timestamp for an ambiguous mismatch — leaves it alone and counts it", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    const someUnrelatedTimestamp = new Date("2019-06-01T00:00:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    // A mismatch that matches no OTHER learner's completedAt/updatedAt for
+    // this course either — genuinely ambiguous, not the collapse signature.
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+        occurredAt: someUnrelatedTimestamp,
+      },
+    });
+
+    const report = await remediateOccurredAtMisattribution(tenant.id);
+    expect(report.repaired).toBe(0);
+    expect(report.ambiguous).toBe(1);
+
+    const stillUnrelated = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidence.id } });
+    expect(stillUnrelated.occurredAt?.getTime()).toBe(someUnrelatedTimestamp.getTime());
+  });
+
+  it("running remediation twice is idempotent — the second pass repairs nothing further", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    const completedAtB = new Date("2026-03-22T14:30:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtB,
+      },
+    });
+    await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+        occurredAt: completedAtB,
+      },
+    });
+
+    const first = await remediateOccurredAtMisattribution(tenant.id);
+    expect(first.repaired).toBe(1);
+    const second = await remediateOccurredAtMisattribution(tenant.id);
+    expect(second.repaired).toBe(0);
+  });
+
+  it("refreshes evidenceConfidence on an EXISTING UserSkill row without touching proficiency, under Policy 1", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    const completedAtB = new Date("2026-03-22T14:30:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtB,
+      },
+    });
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "VERIFIED",
+        occurredAt: completedAtB,
+      },
+    });
+    await db.$transaction((tx) =>
+      projectUserSkill(tx, {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        changeTimestamp: new Date(),
+      })
+    );
+    const before = await db.userSkill.findUniqueOrThrow({
+      where: { userId_skillId: { userId: learnerA.userId, skillId: skill.id } },
+    });
+
+    await remediateOccurredAtMisattribution(tenant.id);
+
+    const after = await db.userSkill.findUniqueOrThrow({
+      where: { userId_skillId: { userId: learnerA.userId, skillId: skill.id } },
+    });
+    // Under Policy 1, occurredAt never affects the ceiling — proficiency is
+    // byte-identical before and after remediation.
+    expect(after.proficiency).toBe(before.proficiency);
+    expect(after.eventSeq).toBe(before.eventSeq);
+
+    const repairedEvidence = await db.skillEvidence.findUniqueOrThrow({
+      where: { id: evidence.id },
+    });
+    expect(repairedEvidence.occurredAt?.getTime()).toBe(completedAtA.getTime());
+  });
+
+  it("NEVER rewrites proficiency even on a stored ADVANCED/EXPERT (legacy, unreachable-under-Policy-1) row — remediation is content-only, never a recompute", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    const completedAtB = new Date("2026-03-22T14:30:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtB,
+      },
+    });
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "VERIFIED",
+        occurredAt: completedAtB, // misattributed: learner B's value
+      },
+    });
+    // A legacy row, stored ADVANCED (unreachable under Policy 1) with
+    // lastAssessedAt genuinely set — exactly the EXPLAINABLE_LEGACY shape
+    // reconciliation already knows about (docs/PHASE_30.2_IMPLEMENTATION.md §10).
+    // If remediation ever called the full recompute, this would be silently
+    // downgraded to INTERMEDIATE — precisely the damage this test exists to
+    // catch.
+    await db.userSkill.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        proficiency: "ADVANCED",
+        lastAssessedAt: new Date("2026-01-10T09:00:00Z"),
+        eventSeq: 1,
+      },
+    });
+    const before = await db.userSkill.findUniqueOrThrow({
+      where: { userId_skillId: { userId: learnerA.userId, skillId: skill.id } },
+    });
+    const eventsBefore = await db.skillProficiencyEvent.count({
+      where: { userId: learnerA.userId, skillId: skill.id },
+    });
+
+    const report = await remediateOccurredAtMisattribution(tenant.id);
+    expect(report.repaired).toBe(1);
+
+    const after = await db.userSkill.findUniqueOrThrow({
+      where: { userId_skillId: { userId: learnerA.userId, skillId: skill.id } },
+    });
+    expect(after.proficiency).toBe("ADVANCED"); // untouched
+    expect(after.eventSeq).toBe(before.eventSeq); // untouched
+    const eventsAfter = await db.skillProficiencyEvent.count({
+      where: { userId: learnerA.userId, skillId: skill.id },
+    });
+    expect(eventsAfter).toBe(eventsBefore); // zero new SkillProficiencyEvent rows
+
+    const repaired = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidence.id } });
+    expect(repaired.occurredAt?.getTime()).toBe(completedAtA.getTime()); // content still repaired
+  });
+
+  it("NEVER creates a UserSkill row that did not already exist", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtA = new Date("2026-01-10T09:00:00Z");
+    const completedAtB = new Date("2026-03-22T14:30:00Z");
+    await db.enrollment.create({
+      data: {
+        userId: learnerA.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtA,
+      },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtB,
+      },
+    });
+    // No UserSkill row at all for learner A — evidence exists but was never
+    // projected by any writer (the exact FIXTURE_ONLY shape reconciliation
+    // already names).
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "VERIFIED",
+        occurredAt: completedAtB,
+      },
+    });
+
+    const report = await remediateOccurredAtMisattribution(tenant.id);
+    expect(report.repaired).toBe(1);
+
+    expect(
+      await db.userSkill.findUnique({
+        where: { userId_skillId: { userId: learnerA.userId, skillId: skill.id } },
+      })
+    ).toBeNull();
+    expect(
+      await db.skillProficiencyEvent.count({
+        where: { userId: learnerA.userId, skillId: skill.id },
+      })
+    ).toBe(0);
+
+    const repaired = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidence.id } });
+    expect(repaired.occurredAt?.getTime()).toBe(completedAtA.getTime());
+  });
+
+  it("a learner whose OWN enrollment has no completedAt (still ACTIVE) is never auto-repaired, even if occurredAt happens to equal another learner's value — own value must be completedAt only, never updatedAt", async () => {
+    const { tenant, ctx: instructorCtx } = await createTenantUser("INSTRUCTOR");
+    const { ctx: learnerA } = await createTenantUser("STUDENT");
+    const { ctx: learnerB } = await createTenantUser("STUDENT");
+    const { course } = await createCourse(tenant.id, instructorCtx.userId);
+    const skill = await createSkill(tenant.id);
+
+    const completedAtB = new Date("2026-03-22T14:30:00Z");
+    // Learner A's own enrollment is still ACTIVE — no completedAt. Its
+    // updatedAt is whatever Prisma stamped on create, a moving value that
+    // must never become a repair target.
+    await db.enrollment.create({
+      data: { userId: learnerA.userId, courseId: course.id, status: "ACTIVE" },
+    });
+    await db.enrollment.create({
+      data: {
+        userId: learnerB.userId,
+        courseId: course.id,
+        status: "COMPLETED",
+        completedAt: completedAtB,
+      },
+    });
+    const evidence = await db.skillEvidence.create({
+      data: {
+        tenantId: tenant.id,
+        userId: learnerA.userId,
+        skillId: skill.id,
+        type: "COURSE_COMPLETION",
+        sourceType: "Course",
+        sourceId: course.id,
+        verificationStatus: "UNVERIFIED",
+        occurredAt: completedAtB, // coincidentally equals learner B's completedAt
+      },
+    });
+
+    const report = await remediateOccurredAtMisattribution(tenant.id);
+    expect(report.repaired).toBe(0);
+    expect(report.ambiguous).toBe(1);
+
+    const unchanged = await db.skillEvidence.findUniqueOrThrow({ where: { id: evidence.id } });
+    expect(unchanged.occurredAt?.getTime()).toBe(completedAtB.getTime());
+  });
+});

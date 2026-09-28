@@ -202,6 +202,11 @@ export type SkillEvidence = Prisma.SkillEvidenceModel
  */
 export type SkillProficiencyEvent = Prisma.SkillProficiencyEventModel
 /**
+ * Model EvidenceStandingEvent
+ * 
+ */
+export type EvidenceStandingEvent = Prisma.EvidenceStandingEventModel
+/**
  * Model CourseSkill
  * 
  */

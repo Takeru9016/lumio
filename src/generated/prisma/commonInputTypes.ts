@@ -732,6 +732,23 @@ export type EnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
 }
 
+export type EnumEvidenceStandingActionFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceStandingAction | Prisma.EnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  in?: $Enums.EvidenceStandingAction[] | Prisma.ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EvidenceStandingAction[] | Prisma.ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEvidenceStandingActionFilter<$PrismaModel> | $Enums.EvidenceStandingAction
+}
+
+export type EnumEvidenceStandingActionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceStandingAction | Prisma.EnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  in?: $Enums.EvidenceStandingAction[] | Prisma.ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EvidenceStandingAction[] | Prisma.ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEvidenceStandingActionWithAggregatesFilter<$PrismaModel> | $Enums.EvidenceStandingAction
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEvidenceStandingActionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEvidenceStandingActionFilter<$PrismaModel>
+}
+
 export type EnumLearningPathStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.LearningPathStatus | Prisma.EnumLearningPathStatusFieldRefInput<$PrismaModel>
   in?: $Enums.LearningPathStatus[] | Prisma.ListEnumLearningPathStatusFieldRefInput<$PrismaModel>
@@ -1521,6 +1538,23 @@ export type NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumEvidenceStandingActionFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceStandingAction | Prisma.EnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  in?: $Enums.EvidenceStandingAction[] | Prisma.ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EvidenceStandingAction[] | Prisma.ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEvidenceStandingActionFilter<$PrismaModel> | $Enums.EvidenceStandingAction
+}
+
+export type NestedEnumEvidenceStandingActionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EvidenceStandingAction | Prisma.EnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  in?: $Enums.EvidenceStandingAction[] | Prisma.ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EvidenceStandingAction[] | Prisma.ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEvidenceStandingActionWithAggregatesFilter<$PrismaModel> | $Enums.EvidenceStandingAction
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEvidenceStandingActionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEvidenceStandingActionFilter<$PrismaModel>
 }
 
 export type NestedEnumLearningPathStatusFilter<$PrismaModel = never> = {

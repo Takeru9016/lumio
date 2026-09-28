@@ -404,6 +404,8 @@ export type UserWhereInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessListRelationFilter
   proficiencyEvents?: Prisma.SkillProficiencyEventListRelationFilter
   proficiencyEventsActed?: Prisma.SkillProficiencyEventListRelationFilter
+  standingEvents?: Prisma.EvidenceStandingEventListRelationFilter
+  standingEventsActed?: Prisma.EvidenceStandingEventListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -462,6 +464,8 @@ export type UserOrderByWithRelationInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessOrderByRelationAggregateInput
   proficiencyEvents?: Prisma.SkillProficiencyEventOrderByRelationAggregateInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventOrderByRelationAggregateInput
+  standingEvents?: Prisma.EvidenceStandingEventOrderByRelationAggregateInput
+  standingEventsActed?: Prisma.EvidenceStandingEventOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -523,6 +527,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   knowledgeAccess?: Prisma.KnowledgeAccessListRelationFilter
   proficiencyEvents?: Prisma.SkillProficiencyEventListRelationFilter
   proficiencyEventsActed?: Prisma.SkillProficiencyEventListRelationFilter
+  standingEvents?: Prisma.EvidenceStandingEventListRelationFilter
+  standingEventsActed?: Prisma.EvidenceStandingEventListRelationFilter
 }, "id" | "clerkId" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -640,6 +646,8 @@ export type UserCreateInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -697,6 +705,8 @@ export type UserUncheckedCreateInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserUpdateInput = {
@@ -754,6 +764,8 @@ export type UserUpdateInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -811,6 +823,8 @@ export type UserUncheckedUpdateInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1432,6 +1446,36 @@ export type UserUpdateOneWithoutProficiencyEventsActedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProficiencyEventsActedInput, Prisma.UserUpdateWithoutProficiencyEventsActedInput>, Prisma.UserUncheckedUpdateWithoutProficiencyEventsActedInput>
 }
 
+export type UserCreateNestedOneWithoutStandingEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStandingEventsInput, Prisma.UserUncheckedCreateWithoutStandingEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStandingEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutStandingEventsActedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStandingEventsActedInput, Prisma.UserUncheckedCreateWithoutStandingEventsActedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStandingEventsActedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStandingEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStandingEventsInput, Prisma.UserUncheckedCreateWithoutStandingEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStandingEventsInput
+  upsert?: Prisma.UserUpsertWithoutStandingEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStandingEventsInput, Prisma.UserUpdateWithoutStandingEventsInput>, Prisma.UserUncheckedUpdateWithoutStandingEventsInput>
+}
+
+export type UserUpdateOneWithoutStandingEventsActedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStandingEventsActedInput, Prisma.UserUncheckedCreateWithoutStandingEventsActedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStandingEventsActedInput
+  upsert?: Prisma.UserUpsertWithoutStandingEventsActedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStandingEventsActedInput, Prisma.UserUpdateWithoutStandingEventsActedInput>, Prisma.UserUncheckedUpdateWithoutStandingEventsActedInput>
+}
+
 export type UserCreateNestedOneWithoutCoursePrerequisitesCreatedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCoursePrerequisitesCreatedInput, Prisma.UserUncheckedCreateWithoutCoursePrerequisitesCreatedInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCoursePrerequisitesCreatedInput
@@ -1590,6 +1634,8 @@ export type UserCreateWithoutTenantInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutTenantInput = {
@@ -1646,6 +1692,8 @@ export type UserUncheckedCreateWithoutTenantInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutTenantInput = {
@@ -1757,6 +1805,8 @@ export type UserCreateWithoutTeamMembersInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembersInput = {
@@ -1813,6 +1863,8 @@ export type UserUncheckedCreateWithoutTeamMembersInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembersInput = {
@@ -1885,6 +1937,8 @@ export type UserUpdateWithoutTeamMembersInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembersInput = {
@@ -1941,6 +1995,8 @@ export type UserUncheckedUpdateWithoutTeamMembersInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutInvitationsSentInput = {
@@ -1997,6 +2053,8 @@ export type UserCreateWithoutInvitationsSentInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsSentInput = {
@@ -2053,6 +2111,8 @@ export type UserUncheckedCreateWithoutInvitationsSentInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsSentInput = {
@@ -2125,6 +2185,8 @@ export type UserUpdateWithoutInvitationsSentInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsSentInput = {
@@ -2181,6 +2243,8 @@ export type UserUncheckedUpdateWithoutInvitationsSentInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -2237,6 +2301,8 @@ export type UserCreateWithoutNotificationsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -2293,6 +2359,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -2365,6 +2433,8 @@ export type UserUpdateWithoutNotificationsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -2421,6 +2491,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutOrgRequestsMadeInput = {
@@ -2477,6 +2549,8 @@ export type UserCreateWithoutOrgRequestsMadeInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutOrgRequestsMadeInput = {
@@ -2533,6 +2607,8 @@ export type UserUncheckedCreateWithoutOrgRequestsMadeInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutOrgRequestsMadeInput = {
@@ -2594,6 +2670,8 @@ export type UserCreateWithoutOrgRequestsResolvedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutOrgRequestsResolvedInput = {
@@ -2650,6 +2728,8 @@ export type UserUncheckedCreateWithoutOrgRequestsResolvedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutOrgRequestsResolvedInput = {
@@ -2722,6 +2802,8 @@ export type UserUpdateWithoutOrgRequestsMadeInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrgRequestsMadeInput = {
@@ -2778,6 +2860,8 @@ export type UserUncheckedUpdateWithoutOrgRequestsMadeInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutOrgRequestsResolvedInput = {
@@ -2845,6 +2929,8 @@ export type UserUpdateWithoutOrgRequestsResolvedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrgRequestsResolvedInput = {
@@ -2901,6 +2987,8 @@ export type UserUncheckedUpdateWithoutOrgRequestsResolvedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutCoursesInput = {
@@ -2957,6 +3045,8 @@ export type UserCreateWithoutCoursesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCoursesInput = {
@@ -3013,6 +3103,8 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCoursesInput = {
@@ -3085,6 +3177,8 @@ export type UserUpdateWithoutCoursesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCoursesInput = {
@@ -3141,6 +3235,8 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutEnrollmentsInput = {
@@ -3197,6 +3293,8 @@ export type UserCreateWithoutEnrollmentsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutEnrollmentsInput = {
@@ -3253,6 +3351,8 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutEnrollmentsInput = {
@@ -3325,6 +3425,8 @@ export type UserUpdateWithoutEnrollmentsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEnrollmentsInput = {
@@ -3381,6 +3483,8 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutLessonProgressInput = {
@@ -3437,6 +3541,8 @@ export type UserCreateWithoutLessonProgressInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutLessonProgressInput = {
@@ -3493,6 +3599,8 @@ export type UserUncheckedCreateWithoutLessonProgressInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutLessonProgressInput = {
@@ -3565,6 +3673,8 @@ export type UserUpdateWithoutLessonProgressInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLessonProgressInput = {
@@ -3621,6 +3731,8 @@ export type UserUncheckedUpdateWithoutLessonProgressInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutQuizAttemptsInput = {
@@ -3677,6 +3789,8 @@ export type UserCreateWithoutQuizAttemptsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutQuizAttemptsInput = {
@@ -3733,6 +3847,8 @@ export type UserUncheckedCreateWithoutQuizAttemptsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutQuizAttemptsInput = {
@@ -3805,6 +3921,8 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
@@ -3861,6 +3979,8 @@ export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutSubmissionsInput = {
@@ -3917,6 +4037,8 @@ export type UserCreateWithoutSubmissionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutSubmissionsInput = {
@@ -3973,6 +4095,8 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutSubmissionsInput = {
@@ -4045,6 +4169,8 @@ export type UserUpdateWithoutSubmissionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmissionsInput = {
@@ -4101,6 +4227,8 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutXpTransactionsInput = {
@@ -4157,6 +4285,8 @@ export type UserCreateWithoutXpTransactionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutXpTransactionsInput = {
@@ -4213,6 +4343,8 @@ export type UserUncheckedCreateWithoutXpTransactionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutXpTransactionsInput = {
@@ -4285,6 +4417,8 @@ export type UserUpdateWithoutXpTransactionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutXpTransactionsInput = {
@@ -4341,6 +4475,8 @@ export type UserUncheckedUpdateWithoutXpTransactionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutCertificatesInput = {
@@ -4397,6 +4533,8 @@ export type UserCreateWithoutCertificatesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCertificatesInput = {
@@ -4453,6 +4591,8 @@ export type UserUncheckedCreateWithoutCertificatesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCertificatesInput = {
@@ -4525,6 +4665,8 @@ export type UserUpdateWithoutCertificatesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCertificatesInput = {
@@ -4581,6 +4723,8 @@ export type UserUncheckedUpdateWithoutCertificatesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutAiChatsInput = {
@@ -4637,6 +4781,8 @@ export type UserCreateWithoutAiChatsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutAiChatsInput = {
@@ -4693,6 +4839,8 @@ export type UserUncheckedCreateWithoutAiChatsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutAiChatsInput = {
@@ -4765,6 +4913,8 @@ export type UserUpdateWithoutAiChatsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiChatsInput = {
@@ -4821,6 +4971,8 @@ export type UserUncheckedUpdateWithoutAiChatsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMandatoryTrainingsCreatedInput = {
@@ -4877,6 +5029,8 @@ export type UserCreateWithoutMandatoryTrainingsCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMandatoryTrainingsCreatedInput = {
@@ -4933,6 +5087,8 @@ export type UserUncheckedCreateWithoutMandatoryTrainingsCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMandatoryTrainingsCreatedInput = {
@@ -5005,6 +5161,8 @@ export type UserUpdateWithoutMandatoryTrainingsCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMandatoryTrainingsCreatedInput = {
@@ -5061,6 +5219,8 @@ export type UserUncheckedUpdateWithoutMandatoryTrainingsCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutLearningAssignmentsInput = {
@@ -5117,6 +5277,8 @@ export type UserCreateWithoutLearningAssignmentsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutLearningAssignmentsInput = {
@@ -5173,6 +5335,8 @@ export type UserUncheckedCreateWithoutLearningAssignmentsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutLearningAssignmentsInput = {
@@ -5234,6 +5398,8 @@ export type UserCreateWithoutLearningAssignmentsMadeInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutLearningAssignmentsMadeInput = {
@@ -5290,6 +5456,8 @@ export type UserUncheckedCreateWithoutLearningAssignmentsMadeInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutLearningAssignmentsMadeInput = {
@@ -5351,6 +5519,8 @@ export type UserCreateWithoutLearningAssignmentsCancelledInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutLearningAssignmentsCancelledInput = {
@@ -5407,6 +5577,8 @@ export type UserUncheckedCreateWithoutLearningAssignmentsCancelledInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutLearningAssignmentsCancelledInput = {
@@ -5479,6 +5651,8 @@ export type UserUpdateWithoutLearningAssignmentsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLearningAssignmentsInput = {
@@ -5535,6 +5709,8 @@ export type UserUncheckedUpdateWithoutLearningAssignmentsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutLearningAssignmentsMadeInput = {
@@ -5602,6 +5778,8 @@ export type UserUpdateWithoutLearningAssignmentsMadeInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLearningAssignmentsMadeInput = {
@@ -5658,6 +5836,8 @@ export type UserUncheckedUpdateWithoutLearningAssignmentsMadeInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutLearningAssignmentsCancelledInput = {
@@ -5725,6 +5905,8 @@ export type UserUpdateWithoutLearningAssignmentsCancelledInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLearningAssignmentsCancelledInput = {
@@ -5781,6 +5963,8 @@ export type UserUncheckedUpdateWithoutLearningAssignmentsCancelledInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutAdminAuditLogsInput = {
@@ -5837,6 +6021,8 @@ export type UserCreateWithoutAdminAuditLogsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutAdminAuditLogsInput = {
@@ -5893,6 +6079,8 @@ export type UserUncheckedCreateWithoutAdminAuditLogsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutAdminAuditLogsInput = {
@@ -5965,6 +6153,8 @@ export type UserUpdateWithoutAdminAuditLogsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminAuditLogsInput = {
@@ -6021,6 +6211,8 @@ export type UserUncheckedUpdateWithoutAdminAuditLogsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutUserJobRolesInput = {
@@ -6077,6 +6269,8 @@ export type UserCreateWithoutUserJobRolesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutUserJobRolesInput = {
@@ -6133,6 +6327,8 @@ export type UserUncheckedCreateWithoutUserJobRolesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutUserJobRolesInput = {
@@ -6205,6 +6401,8 @@ export type UserUpdateWithoutUserJobRolesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserJobRolesInput = {
@@ -6261,6 +6459,8 @@ export type UserUncheckedUpdateWithoutUserJobRolesInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutUserSkillsInput = {
@@ -6317,6 +6517,8 @@ export type UserCreateWithoutUserSkillsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutUserSkillsInput = {
@@ -6373,6 +6575,8 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutUserSkillsInput = {
@@ -6445,6 +6649,8 @@ export type UserUpdateWithoutUserSkillsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserSkillsInput = {
@@ -6501,6 +6707,8 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutSkillEvidenceInput = {
@@ -6557,6 +6765,8 @@ export type UserCreateWithoutSkillEvidenceInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutSkillEvidenceInput = {
@@ -6613,6 +6823,8 @@ export type UserUncheckedCreateWithoutSkillEvidenceInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutSkillEvidenceInput = {
@@ -6674,6 +6886,8 @@ export type UserCreateWithoutSkillEvidenceVerifiedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutSkillEvidenceVerifiedInput = {
@@ -6730,6 +6944,8 @@ export type UserUncheckedCreateWithoutSkillEvidenceVerifiedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutSkillEvidenceVerifiedInput = {
@@ -6802,6 +7018,8 @@ export type UserUpdateWithoutSkillEvidenceInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSkillEvidenceInput = {
@@ -6858,6 +7076,8 @@ export type UserUncheckedUpdateWithoutSkillEvidenceInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutSkillEvidenceVerifiedInput = {
@@ -6925,6 +7145,8 @@ export type UserUpdateWithoutSkillEvidenceVerifiedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSkillEvidenceVerifiedInput = {
@@ -6981,6 +7203,8 @@ export type UserUncheckedUpdateWithoutSkillEvidenceVerifiedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutProficiencyEventsInput = {
@@ -7037,6 +7261,8 @@ export type UserCreateWithoutProficiencyEventsInput = {
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutProficiencyEventsInput = {
@@ -7093,6 +7319,8 @@ export type UserUncheckedCreateWithoutProficiencyEventsInput = {
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutProficiencyEventsInput = {
@@ -7154,6 +7382,8 @@ export type UserCreateWithoutProficiencyEventsActedInput = {
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutProficiencyEventsActedInput = {
@@ -7210,6 +7440,8 @@ export type UserUncheckedCreateWithoutProficiencyEventsActedInput = {
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutProficiencyEventsActedInput = {
@@ -7282,6 +7514,8 @@ export type UserUpdateWithoutProficiencyEventsInput = {
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProficiencyEventsInput = {
@@ -7338,6 +7572,8 @@ export type UserUncheckedUpdateWithoutProficiencyEventsInput = {
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutProficiencyEventsActedInput = {
@@ -7405,6 +7641,8 @@ export type UserUpdateWithoutProficiencyEventsActedInput = {
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProficiencyEventsActedInput = {
@@ -7461,6 +7699,504 @@ export type UserUncheckedUpdateWithoutProficiencyEventsActedInput = {
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserCreateWithoutStandingEventsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  name?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.Role
+  plan?: $Enums.Plan
+  aiCallsUsed?: number
+  aiQuotaResetAt?: Date | string
+  xpTotal?: number
+  currentStreak?: number
+  longestStreak?: number
+  lastActiveDate?: Date | string | null
+  razorpayCustomerId?: string | null
+  razorpaySubId?: string | null
+  subscriptionStatus?: $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.TenantCreateNestedOneWithoutUsersInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseCreateNestedManyWithoutInstructorInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  submissions?: Prisma.AssignmentSubmissionCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
+  aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
+  adminAuditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  invitationsSent?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgRequestsMade?: Prisma.OrgRequestCreateNestedManyWithoutRequesterInput
+  orgRequestsResolved?: Prisma.OrgRequestCreateNestedManyWithoutResolvedByInput
+  learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutUserInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
+  learningPathsCreated?: Prisma.LearningPathCreateNestedManyWithoutCreatedByInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
+  skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceCreateNestedManyWithoutVerifiedByInput
+  aiConversations?: Prisma.AIConversationCreateNestedManyWithoutUserInput
+  aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutUserInput
+  aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutUserInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
+  proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutStandingEventsInput = {
+  id?: string
+  clerkId: string
+  email: string
+  name?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.Role
+  plan?: $Enums.Plan
+  aiCallsUsed?: number
+  aiQuotaResetAt?: Date | string
+  xpTotal?: number
+  currentStreak?: number
+  longestStreak?: number
+  lastActiveDate?: Date | string | null
+  razorpayCustomerId?: string | null
+  razorpaySubId?: string | null
+  subscriptionStatus?: $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
+  tenantId?: string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutInstructorInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  submissions?: Prisma.AssignmentSubmissionUncheckedCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
+  aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
+  adminAuditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  invitationsSent?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgRequestsMade?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutRequesterInput
+  orgRequestsResolved?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutResolvedByInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutUserInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
+  learningPathsCreated?: Prisma.LearningPathUncheckedCreateNestedManyWithoutCreatedByInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutVerifiedByInput
+  aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutUserInput
+  aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutUserInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutUserInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
+  proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutStandingEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStandingEventsInput, Prisma.UserUncheckedCreateWithoutStandingEventsInput>
+}
+
+export type UserCreateWithoutStandingEventsActedInput = {
+  id?: string
+  clerkId: string
+  email: string
+  name?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.Role
+  plan?: $Enums.Plan
+  aiCallsUsed?: number
+  aiQuotaResetAt?: Date | string
+  xpTotal?: number
+  currentStreak?: number
+  longestStreak?: number
+  lastActiveDate?: Date | string | null
+  razorpayCustomerId?: string | null
+  razorpaySubId?: string | null
+  subscriptionStatus?: $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.TenantCreateNestedOneWithoutUsersInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseCreateNestedManyWithoutInstructorInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  submissions?: Prisma.AssignmentSubmissionCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
+  aiChats?: Prisma.AIChatCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionCreateNestedManyWithoutUserInput
+  adminAuditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutActorInput
+  invitationsSent?: Prisma.InvitationCreateNestedManyWithoutInvitedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgRequestsMade?: Prisma.OrgRequestCreateNestedManyWithoutRequesterInput
+  orgRequestsResolved?: Prisma.OrgRequestCreateNestedManyWithoutResolvedByInput
+  learningAssignments?: Prisma.LearningAssignmentCreateNestedManyWithoutUserInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentCreateNestedManyWithoutAssignedByInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentCreateNestedManyWithoutCancelledByInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteCreateNestedManyWithoutCreatedByInput
+  learningPathsCreated?: Prisma.LearningPathCreateNestedManyWithoutCreatedByInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  userJobRoles?: Prisma.UserJobRoleCreateNestedManyWithoutUserInput
+  skillEvidence?: Prisma.SkillEvidenceCreateNestedManyWithoutUserInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceCreateNestedManyWithoutVerifiedByInput
+  aiConversations?: Prisma.AIConversationCreateNestedManyWithoutUserInput
+  aiExecutions?: Prisma.AIExecutionCreateNestedManyWithoutUserInput
+  aiUsageEvents?: Prisma.AIUsageEventCreateNestedManyWithoutUserInput
+  learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
+  knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
+  proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStandingEventsActedInput = {
+  id?: string
+  clerkId: string
+  email: string
+  name?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.Role
+  plan?: $Enums.Plan
+  aiCallsUsed?: number
+  aiQuotaResetAt?: Date | string
+  xpTotal?: number
+  currentStreak?: number
+  longestStreak?: number
+  lastActiveDate?: Date | string | null
+  razorpayCustomerId?: string | null
+  razorpaySubId?: string | null
+  subscriptionStatus?: $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: Date | string | null
+  scheduledDowngradeAt?: Date | string | null
+  tenantId?: string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutInstructorInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  submissions?: Prisma.AssignmentSubmissionUncheckedCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
+  aiChats?: Prisma.AIChatUncheckedCreateNestedManyWithoutUserInput
+  teamMembers?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  xpTransactions?: Prisma.XPTransactionUncheckedCreateNestedManyWithoutUserInput
+  adminAuditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActorInput
+  invitationsSent?: Prisma.InvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgRequestsMade?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutRequesterInput
+  orgRequestsResolved?: Prisma.OrgRequestUncheckedCreateNestedManyWithoutResolvedByInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutUserInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedCreateNestedManyWithoutCancelledByInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedCreateNestedManyWithoutCreatedByInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedCreateNestedManyWithoutCreatedByInput
+  learningPathsCreated?: Prisma.LearningPathUncheckedCreateNestedManyWithoutCreatedByInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedCreateNestedManyWithoutUserInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutUserInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedCreateNestedManyWithoutVerifiedByInput
+  aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutUserInput
+  aiExecutions?: Prisma.AIExecutionUncheckedCreateNestedManyWithoutUserInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedCreateNestedManyWithoutUserInput
+  learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
+  proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStandingEventsActedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStandingEventsActedInput, Prisma.UserUncheckedCreateWithoutStandingEventsActedInput>
+}
+
+export type UserUpsertWithoutStandingEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStandingEventsInput, Prisma.UserUncheckedUpdateWithoutStandingEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStandingEventsInput, Prisma.UserUncheckedCreateWithoutStandingEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStandingEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStandingEventsInput, Prisma.UserUncheckedUpdateWithoutStandingEventsInput>
+}
+
+export type UserUpdateWithoutStandingEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  aiCallsUsed?: Prisma.IntFieldUpdateOperationsInput | number
+  aiQuotaResetAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  xpTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  currentStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  longestStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  razorpayCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneWithoutUsersNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutInstructorNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.AssignmentSubmissionUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
+  aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
+  adminAuditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  invitationsSent?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgRequestsMade?: Prisma.OrgRequestUpdateManyWithoutRequesterNestedInput
+  orgRequestsResolved?: Prisma.OrgRequestUpdateManyWithoutResolvedByNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutUserNestedInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
+  learningPathsCreated?: Prisma.LearningPathUpdateManyWithoutCreatedByNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUpdateManyWithoutVerifiedByNestedInput
+  aiConversations?: Prisma.AIConversationUpdateManyWithoutUserNestedInput
+  aiExecutions?: Prisma.AIExecutionUpdateManyWithoutUserNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutUserNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
+  proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStandingEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  aiCallsUsed?: Prisma.IntFieldUpdateOperationsInput | number
+  aiQuotaResetAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  xpTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  currentStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  longestStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  razorpayCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutInstructorNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.AssignmentSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
+  aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
+  adminAuditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invitationsSent?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgRequestsMade?: Prisma.OrgRequestUncheckedUpdateManyWithoutRequesterNestedInput
+  orgRequestsResolved?: Prisma.OrgRequestUncheckedUpdateManyWithoutResolvedByNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
+  learningPathsCreated?: Prisma.LearningPathUncheckedUpdateManyWithoutCreatedByNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutVerifiedByNestedInput
+  aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutUserNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutUserNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
+  proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserUpsertWithoutStandingEventsActedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStandingEventsActedInput, Prisma.UserUncheckedUpdateWithoutStandingEventsActedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStandingEventsActedInput, Prisma.UserUncheckedCreateWithoutStandingEventsActedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStandingEventsActedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStandingEventsActedInput, Prisma.UserUncheckedUpdateWithoutStandingEventsActedInput>
+}
+
+export type UserUpdateWithoutStandingEventsActedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  aiCallsUsed?: Prisma.IntFieldUpdateOperationsInput | number
+  aiQuotaResetAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  xpTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  currentStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  longestStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  razorpayCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneWithoutUsersNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutInstructorNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.AssignmentSubmissionUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
+  aiChats?: Prisma.AIChatUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUpdateManyWithoutUserNestedInput
+  adminAuditLogs?: Prisma.AdminAuditLogUpdateManyWithoutActorNestedInput
+  invitationsSent?: Prisma.InvitationUpdateManyWithoutInvitedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgRequestsMade?: Prisma.OrgRequestUpdateManyWithoutRequesterNestedInput
+  orgRequestsResolved?: Prisma.OrgRequestUpdateManyWithoutResolvedByNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUpdateManyWithoutUserNestedInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUpdateManyWithoutAssignedByNestedInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUpdateManyWithoutCancelledByNestedInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUpdateManyWithoutCreatedByNestedInput
+  learningPathsCreated?: Prisma.LearningPathUpdateManyWithoutCreatedByNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  userJobRoles?: Prisma.UserJobRoleUpdateManyWithoutUserNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUpdateManyWithoutUserNestedInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUpdateManyWithoutVerifiedByNestedInput
+  aiConversations?: Prisma.AIConversationUpdateManyWithoutUserNestedInput
+  aiExecutions?: Prisma.AIExecutionUpdateManyWithoutUserNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUpdateManyWithoutUserNestedInput
+  learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
+  proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStandingEventsActedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  aiCallsUsed?: Prisma.IntFieldUpdateOperationsInput | number
+  aiQuotaResetAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  xpTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  currentStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  longestStreak?: Prisma.IntFieldUpdateOperationsInput | number
+  lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  razorpayCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionStatus?: Prisma.NullableEnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDowngradeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutInstructorNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  submissions?: Prisma.AssignmentSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
+  aiChats?: Prisma.AIChatUncheckedUpdateManyWithoutUserNestedInput
+  teamMembers?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  xpTransactions?: Prisma.XPTransactionUncheckedUpdateManyWithoutUserNestedInput
+  adminAuditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invitationsSent?: Prisma.InvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgRequestsMade?: Prisma.OrgRequestUncheckedUpdateManyWithoutRequesterNestedInput
+  orgRequestsResolved?: Prisma.OrgRequestUncheckedUpdateManyWithoutResolvedByNestedInput
+  learningAssignments?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  learningAssignmentsMade?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  learningAssignmentsCancelled?: Prisma.LearningAssignmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  mandatoryTrainingsCreated?: Prisma.MandatoryTrainingUncheckedUpdateManyWithoutCreatedByNestedInput
+  coursePrerequisitesCreated?: Prisma.CoursePrerequisiteUncheckedUpdateManyWithoutCreatedByNestedInput
+  learningPathsCreated?: Prisma.LearningPathUncheckedUpdateManyWithoutCreatedByNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  userJobRoles?: Prisma.UserJobRoleUncheckedUpdateManyWithoutUserNestedInput
+  skillEvidence?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutUserNestedInput
+  skillEvidenceVerified?: Prisma.SkillEvidenceUncheckedUpdateManyWithoutVerifiedByNestedInput
+  aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutUserNestedInput
+  aiExecutions?: Prisma.AIExecutionUncheckedUpdateManyWithoutUserNestedInput
+  aiUsageEvents?: Prisma.AIUsageEventUncheckedUpdateManyWithoutUserNestedInput
+  learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
+  knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
+  proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCoursePrerequisitesCreatedInput = {
@@ -7517,6 +8253,8 @@ export type UserCreateWithoutCoursePrerequisitesCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCoursePrerequisitesCreatedInput = {
@@ -7573,6 +8311,8 @@ export type UserUncheckedCreateWithoutCoursePrerequisitesCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCoursePrerequisitesCreatedInput = {
@@ -7645,6 +8385,8 @@ export type UserUpdateWithoutCoursePrerequisitesCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCoursePrerequisitesCreatedInput = {
@@ -7701,6 +8443,8 @@ export type UserUncheckedUpdateWithoutCoursePrerequisitesCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutLearningPathsCreatedInput = {
@@ -7757,6 +8501,8 @@ export type UserCreateWithoutLearningPathsCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutLearningPathsCreatedInput = {
@@ -7813,6 +8559,8 @@ export type UserUncheckedCreateWithoutLearningPathsCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutLearningPathsCreatedInput = {
@@ -7885,6 +8633,8 @@ export type UserUpdateWithoutLearningPathsCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLearningPathsCreatedInput = {
@@ -7941,6 +8691,8 @@ export type UserUncheckedUpdateWithoutLearningPathsCreatedInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutKnowledgeAccessInput = {
@@ -7997,6 +8749,8 @@ export type UserCreateWithoutKnowledgeAccessInput = {
   learningEvents?: Prisma.LearningEventCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutKnowledgeAccessInput = {
@@ -8053,6 +8807,8 @@ export type UserUncheckedCreateWithoutKnowledgeAccessInput = {
   learningEvents?: Prisma.LearningEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutKnowledgeAccessInput = {
@@ -8125,6 +8881,8 @@ export type UserUpdateWithoutKnowledgeAccessInput = {
   learningEvents?: Prisma.LearningEventUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutKnowledgeAccessInput = {
@@ -8181,6 +8939,8 @@ export type UserUncheckedUpdateWithoutKnowledgeAccessInput = {
   learningEvents?: Prisma.LearningEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutAiConversationsInput = {
@@ -8237,6 +8997,8 @@ export type UserCreateWithoutAiConversationsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutAiConversationsInput = {
@@ -8293,6 +9055,8 @@ export type UserUncheckedCreateWithoutAiConversationsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutAiConversationsInput = {
@@ -8365,6 +9129,8 @@ export type UserUpdateWithoutAiConversationsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiConversationsInput = {
@@ -8421,6 +9187,8 @@ export type UserUncheckedUpdateWithoutAiConversationsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutAiExecutionsInput = {
@@ -8477,6 +9245,8 @@ export type UserCreateWithoutAiExecutionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutAiExecutionsInput = {
@@ -8533,6 +9303,8 @@ export type UserUncheckedCreateWithoutAiExecutionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutAiExecutionsInput = {
@@ -8605,6 +9377,8 @@ export type UserUpdateWithoutAiExecutionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiExecutionsInput = {
@@ -8661,6 +9435,8 @@ export type UserUncheckedUpdateWithoutAiExecutionsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutAiUsageEventsInput = {
@@ -8717,6 +9493,8 @@ export type UserCreateWithoutAiUsageEventsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutAiUsageEventsInput = {
@@ -8773,6 +9551,8 @@ export type UserUncheckedCreateWithoutAiUsageEventsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutAiUsageEventsInput = {
@@ -8845,6 +9625,8 @@ export type UserUpdateWithoutAiUsageEventsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiUsageEventsInput = {
@@ -8901,6 +9683,8 @@ export type UserUncheckedUpdateWithoutAiUsageEventsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutLearningEventsInput = {
@@ -8957,6 +9741,8 @@ export type UserCreateWithoutLearningEventsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutLearningEventsInput = {
@@ -9013,6 +9799,8 @@ export type UserUncheckedCreateWithoutLearningEventsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedCreateNestedManyWithoutUserInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutUserInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutActorInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutUserInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutLearningEventsInput = {
@@ -9085,6 +9873,8 @@ export type UserUpdateWithoutLearningEventsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLearningEventsInput = {
@@ -9141,6 +9931,8 @@ export type UserUncheckedUpdateWithoutLearningEventsInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateManyTenantInput = {
@@ -9222,6 +10014,8 @@ export type UserUpdateWithoutTenantInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTenantInput = {
@@ -9278,6 +10072,8 @@ export type UserUncheckedUpdateWithoutTenantInput = {
   knowledgeAccess?: Prisma.KnowledgeAccessUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutUserNestedInput
   proficiencyEventsActed?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutActorNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutUserNestedInput
+  standingEventsActed?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutTenantInput = {
@@ -9342,6 +10138,8 @@ export type UserCountOutputType = {
   knowledgeAccess: number
   proficiencyEvents: number
   proficiencyEventsActed: number
+  standingEvents: number
+  standingEventsActed: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -9376,6 +10174,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   knowledgeAccess?: boolean | UserCountOutputTypeCountKnowledgeAccessArgs
   proficiencyEvents?: boolean | UserCountOutputTypeCountProficiencyEventsArgs
   proficiencyEventsActed?: boolean | UserCountOutputTypeCountProficiencyEventsActedArgs
+  standingEvents?: boolean | UserCountOutputTypeCountStandingEventsArgs
+  standingEventsActed?: boolean | UserCountOutputTypeCountStandingEventsActedArgs
 }
 
 /**
@@ -9605,6 +10405,20 @@ export type UserCountOutputTypeCountProficiencyEventsActedArgs<ExtArgs extends r
   where?: Prisma.SkillProficiencyEventWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStandingEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EvidenceStandingEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStandingEventsActedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EvidenceStandingEventWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -9662,6 +10476,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   knowledgeAccess?: boolean | Prisma.User$knowledgeAccessArgs<ExtArgs>
   proficiencyEvents?: boolean | Prisma.User$proficiencyEventsArgs<ExtArgs>
   proficiencyEventsActed?: boolean | Prisma.User$proficiencyEventsActedArgs<ExtArgs>
+  standingEvents?: boolean | Prisma.User$standingEventsArgs<ExtArgs>
+  standingEventsActed?: boolean | Prisma.User$standingEventsActedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -9779,6 +10595,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   knowledgeAccess?: boolean | Prisma.User$knowledgeAccessArgs<ExtArgs>
   proficiencyEvents?: boolean | Prisma.User$proficiencyEventsArgs<ExtArgs>
   proficiencyEventsActed?: boolean | Prisma.User$proficiencyEventsActedArgs<ExtArgs>
+  standingEvents?: boolean | Prisma.User$standingEventsArgs<ExtArgs>
+  standingEventsActed?: boolean | Prisma.User$standingEventsActedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -9823,6 +10641,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     knowledgeAccess: Prisma.$KnowledgeAccessPayload<ExtArgs>[]
     proficiencyEvents: Prisma.$SkillProficiencyEventPayload<ExtArgs>[]
     proficiencyEventsActed: Prisma.$SkillProficiencyEventPayload<ExtArgs>[]
+    standingEvents: Prisma.$EvidenceStandingEventPayload<ExtArgs>[]
+    standingEventsActed: Prisma.$EvidenceStandingEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -10274,6 +11094,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   knowledgeAccess<T extends Prisma.User$knowledgeAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$knowledgeAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   proficiencyEvents<T extends Prisma.User$proficiencyEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$proficiencyEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillProficiencyEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   proficiencyEventsActed<T extends Prisma.User$proficiencyEventsActedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$proficiencyEventsActedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillProficiencyEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  standingEvents<T extends Prisma.User$standingEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$standingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EvidenceStandingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  standingEventsActed<T extends Prisma.User$standingEventsActedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$standingEventsActedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EvidenceStandingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11487,6 +12309,54 @@ export type User$proficiencyEventsActedArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.SkillProficiencyEventScalarFieldEnum | Prisma.SkillProficiencyEventScalarFieldEnum[]
+}
+
+/**
+ * User.standingEvents
+ */
+export type User$standingEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EvidenceStandingEvent
+   */
+  select?: Prisma.EvidenceStandingEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EvidenceStandingEvent
+   */
+  omit?: Prisma.EvidenceStandingEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EvidenceStandingEventInclude<ExtArgs> | null
+  where?: Prisma.EvidenceStandingEventWhereInput
+  orderBy?: Prisma.EvidenceStandingEventOrderByWithRelationInput | Prisma.EvidenceStandingEventOrderByWithRelationInput[]
+  cursor?: Prisma.EvidenceStandingEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EvidenceStandingEventScalarFieldEnum | Prisma.EvidenceStandingEventScalarFieldEnum[]
+}
+
+/**
+ * User.standingEventsActed
+ */
+export type User$standingEventsActedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EvidenceStandingEvent
+   */
+  select?: Prisma.EvidenceStandingEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EvidenceStandingEvent
+   */
+  omit?: Prisma.EvidenceStandingEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EvidenceStandingEventInclude<ExtArgs> | null
+  where?: Prisma.EvidenceStandingEventWhereInput
+  orderBy?: Prisma.EvidenceStandingEventOrderByWithRelationInput | Prisma.EvidenceStandingEventOrderByWithRelationInput[]
+  cursor?: Prisma.EvidenceStandingEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EvidenceStandingEventScalarFieldEnum | Prisma.EvidenceStandingEventScalarFieldEnum[]
 }
 
 /**

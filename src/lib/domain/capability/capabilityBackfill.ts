@@ -1,4 +1,4 @@
-import type { EvidenceType } from "@/generated/prisma/client";
+import type { EvidenceType, SkillProficiency } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import {
   type ConfidenceInput,
@@ -57,13 +57,33 @@ type EvidenceForBackfill = {
   validUntil: Date | null;
   occurredAt: Date | null;
   createdAt: Date;
+  userId: string;
 };
+
+/** `${userId}:${sourceId}` — every lookup map in this file is keyed by this pair, never by sourceId alone (D24). */
+function learnerSourceKey(userId: string, sourceId: string): string {
+  return `${userId}:${sourceId}`;
+}
 
 /**
  * Resolves and persists `occurredAt`/`scorePercent` for the given rows'
  * evidence still missing it (contract §H7's fallback chain), batched by
  * sourceType to avoid one lookup per row. Returns the resolved values so the
  * caller's in-memory copy can be updated without a second read.
+ *
+ * D24 (docs/PHASE_30.3_DISCOVERY.md §1): every lookup below is scoped to
+ * (tenantId, userId, sourceId), never sourceId alone. The pre-30.3 version of
+ * this function queried Enrollment/QuizAttempt by course/quiz id only, with
+ * no learner filter, and folded the results into a map keyed only by
+ * course/quiz id — so the last-iterated (or, for quiz, the earliest-passing)
+ * row won for every learner sharing that course/quiz, not each learner's
+ * own. Fixed by requiring `userId` in every WHERE clause and keying every
+ * map by `learnerSourceKey(userId, sourceId)`. Enrollment/QuizAttempt/
+ * AssignmentSubmission carry no `tenantId` column of their own, so tenant
+ * consistency is enforced through the owning Course's `tenantId` via the
+ * relevant relation chain — a cross-tenant `sourceId` (e.g. a malformed or
+ * forged evidence row) matches nothing and falls through to the documented
+ * `createdAt` fallback, never another tenant's data.
  */
 async function fillMissingEvidenceMetadata(
   tenantId: string,
@@ -73,47 +93,70 @@ async function fillMissingEvidenceMetadata(
   let occurredAtFilled = 0;
   let scorePercentFilled = 0;
 
-  const courseSourceIds = needsOccurredAt
-    .filter((e) => e.sourceType === "Course" && e.sourceId)
-    .map((e) => e.sourceId as string);
-  const quizSourceIds = needsOccurredAt
-    .filter((e) => e.sourceType === "Quiz" && e.sourceId)
-    .map((e) => e.sourceId as string);
-  const legacyQuizAttemptIds = needsOccurredAt
-    .filter((e) => e.sourceType === "QuizAttempt" && e.sourceId)
-    .map((e) => e.sourceId as string);
+  const courseRows = needsOccurredAt.filter((e) => e.sourceType === "Course" && e.sourceId);
+  const quizRows = needsOccurredAt.filter((e) => e.sourceType === "Quiz" && e.sourceId);
+  const legacyQuizAttemptRows = needsOccurredAt.filter(
+    (e) => e.sourceType === "QuizAttempt" && e.sourceId
+  );
   // scorePercent (unlike occurredAt) can still be missing on a row whose
   // occurredAt is already set, so this set is drawn from ALL of this batch's
   // evidence, not just `needsOccurredAt`.
-  const submissionIds = evidence
-    .filter((e) => e.sourceType === "AssignmentSubmission" && e.sourceId)
-    .map((e) => e.sourceId as string);
+  const submissionRows = evidence.filter(
+    (e) => e.sourceType === "AssignmentSubmission" && e.sourceId
+  );
+
+  const courseSourceIds = [...new Set(courseRows.map((e) => e.sourceId as string))];
+  const courseUserIds = [...new Set(courseRows.map((e) => e.userId))];
+  const quizSourceIds = [...new Set(quizRows.map((e) => e.sourceId as string))];
+  const quizUserIds = [...new Set(quizRows.map((e) => e.userId))];
+  const legacyAttemptIds = [...new Set(legacyQuizAttemptRows.map((e) => e.sourceId as string))];
+  const legacyUserIds = [...new Set(legacyQuizAttemptRows.map((e) => e.userId))];
+  const submissionIds = [...new Set(submissionRows.map((e) => e.sourceId as string))];
+  const submissionUserIds = [...new Set(submissionRows.map((e) => e.userId))];
 
   const [enrollments, quizAttempts, legacyAttempts, submissions] = await Promise.all([
     courseSourceIds.length
       ? db.enrollment.findMany({
-          where: { courseId: { in: courseSourceIds } },
-          select: { courseId: true, completedAt: true, updatedAt: true },
+          where: {
+            courseId: { in: courseSourceIds },
+            userId: { in: courseUserIds },
+            course: { tenantId },
+          },
+          select: { courseId: true, userId: true, completedAt: true, updatedAt: true },
         })
       : Promise.resolve([]),
     quizSourceIds.length
       ? db.quizAttempt.findMany({
-          where: { quizId: { in: quizSourceIds }, isPassed: true },
-          select: { quizId: true, completedAt: true },
+          where: {
+            quizId: { in: quizSourceIds },
+            userId: { in: quizUserIds },
+            isPassed: true,
+            quiz: { lesson: { section: { course: { tenantId } } } },
+          },
+          select: { quizId: true, userId: true, completedAt: true },
           orderBy: { completedAt: "asc" },
         })
       : Promise.resolve([]),
-    legacyQuizAttemptIds.length
+    legacyAttemptIds.length
       ? db.quizAttempt.findMany({
-          where: { id: { in: legacyQuizAttemptIds } },
-          select: { id: true, completedAt: true },
+          where: {
+            id: { in: legacyAttemptIds },
+            userId: { in: legacyUserIds },
+            quiz: { lesson: { section: { course: { tenantId } } } },
+          },
+          select: { id: true, userId: true, completedAt: true },
         })
       : Promise.resolve([]),
     submissionIds.length
       ? db.assignmentSubmission.findMany({
-          where: { id: { in: submissionIds } },
+          where: {
+            id: { in: submissionIds },
+            userId: { in: submissionUserIds },
+            assignment: { lesson: { section: { course: { tenantId } } } },
+          },
           select: {
             id: true,
+            userId: true,
             gradedAt: true,
             score: true,
             assignment: { select: { maxScore: true } },
@@ -124,25 +167,28 @@ async function fillMissingEvidenceMetadata(
 
   const earliestByCourse = new Map<string, Date>();
   for (const e of enrollments) {
-    earliestByCourse.set(e.courseId, e.completedAt ?? e.updatedAt);
+    earliestByCourse.set(learnerSourceKey(e.userId, e.courseId), e.completedAt ?? e.updatedAt);
   }
   const earliestByQuiz = new Map<string, Date>();
   for (const a of quizAttempts) {
-    if (!earliestByQuiz.has(a.quizId)) earliestByQuiz.set(a.quizId, a.completedAt);
+    const key = learnerSourceKey(a.userId, a.quizId);
+    if (!earliestByQuiz.has(key)) earliestByQuiz.set(key, a.completedAt);
   }
-  const byLegacyAttemptId = new Map(legacyAttempts.map((a) => [a.id, a.completedAt]));
-  const bySubmissionId = new Map(submissions.map((s) => [s.id, s]));
+  const byLegacyAttempt = new Map(
+    legacyAttempts.map((a) => [learnerSourceKey(a.userId, a.id), a.completedAt])
+  );
+  const bySubmission = new Map(submissions.map((s) => [learnerSourceKey(s.userId, s.id), s]));
 
   for (const e of needsOccurredAt) {
     let resolved: Date | null = null;
     if (e.sourceType === "Course" && e.sourceId)
-      resolved = earliestByCourse.get(e.sourceId) ?? null;
+      resolved = earliestByCourse.get(learnerSourceKey(e.userId, e.sourceId)) ?? null;
     else if (e.sourceType === "Quiz" && e.sourceId)
-      resolved = earliestByQuiz.get(e.sourceId) ?? null;
+      resolved = earliestByQuiz.get(learnerSourceKey(e.userId, e.sourceId)) ?? null;
     else if (e.sourceType === "QuizAttempt" && e.sourceId)
-      resolved = byLegacyAttemptId.get(e.sourceId) ?? null;
+      resolved = byLegacyAttempt.get(learnerSourceKey(e.userId, e.sourceId)) ?? null;
     else if (e.sourceType === "AssignmentSubmission" && e.sourceId)
-      resolved = bySubmissionId.get(e.sourceId)?.gradedAt ?? null;
+      resolved = bySubmission.get(learnerSourceKey(e.userId, e.sourceId))?.gradedAt ?? null;
     // documented fallback (contract §H7): the evidence's own creation time.
     const finalValue = resolved ?? e.createdAt;
 
@@ -158,7 +204,7 @@ async function fillMissingEvidenceMetadata(
 
   for (const e of evidence) {
     if (e.sourceType !== "AssignmentSubmission" || !e.sourceId) continue;
-    const submission = bySubmissionId.get(e.sourceId);
+    const submission = bySubmission.get(learnerSourceKey(e.userId, e.sourceId));
     if (!submission || submission.score === null) continue;
     const scorePercent = (submission.score / submission.assignment.maxScore) * 100;
     const result = await db.skillEvidence.updateMany({
@@ -364,6 +410,386 @@ export async function backfillAllTenants(opts: { batchSize?: number; asOf?: Date
       evidenceScorePercentFilled: 0,
       failures: 0,
     }
+  );
+  return { perTenant, totals };
+}
+
+// ---------------------------------------------------------------------------
+// D24 remediation (docs/PHASE_30.3_DISCOVERY.md §1, §34 D24) — a deliberate,
+// one-time EXCEPTION to contract §B5's "occurredAt, once set, is never
+// rewritten" rule, for exactly the rows the pre-30.3 backfill (above) wrote
+// wrong. This is NOT part of the ordinary fill-nulls-only path and is never
+// called from `backfillTenant`/`fillMissingEvidenceMetadata` — it is a
+// separate, explicitly-invoked correction, run once against a real database
+// (never automatically, never on every backfill call, so a normal restart of
+// `backfillTenant` can never accidentally re-trigger it).
+//
+// Rule (exactly the task's own three-way split):
+//   correctly sourced occurredAt        -> preserve, untouched
+//   demonstrably misattributed          -> repair to the row's OWN authoritative value
+//   unknown/ambiguous                   -> never touched, never guessed, counted separately
+//
+// "Demonstrably misattributed" is defined narrowly and empirically, not as
+// "differs from the recomputed value": a mismatch is repaired ONLY when the
+// evidence's current `occurredAt` exactly equals ANOTHER learner's candidate
+// timestamp for the same course/quiz (the collapse signature the pre-30.3
+// bug actually produces — proven this session by discriminating a real
+// sample down to the exact millisecond, docs/PHASE_30.3_DISCOVERY.md §1). A
+// mismatch that matches no other learner's value either is left alone as
+// ambiguous — it may be unrelated fixture/legacy data this remediation has
+// no business rewriting, and D24 explicitly forbids inventing a value.
+//
+// Scope: COURSE_COMPLETION and QUIZ_SCORE only — the two types the bug
+// actually touches (Map keyed by course/quiz id, no learner filter).
+// ASSESSMENT (submission id) and legacy "QuizAttempt" (attempt id) evidence
+// were already keyed by an id unique to one learner and were never
+// contaminated by this mechanism (docs/PHASE_30.3_DISCOVERY.md §16); nothing
+// here touches them.
+// ---------------------------------------------------------------------------
+
+export type RepairedOccurredAtRecord = {
+  evidenceId: string;
+  userId: string;
+  skillId: string;
+  sourceType: "Course" | "Quiz";
+  sourceId: string;
+  previousOccurredAt: string;
+  newOccurredAt: string;
+};
+
+export type OccurredAtRemediationReport = {
+  tenantId: string;
+  rowsChecked: number;
+  repaired: number;
+  ambiguous: number;
+  alreadyCorrect: number;
+  /** Classified `ambiguous` because this evidence's OWN learner has no resolvable authoritative value at all (e.g. enrollment still ACTIVE, no completedAt). */
+  ambiguousNoOwnSource: number;
+  /** Classified `ambiguous` because the mismatch doesn't match any other learner's candidate value — not the bug's own signature, not this remediation's business to guess at. */
+  ambiguousUnattributable: number;
+  /** A repair was warranted but a genuine concurrent write raced the classification (CAS re-check failed) or the row disappeared — never counted as `repaired`; safe to pick up on the next run. */
+  stale: number;
+  /** Evidence rows with a null `sourceId` (cannot resolve any candidate at all) — never counted in any other bucket. */
+  skipped: number;
+  repairedRecords: RepairedOccurredAtRecord[];
+  ambiguousEvidenceIds: string[];
+};
+
+type CandidateValue = { userId: string; ownValue: Date | null; matchValue: Date };
+
+type ClassifyOutcome =
+  | { kind: "correct" }
+  | { kind: "ambiguous"; reason: "NO_OWN_SOURCE" | "UNATTRIBUTABLE_MISMATCH" }
+  | { kind: "repaired"; record: RepairedOccurredAtRecord }
+  /** The row changed between this call's read and its lock — a genuine concurrent write, not this classification's to overwrite. Counted separately so `repaired`/`ambiguous` totals never silently include a write that didn't happen. */
+  | { kind: "stale" };
+
+/**
+ * Classifies and, if warranted, repairs ONE evidence row's `occurredAt`
+ * inside its own transaction. Content and cache only: never creates or
+ * recomputes the `UserSkill` projection, never calls `projectUserSkill`.
+ *
+ * Lock `SkillEvidence` first (`SkillEvidence` then `UserSkill`, the
+ * established order — contract §Q "Amends E1, adds transitions" / D21),
+ * re-check under the lock that `occurredAt` still equals the value this
+ * call classified against (a CAS guard — a concurrent write since the read
+ * makes the classification stale, so this call backs off and reports
+ * `stale` rather than overwriting it), write the corrected `occurredAt`,
+ * then — only if a `UserSkill` row already exists (locked separately, never
+ * created) — recompute the confidence cache directly from the current
+ * evidence set and write only `evidenceConfidence`/`policyVersion`.
+ * `proficiency`, `lastAssessedAt`, `eventSeq` are never touched. No
+ * `SkillProficiencyEvent`, no `EvidenceStandingEvent` (a content
+ * correction, not a standing transition).
+ */
+async function classifyAndRepairOne(
+  tenantId: string,
+  userId: string,
+  skillId: string,
+  evidenceId: string,
+  sourceType: "Course" | "Quiz",
+  sourceId: string,
+  currentOccurredAt: Date,
+  ownValue: Date | null,
+  otherLearnersValues: Date[]
+): Promise<ClassifyOutcome> {
+  if (ownValue === null) return { kind: "ambiguous", reason: "NO_OWN_SOURCE" };
+  if (currentOccurredAt.getTime() === ownValue.getTime()) return { kind: "correct" };
+  const matchesAnotherLearner = otherLearnersValues.some(
+    (v) => v.getTime() === currentOccurredAt.getTime()
+  );
+  if (!matchesAnotherLearner) return { kind: "ambiguous", reason: "UNATTRIBUTABLE_MISMATCH" };
+
+  const wrote = await db.$transaction(async (tx) => {
+    const [lockedEvidence] = await tx.$queryRaw<{ id: string; occurredAt: Date | null }[]>`
+      SELECT id, "occurredAt" FROM "SkillEvidence" WHERE id = ${evidenceId} FOR UPDATE
+    `;
+    if (!lockedEvidence) return false; // row disappeared between read and lock
+    if (
+      lockedEvidence.occurredAt === null ||
+      lockedEvidence.occurredAt.getTime() !== currentOccurredAt.getTime()
+    ) {
+      return false; // stale classification — someone else already changed it; back off
+    }
+
+    await tx.skillEvidence.update({
+      where: { id: lockedEvidence.id },
+      data: { occurredAt: ownValue },
+    });
+
+    const [lockedProjection] = await tx.$queryRaw<{ id: string; proficiency: SkillProficiency }[]>`
+      SELECT id, proficiency FROM "UserSkill" WHERE "userId" = ${userId} AND "skillId" = ${skillId} FOR UPDATE
+    `;
+    if (lockedProjection) {
+      const evidenceRows = await tx.skillEvidence.findMany({
+        where: { tenantId, userId, skillId },
+        select: {
+          id: true,
+          type: true,
+          verificationStatus: true,
+          state: true,
+          validUntil: true,
+          occurredAt: true,
+        },
+      });
+      const now = new Date();
+      const contributing = evidenceRows.filter((e) => doesEvidenceContribute(e, now));
+      const confidenceInputs: ConfidenceInput[] = contributing.map((e) => ({
+        verificationStatus: e.verificationStatus,
+        state: e.state,
+        validUntil: e.validUntil,
+        type: e.type,
+        occurredAt: e.occurredAt,
+      }));
+      // Confidence for the EXISTING stored level — never recomputed, matching
+      // the ordinary backfill path's own discipline (§9 above).
+      const confidence = confidenceFor(lockedProjection.proficiency, confidenceInputs, now);
+      await tx.userSkill.update({
+        where: { id: lockedProjection.id },
+        data: { evidenceConfidence: confidence, policyVersion: CURRENT_POLICY_VERSION },
+      });
+    } // else: never create a projection as a side effect of a content fix
+    return true;
+  });
+
+  if (!wrote) return { kind: "stale" };
+  return {
+    kind: "repaired",
+    record: {
+      evidenceId,
+      userId,
+      skillId,
+      sourceType,
+      sourceId,
+      previousOccurredAt: currentOccurredAt.toISOString(),
+      newOccurredAt: ownValue.toISOString(),
+    },
+  };
+}
+
+/**
+ * Runs the D24 remediation for one tenant. Deterministic, learner-scoped,
+ * tenant-scoped (every lookup below matches `fillMissingEvidenceMetadata`'s
+ * own tenant-consistency discipline via the owning Course), idempotent (a
+ * row already at its own authoritative value classifies as "correct" and is
+ * never touched again — safe to re-run), and auditable (returns a full
+ * report; the caller is responsible for persisting it as an artifact,
+ * mirroring 30.2's own `docs/PHASE_30.2_RECONCILIATION.json` convention —
+ * this module does not write a new table for it, per the discovery's own
+ * "don't invent a table" conclusion, docs/PHASE_30.3_DISCOVERY.md §26).
+ */
+export async function remediateOccurredAtMisattribution(
+  tenantId: string
+): Promise<OccurredAtRemediationReport> {
+  const report: OccurredAtRemediationReport = {
+    tenantId,
+    rowsChecked: 0,
+    repaired: 0,
+    ambiguous: 0,
+    alreadyCorrect: 0,
+    ambiguousNoOwnSource: 0,
+    ambiguousUnattributable: 0,
+    stale: 0,
+    skipped: 0,
+    repairedRecords: [],
+    ambiguousEvidenceIds: [],
+  };
+
+  const [courseEvidence, quizEvidence] = await Promise.all([
+    db.skillEvidence.findMany({
+      where: { tenantId, sourceType: "Course", occurredAt: { not: null } },
+      select: { id: true, userId: true, skillId: true, sourceId: true, occurredAt: true },
+    }),
+    db.skillEvidence.findMany({
+      where: { tenantId, sourceType: "Quiz", occurredAt: { not: null } },
+      select: { id: true, userId: true, skillId: true, sourceId: true, occurredAt: true },
+    }),
+  ]);
+  report.rowsChecked = courseEvidence.length + quizEvidence.length;
+
+  const courseIds = [
+    ...new Set(courseEvidence.map((e) => e.sourceId).filter((id): id is string => !!id)),
+  ];
+  const quizIds = [
+    ...new Set(quizEvidence.map((e) => e.sourceId).filter((id): id is string => !!id)),
+  ];
+
+  const [enrollments, attempts] = await Promise.all([
+    courseIds.length
+      ? db.enrollment.findMany({
+          where: { courseId: { in: courseIds }, course: { tenantId } },
+          select: { courseId: true, userId: true, completedAt: true, updatedAt: true },
+        })
+      : Promise.resolve([]),
+    quizIds.length
+      ? db.quizAttempt.findMany({
+          where: {
+            quizId: { in: quizIds },
+            isPassed: true,
+            quiz: { lesson: { section: { course: { tenantId } } } },
+          },
+          select: { quizId: true, userId: true, completedAt: true },
+          orderBy: { completedAt: "asc" },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  // `ownValue` is the STRICT authoritative value (never a fallback) — used
+  // only to decide what THIS learner's own repair target is. `matchValue`
+  // is the wider fallback (`completedAt ?? updatedAt`) — used only to
+  // detect whether another learner's candidate is what the bug actually
+  // wrote, matching `fillMissingEvidenceMetadata`'s own resolution. A
+  // learner whose own `completedAt` is null (still enrolled, not yet
+  // completed) must never be auto-repaired to a moving `updatedAt` value —
+  // that is exactly "replace a historical timestamp because a newer one is
+  // available," which D24 explicitly forbids (docs/PHASE_30.3_DISCOVERY.md
+  // §1, task's own D24 remediation rule).
+  const candidatesByCourse = new Map<string, CandidateValue[]>();
+  for (const e of enrollments) {
+    const list = candidatesByCourse.get(e.courseId);
+    const entry = {
+      userId: e.userId,
+      ownValue: e.completedAt,
+      matchValue: e.completedAt ?? e.updatedAt,
+    };
+    if (list) list.push(entry);
+    else candidatesByCourse.set(e.courseId, [entry]);
+  }
+  // One candidate per learner per quiz — their OWN earliest passing attempt,
+  // matching fillMissingEvidenceMetadata's own semantics (first-seen wins,
+  // orderBy completedAt asc). QuizAttempt.completedAt is a required
+  // (non-nullable) column, so ownValue and matchValue are always the same.
+  const candidatesByQuiz = new Map<string, CandidateValue[]>();
+  const seenLearnerQuiz = new Set<string>();
+  for (const a of attempts) {
+    const seenKey = learnerSourceKey(a.userId, a.quizId);
+    if (seenLearnerQuiz.has(seenKey)) continue;
+    seenLearnerQuiz.add(seenKey);
+    const list = candidatesByQuiz.get(a.quizId);
+    const entry = { userId: a.userId, ownValue: a.completedAt, matchValue: a.completedAt };
+    if (list) list.push(entry);
+    else candidatesByQuiz.set(a.quizId, [entry]);
+  }
+
+  async function process(
+    evidenceId: string,
+    userId: string,
+    skillId: string,
+    sourceType: "Course" | "Quiz",
+    sourceId: string | null,
+    occurredAt: Date | null,
+    candidates: Map<string, CandidateValue[]>
+  ) {
+    if (!sourceId || !occurredAt) {
+      report.skipped += 1;
+      return;
+    }
+    const group = candidates.get(sourceId) ?? [];
+    const own = group.find((c) => c.userId === userId)?.ownValue ?? null;
+    const others = group.filter((c) => c.userId !== userId).map((c) => c.matchValue);
+
+    const outcome = await classifyAndRepairOne(
+      tenantId,
+      userId,
+      skillId,
+      evidenceId,
+      sourceType,
+      sourceId,
+      occurredAt,
+      own,
+      others
+    );
+    switch (outcome.kind) {
+      case "repaired":
+        report.repaired += 1;
+        report.repairedRecords.push(outcome.record);
+        break;
+      case "ambiguous":
+        report.ambiguous += 1;
+        report.ambiguousEvidenceIds.push(evidenceId);
+        if (outcome.reason === "NO_OWN_SOURCE") report.ambiguousNoOwnSource += 1;
+        else report.ambiguousUnattributable += 1;
+        break;
+      case "correct":
+        report.alreadyCorrect += 1;
+        break;
+      case "stale":
+        // A genuine concurrent write raced this classification. Counted
+        // separately from repaired/ambiguous/correct — none of those
+        // buckets actually happened for this row on this call — so
+        // `rowsChecked = repaired + ambiguous + alreadyCorrect + stale +
+        // skipped` always reconciles exactly. Safe to leave for the next
+        // run, which re-reads and re-classifies fresh.
+        report.stale += 1;
+        break;
+    }
+  }
+
+  for (const e of courseEvidence) {
+    await process(
+      e.id,
+      e.userId,
+      e.skillId,
+      "Course",
+      e.sourceId,
+      e.occurredAt,
+      candidatesByCourse
+    );
+  }
+  for (const e of quizEvidence) {
+    await process(e.id, e.userId, e.skillId, "Quiz", e.sourceId, e.occurredAt, candidatesByQuiz);
+  }
+
+  return report;
+}
+
+export type OccurredAtRemediationTotals = {
+  tenants: number;
+  rowsChecked: number;
+  repaired: number;
+  ambiguous: number;
+  alreadyCorrect: number;
+};
+
+/** Runs `remediateOccurredAtMisattribution` independently per tenant and folds the results. */
+export async function remediateOccurredAtMisattributionAllTenants(): Promise<{
+  perTenant: OccurredAtRemediationReport[];
+  totals: OccurredAtRemediationTotals;
+}> {
+  const tenants = await db.tenant.findMany({ select: { id: true }, orderBy: { id: "asc" } });
+  const perTenant: OccurredAtRemediationReport[] = [];
+  for (const tenant of tenants) {
+    perTenant.push(await remediateOccurredAtMisattribution(tenant.id));
+  }
+  const totals = perTenant.reduce<OccurredAtRemediationTotals>(
+    (acc, r) => ({
+      tenants: acc.tenants + 1,
+      rowsChecked: acc.rowsChecked + r.rowsChecked,
+      repaired: acc.repaired + r.repaired,
+      ambiguous: acc.ambiguous + r.ambiguous,
+      alreadyCorrect: acc.alreadyCorrect + r.alreadyCorrect,
+    }),
+    { tenants: 0, rowsChecked: 0, repaired: 0, ambiguous: 0, alreadyCorrect: 0 }
   );
   return { perTenant, totals };
 }

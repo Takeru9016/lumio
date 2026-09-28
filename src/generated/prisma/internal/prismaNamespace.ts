@@ -416,6 +416,7 @@ export const ModelName = {
   UserSkill: 'UserSkill',
   SkillEvidence: 'SkillEvidence',
   SkillProficiencyEvent: 'SkillProficiencyEvent',
+  EvidenceStandingEvent: 'EvidenceStandingEvent',
   CourseSkill: 'CourseSkill',
   CoursePrerequisite: 'CoursePrerequisite',
   LearningPath: 'LearningPath',
@@ -446,7 +447,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "learningAssignment" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "skillProficiencyEvent" | "courseSkill" | "coursePrerequisite" | "learningPath" | "learningPathCourse" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
+    modelProps: "user" | "tenant" | "team" | "teamMember" | "invitation" | "notification" | "orgRequest" | "course" | "section" | "lesson" | "enrollment" | "lessonProgress" | "quiz" | "quizQuestion" | "quizAttempt" | "quizAnswer" | "assignment" | "assignmentSubmission" | "xPTransaction" | "certificate" | "aIChat" | "mandatoryTraining" | "learningAssignment" | "adminAuditLog" | "skillCategory" | "skill" | "jobRole" | "roleSkill" | "userJobRole" | "userSkill" | "skillEvidence" | "skillProficiencyEvent" | "evidenceStandingEvent" | "courseSkill" | "coursePrerequisite" | "learningPath" | "learningPathCourse" | "knowledgeSource" | "knowledgeDocument" | "knowledgeAccess" | "knowledgeChunk" | "aIConversation" | "aIMessage" | "aIToolCall" | "aISourceCitation" | "aIExecution" | "aIUsageEvent" | "learningEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2818,6 +2819,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EvidenceStandingEvent: {
+      payload: Prisma.$EvidenceStandingEventPayload<ExtArgs>
+      fields: Prisma.EvidenceStandingEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EvidenceStandingEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EvidenceStandingEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>
+        }
+        findFirst: {
+          args: Prisma.EvidenceStandingEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EvidenceStandingEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>
+        }
+        findMany: {
+          args: Prisma.EvidenceStandingEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>[]
+        }
+        create: {
+          args: Prisma.EvidenceStandingEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>
+        }
+        createMany: {
+          args: Prisma.EvidenceStandingEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EvidenceStandingEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>[]
+        }
+        delete: {
+          args: Prisma.EvidenceStandingEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>
+        }
+        update: {
+          args: Prisma.EvidenceStandingEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.EvidenceStandingEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EvidenceStandingEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EvidenceStandingEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.EvidenceStandingEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EvidenceStandingEventPayload>
+        }
+        aggregate: {
+          args: Prisma.EvidenceStandingEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEvidenceStandingEvent>
+        }
+        groupBy: {
+          args: Prisma.EvidenceStandingEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EvidenceStandingEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EvidenceStandingEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EvidenceStandingEventCountAggregateOutputType> | number
+        }
+      }
+    }
     CourseSkill: {
       payload: Prisma.$CourseSkillPayload<ExtArgs>
       fields: Prisma.CourseSkillFieldRefs
@@ -4477,6 +4552,29 @@ export const SkillProficiencyEventScalarFieldEnum = {
 export type SkillProficiencyEventScalarFieldEnum = (typeof SkillProficiencyEventScalarFieldEnum)[keyof typeof SkillProficiencyEventScalarFieldEnum]
 
 
+export const EvidenceStandingEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  skillId: 'skillId',
+  evidenceId: 'evidenceId',
+  evidenceRevision: 'evidenceRevision',
+  action: 'action',
+  actorId: 'actorId',
+  actorRole: 'actorRole',
+  actorName: 'actorName',
+  reason: 'reason',
+  previousVerificationStatus: 'previousVerificationStatus',
+  newVerificationStatus: 'newVerificationStatus',
+  previousState: 'previousState',
+  newState: 'newState',
+  occurredAt: 'occurredAt',
+  recordedAt: 'recordedAt'
+} as const
+
+export type EvidenceStandingEventScalarFieldEnum = (typeof EvidenceStandingEventScalarFieldEnum)[keyof typeof EvidenceStandingEventScalarFieldEnum]
+
+
 export const CourseSkillScalarFieldEnum = {
   id: 'id',
   courseId: 'courseId',
@@ -5109,6 +5207,20 @@ export type ListEnumProficiencyEventCauseFieldRefInput<$PrismaModel> = FieldRefI
 
 
 /**
+ * Reference to a field of type 'EvidenceStandingAction'
+ */
+export type EnumEvidenceStandingActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EvidenceStandingAction'>
+    
+
+
+/**
+ * Reference to a field of type 'EvidenceStandingAction[]'
+ */
+export type ListEnumEvidenceStandingActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EvidenceStandingAction[]'>
+    
+
+
+/**
  * Reference to a field of type 'LearningPathStatus'
  */
 export type EnumLearningPathStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LearningPathStatus'>
@@ -5361,6 +5473,7 @@ export type GlobalOmitConfig = {
   userSkill?: Prisma.UserSkillOmit
   skillEvidence?: Prisma.SkillEvidenceOmit
   skillProficiencyEvent?: Prisma.SkillProficiencyEventOmit
+  evidenceStandingEvent?: Prisma.EvidenceStandingEventOmit
   courseSkill?: Prisma.CourseSkillOmit
   coursePrerequisite?: Prisma.CoursePrerequisiteOmit
   learningPath?: Prisma.LearningPathOmit

@@ -1,15 +1,27 @@
 import type {
+  EvidenceState,
   EvidenceType,
   EvidenceVerificationStatus,
   UserSkill,
 } from "@/generated/prisma/client";
 import type { AuthContext } from "@/lib/auth/context";
 import { db } from "@/lib/db";
+import {
+  type EvidenceTransitionAction,
+  evaluateTransition,
+  isVerificationAxisAction,
+  PROFICIENCY_CAUSE_FOR_ACTION,
+  reasonRequired,
+  requiresSourceResolution,
+  roleMayAttempt,
+  stateTargetFor,
+  verificationTargetFor,
+} from "@/lib/domain/capability/evidenceTransitions";
 import { projectUserSkill } from "@/lib/domain/capability/proficiency";
 
 export class CapabilityVerificationError extends Error {
   constructor(
-    public status: 403 | 404,
+    public status: 403 | 404 | 409,
     message: string
   ) {
     super(message);
@@ -129,99 +141,196 @@ export async function resolveSourceCourse(evidence: {
   return null;
 }
 
-/**
- * Authorization predicate (Phase 5 architecture challenge, Challenge 12):
- *   SUPER_ADMIN may verify/reject any evidence.
- *   INSTRUCTOR may verify/reject only evidence whose resolved source Course
- *     they own (course.instructorId === actor.userId).
- *   The evidence's own learner may never verify/reject their own evidence,
- *     regardless of role.
- * Deliberately not a general RBAC system — this is one predicate for one
- * action, mirroring the existing assignment-grading route's shape
- * (src/app/api/assignments/[assignmentId]/submissions/[submissionId]/grade/route.ts)
- * but corrected: that route's ownership check applies even to SUPER_ADMIN,
- * which this predicate deliberately does not replicate (a pre-existing
- * inconsistency there, not a pattern worth carrying forward here).
- */
-async function authorizeVerificationActor(
-  actor: AuthContext & { tenantId: string },
-  evidence: { userId: string; tenantId: string; sourceType: string; sourceId: string | null }
-): Promise<void> {
-  if (evidence.userId === actor.userId) {
-    throw new CapabilityVerificationError(403, "Cannot verify or reject your own evidence");
-  }
-  if (evidence.tenantId !== actor.tenantId) {
-    throw new CapabilityVerificationError(403, "Forbidden");
-  }
-
-  // Source resolution is required for EVERY actor, SUPER_ADMIN included — the
-  // locked contract is "SUPER_ADMIN may verify any valid evidence... subject
-  // to normal source/tenant validation," not an unconditional bypass. A
-  // malformed/unsupported sourceType must fail closed for everyone; only the
-  // instructor-ownership comparison below is what SUPER_ADMIN skips.
-  const course = await resolveSourceCourse(evidence);
-  if (!course) {
-    throw new CapabilityVerificationError(403, "Forbidden");
-  }
-
-  if (actor.role === "SUPER_ADMIN") return;
-  if (actor.role !== "INSTRUCTOR") {
-    throw new CapabilityVerificationError(403, "Forbidden");
-  }
-  if (course.instructorId !== actor.userId) {
-    throw new CapabilityVerificationError(403, "Forbidden");
-  }
-}
+type LockedEvidenceRow = {
+  id: string;
+  tenantId: string;
+  userId: string;
+  skillId: string;
+  sourceType: string;
+  sourceId: string | null;
+  verificationStatus: EvidenceVerificationStatus;
+  state: EvidenceState;
+  revision: number;
+};
 
 /**
- * Shared implementation for verify/reject. The actor can only choose between
- * these two terminal actions — never submit a proficiency value directly.
- * The resulting UserSkill proficiency is always derived by
- * projectUserSkill's deterministic recompute over the full remaining
- * evidence set, never set directly by this function or its caller.
+ * The one canonical entry point for every evidence-standing transition
+ * (docs/PHASE_30.3_DISCOVERY.md §13/§14/§15/§24/§25/§26, contract §Q). Locks
+ * the `SkillEvidence` row first (`SELECT ... FOR UPDATE`), then `UserSkill`
+ * via `projectUserSkill` inside the same transaction — the fixed lock order
+ * documented in the discovery (§14/§34 D21), so a verification transaction
+ * and a concurrent evidence-creation transaction can never deadlock against
+ * each other.
+ *
+ * Check order, exactly as specified (docs/PHASE_30.3_DISCOVERY.md §14):
+ *   1. lock the row
+ *   2. tenant mismatch -> the SAME 404 as missing (D23 — closes a real,
+ *      pre-existing existence leak: the old code returned a distinguishable
+ *      403 for a cross-tenant evidenceId)
+ *   3. the subject may never act on their own evidence -> 403
+ *   4. the evidence's learner is soft-deleted -> 403 (D22 — a real,
+ *      pre-existing gap; nothing previously checked this)
+ *   5. the actor's role is not even a candidate for this action -> 403
+ *      (coarse gate, before any state-legality info could leak)
+ *   6. the transition itself: NOT_ACTIVE or ILLEGAL_TRANSITION -> 409
+ *   7. source resolution + course tenant/ownership, for verification-axis
+ *      actions only (§25's per-action table — revoke/reinstate never
+ *      require it, since correcting evidence with an unresolvable source is
+ *      their entire purpose)
+ *   8. no-op -> return the current UserSkill unchanged, no writes at all
+ *   9. apply -> bump revision, write SkillEvidence, write ONE
+ *      EvidenceStandingEvent (always, regardless of whether the level
+ *      moves), then projectUserSkill (which writes a SkillProficiencyEvent
+ *      only if the level actually changed — 30.2's rule, not reopened)
  */
-async function setEvidenceVerificationStatus(
+async function applyEvidenceTransition(
   actor: AuthContext & { tenantId: string },
   evidenceId: string,
-  status: Extract<EvidenceVerificationStatus, "VERIFIED" | "REJECTED">
+  action: EvidenceTransitionAction,
+  opts: { reason?: string } = {}
 ): Promise<UserSkill> {
-  const evidence = await db.skillEvidence.findUnique({ where: { id: evidenceId } });
-  if (!evidence) throw new CapabilityVerificationError(404, "Evidence not found");
-
-  await authorizeVerificationActor(actor, evidence);
+  const reason = opts.reason?.trim();
+  if (reasonRequired(action) && !reason) {
+    throw new CapabilityVerificationError(403, "A reason is required for this action");
+  }
 
   return db.$transaction(async (tx) => {
-    // Phase 30.2 — `revision` is incremented on every audited transition of
-    // this row (schema comment, prisma/schema.prisma), and
-    // SkillProficiencyEvent's `[evidenceId, evidenceRevision]` unique
-    // constraint (shipped in 30.1) depends on it actually moving: without
-    // this increment, verify-then-reject on the same evidence row would
-    // stamp two events at revision 0 and the reject's event insert would
-    // fail its own unique constraint — a real collision this repo's own
-    // tests exercise (verification.test.ts's verify-then-reject cases).
+    const [locked] = await tx.$queryRaw<LockedEvidenceRow[]>`
+      SELECT id, "tenantId", "userId", "skillId", "sourceType", "sourceId",
+             "verificationStatus", "state", "revision"
+      FROM "SkillEvidence"
+      WHERE id = ${evidenceId}
+      FOR UPDATE
+    `;
+
+    if (!locked || locked.tenantId !== actor.tenantId) {
+      throw new CapabilityVerificationError(404, "Evidence not found");
+    }
+    if (locked.userId === actor.userId) {
+      throw new CapabilityVerificationError(403, "Cannot act on your own evidence");
+    }
+
+    const learner = await tx.user.findUnique({
+      where: { id: locked.userId },
+      select: { deletedAt: true },
+    });
+    if (!learner || learner.deletedAt !== null) {
+      throw new CapabilityVerificationError(403, "Forbidden");
+    }
+
+    if (!roleMayAttempt(action, actor.role)) {
+      throw new CapabilityVerificationError(403, "Forbidden");
+    }
+
+    const evaluation = evaluateTransition(action, {
+      verificationStatus: locked.verificationStatus,
+      state: locked.state,
+    });
+    if (evaluation.outcome === "refuse") {
+      throw new CapabilityVerificationError(
+        409,
+        evaluation.code === "NOT_ACTIVE"
+          ? "Evidence is not active — reinstate it first"
+          : `Cannot apply this action to evidence currently at ${locked.verificationStatus}/${locked.state}`
+      );
+    }
+
+    if (requiresSourceResolution(action)) {
+      const course = await resolveSourceCourse(locked);
+      if (!course || course.tenantId !== actor.tenantId) {
+        throw new CapabilityVerificationError(403, "Forbidden");
+      }
+      if (actor.role === "INSTRUCTOR" && course.instructorId !== actor.userId) {
+        throw new CapabilityVerificationError(403, "Forbidden");
+      }
+    }
+
+    if (evaluation.outcome === "no-op") {
+      // Never call projectUserSkill here: it is a full recompute, and for a
+      // stored level above what Policy 1 can grant (e.g. legacy ADVANCED)
+      // it would silently converge proficiency downward on a plain re-verify.
+      const existing = await tx.userSkill.findUnique({
+        where: { userId_skillId: { userId: locked.userId, skillId: locked.skillId } },
+      });
+      if (existing) return existing;
+      return projectUserSkill(tx, {
+        tenantId: actor.tenantId,
+        userId: locked.userId,
+        skillId: locked.skillId,
+        changeTimestamp: new Date(),
+        cause: "RECALCULATED",
+      });
+    }
+
+    const actorRow = await tx.user.findUnique({
+      where: { id: actor.userId },
+      select: { name: true },
+    });
+    const now = new Date();
+
+    let newVerificationStatus = locked.verificationStatus;
+    let newState = locked.state;
+    const updateData: {
+      revision: { increment: number };
+      verificationStatus?: EvidenceVerificationStatus;
+      state?: EvidenceState;
+      verifiedById?: string;
+      verifiedAt?: Date;
+    } = { revision: { increment: 1 } };
+
+    if (isVerificationAxisAction(action)) {
+      newVerificationStatus = verificationTargetFor(action);
+      updateData.verificationStatus = newVerificationStatus;
+      if (action === "VERIFY") {
+        updateData.verifiedById = actor.userId;
+        updateData.verifiedAt = now;
+      }
+      // Every other transition leaves verifiedById/verifiedAt untouched —
+      // the unified rule (docs/PHASE_30.3_DISCOVERY.md §15): they mean
+      // "actor and time of the most recent VERIFY", a legacy display-only
+      // field, never a live trust signal. The full per-action history lives
+      // only in EvidenceStandingEvent below.
+    } else {
+      newState = stateTargetFor(action);
+      updateData.state = newState;
+    }
+
     const updatedEvidence = await tx.skillEvidence.update({
-      where: { id: evidenceId },
-      data:
-        status === "VERIFIED"
-          ? {
-              verificationStatus: "VERIFIED",
-              verifiedById: actor.userId,
-              verifiedAt: new Date(),
-              revision: { increment: 1 },
-            }
-          : { verificationStatus: "REJECTED", revision: { increment: 1 } },
+      where: { id: locked.id },
+      data: updateData,
+    });
+
+    await tx.evidenceStandingEvent.create({
+      data: {
+        tenantId: actor.tenantId,
+        userId: locked.userId,
+        skillId: locked.skillId,
+        evidenceId: locked.id,
+        evidenceRevision: updatedEvidence.revision,
+        action,
+        actorId: actor.userId,
+        actorRole: actor.role,
+        actorName: actorRow?.name ?? null,
+        reason: reason ?? null,
+        previousVerificationStatus: locked.verificationStatus,
+        newVerificationStatus,
+        previousState: locked.state,
+        newState,
+        occurredAt: now,
+      },
     });
 
     return projectUserSkill(tx, {
-      tenantId: evidence.tenantId,
-      userId: evidence.userId,
-      skillId: evidence.skillId,
-      changeTimestamp: new Date(),
-      cause: status === "VERIFIED" ? "EVIDENCE_VERIFIED" : "EVIDENCE_REJECTED",
-      evidenceId,
+      tenantId: actor.tenantId,
+      userId: locked.userId,
+      skillId: locked.skillId,
+      changeTimestamp: now,
+      cause: PROFICIENCY_CAUSE_FOR_ACTION[action],
+      evidenceId: locked.id,
       evidenceRevision: updatedEvidence.revision,
       actorId: actor.userId,
       actorRole: actor.role,
+      reason,
     });
   });
 }
@@ -230,14 +339,44 @@ export async function verifyEvidence(
   actor: AuthContext & { tenantId: string },
   evidenceId: string
 ): Promise<UserSkill> {
-  return setEvidenceVerificationStatus(actor, evidenceId, "VERIFIED");
+  return applyEvidenceTransition(actor, evidenceId, "VERIFY");
 }
 
 export async function rejectEvidence(
   actor: AuthContext & { tenantId: string },
   evidenceId: string
 ): Promise<UserSkill> {
-  return setEvidenceVerificationStatus(actor, evidenceId, "REJECTED");
+  return applyEvidenceTransition(actor, evidenceId, "REJECT");
+}
+
+export async function unverifyEvidence(
+  actor: AuthContext & { tenantId: string },
+  evidenceId: string
+): Promise<UserSkill> {
+  return applyEvidenceTransition(actor, evidenceId, "UNVERIFY");
+}
+
+export async function reopenEvidence(
+  actor: AuthContext & { tenantId: string },
+  evidenceId: string
+): Promise<UserSkill> {
+  return applyEvidenceTransition(actor, evidenceId, "REOPEN");
+}
+
+export async function revokeEvidence(
+  actor: AuthContext & { tenantId: string },
+  evidenceId: string,
+  reason: string
+): Promise<UserSkill> {
+  return applyEvidenceTransition(actor, evidenceId, "REVOKE", { reason });
+}
+
+export async function reinstateEvidence(
+  actor: AuthContext & { tenantId: string },
+  evidenceId: string,
+  reason: string
+): Promise<UserSkill> {
+  return applyEvidenceTransition(actor, evidenceId, "REINSTATE", { reason });
 }
 
 export type ReviewableEvidenceRow = {

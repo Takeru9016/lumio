@@ -189,6 +189,22 @@ enum ProficiencyEventCause {
   RECALCULATED
 }
 
+// Phase 30.3 — every evidence-standing transition (docs/PHASE_30.3_DISCOVERY.md §26),
+// independent of whether it moved the projected level. EXPIRE/SUPERSEDE are
+// declared for schema completeness (mirroring ProficiencyEventCause's own
+// EVIDENCE_EXPIRED/EVIDENCE_SUPERSEDED) but have no writer until 30.8 — no
+// validUntil-bearing evidence type or assessed-level evidence exists yet.
+enum EvidenceStandingAction {
+  VERIFY
+  REJECT
+  UNVERIFY
+  REOPEN
+  REVOKE
+  REINSTATE
+  EXPIRE
+  SUPERSEDE
+}
+
 // ---- V2: Knowledge ---------------------------------------------
 
 enum KnowledgeSourceType {
@@ -340,6 +356,10 @@ model User {
   proficiencyEvents      SkillProficiencyEvent[]
   proficiencyEventsActed SkillProficiencyEvent[] @relation("ProficiencyEventActor")
 
+  // Phase 30.3 — evidence-standing audit rows (docs/PHASE_30.3_DISCOVERY.md §26).
+  standingEvents       EvidenceStandingEvent[]
+  standingEventsActed  EvidenceStandingEvent[] @relation("EvidenceStandingEventActor")
+
   deletedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -407,6 +427,8 @@ model Tenant {
 
   // Phase 30 — schema only; no runtime path creates these rows in 30.1.
   proficiencyEvents SkillProficiencyEvent[]
+  // Phase 30.3
+  standingEvents    EvidenceStandingEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -996,6 +1018,7 @@ model Skill {
   evidence          SkillEvidence[]
   courses           CourseSkill[]
   proficiencyEvents SkillProficiencyEvent[]
+  standingEvents    EvidenceStandingEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1173,6 +1196,7 @@ model SkillEvidence {
   scorePercent Float?
 
   proficiencyEvents SkillProficiencyEvent[]
+  standingEvents    EvidenceStandingEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1261,6 +1285,64 @@ model SkillProficiencyEvent {
   @@index([tenantId, skillId, recordedAt])
   @@index([tenantId, userId, skillId, recordedAt])
   @@index([tenantId, cause, recordedAt])
+}
+
+// Append-only audit of every evidence-standing transition (verify, reject,
+// unverify, reopen, revoke, reinstate — docs/PHASE_30.3_DISCOVERY.md §26),
+// independent of whether the transition changed the projected level.
+// SkillProficiencyEvent (above) answers "why did proficiency change"; this
+// table answers "what happened to this evidence's standing" — the two are
+// deliberately separate, joined only by (evidenceId, evidenceRevision), the
+// same pair SkillProficiencyEvent already carries, so no new FK is needed to
+// correlate a standing transition with the proficiency event it may (or may
+// not) have produced.
+model EvidenceStandingEvent {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillId  String
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  evidenceId String
+  evidence   SkillEvidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  // The revision THIS transition produced (SkillEvidence.revision after the
+  // write) — always populated, unlike SkillProficiencyEvent.evidenceRevision,
+  // because every row here is about exactly one evidence transition by
+  // definition (no BASELINE/RECALCULATED-shaped row exists for this table).
+  evidenceRevision Int
+
+  action EvidenceStandingAction
+
+  // Null only for EXPIRE/SUPERSEDE (system-caused, not built until 30.8).
+  actorId String?
+  actor   User?   @relation("EvidenceStandingEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorRole Role?
+  // Point-in-time snapshot of the actor's display name, taken at write time —
+  // same convention as LearningAssignment.lastCancelledByName — so the row
+  // stays readable ("revoked by Jane Smith") after actorId goes SetNull.
+  actorName String?
+
+  // Required (enforced in code, not the DB) for REVOKE/REINSTATE; optional elsewhere.
+  reason String?
+
+  previousVerificationStatus EvidenceVerificationStatus
+  newVerificationStatus      EvidenceVerificationStatus
+  previousState              EvidenceState
+  newState                   EvidenceState
+
+  // Business time — always server time (now()) for this table; unlike
+  // SkillProficiencyEvent.occurredAt, callers never supply a backdated
+  // value here (docs/PHASE_30.3_DISCOVERY.md §15's "server time only" rule
+  // for revoke/reinstate — a correction action is never claimed to have
+  // happened earlier than it did).
+  occurredAt DateTime @default(now())
+  recordedAt DateTime @default(now())
+
+  @@unique([evidenceId, evidenceRevision])
+  @@index([tenantId, evidenceId, recordedAt])
+  @@index([tenantId, userId, recordedAt])
 }
 
 // Skills developed by a course. Tenant scope is inherited through `course`.

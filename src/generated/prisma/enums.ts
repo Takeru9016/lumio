@@ -226,6 +226,20 @@ export const ProficiencyEventCause = {
 export type ProficiencyEventCause = (typeof ProficiencyEventCause)[keyof typeof ProficiencyEventCause]
 
 
+export const EvidenceStandingAction = {
+  VERIFY: 'VERIFY',
+  REJECT: 'REJECT',
+  UNVERIFY: 'UNVERIFY',
+  REOPEN: 'REOPEN',
+  REVOKE: 'REVOKE',
+  REINSTATE: 'REINSTATE',
+  EXPIRE: 'EXPIRE',
+  SUPERSEDE: 'SUPERSEDE'
+} as const
+
+export type EvidenceStandingAction = (typeof EvidenceStandingAction)[keyof typeof EvidenceStandingAction]
+
+
 export const KnowledgeSourceType = {
   COURSE: 'COURSE',
   LESSON: 'LESSON',

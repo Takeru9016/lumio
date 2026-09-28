@@ -354,6 +354,7 @@ export type SkillEvidenceWhereInput = {
   userSkill?: Prisma.XOR<Prisma.UserSkillNullableScalarRelationFilter, Prisma.UserSkillWhereInput> | null
   verifiedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   proficiencyEvents?: Prisma.SkillProficiencyEventListRelationFilter
+  standingEvents?: Prisma.EvidenceStandingEventListRelationFilter
 }
 
 export type SkillEvidenceOrderByWithRelationInput = {
@@ -384,6 +385,7 @@ export type SkillEvidenceOrderByWithRelationInput = {
   userSkill?: Prisma.UserSkillOrderByWithRelationInput
   verifiedBy?: Prisma.UserOrderByWithRelationInput
   proficiencyEvents?: Prisma.SkillProficiencyEventOrderByRelationAggregateInput
+  standingEvents?: Prisma.EvidenceStandingEventOrderByRelationAggregateInput
 }
 
 export type SkillEvidenceWhereUniqueInput = Prisma.AtLeast<{
@@ -418,6 +420,7 @@ export type SkillEvidenceWhereUniqueInput = Prisma.AtLeast<{
   userSkill?: Prisma.XOR<Prisma.UserSkillNullableScalarRelationFilter, Prisma.UserSkillWhereInput> | null
   verifiedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   proficiencyEvents?: Prisma.SkillProficiencyEventListRelationFilter
+  standingEvents?: Prisma.EvidenceStandingEventListRelationFilter
 }, "id" | "tenantId_userId_skillId_sourceType_sourceId">
 
 export type SkillEvidenceOrderByWithAggregationInput = {
@@ -499,6 +502,7 @@ export type SkillEvidenceCreateInput = {
   userSkill?: Prisma.UserSkillCreateNestedOneWithoutEvidenceInput
   verifiedBy?: Prisma.UserCreateNestedOneWithoutSkillEvidenceVerifiedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceUncheckedCreateInput = {
@@ -524,6 +528,7 @@ export type SkillEvidenceUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceUpdateInput = {
@@ -549,6 +554,7 @@ export type SkillEvidenceUpdateInput = {
   userSkill?: Prisma.UserSkillUpdateOneWithoutEvidenceNestedInput
   verifiedBy?: Prisma.UserUpdateOneWithoutSkillEvidenceVerifiedNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateInput = {
@@ -574,6 +580,7 @@ export type SkillEvidenceUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceCreateManyInput = {
@@ -746,6 +753,11 @@ export type SkillEvidenceSumOrderByAggregateInput = {
 export type SkillEvidenceNullableScalarRelationFilter = {
   is?: Prisma.SkillEvidenceWhereInput | null
   isNot?: Prisma.SkillEvidenceWhereInput | null
+}
+
+export type SkillEvidenceScalarRelationFilter = {
+  is?: Prisma.SkillEvidenceWhereInput
+  isNot?: Prisma.SkillEvidenceWhereInput
 }
 
 export type SkillEvidenceCreateNestedManyWithoutUserInput = {
@@ -994,6 +1006,20 @@ export type SkillEvidenceUpdateOneWithoutProficiencyEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SkillEvidenceUpdateToOneWithWhereWithoutProficiencyEventsInput, Prisma.SkillEvidenceUpdateWithoutProficiencyEventsInput>, Prisma.SkillEvidenceUncheckedUpdateWithoutProficiencyEventsInput>
 }
 
+export type SkillEvidenceCreateNestedOneWithoutStandingEventsInput = {
+  create?: Prisma.XOR<Prisma.SkillEvidenceCreateWithoutStandingEventsInput, Prisma.SkillEvidenceUncheckedCreateWithoutStandingEventsInput>
+  connectOrCreate?: Prisma.SkillEvidenceCreateOrConnectWithoutStandingEventsInput
+  connect?: Prisma.SkillEvidenceWhereUniqueInput
+}
+
+export type SkillEvidenceUpdateOneRequiredWithoutStandingEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.SkillEvidenceCreateWithoutStandingEventsInput, Prisma.SkillEvidenceUncheckedCreateWithoutStandingEventsInput>
+  connectOrCreate?: Prisma.SkillEvidenceCreateOrConnectWithoutStandingEventsInput
+  upsert?: Prisma.SkillEvidenceUpsertWithoutStandingEventsInput
+  connect?: Prisma.SkillEvidenceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SkillEvidenceUpdateToOneWithWhereWithoutStandingEventsInput, Prisma.SkillEvidenceUpdateWithoutStandingEventsInput>, Prisma.SkillEvidenceUncheckedUpdateWithoutStandingEventsInput>
+}
+
 export type SkillEvidenceCreateWithoutUserInput = {
   id?: string
   type: $Enums.EvidenceType
@@ -1016,6 +1042,7 @@ export type SkillEvidenceCreateWithoutUserInput = {
   userSkill?: Prisma.UserSkillCreateNestedOneWithoutEvidenceInput
   verifiedBy?: Prisma.UserCreateNestedOneWithoutSkillEvidenceVerifiedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceUncheckedCreateWithoutUserInput = {
@@ -1040,6 +1067,7 @@ export type SkillEvidenceUncheckedCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceCreateOrConnectWithoutUserInput = {
@@ -1074,6 +1102,7 @@ export type SkillEvidenceCreateWithoutVerifiedByInput = {
   skill: Prisma.SkillCreateNestedOneWithoutEvidenceInput
   userSkill?: Prisma.UserSkillCreateNestedOneWithoutEvidenceInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceUncheckedCreateWithoutVerifiedByInput = {
@@ -1098,6 +1127,7 @@ export type SkillEvidenceUncheckedCreateWithoutVerifiedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceCreateOrConnectWithoutVerifiedByInput = {
@@ -1191,6 +1221,7 @@ export type SkillEvidenceCreateWithoutTenantInput = {
   userSkill?: Prisma.UserSkillCreateNestedOneWithoutEvidenceInput
   verifiedBy?: Prisma.UserCreateNestedOneWithoutSkillEvidenceVerifiedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceUncheckedCreateWithoutTenantInput = {
@@ -1215,6 +1246,7 @@ export type SkillEvidenceUncheckedCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceCreateOrConnectWithoutTenantInput = {
@@ -1265,6 +1297,7 @@ export type SkillEvidenceCreateWithoutSkillInput = {
   userSkill?: Prisma.UserSkillCreateNestedOneWithoutEvidenceInput
   verifiedBy?: Prisma.UserCreateNestedOneWithoutSkillEvidenceVerifiedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceUncheckedCreateWithoutSkillInput = {
@@ -1289,6 +1322,7 @@ export type SkillEvidenceUncheckedCreateWithoutSkillInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceCreateOrConnectWithoutSkillInput = {
@@ -1339,6 +1373,7 @@ export type SkillEvidenceCreateWithoutUserSkillInput = {
   skill: Prisma.SkillCreateNestedOneWithoutEvidenceInput
   verifiedBy?: Prisma.UserCreateNestedOneWithoutSkillEvidenceVerifiedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceUncheckedCreateWithoutUserSkillInput = {
@@ -1363,6 +1398,7 @@ export type SkillEvidenceUncheckedCreateWithoutUserSkillInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutEvidenceInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceCreateOrConnectWithoutUserSkillInput = {
@@ -1413,6 +1449,7 @@ export type SkillEvidenceCreateWithoutProficiencyEventsInput = {
   skill: Prisma.SkillCreateNestedOneWithoutEvidenceInput
   userSkill?: Prisma.UserSkillCreateNestedOneWithoutEvidenceInput
   verifiedBy?: Prisma.UserCreateNestedOneWithoutSkillEvidenceVerifiedInput
+  standingEvents?: Prisma.EvidenceStandingEventCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceUncheckedCreateWithoutProficiencyEventsInput = {
@@ -1437,6 +1474,7 @@ export type SkillEvidenceUncheckedCreateWithoutProficiencyEventsInput = {
   scorePercent?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type SkillEvidenceCreateOrConnectWithoutProficiencyEventsInput = {
@@ -1477,6 +1515,7 @@ export type SkillEvidenceUpdateWithoutProficiencyEventsInput = {
   skill?: Prisma.SkillUpdateOneRequiredWithoutEvidenceNestedInput
   userSkill?: Prisma.UserSkillUpdateOneWithoutEvidenceNestedInput
   verifiedBy?: Prisma.UserUpdateOneWithoutSkillEvidenceVerifiedNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateWithoutProficiencyEventsInput = {
@@ -1501,6 +1540,123 @@ export type SkillEvidenceUncheckedUpdateWithoutProficiencyEventsInput = {
   scorePercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutEvidenceNestedInput
+}
+
+export type SkillEvidenceCreateWithoutStandingEventsInput = {
+  id?: string
+  type: $Enums.EvidenceType
+  sourceType: string
+  sourceId?: string | null
+  proficiency?: $Enums.SkillProficiency | null
+  score?: number | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationStatus?: $Enums.EvidenceVerificationStatus
+  verifiedAt?: Date | string | null
+  occurredAt?: Date | string | null
+  validUntil?: Date | string | null
+  state?: $Enums.EvidenceState
+  revision?: number
+  scorePercent?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutSkillEvidenceInput
+  user: Prisma.UserCreateNestedOneWithoutSkillEvidenceInput
+  skill: Prisma.SkillCreateNestedOneWithoutEvidenceInput
+  userSkill?: Prisma.UserSkillCreateNestedOneWithoutEvidenceInput
+  verifiedBy?: Prisma.UserCreateNestedOneWithoutSkillEvidenceVerifiedInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventCreateNestedManyWithoutEvidenceInput
+}
+
+export type SkillEvidenceUncheckedCreateWithoutStandingEventsInput = {
+  id?: string
+  tenantId: string
+  userId: string
+  skillId: string
+  userSkillId?: string | null
+  type: $Enums.EvidenceType
+  sourceType: string
+  sourceId?: string | null
+  proficiency?: $Enums.SkillProficiency | null
+  score?: number | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationStatus?: $Enums.EvidenceVerificationStatus
+  verifiedById?: string | null
+  verifiedAt?: Date | string | null
+  occurredAt?: Date | string | null
+  validUntil?: Date | string | null
+  state?: $Enums.EvidenceState
+  revision?: number
+  scorePercent?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedCreateNestedManyWithoutEvidenceInput
+}
+
+export type SkillEvidenceCreateOrConnectWithoutStandingEventsInput = {
+  where: Prisma.SkillEvidenceWhereUniqueInput
+  create: Prisma.XOR<Prisma.SkillEvidenceCreateWithoutStandingEventsInput, Prisma.SkillEvidenceUncheckedCreateWithoutStandingEventsInput>
+}
+
+export type SkillEvidenceUpsertWithoutStandingEventsInput = {
+  update: Prisma.XOR<Prisma.SkillEvidenceUpdateWithoutStandingEventsInput, Prisma.SkillEvidenceUncheckedUpdateWithoutStandingEventsInput>
+  create: Prisma.XOR<Prisma.SkillEvidenceCreateWithoutStandingEventsInput, Prisma.SkillEvidenceUncheckedCreateWithoutStandingEventsInput>
+  where?: Prisma.SkillEvidenceWhereInput
+}
+
+export type SkillEvidenceUpdateToOneWithWhereWithoutStandingEventsInput = {
+  where?: Prisma.SkillEvidenceWhereInput
+  data: Prisma.XOR<Prisma.SkillEvidenceUpdateWithoutStandingEventsInput, Prisma.SkillEvidenceUncheckedUpdateWithoutStandingEventsInput>
+}
+
+export type SkillEvidenceUpdateWithoutStandingEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumEvidenceTypeFieldUpdateOperationsInput | $Enums.EvidenceType
+  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proficiency?: Prisma.NullableEnumSkillProficiencyFieldUpdateOperationsInput | $Enums.SkillProficiency | null
+  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationStatus?: Prisma.EnumEvidenceVerificationStatusFieldUpdateOperationsInput | $Enums.EvidenceVerificationStatus
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  occurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  state?: Prisma.EnumEvidenceStateFieldUpdateOperationsInput | $Enums.EvidenceState
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  scorePercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutSkillEvidenceNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutSkillEvidenceNestedInput
+  skill?: Prisma.SkillUpdateOneRequiredWithoutEvidenceNestedInput
+  userSkill?: Prisma.UserSkillUpdateOneWithoutEvidenceNestedInput
+  verifiedBy?: Prisma.UserUpdateOneWithoutSkillEvidenceVerifiedNestedInput
+  proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutEvidenceNestedInput
+}
+
+export type SkillEvidenceUncheckedUpdateWithoutStandingEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  skillId?: Prisma.StringFieldUpdateOperationsInput | string
+  userSkillId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumEvidenceTypeFieldUpdateOperationsInput | $Enums.EvidenceType
+  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proficiency?: Prisma.NullableEnumSkillProficiencyFieldUpdateOperationsInput | $Enums.SkillProficiency | null
+  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  verificationStatus?: Prisma.EnumEvidenceVerificationStatusFieldUpdateOperationsInput | $Enums.EvidenceVerificationStatus
+  verifiedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  occurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  state?: Prisma.EnumEvidenceStateFieldUpdateOperationsInput | $Enums.EvidenceState
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  scorePercent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceCreateManyUserInput = {
@@ -1571,6 +1727,7 @@ export type SkillEvidenceUpdateWithoutUserInput = {
   userSkill?: Prisma.UserSkillUpdateOneWithoutEvidenceNestedInput
   verifiedBy?: Prisma.UserUpdateOneWithoutSkillEvidenceVerifiedNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateWithoutUserInput = {
@@ -1595,6 +1752,7 @@ export type SkillEvidenceUncheckedUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateManyWithoutUserInput = {
@@ -1642,6 +1800,7 @@ export type SkillEvidenceUpdateWithoutVerifiedByInput = {
   skill?: Prisma.SkillUpdateOneRequiredWithoutEvidenceNestedInput
   userSkill?: Prisma.UserSkillUpdateOneWithoutEvidenceNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateWithoutVerifiedByInput = {
@@ -1666,6 +1825,7 @@ export type SkillEvidenceUncheckedUpdateWithoutVerifiedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateManyWithoutVerifiedByInput = {
@@ -1736,6 +1896,7 @@ export type SkillEvidenceUpdateWithoutTenantInput = {
   userSkill?: Prisma.UserSkillUpdateOneWithoutEvidenceNestedInput
   verifiedBy?: Prisma.UserUpdateOneWithoutSkillEvidenceVerifiedNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateWithoutTenantInput = {
@@ -1760,6 +1921,7 @@ export type SkillEvidenceUncheckedUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateManyWithoutTenantInput = {
@@ -1830,6 +1992,7 @@ export type SkillEvidenceUpdateWithoutSkillInput = {
   userSkill?: Prisma.UserSkillUpdateOneWithoutEvidenceNestedInput
   verifiedBy?: Prisma.UserUpdateOneWithoutSkillEvidenceVerifiedNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateWithoutSkillInput = {
@@ -1854,6 +2017,7 @@ export type SkillEvidenceUncheckedUpdateWithoutSkillInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateManyWithoutSkillInput = {
@@ -1924,6 +2088,7 @@ export type SkillEvidenceUpdateWithoutUserSkillInput = {
   skill?: Prisma.SkillUpdateOneRequiredWithoutEvidenceNestedInput
   verifiedBy?: Prisma.UserUpdateOneWithoutSkillEvidenceVerifiedNestedInput
   proficiencyEvents?: Prisma.SkillProficiencyEventUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateWithoutUserSkillInput = {
@@ -1948,6 +2113,7 @@ export type SkillEvidenceUncheckedUpdateWithoutUserSkillInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proficiencyEvents?: Prisma.SkillProficiencyEventUncheckedUpdateManyWithoutEvidenceNestedInput
+  standingEvents?: Prisma.EvidenceStandingEventUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type SkillEvidenceUncheckedUpdateManyWithoutUserSkillInput = {
@@ -1980,10 +2146,12 @@ export type SkillEvidenceUncheckedUpdateManyWithoutUserSkillInput = {
 
 export type SkillEvidenceCountOutputType = {
   proficiencyEvents: number
+  standingEvents: number
 }
 
 export type SkillEvidenceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   proficiencyEvents?: boolean | SkillEvidenceCountOutputTypeCountProficiencyEventsArgs
+  standingEvents?: boolean | SkillEvidenceCountOutputTypeCountStandingEventsArgs
 }
 
 /**
@@ -2001,6 +2169,13 @@ export type SkillEvidenceCountOutputTypeDefaultArgs<ExtArgs extends runtime.Type
  */
 export type SkillEvidenceCountOutputTypeCountProficiencyEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SkillProficiencyEventWhereInput
+}
+
+/**
+ * SkillEvidenceCountOutputType without action
+ */
+export type SkillEvidenceCountOutputTypeCountStandingEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EvidenceStandingEventWhereInput
 }
 
 
@@ -2032,6 +2207,7 @@ export type SkillEvidenceSelect<ExtArgs extends runtime.Types.Extensions.Interna
   userSkill?: boolean | Prisma.SkillEvidence$userSkillArgs<ExtArgs>
   verifiedBy?: boolean | Prisma.SkillEvidence$verifiedByArgs<ExtArgs>
   proficiencyEvents?: boolean | Prisma.SkillEvidence$proficiencyEventsArgs<ExtArgs>
+  standingEvents?: boolean | Prisma.SkillEvidence$standingEventsArgs<ExtArgs>
   _count?: boolean | Prisma.SkillEvidenceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["skillEvidence"]>
 
@@ -2125,6 +2301,7 @@ export type SkillEvidenceInclude<ExtArgs extends runtime.Types.Extensions.Intern
   userSkill?: boolean | Prisma.SkillEvidence$userSkillArgs<ExtArgs>
   verifiedBy?: boolean | Prisma.SkillEvidence$verifiedByArgs<ExtArgs>
   proficiencyEvents?: boolean | Prisma.SkillEvidence$proficiencyEventsArgs<ExtArgs>
+  standingEvents?: boolean | Prisma.SkillEvidence$standingEventsArgs<ExtArgs>
   _count?: boolean | Prisma.SkillEvidenceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SkillEvidenceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2151,6 +2328,7 @@ export type $SkillEvidencePayload<ExtArgs extends runtime.Types.Extensions.Inter
     userSkill: Prisma.$UserSkillPayload<ExtArgs> | null
     verifiedBy: Prisma.$UserPayload<ExtArgs> | null
     proficiencyEvents: Prisma.$SkillProficiencyEventPayload<ExtArgs>[]
+    standingEvents: Prisma.$EvidenceStandingEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2574,6 +2752,7 @@ export interface Prisma__SkillEvidenceClient<T, Null = never, ExtArgs extends ru
   userSkill<T extends Prisma.SkillEvidence$userSkillArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SkillEvidence$userSkillArgs<ExtArgs>>): Prisma.Prisma__UserSkillClient<runtime.Types.Result.GetResult<Prisma.$UserSkillPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   verifiedBy<T extends Prisma.SkillEvidence$verifiedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SkillEvidence$verifiedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   proficiencyEvents<T extends Prisma.SkillEvidence$proficiencyEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SkillEvidence$proficiencyEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillProficiencyEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  standingEvents<T extends Prisma.SkillEvidence$standingEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SkillEvidence$standingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EvidenceStandingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3084,6 +3263,30 @@ export type SkillEvidence$proficiencyEventsArgs<ExtArgs extends runtime.Types.Ex
   take?: number
   skip?: number
   distinct?: Prisma.SkillProficiencyEventScalarFieldEnum | Prisma.SkillProficiencyEventScalarFieldEnum[]
+}
+
+/**
+ * SkillEvidence.standingEvents
+ */
+export type SkillEvidence$standingEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EvidenceStandingEvent
+   */
+  select?: Prisma.EvidenceStandingEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EvidenceStandingEvent
+   */
+  omit?: Prisma.EvidenceStandingEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EvidenceStandingEventInclude<ExtArgs> | null
+  where?: Prisma.EvidenceStandingEventWhereInput
+  orderBy?: Prisma.EvidenceStandingEventOrderByWithRelationInput | Prisma.EvidenceStandingEventOrderByWithRelationInput[]
+  cursor?: Prisma.EvidenceStandingEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EvidenceStandingEventScalarFieldEnum | Prisma.EvidenceStandingEventScalarFieldEnum[]
 }
 
 /**
