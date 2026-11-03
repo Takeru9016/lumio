@@ -10,10 +10,10 @@ importers:
     dependencies:
       '@ai-sdk/openai':
         specifier: ^4.0.0
-        version: 4.0.0(zod@4.4.3)
+        version: 4.0.0(zod@4.6.6)
       '@ai-sdk/react':
         specifier: ^4.0.9
-        version: 4.0.9(react@19.2.4)(zod@4.4.3)
+        version: 4.0.9(react@19.2.4)(zod@4.6.6)
       '@clerk/nextjs':
         specifier: ^7.5.9
         version: 7.5.9(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -91,7 +91,7 @@ importers:
         version: 1.38.0
       ai:
         specifier: ^7.0.2
-        version: 7.0.2(zod@4.4.3)
+        version: 7.0.2(zod@4.6.6)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -159,8 +159,8 @@ importers:
         specifier: ^7.7.4
         version: 7.7.4(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.3.1)
       zod:
-        specifier: ^4.4.3
-        version: 4.4.3
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.0
@@ -3916,9 +3916,6 @@ packages:
   prosemirror-model@1.25.11:
     resolution: {integrity: sha512-QWg9RhnpLlogAmp3p96uEFrE5txQpFynd4vhBAELkwgOCWQs/X0yCzB3/hrHqiPwf91RG5KyWq6553zs9JqIOQ==}
 
-  prosemirror-model@1.25.9:
-    resolution: {integrity: sha512-pRTklkDDMMRopyoAcrr9wV/8g/RYgrLHBuJAb5hlEuYZRdm5yqmPjWId83fpBwPpSFqEdja0H7Dfd7z1X/npcA==}
-
   prosemirror-schema-list@1.5.1:
     resolution: {integrity: sha512-927lFx/uwyQaGwJxLWCZRkjXG0p48KpMj6ueoYiu4JX05GGuGcgzAy62dfiV8eFZftgyBUvLx76RsMe20fJl+Q==}
 
@@ -3930,9 +3927,6 @@ packages:
 
   prosemirror-transform@1.12.0:
     resolution: {integrity: sha512-GxboyN4AMIsoHNtz5uf2r2Ru551i5hWeCMD6E2Ib4Eogqoub0NflniaBPVQ4MrGE5yZ8JV9tUHg9qcZTTrcN4w==}
-
-  prosemirror-view@1.41.9:
-    resolution: {integrity: sha512-clTunTX+eaLbr87L1V1QPheRlEQJyTlL3gXe9x3jQIk3rL0RVWxviDGz8tFaydwIVm+hKhYCyr+R/zBtWr9s6A==}
 
   prosemirror-view@1.42.4:
     resolution: {integrity: sha512-H/LErnE8Vms1GYkvhfj6G3K9rc2p+o5EHGmTwvPOl0f21wPPxlMVRB8ICOseH+COb2oPKFEoufbgY6yet/dR4w==}
@@ -4567,53 +4561,53 @@ packages:
   zeptomatch@2.1.0:
     resolution: {integrity: sha512-KiGErG2J0G82LSpniV0CtIzjlJ10E04j02VOudJsPyPwNZgGnRKQy7I1R7GMyg/QswnE4l7ohSGrQbQbjXPPDA==}
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
 snapshots:
 
-  '@ai-sdk/gateway@4.0.2(zod@4.4.3)':
+  '@ai-sdk/gateway@4.0.2(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.0
-      '@ai-sdk/provider-utils': 5.0.0(zod@4.4.3)
+      '@ai-sdk/provider-utils': 5.0.0(zod@4.6.6)
       '@vercel/oidc': 3.2.0
-      zod: 4.4.3
+      zod: 4.6.6
 
-  '@ai-sdk/gateway@4.0.6(zod@4.4.3)':
+  '@ai-sdk/gateway@4.0.6(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.1
-      '@ai-sdk/provider-utils': 5.0.2(zod@4.4.3)
+      '@ai-sdk/provider-utils': 5.0.2(zod@4.6.6)
       '@vercel/oidc': 3.2.0
-      zod: 4.4.3
+      zod: 4.6.6
 
-  '@ai-sdk/mcp@2.0.4(zod@4.4.3)':
+  '@ai-sdk/mcp@2.0.4(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.1
-      '@ai-sdk/provider-utils': 5.0.2(zod@4.4.3)
+      '@ai-sdk/provider-utils': 5.0.2(zod@4.6.6)
       pkce-challenge: 5.0.1
-      zod: 4.4.3
+      zod: 4.6.6
 
-  '@ai-sdk/openai@4.0.0(zod@4.4.3)':
+  '@ai-sdk/openai@4.0.0(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.0
-      '@ai-sdk/provider-utils': 5.0.0(zod@4.4.3)
-      zod: 4.4.3
+      '@ai-sdk/provider-utils': 5.0.0(zod@4.6.6)
+      zod: 4.6.6
 
-  '@ai-sdk/provider-utils@5.0.0(zod@4.4.3)':
+  '@ai-sdk/provider-utils@5.0.0(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.0
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.0
-      zod: 4.4.3
+      zod: 4.6.6
 
-  '@ai-sdk/provider-utils@5.0.2(zod@4.4.3)':
+  '@ai-sdk/provider-utils@5.0.2(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.1
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.0
-      zod: 4.4.3
+      zod: 4.6.6
 
   '@ai-sdk/provider@4.0.0':
     dependencies:
@@ -4623,12 +4617,12 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@4.0.9(react@19.2.4)(zod@4.4.3)':
+  '@ai-sdk/react@4.0.9(react@19.2.4)(zod@4.6.6)':
     dependencies:
-      '@ai-sdk/mcp': 2.0.4(zod@4.4.3)
+      '@ai-sdk/mcp': 2.0.4(zod@4.6.6)
       '@ai-sdk/provider': 4.0.1
-      '@ai-sdk/provider-utils': 5.0.2(zod@4.4.3)
-      ai: 7.0.8(zod@4.4.3)
+      '@ai-sdk/provider-utils': 5.0.2(zod@4.6.6)
+      ai: 7.0.8(zod@4.6.6)
       react: 19.2.4
       swr: 2.4.2(react@19.2.4)
       throttleit: 2.1.0
@@ -6736,19 +6730,19 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ai@7.0.2(zod@4.4.3):
+  ai@7.0.2(zod@4.6.6):
     dependencies:
-      '@ai-sdk/gateway': 4.0.2(zod@4.4.3)
+      '@ai-sdk/gateway': 4.0.2(zod@4.6.6)
       '@ai-sdk/provider': 4.0.0
-      '@ai-sdk/provider-utils': 5.0.0(zod@4.4.3)
-      zod: 4.4.3
+      '@ai-sdk/provider-utils': 5.0.0(zod@4.6.6)
+      zod: 4.6.6
 
-  ai@7.0.8(zod@4.4.3):
+  ai@7.0.8(zod@4.6.6):
     dependencies:
-      '@ai-sdk/gateway': 4.0.6(zod@4.4.3)
+      '@ai-sdk/gateway': 4.0.6(zod@4.6.6)
       '@ai-sdk/provider': 4.0.1
-      '@ai-sdk/provider-utils': 5.0.2(zod@4.4.3)
-      zod: 4.4.3
+      '@ai-sdk/provider-utils': 5.0.2(zod@4.6.6)
+      zod: 4.6.6
 
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
@@ -7929,7 +7923,7 @@ snapshots:
 
   prosemirror-commands@1.7.1:
     dependencies:
-      prosemirror-model: 1.25.9
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
 
@@ -7937,20 +7931,20 @@ snapshots:
     dependencies:
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
-      prosemirror-view: 1.41.9
+      prosemirror-view: 1.42.4
 
   prosemirror-gapcursor@1.4.1:
     dependencies:
       prosemirror-keymap: 1.2.3
-      prosemirror-model: 1.25.9
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
-      prosemirror-view: 1.41.9
+      prosemirror-view: 1.42.4
 
   prosemirror-history@1.5.0:
     dependencies:
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
-      prosemirror-view: 1.41.9
+      prosemirror-view: 1.42.4
       rope-sequence: 1.3.4
 
   prosemirror-inputrules@1.5.1:
@@ -7967,43 +7961,33 @@ snapshots:
     dependencies:
       orderedmap: 2.1.1
 
-  prosemirror-model@1.25.9:
-    dependencies:
-      orderedmap: 2.1.1
-
   prosemirror-schema-list@1.5.1:
     dependencies:
-      prosemirror-model: 1.25.9
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
 
   prosemirror-state@1.4.4:
     dependencies:
-      prosemirror-model: 1.25.9
+      prosemirror-model: 1.25.11
       prosemirror-transform: 1.12.0
-      prosemirror-view: 1.41.9
+      prosemirror-view: 1.42.4
 
   prosemirror-tables@1.8.5:
     dependencies:
       prosemirror-keymap: 1.2.3
-      prosemirror-model: 1.25.9
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
-      prosemirror-view: 1.41.9
+      prosemirror-view: 1.42.4
 
   prosemirror-transform@1.12.0:
     dependencies:
-      prosemirror-model: 1.25.9
-
-  prosemirror-view@1.41.9:
-    dependencies:
-      prosemirror-model: 1.25.9
-      prosemirror-state: 1.4.4
-      prosemirror-transform: 1.12.0
+      prosemirror-model: 1.25.11
 
   prosemirror-view@1.42.4:
     dependencies:
-      prosemirror-model: 1.25.9
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
 
@@ -8638,4 +8622,4 @@ snapshots:
       grammex: 3.1.12
       graphmatch: 1.1.1
 
-  zod@4.4.3: {}
+  zod@4.6.6: {}
